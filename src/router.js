@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './components/Home.vue';
+import Activity from './components/Activity.vue';
 import Leaderboard from './components/Leaderboard.vue';
 import Maps from './components/Maps.vue';
 import Players from './components/Players.vue';
@@ -13,6 +14,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+  },
+  {
+    path: '/activity',
+    name: 'Activity',
+    component: Activity,
   },
   {
     path: '/maps',

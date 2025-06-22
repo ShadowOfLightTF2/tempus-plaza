@@ -32,6 +32,7 @@
         </div>
         <div
           class="row g-0"
+          :class="{ 'golden-border': donator }"
           style="height: 100%; display: flex; align-items: center"
         >
           <div
@@ -638,6 +639,7 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
+    donator: false,
     player: {
       id: null,
       steamid: null,
@@ -747,12 +749,15 @@ export default {
           enabled: false,
         },
       },
+      markers: {
+        size: 1,
+      },
       theme: {
         mode: "dark",
       },
       colors: ["#FF6B6B"],
       stroke: {
-        curve: "smooth",
+        curve: "straight",
         width: 3,
       },
       grid: {
@@ -799,12 +804,15 @@ export default {
           enabled: false,
         },
       },
+      markers: {
+        size: 1,
+      },
       theme: {
         mode: "dark",
       },
       colors: ["#4ECDC4"],
       stroke: {
-        curve: "smooth",
+        curve: "straight",
         width: 3,
       },
       grid: {
@@ -850,6 +858,9 @@ export default {
         zoom: {
           enabled: false,
         },
+      },
+      markers: {
+        size: 1,
       },
       theme: {
         mode: "dark",
@@ -1191,7 +1202,7 @@ export default {
       this.showLauncherMenu = false;
     },
     handleImageError(event) {
-      event.target.src = "/icons/default-flag.jpg";
+      event.target.src = "/tempus-plaza/icons/default-flag.jpg";
     },
     returnToAllPlayers() {
       this.$router.push("/players");
@@ -1505,7 +1516,7 @@ export default {
 
 <style scoped>
 .player-page {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI";
 }
 
 .return-button {
@@ -1742,9 +1753,10 @@ export default {
   align-items: center;
 }
 
-.class-icon {
-  width: 24px !important;
-  height: 24px !important;
+.shared-avatar {
+  width: 25px;
+  height: 25px;
+  border: 2px solid var(--color-primary);
 }
 
 .record-map {
@@ -2030,5 +2042,10 @@ export default {
 }
 .rank-color-peon {
   color: var(--color-peon);
+}
+
+.golden-border {
+  border-radius: 12px;
+  border: 2px solid gold !important;
 }
 </style>

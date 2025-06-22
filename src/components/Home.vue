@@ -12,13 +12,6 @@
       <div class="content-container">
         <div class="button-group">
           <button
-            :class="{ active: currentView === 'activity' }"
-            @click="switchView('activity')"
-            class="toggle-btn btn btn-dark update-button"
-          >
-            Activity
-          </button>
-          <button
             :class="{ active: currentView === 'topplayers' }"
             @click="switchView('topplayers')"
             class="toggle-btn btn btn-dark update-button"
@@ -39,83 +32,6 @@
           </div>
         </div>
         <div v-else class="table-container">
-          <div v-if="currentView === 'activity'" class="table-wrapper">
-            <div
-              class="table-header-content"
-              style="
-                background: linear-gradient(
-                  90deg,
-                  var(--color-primary),
-                  var(--color-box)
-                );
-              "
-            >
-              <div class="table-header-text">
-                <p class="table-header-title">Latest world records</p>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Player</th>
-                    <th>Map</th>
-                    <th>Type</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(activity, index) in activityData"
-                    :key="activity.id"
-                  >
-                    <td
-                      class="name-cell align-middle player-name clickable name-column"
-                      @click="goToPlayer(activity.player_id)"
-                    >
-                      <img
-                        :src="activity.avatar"
-                        :alt="activity.player + ' avatar'"
-                        class="avatar"
-                        onerror="this.src='/avatars/golly.jpg'"
-                      />
-                      {{ activity.player }}
-                    </td>
-                    <td
-                      class="name-cell align-middle map-name clickable"
-                      @click="goToMap(activity.map_id)"
-                    >
-                      <img
-                        :src="`icons/${activity.class}.png`"
-                        :alt="activity.class"
-                        class="class-icon-small"
-                      />
-                      {{ activity.map }}
-                    </td>
-                    <td>
-                      <div class="type-cell">
-                        <span
-                          class="record-type"
-                          :style="{ color: 'var(--color-text)' }"
-                        >
-                          <template v-if="activity.recordType === 'map'"
-                            >🌍 Map</template
-                          >
-                          <template v-else-if="activity.recordType === 'course'"
-                            >🚩 Course {{ activity.index }}</template
-                          >
-                          <template v-else-if="activity.recordType === 'bonus'"
-                            >⭐ Bonus {{ activity.index }}</template
-                          >
-                        </span>
-                      </div>
-                    </td>
-                    <td class="timestamp-cell">{{ activity.timestamp }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
           <div v-if="currentView === 'topplayers'" class="table-wrapper">
             <div
               class="table-header-content"
@@ -167,7 +83,7 @@
                       @click="goToMap(player.map_id)"
                       style="color: var(--color-text-clickable)"
                     >
-                      {{ player.currentMap }}
+                      {{ player.current_map }}
                     </td>
                     <td>{{ player.shortname }} | {{ player.server_name }}</td>
                     <td class="align-middle">
@@ -294,14 +210,12 @@
 </template>
 
 <script>
-import { formatDate, formatDuration } from "@/utils/calculations";
 export default {
   name: "Home",
   data() {
     return {
-      currentView: "activity",
+      currentView: "topplayers",
       loading: false,
-      activityData: [],
       topPlayersData: [],
       serversData: [],
       selectedServer: null,
@@ -310,13 +224,22 @@ export default {
   },
   async created() {
     document.title = "Tempus plaza - Home";
-    await Promise.all([
-      this.fetchActivityData(),
-      this.fetchTopPlayersData(),
-      this.fetchServersData(),
-    ]);
+    await this.fetchData();
   },
   methods: {
+    async fetchData() {
+      this.loading = true;
+      try {
+        await Promise.all([
+          this.fetchTopPlayersData(),
+          this.fetchServersData(),
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        this.loading = false;
+      }
+    },
     sortServersByPlayers() {
       this.sortDirection *= -1;
       this.serversData.sort((a, b) => {
@@ -345,33 +268,7 @@ export default {
         return a.country.localeCompare(b.country) * this.sortDirection;
       });
     },
-    async fetchActivityData() {
-      this.loading = true;
-      try {
-        const response = await fetch("http://localhost:3000/maps/activity");
-        const data = await response.json();
-
-        this.activityData = data.map((item) => ({
-          id: item.id,
-          player: item.player_name,
-          player_id: item.player_id,
-          avatar: item.steam_avatar,
-          map: item.map_name,
-          map_id: item.map_id,
-          time: formatDuration(item.duration),
-          class: item.class,
-          recordType: item.map_type,
-          index: item.type_index,
-          timestamp: formatDate(item.record_date),
-        }));
-      } catch (error) {
-        console.error("There was an error fetching the activity data:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
     async fetchTopPlayersData() {
-      this.loading = true;
       try {
         const response = await fetch(
           "http://localhost:3000/servers/top-players"
@@ -379,19 +276,21 @@ export default {
         const data = await response.json();
 
         this.topPlayersData = data
-          .sort((a, b) => b.score - a.score)
+          .sort((a, b) => {
+            if (a.highest_rank === null) return 1;
+            if (b.highest_rank === null) return -1;
+
+            return a.highest_rank - b.highest_rank;
+          })
           .slice(0, 20);
       } catch (error) {
         console.error(
           "There was an error fetching the top players data:",
           error
         );
-      } finally {
-        this.loading = false;
       }
     },
     async fetchServersData() {
-      this.loading = true;
       try {
         const response = await fetch("http://localhost:3000/servers");
         const data = await response.json();
@@ -414,8 +313,6 @@ export default {
         });
       } catch (error) {
         console.error("There was an error fetching the servers data:", error);
-      } finally {
-        this.loading = false;
       }
     },
     getFlagImageUrl(countryCode) {
@@ -443,14 +340,14 @@ export default {
         params: { playerId: playerId },
       });
     },
-    selectServer(server) {
-      this.selectedServer = server;
-    },
     goToMap(mapId) {
       this.$router.push({
         name: "Records",
         params: { mapId: mapId },
       });
+    },
+    selectServer(server) {
+      this.selectedServer = server;
     },
   },
 };
@@ -619,7 +516,7 @@ export default {
   width: 25px;
   height: 25px;
   margin-right: 8px;
-  border: 0.1px solid var(--color-border-soft);
+  border: 1px solid var(--color-primary);
   border-radius: 2px;
 }
 

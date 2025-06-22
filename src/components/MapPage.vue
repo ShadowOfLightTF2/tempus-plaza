@@ -207,7 +207,7 @@
                   <div class="row authors-block">
                     <div
                       v-for="author in authors"
-                      :key="author.id"
+                      :key="author.author_id"
                       class="col-md-4 text-center"
                     >
                       <img
@@ -220,7 +220,11 @@
                         class="rounded-circle author-avatar mb-3"
                       />
                       <h5 class="author-name">
-                        {{ author.name ? author.name : "Unknown Author" }}
+                        {{
+                          author.author_name
+                            ? author.author_name
+                            : "Unknown Author"
+                        }}
                       </h5>
                     </div>
                   </div>
@@ -353,8 +357,9 @@ export default {
     },
     formatDate(unixTimestamp) {
       const date = new Date(unixTimestamp * 1000);
+      console.log(date);
       const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getDate() + 1).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
 
       return `${day}/${month}/${year}`;

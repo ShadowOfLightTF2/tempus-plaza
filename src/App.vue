@@ -2,10 +2,18 @@
   <div id="app" @click="closeDropdown">
     <nav class="navbar navbar-expand-lg navbar-dark bg-custom">
       <div class="container justify-content-center">
+        <div v-if="isUpdating" class="update-message">
+          Records are currently updating. Performance may be affected.
+        </div>
         <ul class="navbar-nav">
           <li class="nav-item me-3">
             <router-link to="/" class="nav-link nav-link-bold">
               <i class="bi bi-house"></i> Home
+            </router-link>
+          </li>
+          <li class="nav-item me-3">
+            <router-link to="/activity" class="nav-link nav-link-bold">
+              <i class="bi bi-graph-up"></i> Activity
             </router-link>
           </li>
           <li class="nav-item me-3">
@@ -101,9 +109,7 @@
               <img
                 :src="user.avatar"
                 alt="avatar"
-                class="rounded-circle me-2"
-                width="32"
-                height="32"
+                class="me-2 avatar"
                 v-if="user.avatar"
               />
               <span>{{ user.name }}</span>
@@ -261,6 +267,7 @@ export default {
       rankPreference: "overall",
       gender: "male",
       currentUser: null,
+      isUpdating: false,
     };
   },
   computed: {
@@ -269,6 +276,16 @@ export default {
     },
   },
   methods: {
+    async checkUpdateStatus() {
+      try {
+        const response = await fetch("http://localhost:3000/is-updating");
+        const data = await response.json();
+        console.log(data);
+        this.isUpdating = data.isUpdating;
+      } catch (error) {
+        console.error("Error fetching update status:", error);
+      }
+    },
     closeDropdown() {
       this.searchResults = null;
     },
@@ -398,6 +415,11 @@ export default {
   },
   created() {
     this.debouncedSearch = debounce(this.fetchSearchResults, 500);
+    this.checkUpdateStatus();
+    this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
+  },
+  beforeDestroy() {
+    clearInterval(this.updateInterval);
   },
   watch: {
     searchQuery() {
@@ -429,12 +451,12 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI";
   background: var(--color-background) !important;
 }
 
 #app {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI";
   background: var(--color-background);
 }
 
@@ -497,7 +519,6 @@ html {
   background: var(--color-primary) !important;
   border-radius: 0;
 }
-
 .bi-steam {
   color: var(--color-text);
 }
@@ -510,6 +531,15 @@ html {
 </style>
 
 <style scoped>
+.update-message {
+  color: #ffcc00;
+  font-weight: bold;
+  margin-right: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
 .row-divider {
   width: 100%;
   border: none;
@@ -526,6 +556,13 @@ html {
 
 .login-button {
   border-radius: 8px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
 }
 
 .dropdown-toggle:hover {
@@ -601,7 +638,7 @@ html {
 
 .search-input {
   width: 200px;
-  padding: 8px 8px 8px 36px;
+  padding: 8px 8px 8px 40px;
   background: var(--color-box);
   border: 2px solid rgba(68, 68, 68, 0.3);
   border-radius: 12px;

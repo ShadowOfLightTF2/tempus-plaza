@@ -1,16 +1,5 @@
 <template>
-  <div v-if="loading && initialLoad" class="text-center">
-    <div
-      class="spinner-border text-light"
-      role="status"
-      style="margin-top: 100px"
-    >
-      <span class="visually-hidden">Loading players...</span>
-    </div>
-  </div>
-  <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
   <div
-    v-else
     class="container players-container py-4 d-flex flex-column align-items-center bg-dark-custom"
   >
     <h1 class="text-center players-title">Tempus top players</h1>
@@ -70,7 +59,18 @@
       </div>
     </div>
     <hr class="row-divider" style="width: 75%" />
+    <div v-if="loading && initialLoad" class="text-center">
+      <div
+        class="spinner-border text-light"
+        role="status"
+        style="margin-top: 100px"
+      >
+        <span class="visually-hidden">Loading players...</span>
+      </div>
+    </div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
     <div
+      v-else
       class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
     >
       <div class="table-wrapper">
@@ -101,7 +101,15 @@
               <tr>
                 <th>Rank</th>
                 <th>Player</th>
-                <th>{{ points ? "Points" : "Count" }}</th>
+                <th>
+                  {{
+                    points
+                      ? "Points"
+                      : selectedCategory === "completion"
+                      ? "Percentage"
+                      : "Count"
+                  }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -122,7 +130,20 @@
                   />
                   {{ player.name }}
                 </td>
-                <td class="points-column">{{ player.amount }}</td>
+                <td
+                  class="points-column"
+                  :class="{
+                    'percentage-column': selectedCategory === 'completion',
+                  }"
+                >
+                  {{
+                    selectedCategory === "completion"
+                      ? player.percentage
+                        ? player.percentage.toFixed(2) + "%"
+                        : "0%"
+                      : player.amount
+                  }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -176,7 +197,15 @@
               <tr>
                 <th>Rank</th>
                 <th>Player</th>
-                <th>{{ points ? "Points" : "Count" }}</th>
+                <th>
+                  {{
+                    points
+                      ? "Points"
+                      : selectedCategory === "completion"
+                      ? "Percentage"
+                      : "Count"
+                  }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -197,7 +226,20 @@
                   />
                   {{ player.name }}
                 </td>
-                <td>{{ player.amount }}</td>
+                <td
+                  class="points-column"
+                  :class="{
+                    'percentage-column': selectedCategory === 'completion',
+                  }"
+                >
+                  {{
+                    selectedCategory === "completion"
+                      ? player.percentage
+                        ? player.percentage.toFixed(2) + "%"
+                        : "0%"
+                      : player.amount
+                  }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -251,7 +293,15 @@ export default {
       ratings: [],
       tiers: [],
     },
-    categoryNames: ["points", "wrs", "tts", "groups", "ratings", "tiers"],
+    categoryNames: [
+      "points",
+      "wrs",
+      "tts",
+      "groups",
+      "ratings",
+      "tiers",
+      "completion",
+    ],
     categoryDisplayNames: {
       wrs: "World records",
       tts: "Top times",
@@ -259,19 +309,15 @@ export default {
       groups: "Groups",
       ratings: "Ratings (maps)",
       tiers: "Tiers",
+      completion: "Completion",
     },
     currentSoldierIndex: 50,
     currentDemomanIndex: 50,
   }),
-  watch: {
-    $route(to, from) {
-      this.initializeFromRoute();
-    },
-  },
   mounted() {
     document.title = "Tempus plaza - Players";
     this.fillDropdowns();
-    this.initializeFromRoute();
+    this.fetchDataForCurrentSelection(0);
   },
   computed: {
     formattedHeaderTitle() {
@@ -288,111 +334,158 @@ export default {
     },
   },
   methods: {
+    goToPlayer(playerId) {
+      this.$router.push({
+        name: "PlayerPage",
+        params: { playerId: playerId },
+      });
+    },
     handleError(e) {
       const fallback = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
       if (e.target.src !== fallback) {
         e.target.src = fallback;
       }
     },
-    selectCategory(category) {
-      this.selectedCategory = category;
-      const defaultItem = this.dropdowns[category][0];
-      this.selectItem(category, defaultItem);
-    },
-    initializeFromRoute() {
-      const category = this.$route.params.category || "points";
-      const item = this.$route.params.item || "Combined";
-
-      if (!this.categoryNames.includes(category)) {
-        this.updateRoute("points", "Combined");
-        return;
+    async fetchDataForCurrentSelection(index) {
+      if (this.initialLoad) {
+        this.loading = true;
       }
+      try {
+        const category = this.selectedCategory;
+        const item = this.selectedItem;
 
-      this.selectedCategory = category;
-      this.selectedItem = decodeURIComponent(item);
+        let tableName = category;
+        let type = item
+          .replace(/\s+/g, "")
+          .toLowerCase()
+          .replace(/\s*combined\s*/gi, "total");
+        let cat = "points";
 
-      this.points = !this.selectedItem.includes("(count)");
-
-      this.fetchDataForCurrentSelection(0);
-    },
-    updateRoute(category, item) {
-      const encodedItem = encodeURIComponent(item);
-
-      if (
-        this.$route.params.category !== category ||
-        this.$route.params.item !== encodedItem
-      ) {
-        this.$router
-          .push({
-            name: "Players",
-            params: {
-              category: category,
-              item: encodedItem,
-            },
-          })
-          .catch((err) => {
-            if (err.name !== "NavigationDuplicated") {
-              console.error("Navigation error:", err);
-            }
-          });
-      }
-    },
-    loadMoreDemomen() {
-      this.loadingDemomen = true;
-      this.currentDemomanIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentDemomanIndex);
-    },
-    loadMoreSoldiers() {
-      this.loadingSoldiers = true;
-      this.currentSoldierIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentSoldierIndex);
-    },
-    fetchDataForCurrentSelection(index) {
-      const category = this.selectedCategory;
-      const item = this.selectedItem;
-
-      let tableName = category;
-      let type = item
-        .replace(/\s+/g, "")
-        .toLowerCase()
-        .replace(/\s*combined\s*/gi, "total");
-      let cat = "points";
-
-      if (type.includes("(count)")) {
-        type = type.replace("(count)", "");
-        cat = "count";
-        this.points = false;
-      }
-
-      if (tableName === "ratings") {
-        const newName = type.replace(
-          /rating(\d+)/g,
-          (match, num) => `r${num}s`
-        );
-        tableName = newName;
-        type = "maps";
-      } else if (tableName === "groups") {
-        if (type === "groups") {
-          this.fetchPlayers(type, "total", cat, index);
+        if (category === "completion") {
+          this.points = false;
+          await this.fetchCompletions(type, index);
           return;
-        } else {
+        }
+
+        if (type.includes("(count)")) {
+          type = type.replace("(count)", "");
+          cat = "count";
+          this.points = false;
+        }
+
+        if (tableName === "ratings") {
           const newName = type.replace(
-            /group(\d+)/g,
-            (match, num) => `g${num}s`
+            /rating(\d+)/g,
+            (match, num) => `r${num}s`
           );
           tableName = newName;
-          type = "total";
+          type = "maps";
+        } else if (tableName === "groups") {
+          if (type === "groups") {
+            await this.fetchPlayers(type, "total", cat, index);
+            return;
+          } else {
+            const newName = type.replace(
+              /group(\d+)/g,
+              (match, num) => `g${num}s`
+            );
+            tableName = newName;
+            type = "total";
+          }
         }
+
+        if (tableName === "tiers") cat = "total";
+
+        await this.fetchPlayers(tableName, type, cat, index);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        this.loading = false;
+        this.initialLoad = false;
+        this.loadingSoldiers = false;
+        this.loadingDemomen = false;
+      }
+    },
+    async fetchCompletions(type, index) {
+      let isCombined = false;
+      let indexFix = 0;
+      if (index > 0) indexFix = 50;
+      if (type === "total") isCombined = true;
+
+      const response = await axios.get(
+        `http://localhost:3000/players/players-completion-stats/${type}/${
+          index - indexFix
+        }`
+      );
+      const playersResponse = response.data;
+
+      const mapsResponse = await axios.get("http://localhost:3000/maps/count");
+      const maps = mapsResponse.data;
+
+      const players = playersResponse[type];
+
+      const calculatePercentage = (playerAmount, totalAmount) => {
+        if (totalAmount <= 0 || playerAmount === undefined) {
+          return 0;
+        }
+        return (playerAmount / totalAmount) * 100;
+      };
+
+      let totalSoldierCount, totalDemomanCount;
+
+      if (isCombined) {
+        const totalSoldierMapsCount = maps[0].soldier_maps_count || 0;
+        const totalSoldierCoursesCount = maps[0].soldier_courses_count || 0;
+        const totalSoldierBonusesCount = maps[0].soldier_bonuses_count || 0;
+
+        const totalDemomanMapsCount = maps[0].demoman_maps_count || 0;
+        const totalDemomanCoursesCount = maps[0].demoman_courses_count || 0;
+        const totalDemomanBonusesCount = maps[0].demoman_bonuses_count || 0;
+
+        totalSoldierCount =
+          totalSoldierMapsCount +
+          totalSoldierCoursesCount +
+          totalSoldierBonusesCount;
+        totalDemomanCount =
+          totalDemomanMapsCount +
+          totalDemomanCoursesCount +
+          totalDemomanBonusesCount;
+      } else {
+        totalSoldierCount = maps[0][`soldier_${type}_count`] || 0;
+        totalDemomanCount = maps[0][`demoman_${type}_count`] || 0;
       }
 
-      if (tableName === "tiers") cat = "total";
-
-      this.fetchPlayers(tableName, type, cat, index);
+      if (index === 0) {
+        this.soldierPlayers = players.soldier.map((player) => ({
+          ...player,
+          percentage: calculatePercentage(player.amount, totalSoldierCount),
+        }));
+        this.demomanPlayers = players.demoman.map((player) => ({
+          ...player,
+          percentage: calculatePercentage(player.amount, totalDemomanCount),
+        }));
+      } else {
+        this.soldierPlayers = [
+          ...this.soldierPlayers,
+          ...players.soldier.map((player) => ({
+            ...player,
+            percentage: calculatePercentage(player.amount, totalSoldierCount),
+          })),
+        ];
+        this.demomanPlayers = [
+          ...this.demomanPlayers,
+          ...players.demoman.map((player) => ({
+            ...player,
+            percentage: calculatePercentage(player.amount, totalDemomanCount),
+          })),
+        ];
+      }
     },
+
     fillDropdowns() {
-      this.dropdowns.points = ["Combined", "Maps", "Courses", "Bonuses"];
-      this.dropdowns.wrs = ["Combined", "Maps", "Courses", "Bonuses"];
-      this.dropdowns.tts = ["Combined", "Maps", "Courses", "Bonuses"];
+      this.dropdowns.points = ["Total", "Maps", "Courses", "Bonuses"];
+      this.dropdowns.wrs = ["Total", "Maps", "Courses", "Bonuses"];
+      this.dropdowns.tts = ["Total", "Maps", "Courses", "Bonuses"];
       this.dropdowns.groups = [
         "Groups",
         "Group 1",
@@ -413,32 +506,39 @@ export default {
         "Tier 9",
         "Tier 10",
       ];
+      this.dropdowns.completion = ["Total", "Maps", "Courses", "Bonuses"];
     },
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     },
     getCountItems(category) {
-      // For groups category, exclude 'Groups' from the count list
       if (category === "groups") {
         return this.dropdowns[category].filter((item) => item !== "Groups");
       }
       return this.dropdowns[category];
     },
+    selectCategory(category) {
+      this.selectedCategory = category;
+      const defaultItem = this.dropdowns[category][0];
+      this.selectItem(category, defaultItem);
+    },
     selectItem(category, item) {
+      this.initialLoad = true;
       this.points = true;
       this.selectedCategory = category;
       this.selectedItem = item;
 
-      this.updateRoute(category, item);
+      this.currentSoldierIndex = 50;
+      this.currentDemomanIndex = 50;
+      this.soldierPlayers = [];
+      this.demomanPlayers = [];
 
-      this.dropdownOpen = false;
-      this.hoveredCategory = null;
+      this.fetchDataForCurrentSelection(0);
     },
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
     },
     async fetchPlayers(tableName, type, category, index) {
-      if (this.initialLoad) this.loading = true;
       try {
         const response = await axios.get(
           `http://localhost:3000/players/data/${tableName}/${type}/${category}/${index}`
@@ -453,18 +553,17 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching players");
-      } finally {
-        this.loading = false;
-        this.loadingSoldiers = false;
-        this.loadingDemomen = false;
-        this.initialLoad = false;
       }
     },
-    async goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
+    loadMoreDemomen() {
+      this.loadingDemomen = true;
+      this.currentDemomanIndex += 50;
+      this.fetchDataForCurrentSelection(this.currentDemomanIndex);
+    },
+    loadMoreSoldiers() {
+      this.loadingSoldiers = true;
+      this.currentSoldierIndex += 50;
+      this.fetchDataForCurrentSelection(this.currentSoldierIndex);
     },
   },
 };
@@ -517,6 +616,8 @@ export default {
 
 .table-dark {
   margin: 0px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table-dark th {
@@ -578,6 +679,7 @@ export default {
 .clickable {
   cursor: pointer;
 }
+
 .update-button {
   border-radius: 0px;
 }
@@ -596,7 +698,8 @@ export default {
   width: 25px;
   height: 25px;
   margin-right: 1px;
-  border: 0.1px solid var(--color-border-soft);
+  border: 1px solid var(--color-primary);
+  border-radius: 2px;
 }
 
 @media (max-width: 767.98px) {
@@ -722,6 +825,11 @@ export default {
   background: linear-gradient(90deg, transparent, #4a9eff, transparent);
   margin: 30px 0;
   opacity: 0.6;
+}
+
+.percentage-column {
+  text-align: left;
+  padding-left: 3% !important;
 }
 
 @media (max-width: 767.98px) {

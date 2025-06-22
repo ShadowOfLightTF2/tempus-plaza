@@ -232,7 +232,12 @@
             </tbody>
           </table>
         </div>
-        <div class="maps-footer">
+        <div v-if="showMoreLoading" class="text-center">
+          <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading records...</span>
+          </div>
+        </div>
+        <div v-else class="maps-footer">
           <button
             v-if="displayedDemomanEntries.length < selectedRecords.length"
             @click="showMoreDemomanEntries"

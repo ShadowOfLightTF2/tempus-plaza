@@ -289,6 +289,28 @@
       </div>
     </div>
     <hr class="row-divider" style="width: 75%" />
+    <div class="search-records-container">
+      <div class="search-input-wrapper">
+        <svg
+          class="search-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          v-model="recordSearchQuery"
+          placeholder="Search map..."
+          class="search-records-input"
+        />
+      </div>
+    </div>
 
     <!-- Loading and Error States -->
     <div v-if="loading" class="text-center">
@@ -324,7 +346,9 @@
                 <td class="clickable" @click="goToMap(record.map_id)">
                   {{ record.map_name }}
                 </td>
-                <td>{{ getRecordType(record.type) }}</td>
+                <td>
+                  {{ getRecordType(record.type) }}{{ formatIndex(record) }}
+                </td>
                 <td>
                   <img
                     :src="`/tempus-plaza/icons/${record.class}.png`"
@@ -386,6 +410,7 @@ export default {
     availableGroups: [1, 2, 3, 4, 5],
     selectedGroups: [],
     sortByDate: "newest",
+    recordSearchQuery: "",
     searchQuery: "",
     searchResults: null,
     debounceTimer: null,
@@ -481,6 +506,12 @@ export default {
           }
         }
 
+        if (this.recordSearchQuery) {
+          const query = this.recordSearchQuery.toLowerCase();
+          if (!record.map_name.toLowerCase().includes(query)) {
+            return false;
+          }
+        }
         return true;
       });
 
@@ -534,6 +565,9 @@ export default {
       },
       immediate: true,
     },
+    recordSearchQuery() {
+      this.applyFilters();
+    },
   },
   mounted() {
     document.title = "Tempus plaza - Lookup";
@@ -554,6 +588,17 @@ export default {
     }
   },
   methods: {
+    formatIndex(record) {
+      const type = record.type;
+      if (type === "map") return "";
+      return `${type.charAt(0).toUpperCase()}${record.index}`;
+    },
+    applyFilters() {
+      this.filteredRecords = this.filteredSortedItems.slice(
+        0,
+        this.displayCount
+      );
+    },
     goToPlayer(playerId) {
       this.$router.push({
         name: "PlayerPage",
@@ -1282,6 +1327,33 @@ export default {
   width: 25px;
   height: 25px;
   margin: 8px;
+}
+
+.search-records-container {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 25px;
+}
+
+.search-records-input {
+  width: 100%;
+  padding: 12px 12px 12px 50px;
+  background: var(--color-box);
+  border: 2px solid rgba(68, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.search-records-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.search-records-input::placeholder {
+  color: #888;
 }
 
 .table-responsive {

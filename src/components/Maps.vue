@@ -233,7 +233,9 @@
                 {{
                   currentView === "maps"
                     ? item.name
-                    : `${item.map_name} (${item.index})`
+                    : `${item.map_name} (${currentView
+                        .slice(0, 1)
+                        .toUpperCase()}${item.index})`
                 }}
               </td>
               <td
@@ -553,7 +555,7 @@ export default {
         this.pickerComplete = true;
 
         if (availableRows.length === 1) {
-          await this.$nextTick(); // Wait for the DOM to update
+          await this.$nextTick();
           const rowIndex = availableRows[0].index;
           this.$refs.tableRows[rowIndex].scrollIntoView({
             behavior: "smooth",
@@ -595,7 +597,7 @@ export default {
 
 <style scoped>
 .maps-container {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI";
 }
 
 .bg-dark-custom {
