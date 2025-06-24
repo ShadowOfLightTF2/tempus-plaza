@@ -2,6 +2,16 @@
   <div
     class="container maps-container py-4 d-flex flex-column align-items-center bg-dark-custom"
   >
+    <div class="page-header">
+      <h1 class="page-title">
+        <span class="title-icon">🗺️</span>
+        Map leaderboards
+      </h1>
+      <p class="page-subtitle">
+        Leaderboards for maps, courses and bonuses records
+      </p>
+    </div>
+    <hr class="row-divider" style="width: 75%" />
     <div v-if="!loading && selectedRecords.length > 0">
       <div class="map-name-container clickable" @click="goToMap(mapId)">
         <h1 class="text-center maps-title">
@@ -599,6 +609,12 @@ export default {
 }
 
 .maps-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   color: var(--color-text-clickable);
 }
 
@@ -704,15 +720,22 @@ export default {
 }
 
 .map-name-container {
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 16px;
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: var(--color-background);
-  transition: background-color 0.3s ease;
-  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    135deg,
+    var(--color-box),
+    var(--color-background)
+  );
+  transition: all 0.3s ease;
+  border: 2px solid var(--color-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
 .map-name-container:hover {

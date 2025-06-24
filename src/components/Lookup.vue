@@ -2,7 +2,24 @@
   <div
     class="container records-container py-4 d-flex flex-column align-items-center bg-dark-custom"
   >
-    <!-- Search section remains unchanged -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <span class="title-icon">🔍</span>
+        Lookup players
+      </h1>
+      <p class="page-subtitle">Search and filter through player records</p>
+    </div>
+    <hr class="row-divider" style="width: 75%" />
+    <div
+      v-if="playerId"
+      class="player-name-display"
+      @click="goToPlayer(playerId)"
+    >
+      <h2
+        class="clickable"
+        v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+      ></h2>
+    </div>
     <div class="search-section">
       <div class="search-container" @click.stop>
         <div class="search-input-wrapper">
@@ -58,25 +75,9 @@
         "
       ></div>
     </div>
-    <hr class="row-divider" style="width: 75%" />
-
-    <!-- Player Name Display -->
-    <div
-      v-if="playerId"
-      class="player-name-display"
-      @click="goToPlayer(playerId)"
-    >
-      <h2
-        class="clickable"
-        v-html="sanitize(selectedPlayerName) || 'Selected Player'"
-      ></h2>
-    </div>
     <hr class="row-divider" style="width: 75%" v-if="playerId" />
-
-    <!-- Filter Section -->
     <div class="filter-section">
       <div class="filter-content">
-        <!-- Soldier and Demoman Tiers -->
         <div class="filter-columns">
           <div class="filter-group">
             <h6 class="filter-title text-light mb-2">Soldier Tiers</h6>
@@ -119,8 +120,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Soldier and Demoman Ratings -->
         <div class="filter-columns">
           <div class="filter-group">
             <h6 class="filter-title text-light mb-2">Soldier Ratings</h6>
@@ -167,8 +166,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Groups Filter -->
         <div class="filter-group">
           <h6 class="filter-title text-light mb-2">Placement</h6>
           <div class="group-filter-container">
@@ -207,8 +204,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Class and Type Filters -->
         <div class="filter-columns">
           <div class="filter-group">
             <h6 class="filter-title text-light mb-2">Class</h6>
@@ -246,7 +241,6 @@
               </label>
             </div>
           </div>
-          <!-- Sort by Date Dropdown -->
           <div class="filter-group">
             <h6 class="filter-title text-light mb-2">Sort by</h6>
             <div class="dropdown">
@@ -272,7 +266,6 @@
             </div>
           </div>
         </div>
-
         <div class="filter-actions">
           <button
             type="button"
@@ -311,16 +304,12 @@
         />
       </div>
     </div>
-
-    <!-- Loading and Error States -->
     <div v-if="loading" class="text-center">
       <div class="spinner-border text-light" role="status">
         <span class="visually-hidden">Loading records...</span>
       </div>
     </div>
     <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-
-    <!-- Table Section -->
     <div
       v-else
       class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
@@ -388,8 +377,10 @@
 import DOMPurify from "dompurify";
 import Cookies from "js-cookie";
 import { formatDuration } from "@/utils/calculations.js";
+
 const API_BASE_URL =
   import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:3000";
+
 export default {
   name: "PlayerRecords",
   data: () => ({
@@ -400,7 +391,6 @@ export default {
     error: null,
     selectedClasses: [],
     selectedTypes: [],
-    filteredRecords: [],
     selectedSoldierTiers: [],
     selectedSoldierRatings: [],
     selectedDemomanTiers: [],
@@ -536,6 +526,9 @@ export default {
         return 0;
       });
     },
+    filteredRecords() {
+      return this.filteredSortedItems.slice(0, this.displayCount);
+    },
     selectedSortOption() {
       const option = this.dropdownOptions.find(
         (opt) => opt.value === this.sortByDate
@@ -565,8 +558,10 @@ export default {
       },
       immediate: true,
     },
-    recordSearchQuery() {
-      this.applyFilters();
+    $route(to) {
+      if (to.params.playerId) {
+        this.playerId = to.params.playerId;
+      }
     },
   },
   mounted() {
@@ -581,23 +576,31 @@ export default {
         console.error("Malformed user cookie:", e);
       }
     }
-    if (user && user.playerid) {
+    if (this.$route.params.playerId) {
+      this.playerId = this.$route.params.playerId;
+      this.findPlayerName(this.playerId);
+    } else if (user && user.playerid) {
       this.playerId = user.playerid;
       this.selectedPlayerName = user.name;
+      this.$router.push({
+        name: "Lookup",
+        params: { playerId: this.playerId },
+      });
+    }
+    if (this.playerId) {
       this.fetchRecords();
     }
   },
   methods: {
+    async findPlayerName(playerId) {
+      const response = await fetch(`${API_BASE_URL}/players/${playerId}`);
+      const data = await response.json();
+      this.selectedPlayerName = data[0].name;
+    },
     formatIndex(record) {
       const type = record.type;
       if (type === "map") return "";
       return `${type.charAt(0).toUpperCase()}${record.index}`;
-    },
-    applyFilters() {
-      this.filteredRecords = this.filteredSortedItems.slice(
-        0,
-        this.displayCount
-      );
     },
     goToPlayer(playerId) {
       this.$router.push({
@@ -624,13 +627,11 @@ export default {
           return "";
       }
     },
-
     sanitize(str) {
       return DOMPurify.sanitize(str || "");
     },
     showMore() {
       this.displayCount += 300;
-      this.applyFilters();
     },
     getRankColorClass(placement) {
       if (placement === 1) return "placement-rank-gold";
@@ -656,7 +657,6 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
 
-      //return `${day}/${month}/${year}`;
       return `${year}/${month}/${day}`;
     },
     async onSearch() {
@@ -695,10 +695,13 @@ export default {
       ).name;
       this.searchQuery = "";
       this.searchResults = null;
+      this.$router.push({
+        name: "Lookup",
+        params: { playerId: playerId },
+      });
     },
     selectSortOption(value) {
       this.sortByDate = value;
-      this.applyFilters();
     },
     async fetchRecords() {
       this.loading = true;
@@ -732,19 +735,12 @@ export default {
         };
 
         this.records = this.cachedRecords.records;
-        this.applyFilters();
       } catch (error) {
         this.error = "Error fetching records.";
         console.error("Error fetching records:", error);
       } finally {
         this.loading = false;
       }
-    },
-    applyFilters() {
-      this.filteredRecords = this.filteredSortedItems.slice(
-        0,
-        this.displayCount
-      );
     },
     clearAllFilters() {
       this.selectedClasses = [];
@@ -753,10 +749,6 @@ export default {
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
-      this.applyFilters();
-    },
-    onFilterChange() {
-      this.applyFilters();
     },
     formatDuration(unixTimestamp) {
       return formatDuration(unixTimestamp);
@@ -788,7 +780,8 @@ export default {
 
 .search-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
+  margin-top: 20px;
 }
 
 .search-container {
@@ -1421,7 +1414,14 @@ export default {
 
 .player-name-display h2 {
   color: var(--color-text);
-  font-size: 2rem;
+  font-size: 2.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin: 0 auto;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .show-more-btn {

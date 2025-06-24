@@ -1,27 +1,34 @@
 <template>
   <div class="container mx-auto py-4 d-flex flex-column align-items-center">
     <div class="content-container">
+      <div class="page-header">
+        <h1 class="page-title">
+          <span class="title-icon">📊</span>
+          Activity dashboard
+        </h1>
+        <p class="page-subtitle">Track the latest records</p>
+      </div>
       <div class="button-group">
         <button
           :class="{ active: currentView === 'worldrecords' }"
           @click="switchView('worldrecords')"
           class="toggle-btn btn btn-dark update-button"
         >
-          World records
+          <span class="btn-text">World Records</span>
         </button>
         <button
           :class="{ active: currentView === 'toptimes' }"
           @click="switchView('toptimes')"
           class="toggle-btn btn btn-dark update-button"
         >
-          Top times
+          <span class="btn-text">Top Times</span>
         </button>
         <button
           :class="{ active: currentView === 'group1s' }"
           @click="switchView('group1s')"
           class="toggle-btn btn btn-dark update-button"
         >
-          Group 1s
+          <span class="btn-text">Group 1s</span>
         </button>
       </div>
       <div v-if="loading" class="text-center py-5">
@@ -31,20 +38,11 @@
       </div>
       <div v-else class="table-container">
         <div v-if="currentView === 'worldrecords'" class="table-wrapper">
-          <div
-            class="table-header-content"
-            style="
-              background: linear-gradient(
-                90deg,
-                var(--color-primary),
-                var(--color-box)
-              );
-            "
-          >
+          <div class="table-header-content">
+            <div class="table-header-icon">🏆</div>
             <div class="table-header-text">
-              <p class="table-header-title">
-                Latest world records (updates every 5 minutes)
-              </p>
+              <h3 class="table-header-title">Latest world records</h3>
+              <p class="table-header-subtitle">Updates every 5 minutes</p>
             </div>
           </div>
           <div class="table-responsive">
@@ -110,20 +108,11 @@
           </div>
         </div>
         <div v-if="currentView === 'toptimes'" class="table-wrapper">
-          <div
-            class="table-header-content"
-            style="
-              background: linear-gradient(
-                90deg,
-                var(--color-primary),
-                var(--color-box)
-              );
-            "
-          >
+          <div class="table-header-content">
+            <div class="table-header-icon">🥇</div>
             <div class="table-header-text">
-              <p class="table-header-title">
-                Latest top times (updates once a day)
-              </p>
+              <h3 class="table-header-title">Latest top times</h3>
+              <p class="table-header-subtitle">Updates twice a day</p>
             </div>
           </div>
           <div class="table-responsive">
@@ -188,20 +177,11 @@
           </div>
         </div>
         <div v-if="currentView === 'group1s'" class="table-wrapper">
-          <div
-            class="table-header-content"
-            style="
-              background: linear-gradient(
-                90deg,
-                var(--color-primary),
-                var(--color-box)
-              );
-            "
-          >
+          <div class="table-header-content">
+            <div class="table-header-icon">⏱️</div>
             <div class="table-header-text">
-              <p class="table-header-title">
-                Latest group 1s (updates once a day)
-              </p>
+              <h3 class="table-header-title">Latest group 1s</h3>
+              <p class="table-header-subtitle">Updates twice a day</p>
             </div>
           </div>
           <div class="table-responsive">
@@ -272,20 +252,38 @@
 
 <script>
 import { formatDate, formatDuration } from "@/utils/calculations";
+
 export default {
   name: "Activity",
+  props: {
+    view: {
+      type: String,
+      default: "worldrecords",
+    },
+  },
   data() {
     return {
-      currentView: "worldrecords",
+      currentView: this.view,
       worldRecordsData: [],
       topTimesData: [],
       group1sData: [],
       loading: false,
     };
   },
+  watch: {
+    $route(to) {
+      if (to.params.view) {
+        this.currentView = to.params.view;
+      }
+    },
+  },
   async created() {
     document.title = "Tempus plaza - Activity";
     await this.fetchData();
+    const { view } = this.$route.params;
+    if (view) {
+      this.currentView = view;
+    }
   },
   methods: {
     async fetchData() {
@@ -365,6 +363,7 @@ export default {
     switchView(view) {
       if (this.currentView === view) return;
       this.currentView = view;
+      this.$router.push({ name: "Activity", params: { view } });
     },
     goToPlayer(playerId) {
       this.$router.push({
@@ -387,10 +386,6 @@ export default {
   background: var(--color-background);
 }
 
-.players-title {
-  color: var(--color-text);
-}
-
 .flag-icon {
   width: 20px;
   height: auto;
@@ -400,6 +395,12 @@ export default {
 .content-container {
   width: 100%;
   max-width: 1200px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem 0;
 }
 
 .table-wrapper {
@@ -412,19 +413,39 @@ export default {
 .table-header-content {
   display: flex;
   align-items: center;
-  padding: 10px;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
+  border-bottom: 2px solid var(--color-border);
+}
+
+.table-header-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .table-header-text {
-  margin-left: 10px;
-  text-align: left;
-  font-weight: bold;
+  flex: 1;
 }
 
 .table-header-title {
-  margin: 5px 0 0 0px;
-  font-size: 20px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: var(--color-text);
+}
+
+.table-header-subtitle {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.8;
+}
+
+.table-header-badge {
+  display: flex;
+  align-items: center;
 }
 
 .table-responsive {
@@ -526,6 +547,19 @@ export default {
     flex-direction: column;
     width: 100%;
     max-width: 300px;
+    margin: 0 auto 2rem;
+    border-bottom: 1px solid var(--color-border) !important;
+    border-radius: 12px;
+  }
+
+  .toggle-btn {
+    justify-content: center;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
   }
 }
 </style>

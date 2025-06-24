@@ -1,15 +1,15 @@
 <template>
-  <div id="app">
+  <div
+    class="container py-4 d-flex flex-column align-items-center bg-dark-custom"
+  >
+    <div class="page-header">
+      <h1 class="page-title">
+        <span class="title-icon">❤️</span>
+        Support the website
+      </h1>
+    </div>
+    <hr class="divider" style="width: 75%" />
     <div class="donation-panel">
-      <div class="panel-header">
-        <span class="heart-icon">❤️</span>
-        <h2>Support me</h2>
-      </div>
-      <hr class="divider" />
-      <p class="panel-description">
-        Your support helps me pay for server uptime and upgrade the websites
-        services
-      </p>
       <div class="donation-options">
         <a
           href="https://ko-fi.com/shadowoflight"
@@ -20,6 +20,10 @@
           <span class="kofi-text">Donate through ko-fi</span>
         </a>
       </div>
+      <p class="panel-description">
+        Your support helps me pay for server uptime and upgrade the websites
+        services
+      </p>
       <hr class="divider" />
       <div class="panel-footer">
         <p class="thank-you">Thank you for your generosity!</p>
@@ -47,13 +51,6 @@ export default {
 </script>
 
 <style scoped>
-#app {
-  font-family: Helvetica;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
 .donation-panel {
   max-width: 500px;
   margin: 40px auto;
@@ -63,16 +60,6 @@ export default {
   padding: 40px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.panel-header {
-  margin-bottom: 20px;
-}
-
-.heart-icon {
-  font-size: 32px;
-  display: block;
-  margin-bottom: 10px;
 }
 
 .panel-header h2 {

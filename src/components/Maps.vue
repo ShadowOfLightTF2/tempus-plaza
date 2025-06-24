@@ -2,31 +2,12 @@
   <div
     class="container maps-container py-4 d-flex flex-column align-items-center bg-dark-custom"
   >
-    <div class="picker-section" v-if="filteredAndSortedItems.length > 0">
-      <div class="picker-controls">
-        <button
-          @click="startRandomPicker"
-          :disabled="isPickerActive || filteredAndSortedItems.length <= 1"
-          class="btn picker-btn"
-          :class="{ 'picker-btn-active': isPickerActive }"
-        >
-          <span v-if="!isPickerActive">Random map picker</span>
-          <span v-else>Eliminating...</span>
-        </button>
-        <button
-          @click="resetPicker"
-          v-if="eliminatedRows.size > 0"
-          class="btn btn-secondary ml-2"
-        >
-          Reset
-        </button>
-        <div
-          class="picker-status"
-          v-if="isPickerActive || eliminatedRows.size > 0"
-        >
-          <span class="remaining-count">{{ remainingCount }} remaining</span>
-        </div>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <span class="title-icon">🗺️</span>
+        Tempus maps
+      </h1>
+      <p class="page-subtitle">Explore and filter maps, courses and bonuses</p>
     </div>
     <hr class="row-divider" style="width: 75%" />
     <div class="filter-section">
@@ -144,31 +125,58 @@
     </div>
     <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
     <div v-else class="table-container">
-      <div class="button-group">
-        <button
-          :class="{ active: currentView === 'maps' }"
-          @click="switchView('maps')"
-          class="toggle-btn btn btn-dark update-button"
-          style="background: var(--color-box)"
-        >
-          Maps
-        </button>
-        <button
-          :class="{ active: currentView === 'courses' }"
-          @click="switchView('courses')"
-          class="toggle-btn btn btn-dark update-button"
-          style="background: var(--color-box)"
-        >
-          Courses
-        </button>
-        <button
-          :class="{ active: currentView === 'bonuses' }"
-          @click="switchView('bonuses')"
-          class="toggle-btn btn btn-dark update-button"
-          style="background: var(--color-box)"
-        >
-          Bonuses
-        </button>
+      <div class="table-header-section">
+        <div class="picker-section" v-if="filteredAndSortedItems.length > 0">
+          <div class="picker-controls">
+            <button
+              @click="startRandomPicker"
+              :disabled="isPickerActive || filteredAndSortedItems.length <= 1"
+              class="btn picker-btn"
+              :class="{ 'picker-btn-active': isPickerActive }"
+            >
+              <span v-if="!isPickerActive">Random map picker</span>
+              <span v-else>Eliminating...</span>
+            </button>
+            <button
+              @click="resetPicker"
+              v-if="eliminatedRows.size > 0"
+              class="btn btn-secondary ml-2"
+            >
+              Reset
+            </button>
+            <div
+              class="picker-status"
+              v-if="isPickerActive || eliminatedRows.size > 0"
+            >
+              <span class="remaining-count"
+                >{{ remainingCount }} remaining</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="button-group">
+          <button
+            :class="{ active: currentView === 'maps' }"
+            @click="switchView('maps')"
+            class="toggle-btn btn btn-dark update-button"
+          >
+            Maps
+          </button>
+          <button
+            :class="{ active: currentView === 'courses' }"
+            @click="switchView('courses')"
+            class="toggle-btn btn btn-dark update-button"
+          >
+            Courses
+          </button>
+          <button
+            :class="{ active: currentView === 'bonuses' }"
+            @click="switchView('bonuses')"
+            class="toggle-btn btn btn-dark update-button"
+          >
+            Bonuses
+          </button>
+        </div>
       </div>
       <div class="table-responsive w-100" style="max-width: 1296px">
         <table class="table table-dark">
@@ -607,7 +615,7 @@ export default {
 .picker-section {
   background: var(--color-box);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 12px 12px 0px 0px !important;
   padding: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -627,7 +635,6 @@ export default {
   font-weight: bold;
   font-size: 16px;
   padding: 12px 24px;
-  border-radius: 8px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -888,6 +895,11 @@ export default {
 .table-container {
   border-radius: 0 0 8px 8px;
   border-top: none;
+}
+
+.button-group {
+  border-top: none;
+  border-radius: 0;
 }
 
 .table th {

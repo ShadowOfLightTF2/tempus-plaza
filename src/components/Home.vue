@@ -6,7 +6,6 @@
         <h1 class="header-title">Tempus plaza</h1>
         <p class="header-subtitle">Information about the Tempus network</p>
       </div>
-      <div class="header-gradient"></div>
     </div>
     <div class="container mx-auto py-4 d-flex flex-column align-items-center">
       <div class="content-container">
@@ -33,18 +32,11 @@
         </div>
         <div v-else class="table-container">
           <div v-if="currentView === 'topplayers'" class="table-wrapper">
-            <div
-              class="table-header-content"
-              style="
-                background: linear-gradient(
-                  90deg,
-                  var(--color-primary),
-                  var(--color-box)
-                );
-              "
-            >
+            <div class="table-header-content">
+              <div class="table-header-icon">🏆</div>
               <div class="table-header-text">
-                <p class="table-header-title">Top players</p>
+                <h3 class="table-header-title">Top players</h3>
+                <p class="table-header-subtitle">Updates every 5 minutes</p>
               </div>
             </div>
             <div class="table-responsive">
@@ -79,7 +71,7 @@
                       {{ player.player_name }}
                     </td>
                     <td
-                      class="name-cell align-middle player-name clickable"
+                      class="map-cell align-middle map-name clickable"
                       @click="goToMap(player.map_id)"
                       style="color: var(--color-text-clickable)"
                     >
@@ -107,18 +99,11 @@
             </div>
           </div>
           <div v-if="currentView === 'servers'" class="table-wrapper">
-            <div
-              class="table-header-content"
-              style="
-                background: linear-gradient(
-                  90deg,
-                  var(--color-primary),
-                  var(--color-box)
-                );
-              "
-            >
+            <div class="table-header-content">
+              <div class="table-header-icon">🌍</div>
               <div class="table-header-text">
-                <p class="table-header-title">Server status</p>
+                <h3 class="table-header-title">Server status</h3>
+                <p class="table-header-subtitle">Updates every 5 minutes</p>
               </div>
             </div>
             <div class="table-responsive">
@@ -160,7 +145,7 @@
                       <div class="server-name">{{ server.name }}</div>
                     </td>
                     <td
-                      class="map-cell clickable align-middle"
+                      class="map-cell align-middle map-name clickable"
                       @click="goToMap(server.map_id)"
                     >
                       {{ server.currentMap }}
@@ -368,7 +353,6 @@ export default {
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
 }
-
 .header-content {
   position: relative;
   text-align: center;
@@ -377,9 +361,15 @@ export default {
 }
 
 .header-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: var(--color-text);
+  margin: 0 auto;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .header-subtitle {
@@ -396,13 +386,6 @@ export default {
 .header-title {
   font-size: 3rem;
   font-weight: bold;
-}
-
-.header-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
-  opacity: 0.2;
 }
 .bg-dark-custom {
   background: var(--color-background);
@@ -434,18 +417,32 @@ export default {
   display: flex;
   align-items: center;
   padding: 10px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
+  border-bottom: 2px solid var(--color-border);
+}
+
+.table-header-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .table-header-text {
-  margin-left: 10px;
-  text-align: left;
-  font-weight: bold;
+  flex: 1;
 }
 
 .table-header-title {
-  margin: 5px 0 0 0px;
-  font-size: 20px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: var(--color-text);
+}
+
+.table-header-subtitle {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.8;
 }
 
 .table-responsive {
@@ -478,7 +475,8 @@ export default {
   background: var(--color-row-odd);
 }
 
-.name-cell {
+.name-cell,
+.map-cell {
   max-width: 250px;
   white-space: normal;
   overflow: hidden;
@@ -492,9 +490,8 @@ export default {
 }
 
 .player-name:hover,
-.map-name:hover,
-.map-cell:hover {
-  background: var(--color-primary);
+.map-name:hover {
+  background: var(--color-primary) !important;
 }
 
 .table-dark tr:nth-child(odd) .name-cell:hover {

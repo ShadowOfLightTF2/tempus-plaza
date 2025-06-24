@@ -16,9 +16,9 @@ const routes = [
     component: Home,
   },
   {
-    path: '/activity',
+    path: '/activity/:view?',
     name: 'Activity',
-    component: Activity,
+    component: Activity
   },
   {
     path: '/maps',
@@ -47,9 +47,12 @@ const routes = [
     component: Players
   },
   {
-    path: '/lookup',
+    path: '/lookup/:playerId?',
     name: 'Lookup',
-    component: Lookup
+    component: Lookup,
+    props: route => ({
+      playerId: Number(route.params.playerId)
+    })
   },
   {
     path: '/donate',

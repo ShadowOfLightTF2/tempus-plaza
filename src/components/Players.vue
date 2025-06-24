@@ -2,7 +2,15 @@
   <div
     class="container players-container py-4 d-flex flex-column align-items-center bg-dark-custom"
   >
-    <h1 class="text-center players-title">Tempus top players</h1>
+    <div class="content-container">
+      <div class="page-header">
+        <h1 class="page-title">
+          <span class="title-icon">🏆</span>
+          Tempus top players
+        </h1>
+        <p class="page-subtitle">View the top players in various categories</p>
+      </div>
+    </div>
     <hr class="row-divider" style="width: 75%" />
     <div class="category-tabs-container my-4">
       <div class="category-tabs">
@@ -138,9 +146,7 @@
                 >
                   {{
                     selectedCategory === "completion"
-                      ? player.percentage
-                        ? player.percentage.toFixed(2) + "%"
-                        : "0%"
+                      ? player.percentage + "%"
                       : player.amount
                   }}
                 </td>
@@ -234,9 +240,7 @@
                 >
                   {{
                     selectedCategory === "completion"
-                      ? player.percentage
-                        ? player.percentage.toFixed(2) + "%"
-                        : "0%"
+                      ? player.percentage + "%"
                       : player.amount
                   }}
                 </td>
@@ -317,6 +321,11 @@ export default {
   mounted() {
     document.title = "Tempus plaza - Players";
     this.fillDropdowns();
+    const { category, item } = this.$route.params;
+    if (category && item) {
+      this.selectedCategory = category;
+      this.selectedItem = item;
+    }
     this.fetchDataForCurrentSelection(0);
   },
   computed: {
@@ -407,10 +416,8 @@ export default {
       }
     },
     async fetchCompletions(type, index) {
-      let isCombined = false;
       let indexFix = 0;
       if (index > 0) indexFix = 50;
-      if (type === "total") isCombined = true;
 
       const response = await axios.get(
         `http://localhost:3000/players/players-completion-stats/${type}/${
@@ -419,66 +426,15 @@ export default {
       );
       const playersResponse = response.data;
 
-      const mapsResponse = await axios.get("http://localhost:3000/maps/count");
-      const maps = mapsResponse.data;
-
-      const players = playersResponse[type];
-
-      const calculatePercentage = (playerAmount, totalAmount) => {
-        if (totalAmount <= 0 || playerAmount === undefined) {
-          return 0;
-        }
-        return (playerAmount / totalAmount) * 100;
-      };
-
-      let totalSoldierCount, totalDemomanCount;
-
-      if (isCombined) {
-        const totalSoldierMapsCount = maps[0].soldier_maps_count || 0;
-        const totalSoldierCoursesCount = maps[0].soldier_courses_count || 0;
-        const totalSoldierBonusesCount = maps[0].soldier_bonuses_count || 0;
-
-        const totalDemomanMapsCount = maps[0].demoman_maps_count || 0;
-        const totalDemomanCoursesCount = maps[0].demoman_courses_count || 0;
-        const totalDemomanBonusesCount = maps[0].demoman_bonuses_count || 0;
-
-        totalSoldierCount =
-          totalSoldierMapsCount +
-          totalSoldierCoursesCount +
-          totalSoldierBonusesCount;
-        totalDemomanCount =
-          totalDemomanMapsCount +
-          totalDemomanCoursesCount +
-          totalDemomanBonusesCount;
-      } else {
-        totalSoldierCount = maps[0][`soldier_${type}_count`] || 0;
-        totalDemomanCount = maps[0][`demoman_${type}_count`] || 0;
-      }
+      const soldierPlayers = playersResponse[0];
+      const demomanPlayers = playersResponse[1];
 
       if (index === 0) {
-        this.soldierPlayers = players.soldier.map((player) => ({
-          ...player,
-          percentage: calculatePercentage(player.amount, totalSoldierCount),
-        }));
-        this.demomanPlayers = players.demoman.map((player) => ({
-          ...player,
-          percentage: calculatePercentage(player.amount, totalDemomanCount),
-        }));
+        this.soldierPlayers = soldierPlayers;
+        this.demomanPlayers = demomanPlayers;
       } else {
-        this.soldierPlayers = [
-          ...this.soldierPlayers,
-          ...players.soldier.map((player) => ({
-            ...player,
-            percentage: calculatePercentage(player.amount, totalSoldierCount),
-          })),
-        ];
-        this.demomanPlayers = [
-          ...this.demomanPlayers,
-          ...players.demoman.map((player) => ({
-            ...player,
-            percentage: calculatePercentage(player.amount, totalDemomanCount),
-          })),
-        ];
+        this.soldierPlayers = [...this.soldierPlayers, ...soldierPlayers];
+        this.demomanPlayers = [...this.demomanPlayers, ...demomanPlayers];
       }
     },
 
@@ -520,11 +476,15 @@ export default {
     selectCategory(category) {
       this.selectedCategory = category;
       const defaultItem = this.dropdowns[category][0];
+      this.$router.push({
+        name: "Players",
+        params: { category: category, item: defaultItem },
+      });
       this.selectItem(category, defaultItem);
     },
-    selectItem(category, item) {
+    async selectItem(category, item) {
       this.initialLoad = true;
-      this.points = true;
+      this.points = !item.includes("(count)");
       this.selectedCategory = category;
       this.selectedItem = item;
 
@@ -533,7 +493,12 @@ export default {
       this.soldierPlayers = [];
       this.demomanPlayers = [];
 
-      this.fetchDataForCurrentSelection(0);
+      await this.fetchDataForCurrentSelection(0);
+
+      this.$router.push({
+        name: "Players",
+        params: { category: category, item: item },
+      });
     },
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
@@ -564,6 +529,18 @@ export default {
       this.loadingSoldiers = true;
       this.currentSoldierIndex += 50;
       this.fetchDataForCurrentSelection(this.currentSoldierIndex);
+    },
+  },
+  watch: {
+    "$route.params": {
+      handler: function (params) {
+        if (params.category && params.item) {
+          this.selectedCategory = params.category;
+          this.selectedItem = params.item;
+          this.fetchDataForCurrentSelection(0);
+        }
+      },
+      immediate: true,
     },
   },
 };
@@ -642,10 +619,6 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--color-text-clickable) !important;
-}
-
-.players-title {
-  color: var(--color-text);
 }
 
 .rank-column {

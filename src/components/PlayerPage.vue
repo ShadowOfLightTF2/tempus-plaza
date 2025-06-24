@@ -867,7 +867,7 @@ export default {
       },
       colors: ["#45B7D1"],
       stroke: {
-        curve: "smooth",
+        curve: "straight",
         width: 3,
       },
       grid: {
@@ -1594,8 +1594,10 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-  color: #fff;
-  margin: 0 auto;
+  color: var(--color-text);
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .flag-icon {

@@ -528,6 +528,34 @@ html {
   font-weight: bold;
   border-radius: 8px;
 }
+
+.page-header {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.title-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.page-subtitle {
+  color: var(--color-text);
+  opacity: 0.8;
+  font-size: 1.1rem;
+  margin: 0;
+}
 </style>
 
 <style scoped>
