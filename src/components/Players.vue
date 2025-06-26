@@ -275,6 +275,7 @@
 
 <script>
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Players",
@@ -420,7 +421,7 @@ export default {
       if (index > 0) indexFix = 50;
 
       const response = await axios.get(
-        `http://localhost:3000/players/players-completion-stats/${type}/${
+        `${API_BASE_URL}/players/players-completion-stats/${type}/${
           index - indexFix
         }`
       );
@@ -506,7 +507,7 @@ export default {
     async fetchPlayers(tableName, type, category, index) {
       try {
         const response = await axios.get(
-          `http://localhost:3000/players/data/${tableName}/${type}/${category}/${index}`
+          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${index}`
         );
         const players = response.data;
         if (index === 0) {

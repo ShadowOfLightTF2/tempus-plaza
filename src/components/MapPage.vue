@@ -17,19 +17,17 @@
         v-if="map"
         class="card map-banner mb-4"
         :style="{
-          background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/maps/${map.name}.jpg') center/cover no-repeat`,
-          backgroundBlendMode: 'multiply',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+    `,
+          backgroundBlendMode: 'multiply, normal, normal',
+          backgroundSize: 'cover, cover, cover',
+          backgroundPosition: 'center, center, center',
         }"
       >
-        <div
-          class="row g-0 banner-content"
-          :style="{
-            background:
-              'linear-gradient(135deg, var(--color-box), var(--color-row))',
-          }"
-        >
+        <div class="row g-0 banner-content">
           <div class="col-md-12 d-flex flex-column align-items-center p-4">
             <button @click="goBack" class="btn btn-dark back-button">
               <i class="bi bi-arrow-left me-2"></i>Back
@@ -50,6 +48,10 @@
                       >
                         T{{ map.soldier_tier }}
                       </p>
+                      <div class="completion-count">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ map.soldier_completion_count || 0 }} completions
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -82,6 +84,10 @@
                       >
                         T{{ map.demoman_tier }}
                       </p>
+                      <div class="completion-count">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ map.demoman_completion_count || 0 }} completions
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -136,6 +142,10 @@
                                   R{{ course.soldier_rating }}
                                 </span>
                               </div>
+                              <div class="completion-count-small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ course.soldier_completion_count || 0 }}
+                              </div>
                             </div>
                             <div class="rating-section">
                               <div class="rating-label">Demoman</div>
@@ -152,6 +162,10 @@
                                 >
                                   R{{ course.demoman_rating }}
                                 </span>
+                              </div>
+                              <div class="completion-count-small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ course.demoman_completion_count || 0 }}
                               </div>
                             </div>
                           </div>
@@ -197,6 +211,10 @@
                                   R{{ bonus.soldier_rating }}
                                 </span>
                               </div>
+                              <div class="completion-count-small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ bonus.soldier_completion_count || 0 }}
+                              </div>
                             </div>
                             <div class="rating-section">
                               <div class="rating-label">Demoman</div>
@@ -213,6 +231,10 @@
                                 >
                                   R{{ bonus.demoman_rating }}
                                 </span>
+                              </div>
+                              <div class="completion-count-small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ bonus.demoman_completion_count || 0 }}
                               </div>
                             </div>
                           </div>
@@ -285,140 +307,157 @@
               <h2 class="section-header mb-4">
                 <i class="bi bi-play-circle me-2"></i>Record videos
               </h2>
-              <div class="video-section mb-5">
-                <h4 class="video-section-title mb-3">🌍Map records</h4>
-                <div class="row g-4">
-                  <div class="col-lg-6">
-                    <div class="video-card">
-                      <h5 class="video-title">
-                        <i class="bi bi-person-fill me-2"></i>Soldier record
-                      </h5>
-                      <div class="video-container">
-                        <div
-                          v-if="
-                            map &&
-                            map.soldier_video &&
-                            map.soldier_video !== 'null'
-                          "
-                        >
-                          <iframe
-                            :src="
-                              'https://www.youtube.com/embed/' +
-                              map.soldier_video
+              <div class="video-section mb-3">
+                <div class="section-header-styled">
+                  <h4 class="video-section-title mb-0">🌍Map records</h4>
+                </div>
+                <div class="section-content">
+                  <div class="row g-4">
+                    <div class="col-lg-6">
+                      <div class="video-card">
+                        <h5 class="video-title">
+                          <i class="bi bi-person-fill me-2"></i>Soldier record
+                        </h5>
+                        <div class="video-container">
+                          <div
+                            v-if="
+                              map &&
+                              map.soldier_video &&
+                              map.soldier_video !== 'null'
                             "
-                            frameborder="0"
-                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
                           >
-                          </iframe>
-                        </div>
-                        <div v-else class="no-video-placeholder">
-                          <i class="bi bi-camera-video-off"></i>
-                          <span>No video available</span>
+                            <iframe
+                              :src="
+                                'https://www.youtube.com/embed/' +
+                                map.soldier_video
+                              "
+                              frameborder="0"
+                              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowfullscreen
+                            >
+                            </iframe>
+                          </div>
+                          <div v-else class="no-video-placeholder">
+                            <i class="bi bi-camera-video-off"></i>
+                            <span>No video available</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="col-lg-6">
-                    <div class="video-card">
-                      <h5 class="video-title">
-                        <i class="bi bi-person-fill me-2"></i>Demoman record
-                      </h5>
-                      <div class="video-container">
-                        <div
-                          v-if="
-                            map &&
-                            map.demoman_video &&
-                            map.demoman_video !== 'null'
-                          "
-                        >
-                          <iframe
-                            :src="
-                              'https://www.youtube.com/embed/' +
-                              map.demoman_video
+                    <div class="col-lg-6">
+                      <div class="video-card">
+                        <h5 class="video-title">
+                          <i class="bi bi-person-fill me-2"></i>Demoman record
+                        </h5>
+                        <div class="video-container">
+                          <div
+                            v-if="
+                              map &&
+                              map.demoman_video &&
+                              map.demoman_video !== 'null'
                             "
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
                           >
-                          </iframe>
-                        </div>
-                        <div v-else class="no-video-placeholder">
-                          <i class="bi bi-camera-video-off"></i>
-                          <span>No video available</span>
+                            <iframe
+                              :src="
+                                'https://www.youtube.com/embed/' +
+                                map.demoman_video
+                              "
+                              frameborder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowfullscreen
+                            >
+                            </iframe>
+                          </div>
+                          <div v-else class="no-video-placeholder">
+                            <i class="bi bi-camera-video-off"></i>
+                            <span>No video available</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-if="courses.length > 0" class="video-section mb-5">
-                <h4 class="video-section-title mb-3">🚩Course records</h4>
-                <div
-                  v-for="course in courses"
-                  :key="course.id"
-                  class="course-videos mb-4"
-                >
-                  <h5 class="course-video-title mb-3">
-                    Course {{ course.index }}
-                  </h5>
-                  <div class="row g-4">
-                    <div class="col-lg-6">
-                      <div class="video-card">
-                        <h6 class="video-title">
-                          <i class="bi bi-person-fill me-2"></i>Soldier record
-                        </h6>
-                        <div class="video-container">
-                          <div
-                            v-if="
-                              course.soldier_video &&
-                              course.soldier_video !== 'null'
-                            "
-                          >
-                            <iframe
-                              :src="
-                                'https://www.youtube.com/embed/' +
-                                course.soldier_video
+              <div v-if="courses.length > 0" class="video-section mb-3">
+                <div class="collapsible-header" @click="toggleCourseVideos">
+                  <h4 class="video-section-title mb-0">
+                    🚩Course records
+                    <i
+                      class="bi"
+                      :class="
+                        showCourseVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                      "
+                      style="margin-left: auto"
+                    ></i>
+                  </h4>
+                </div>
+                <div v-if="showCourseVideos" class="collapsible-content">
+                  <div
+                    v-for="course in courses"
+                    :key="course.id"
+                    class="course-videos mb-4"
+                  >
+                    <h5 class="course-video-title mb-3">
+                      Course {{ course.index }}
+                    </h5>
+                    <div class="row g-4">
+                      <div class="col-lg-6">
+                        <div class="video-card">
+                          <h6 class="video-title">
+                            <i class="bi bi-person-fill me-2"></i>Soldier record
+                          </h6>
+                          <div class="video-container">
+                            <div
+                              v-if="
+                                course.soldier_video &&
+                                course.soldier_video !== 'null'
                               "
-                              frameborder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowfullscreen
                             >
-                            </iframe>
-                          </div>
-                          <div v-else class="no-video-placeholder">
-                            <i class="bi bi-camera-video-off"></i>
-                            <span>No video available</span>
+                              <iframe
+                                :src="
+                                  'https://www.youtube.com/embed/' +
+                                  course.soldier_video
+                                "
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                              >
+                              </iframe>
+                            </div>
+                            <div v-else class="no-video-placeholder">
+                              <i class="bi bi-camera-video-off"></i>
+                              <span>No video available</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="col-lg-6">
-                      <div class="video-card">
-                        <h6 class="video-title">
-                          <i class="bi bi-person-fill me-2"></i>Demoman record
-                        </h6>
-                        <div class="video-container">
-                          <div
-                            v-if="
-                              course.demoman_video &&
-                              course.demoman_video !== 'null'
-                            "
-                          >
-                            <iframe
-                              :src="
-                                'https://www.youtube.com/embed/' +
-                                course.demoman_video
+                      <div class="col-lg-6">
+                        <div class="video-card">
+                          <h6 class="video-title">
+                            <i class="bi bi-person-fill me-2"></i>Demoman record
+                          </h6>
+                          <div class="video-container">
+                            <div
+                              v-if="
+                                course.demoman_video &&
+                                course.demoman_video !== 'null'
                               "
-                              frameborder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowfullscreen
                             >
-                            </iframe>
-                          </div>
-                          <div v-else class="no-video-placeholder">
-                            <i class="bi bi-camera-video-off"></i>
-                            <span>No video available</span>
+                              <iframe
+                                :src="
+                                  'https://www.youtube.com/embed/' +
+                                  course.demoman_video
+                                "
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                              >
+                              </iframe>
+                            </div>
+                            <div v-else class="no-video-placeholder">
+                              <i class="bi bi-camera-video-off"></i>
+                              <span>No video available</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -427,72 +466,85 @@
                 </div>
               </div>
               <div v-if="bonuses.length > 0" class="video-section">
-                <h4 class="video-section-title mb-3">⭐Bonus records</h4>
-                <div
-                  v-for="bonus in bonuses"
-                  :key="bonus.id"
-                  class="bonus-videos mb-4"
-                >
-                  <h5 class="bonus-video-title mb-3">
-                    Bonus {{ bonus.index }}
-                  </h5>
-                  <div class="row g-4">
-                    <div class="col-lg-6">
-                      <div class="video-card">
-                        <h6 class="video-title">
-                          <i class="bi bi-person-fill me-2"></i>Soldier record
-                        </h6>
-                        <div class="video-container">
-                          <div
-                            v-if="
-                              bonus.soldier_video &&
-                              bonus.soldier_video !== 'null'
-                            "
-                          >
-                            <iframe
-                              :src="
-                                'https://www.youtube.com/embed/' +
-                                bonus.soldier_video
+                <div class="collapsible-header" @click="toggleBonusVideos">
+                  <h4 class="video-section-title mb-0">
+                    ⭐Bonus records
+                    <i
+                      class="bi"
+                      :class="
+                        showBonusVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                      "
+                      style="margin-left: auto"
+                    ></i>
+                  </h4>
+                </div>
+                <div v-if="showBonusVideos" class="collapsible-content">
+                  <div
+                    v-for="bonus in bonuses"
+                    :key="bonus.id"
+                    class="bonus-videos"
+                  >
+                    <h5 class="bonus-video-title mb-3">
+                      Bonus {{ bonus.index }}
+                    </h5>
+                    <div class="row g-4">
+                      <div class="col-lg-6">
+                        <div class="video-card">
+                          <h6 class="video-title">
+                            <i class="bi bi-person-fill me-2"></i>Soldier record
+                          </h6>
+                          <div class="video-container">
+                            <div
+                              v-if="
+                                bonus.soldier_video &&
+                                bonus.soldier_video !== 'null'
                               "
-                              frameborder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowfullscreen
                             >
-                            </iframe>
-                          </div>
-                          <div v-else class="no-video-placeholder">
-                            <i class="bi bi-camera-video-off"></i>
-                            <span>No video available</span>
+                              <iframe
+                                :src="
+                                  'https://www.youtube.com/embed/' +
+                                  bonus.soldier_video
+                                "
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                              >
+                              </iframe>
+                            </div>
+                            <div v-else class="no-video-placeholder">
+                              <i class="bi bi-camera-video-off"></i>
+                              <span>No video available</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="col-lg-6">
-                      <div class="video-card">
-                        <h6 class="video-title">
-                          <i class="bi bi-person-fill me-2"></i>Demoman record
-                        </h6>
-                        <div class="video-container">
-                          <div
-                            v-if="
-                              bonus.demoman_video &&
-                              bonus.demoman_video !== 'null'
-                            "
-                          >
-                            <iframe
-                              :src="
-                                'https://www.youtube.com/embed/' +
-                                bonus.demoman_video
+                      <div class="col-lg-6">
+                        <div class="video-card">
+                          <h6 class="video-title">
+                            <i class="bi bi-person-fill me-2"></i>Demoman record
+                          </h6>
+                          <div class="video-container">
+                            <div
+                              v-if="
+                                bonus.demoman_video &&
+                                bonus.demoman_video !== 'null'
                               "
-                              frameborder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowfullscreen
                             >
-                            </iframe>
-                          </div>
-                          <div v-else class="no-video-placeholder">
-                            <i class="bi bi-camera-video-off"></i>
-                            <span>No video available</span>
+                              <iframe
+                                :src="
+                                  'https://www.youtube.com/embed/' +
+                                  bonus.demoman_video
+                                "
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                              >
+                              </iframe>
+                            </div>
+                            <div v-else class="no-video-placeholder">
+                              <i class="bi bi-camera-video-off"></i>
+                              <span>No video available</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -511,7 +563,7 @@
 <script>
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "MapPage",
@@ -528,6 +580,8 @@ export default {
       courses: [],
       bonuses: [],
       mapNotFound: false,
+      showCourseVideos: false,
+      showBonusVideos: false,
     };
   },
   async mounted() {
@@ -581,6 +635,13 @@ export default {
       const year = date.getFullYear();
 
       return `${day} ${monthName} ${year}`;
+    },
+    toggleCourseVideos() {
+      this.showCourseVideos = !this.showCourseVideos;
+    },
+
+    toggleBonusVideos() {
+      this.showBonusVideos = !this.showBonusVideos;
     },
   },
 };
@@ -649,7 +710,7 @@ export default {
   left: 20px;
   border-radius: 8px;
   padding: 10px 16px;
-  border: none;
+  border: 1px solid var(--color-border-soft);
   transition: all 0.3s ease;
   z-index: 10;
 }
@@ -704,13 +765,47 @@ export default {
   letter-spacing: 1px;
 }
 
+.completion-count {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-weight: 500;
+  opacity: 0.8;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.completion-count i {
+  font-size: 0.7rem;
+  color: var(--color-primary);
+}
+
+.completion-count-small {
+  font-size: 0.65rem;
+  color: var(--color-text);
+  font-weight: 500;
+  opacity: 0.7;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completion-count-small i {
+  font-size: 0.6rem;
+  color: var(--color-primary);
+}
+
 .video-section-title {
   color: var(--color-text);
   font-weight: 600;
   display: flex;
   align-items: center;
-  border-bottom: 2px solid var(--color-primary);
-  padding-bottom: 8px;
 }
 
 .course-video-title,
@@ -718,7 +813,7 @@ export default {
   color: var(--color-text);
   font-weight: bold;
   text-align: center;
-  background: var(--color-dark);
+  background: var(--color-primary-dark);
   padding: 8px 16px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -737,6 +832,7 @@ export default {
   background: var(--color-dark);
   border-radius: 12px;
   padding: 16px;
+  margin-bottom: 16px !important;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
 }
@@ -902,7 +998,7 @@ export default {
 
 .row-divider {
   border: none;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(
     90deg,
     transparent,
@@ -1035,6 +1131,67 @@ export default {
 .rating-color.rating-4 {
   background: var(--color-rating-4);
   color: var(--color-text);
+}
+
+.section-header-styled {
+  padding: 12px 16px;
+  background: var(--color-background);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+}
+
+.section-header-styled .video-section-title {
+  display: flex;
+  align-items: center;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.section-content {
+  margin-bottom: 16px;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  padding: 12px 16px;
+  background: var(--color-background);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.collapsible-header:hover {
+  background: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.collapsible-header .video-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.collapsible-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {

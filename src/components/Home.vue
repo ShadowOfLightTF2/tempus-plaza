@@ -1,4 +1,7 @@
 <template>
+  <!-- <div>
+    <button @click="downloadImage">Download Images</button>
+  </div> -->
   <div class="min-h-screen bg-dark-custom">
     <div class="header-hero">
       <div class="header-overlay"></div>
@@ -195,6 +198,8 @@
 </template>
 
 <script>
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+
 export default {
   name: "Home",
   data() {
@@ -212,6 +217,13 @@ export default {
     await this.fetchData();
   },
   methods: {
+    async downloadImage() {
+      try {
+        window.location.href = `${API_BASE_URL}/maps/789/download-map-image`;
+      } catch (error) {
+        console.error("Error downloading images:", error);
+      }
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -255,9 +267,7 @@ export default {
     },
     async fetchTopPlayersData() {
       try {
-        const response = await fetch(
-          "http://localhost:3000/servers/top-players"
-        );
+        const response = await fetch(`${API_BASE_URL}/servers/top-players`);
         const data = await response.json();
 
         this.topPlayersData = data
@@ -277,7 +287,7 @@ export default {
     },
     async fetchServersData() {
       try {
-        const response = await fetch("http://localhost:3000/servers");
+        const response = await fetch(`${API_BASE_URL}/servers`);
         const data = await response.json();
 
         const regionOrder = [
@@ -418,7 +428,7 @@ export default {
   align-items: center;
   padding: 10px;
   background: linear-gradient(135deg, var(--color-primary), var(--color-box));
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .table-header-icon {
@@ -586,10 +596,95 @@ export default {
 }
 
 @media (max-width: 767.98px) {
+  .header-hero {
+    height: 12rem;
+  }
+
+  .header-title {
+    font-size: 2rem;
+  }
+
+  .header-subtitle {
+    font-size: 1rem;
+  }
+
   .button-group {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table-responsive {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .table-dark th,
+  .table-dark td {
+    padding: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .table-header-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .table-header-text {
+    width: 100%;
+    text-align: center;
+  }
+
+  .name-cell,
+  .map-cell {
+    max-width: 150px;
+  }
+
+  .server-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .player-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .connect-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .content-container {
+    padding: 0 15px;
+  }
+
+  .avatar {
+    width: 20px;
+    height: 20px;
   }
 }
 </style>

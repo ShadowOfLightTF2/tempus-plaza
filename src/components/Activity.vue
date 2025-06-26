@@ -77,7 +77,7 @@
                     @click="goToMap(record.map_id)"
                   >
                     <img
-                      :src="`icons/${record.class}.png`"
+                      :src="`/tempus-plaza/icons/${record.class}.png`"
                       :alt="record.class"
                       class="class-icon-small"
                     />
@@ -145,7 +145,7 @@
                     @click="goToMap(record.map_id)"
                   >
                     <img
-                      :src="`icons/${record.class}.png`"
+                      :src="`/tempus-plaza/icons/${record.class}.png`"
                       :alt="record.class"
                       class="class-icon-small"
                     />
@@ -214,7 +214,7 @@
                     @click="goToMap(record.map_id)"
                   >
                     <img
-                      :src="`icons/${record.class}.png`"
+                      :src="`/tempus-plaza/icons/${record.class}.png`"
                       :alt="record.class"
                       class="class-icon-small"
                     />
@@ -252,6 +252,8 @@
 
 <script>
 import { formatDate, formatDuration } from "@/utils/calculations";
+
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Activity",
@@ -300,9 +302,9 @@ export default {
       try {
         const [worldRecordsResponse, topTimesResponse, group1sResponse] =
           await Promise.all([
-            fetch("http://localhost:3000/maps/activity"),
-            fetch("http://localhost:3000/maps/recent-top-times"),
-            fetch("http://localhost:3000/maps/recent-g1s"),
+            fetch(`${API_BASE_URL}/maps/activity`),
+            fetch(`${API_BASE_URL}/maps/recent-top-times`),
+            fetch(`${API_BASE_URL}/maps/recent-g1s`),
           ]);
 
         const [worldRecordsData, topTimesData, group1sData] = await Promise.all(
@@ -416,7 +418,7 @@ export default {
   justify-content: space-between;
   padding: 1.5rem;
   background: linear-gradient(135deg, var(--color-primary), var(--color-box));
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .table-header-icon {
@@ -542,6 +544,7 @@ export default {
   color: var(--color-text);
 }
 
+/* Responsive styles for mobile phones */
 @media (max-width: 767.98px) {
   .button-group {
     flex-direction: column;
@@ -554,12 +557,33 @@ export default {
 
   .toggle-btn {
     justify-content: center;
+    margin-bottom: 0.5rem;
   }
 
   .table-header-content {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+  }
+
+  .table-responsive {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .name-cell,
+  .name-column {
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .table-header-icon {
+    font-size: 1.5rem;
   }
 }
 </style>

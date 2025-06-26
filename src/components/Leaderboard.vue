@@ -19,7 +19,6 @@
         </h1>
       </div>
     </div>
-    <hr class="row-divider" style="width: 75%" />
     <div class="category-tabs-container my-4">
       <div class="category-tabs">
         <button
@@ -33,7 +32,6 @@
         </button>
       </div>
     </div>
-
     <div class="subcategory-container my-3">
       <div class="subcategory-pills">
         <template v-if="selectedTypePill === 'Map'">
@@ -270,15 +268,10 @@
 import axios from "axios";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Records",
-  props: {
-    mapId: {
-      type: Number,
-      required: true,
-    },
-  },
   data() {
     return {
       selectedRecords: [],
@@ -303,6 +296,9 @@ export default {
     };
   },
   computed: {
+    mapId() {
+      return Number(this.$route.params.mapId);
+    },
     displayedSoldierEntries() {
       return this.selectedRecords
         .filter((record) => record.class === "soldier")
@@ -316,6 +312,11 @@ export default {
   },
   mounted() {
     this.fetchMapData();
+  },
+  watch: {
+    mapId() {
+      this.fetchMapData();
+    },
   },
   methods: {
     selectType(type) {
@@ -342,7 +343,7 @@ export default {
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/all-info`
+          `${API_BASE_URL}/maps/${this.mapId}/all-info`
         );
         const { map, courses, bonuses } = response.data;
 
@@ -395,7 +396,7 @@ export default {
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/records/${offset}/${limit}`
+          `${API_BASE_URL}/maps/${this.mapId}/records/${offset}/${limit}`
         );
         if (offset === 0) {
           this.selectedRecords = response.data;
@@ -420,7 +421,7 @@ export default {
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/course/${courseIndex}/records/${offset}/${limit}`
+          `${API_BASE_URL}/maps/${this.mapId}/course/${courseIndex}/records/${offset}/${limit}`
         );
         if (offset === 0) {
           this.selectedRecords = response.data;
@@ -444,7 +445,7 @@ export default {
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/bonus/${bonusIndex}/records/${offset}/${limit}`
+          `${API_BASE_URL}/maps/${this.mapId}/bonus/${bonusIndex}/records/${offset}/${limit}`
         );
         if (offset === 0) {
           this.selectedRecords = response.data;
@@ -581,6 +582,7 @@ export default {
 
 .table-dark {
   margin: 0px;
+  border-collapse: collapse;
 }
 
 .table-dark th {
@@ -590,7 +592,6 @@ export default {
   font-weight: 600;
   padding-bottom: 7px;
   border-top: 1px solid var(--color-border-soft);
-  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-dark td {
@@ -667,8 +668,7 @@ export default {
 .table-wrapper {
   width: 100%;
   flex: 1;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--color-border);
 }
 
@@ -681,6 +681,7 @@ export default {
 .duration-column {
   width: auto;
   white-space: nowrap;
+  text-align: right;
 }
 
 .points-column {
@@ -713,6 +714,13 @@ export default {
 
 .clickable {
   cursor: pointer;
+}
+
+.update-button {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .update-button:hover {

@@ -14,8 +14,8 @@
     </div>
     <div v-else>
       <div
-        v-if="player"
-        class="card profile-banner mb-4 shadow"
+        class="profile-banner mb-4 shadow"
+        :class="{ 'golden-border': player.donator }"
         style="
           background: linear-gradient(
             135deg,
@@ -27,24 +27,30 @@
       >
         <div v-if="loading.ranks" class="text-center">
           <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading records...</span>
+            <span class="visually-hidden">Loading ranks...</span>
           </div>
         </div>
+
         <div
           class="row g-0"
-          :class="{ 'golden-border': donator }"
           style="height: 100%; display: flex; align-items: center"
         >
           <div
             class="col-md-4 d-flex flex-column align-items-center profile-left p-4"
             style="height: 100%"
           >
+            <div v-if="player.donator" class="donator-badge">
+              <span class="badge-text">Donator</span>
+            </div>
             <img
               :src="`${player.steam_avatar}`"
               alt="Avatar"
               class="rounded-circle avatar mb-3"
               onerror="this.src='/avatars/golly.jpg'"
             />
+            <div v-if="player.donator" class="donator-badge">
+              <span class="badge-text">Donator</span>
+            </div>
             <div class="profile-info text-center">
               <h1 v-if="player.name" class="player-name">
                 {{ player.name }}
@@ -422,8 +428,15 @@
                           />
                           <span class="ms-2 record-map">
                             {{ record.map_name }}
-                            <span v-if="record.type !== 'map'">
-                              - {{ record.type.slice(0, 1).toUpperCase()
+                            <span v-if="record.type !== 'map'"
+                              >|
+                              <template v-if="record.type === 'course'"
+                                >🚩</template
+                              >
+                              <template v-if="record.type === 'bonus'"
+                                >⭐</template
+                              >
+                              {{ record.type.slice(0, 1).toUpperCase()
                               }}{{ record.index }}
                             </span>
                           </span>
@@ -625,7 +638,7 @@ import VueApexCharts from "vue3-apexcharts";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerPage",
@@ -639,7 +652,6 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
-    donator: false,
     player: {
       id: null,
       steamid: null,
@@ -657,6 +669,7 @@ export default {
       gender: "male",
       launcher_pref: 1,
       rank_pref: "",
+      donator: false,
       shared_soldier_type: "",
       shared_demoman_type: "",
     },
@@ -953,8 +966,8 @@ export default {
   async mounted() {
     try {
       await Promise.all([
-        this.fetchUserData(this.playerId),
         this.fetchPlayerData(this.playerId),
+        this.fetchUserData(this.playerId),
         this.fetchPlayerRanks(this.playerId),
         this.fetchRecentRecords(this.playerId),
         this.fetchPlayerPoints(this.playerId),
@@ -990,11 +1003,11 @@ export default {
           try {
             await Promise.all([
               this.fetchPlayerData(newId),
+              this.fetchUserData(newId),
               this.fetchPlayerRanks(newId),
               this.fetchRecentRecords(newId),
               this.fetchPlayerPoints(newId),
             ]);
-
             await this.fetchPlayerStats(newId);
             await this.fetchSharedTimes(newId);
           } catch (error) {
@@ -1114,20 +1127,36 @@ export default {
         { range: [3, 3], male: "Archduke", female: "Archduchess" },
         { range: [4, 4], male: "Lord", female: "Lady" },
         { range: [5, 5], male: "Duke", female: "Duchess" },
-        { range: [6, 10], male: "Prince", female: "Princess" },
-        { range: [11, 15], male: "Earl", female: "Gearl" },
-        { range: [16, 20], male: "Sir", female: "Madam" },
-        { range: [21, 25], male: "Count", female: "Countess" },
+        { range: [6, 10], male: "Prince V", female: "Princess V" },
+        { range: [6, 10], male: "Prince IV", female: "Princess IV" },
+        { range: [6, 10], male: "Prince III", female: "Princess III" },
+        { range: [6, 10], male: "Prince II", female: "Princess II" },
+        { range: [6, 10], male: "Prince I", female: "Princess I" },
+        { range: [11, 11], male: "Earl V", female: "Gearl V" },
+        { range: [12, 12], male: "Earl IV", female: "Gearl IV" },
+        { range: [13, 13], male: "Earl III", female: "Gearl III" },
+        { range: [14, 14], male: "Earl II", female: "Gearl II" },
+        { range: [15, 15], male: "Earl I", female: "Gearl I" },
+        { range: [16, 16], male: "Sir V", female: "Madam V" },
+        { range: [17, 17], male: "Sir IV", female: "Madam IV" },
+        { range: [18, 18], male: "Sir III", female: "Madam III" },
+        { range: [19, 19], male: "Sir II", female: "Madam II" },
+        { range: [20, 20], male: "Sir I", female: "Madam I" },
+        { range: [21, 21], male: "Count V", female: "Countess" },
+        { range: [22, 22], male: "Count IV", female: "Countess" },
+        { range: [23, 23], male: "Count III", female: "Countess" },
+        { range: [24, 24], male: "Count II", female: "Countess" },
+        { range: [25, 25], male: "Count I", female: "Countess" },
         { range: [26, 30], male: "Baron V", female: "Baroness V" },
         { range: [31, 35], male: "Baron IV", female: "Baroness IV" },
         { range: [36, 40], male: "Baron III", female: "Baroness III" },
         { range: [41, 45], male: "Baron II", female: "Baroness II" },
         { range: [46, 50], male: "Baron I", female: "Baroness I" },
-        { range: [51, 60], male: "Knight", female: "Dame" },
-        { range: [61, 70], male: "Knight", female: "Dame" },
-        { range: [71, 80], male: "Knight", female: "Dame" },
-        { range: [81, 90], male: "Knight", female: "Dame" },
-        { range: [91, 100], male: "Knight", female: "Dame" },
+        { range: [51, 60], male: "Knight V", female: "Dame V" },
+        { range: [61, 70], male: "Knight IV", female: "Dame IV" },
+        { range: [71, 80], male: "Knight III", female: "Dame III" },
+        { range: [81, 90], male: "Knight II", female: "Dame II" },
+        { range: [91, 100], male: "Knight I", female: "Dame I" },
         { range: [101, 120], male: "Noble V", female: "Noblewoman V" },
         { range: [121, 140], male: "Noble IV", female: "Noblewoman IV" },
         { range: [141, 160], male: "Noble III", female: "Noblewoman III" },
@@ -1213,15 +1242,21 @@ export default {
         const data = response.data;
         if (!data || data.length === 0) {
           console.log("User not found");
+          this.player = {
+            ...this.player,
+            gender: "male",
+            donator: false,
+          };
           return;
         }
+        console.log(data);
         this.player = {
           ...this.player,
           gender: data.gender,
           rank_pref: data.rank_pref,
+          donator: Boolean(data.donator),
           // launcher_pref: data.launcher_pref
         };
-        this.user = response.data[0];
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -1542,6 +1577,7 @@ export default {
 }
 
 .profile-banner {
+  position: relative;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
@@ -2046,8 +2082,45 @@ export default {
   color: var(--color-peon);
 }
 
+.donator-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: gold;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
 .golden-border {
   border-radius: 12px;
   border: 2px solid gold !important;
+  animation: goldenGlow 2s infinite;
+}
+
+@keyframes goldenGlow {
+  0% {
+    box-shadow: 0 0 5px gold;
+  }
+  50% {
+    box-shadow: 0 0 20px gold;
+  }
+  100% {
+    box-shadow: 0 0 5px gold;
+  }
 }
 </style>

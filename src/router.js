@@ -72,6 +72,8 @@ const routes = [
 const router = createRouter({
   history: createWebHistory('/tempus-plaza/'),
   routes,
+  linkActiveClass: 'active',
+  linkExactActiveClass: 'exact-active'
 });
 
 export default router;

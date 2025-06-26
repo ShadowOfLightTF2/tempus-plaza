@@ -114,6 +114,26 @@
             >Showing {{ filteredAndSortedItems.length }} of
             {{ currentItems.length }} items</span
           >
+          <div class="search-input-wrapper">
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search for map..."
+              class="search-input"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -282,6 +302,7 @@
 <script>
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 
 export default {
@@ -307,6 +328,7 @@ export default {
       pickerComplete: false,
       eliminatingRowId: null,
       shouldContinuePicker: true,
+      searchQuery: "",
     };
   },
   mounted() {
@@ -335,7 +357,7 @@ export default {
       }
     },
     filteredItems() {
-      return this.currentItems.filter((item) => {
+      let filtered = this.currentItems.filter((item) => {
         if (
           this.selectedSoldierTiers.length > 0 &&
           !this.selectedSoldierTiers.includes(item.soldier_tier)
@@ -358,6 +380,21 @@ export default {
           return false;
         return true;
       });
+
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter((item) => {
+          const name =
+            this.currentView === "maps"
+              ? item.name
+              : `${item.map_name} (${this.currentView
+                  .slice(0, 1)
+                  .toUpperCase()}${item.index})`;
+          return name.toLowerCase().includes(query);
+        });
+      }
+
+      return filtered;
     },
     filteredAndSortedItems() {
       return this.filteredItems.slice().sort((a, b) => {
@@ -455,7 +492,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get("http://localhost:3000/maps");
+        const response = await axios.get(`${API_BASE_URL}/maps`);
         this.maps = response.data;
       } catch (error) {
         this.error = "Error fetching maps data.";
@@ -469,7 +506,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get("http://localhost:3000/maps/courses");
+        const response = await axios.get(`${API_BASE_URL}/maps/courses`);
         this.courses = response.data;
       } catch (error) {
         this.error = "Error fetching courses data.";
@@ -483,7 +520,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get("http://localhost:3000/maps/bonuses");
+        const response = await axios.get(`${API_BASE_URL}/maps/bonuses`);
         this.bonuses = response.data;
       } catch (error) {
         this.error = "Error fetching bonuses data.";
@@ -610,6 +647,40 @@ export default {
 
 .bg-dark-custom {
   background: var(--color-background, #1a1a1a);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #888;
+  z-index: 2;
+}
+
+.search-input {
+  width: 200px;
+  padding: 8px 8px 8px 40px;
+  background: var(--color-row) !important;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.search-input::placeholder {
+  color: #888;
 }
 
 .picker-section {
@@ -778,7 +849,6 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
 }
 
 .filter-columns {
@@ -867,6 +937,9 @@ export default {
   justify-content: center;
   gap: 15px;
   flex-wrap: wrap;
+  margin-top: 35px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .text-light {
@@ -890,10 +963,11 @@ export default {
   border-left: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
+  border-radius: 0 0 8px 8px;
 }
 
 .table-container {
-  border-radius: 0 0 8px 8px;
+  border-radius: 8px !important;
   border-top: none;
 }
 
@@ -1031,7 +1105,6 @@ export default {
   color: var(--color-text);
 }
 
-/* Tier badges with same colors as table cells */
 .tier-badge.tier-0 {
   background: var(--color-dark);
   color: var(--color-text);
@@ -1104,17 +1177,12 @@ export default {
 @media (max-width: 767.98px) {
   .table-responsive {
     width: 100%;
-  }
-
-  .button-group {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
+    overflow-x: auto;
   }
 
   .filter-section {
-    padding: 15px;
     width: 100%;
+    padding: 15px;
   }
 
   .filter-columns {
@@ -1127,16 +1195,35 @@ export default {
     width: 100%;
   }
 
-  .tier-filter-container,
-  .rating-filter-container {
-    flex-direction: column;
-    align-items: center;
+  .tier-filters,
+  .rating-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
   }
 
   .filter-actions {
     flex-direction: column;
     gap: 10px;
+    align-items: center;
+  }
+
+  .picker-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    margin: 5px;
   }
 }
 </style>

@@ -75,7 +75,7 @@
         "
       ></div>
     </div>
-    <hr class="row-divider" style="width: 75%" v-if="playerId" />
+    <hr class="row-divider" style="width: 75%" />
     <div class="filter-section">
       <div class="filter-content">
         <div class="filter-columns">
@@ -378,8 +378,7 @@ import DOMPurify from "dompurify";
 import Cookies from "js-cookie";
 import { formatDuration } from "@/utils/calculations.js";
 
-const API_BASE_URL =
-  import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerRecords",
@@ -1433,21 +1432,77 @@ export default {
 
 @media (max-width: 767.98px) {
   .filter-section {
-    padding: 20px;
+    padding: 15px;
     width: 100%;
-    margin: 0 16px;
+    margin: 0;
   }
 
   .filter-columns {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .tier-filters,
+  .rating-filters,
+  .group-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .search-section,
+  .search-records-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 10px 0;
+    padding: 0 15px;
+  }
+
+  .search-input,
+  .search-records-input {
+    width: 100%;
+    padding: 12px;
   }
 
   .tables-wrapper {
     flex-direction: column;
     align-items: center;
-    padding: 0 16px;
+    padding: 0;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table-dark th,
+  .table-dark td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .show-more-btn {
+    width: 100%;
+  }
+
+  .player-name-display h2 {
+    font-size: 1.5rem;
   }
 }
 </style>
