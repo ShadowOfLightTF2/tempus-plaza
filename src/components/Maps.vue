@@ -1,299 +1,320 @@
 <template>
   <div
-    class="container maps-container py-4 d-flex flex-column align-items-center bg-dark-custom"
+    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="page-header">
-      <h1 class="page-title">
-        <span class="title-icon">🗺️</span>
-        Tempus maps
-      </h1>
-      <p class="page-subtitle">Explore and filter maps, courses and bonuses</p>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div class="filter-section">
-      <div class="filter-content">
-        <div class="filter-columns">
-          <div class="filter-column">
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Soldier tiers</h6>
-              <div class="tier-filter-container">
-                <div class="tier-filters">
-                  <label
-                    v-for="tier in availableTiers"
-                    :key="'soldier-tier-' + tier"
-                    class="tier-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="tier"
-                      v-model="selectedSoldierTiers"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                  </label>
+    <div class="container" style="z-index: 1">
+      <div
+        class="content-container mx-auto py-4 d-flex flex-column align-items-center"
+        style="z-index: 1"
+      >
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">🗺️</span>
+            Tempus maps
+          </h1>
+          <p class="page-subtitle">
+            Explore and filter maps, courses and bonuses
+          </p>
+        </div>
+        <hr class="row-divider" style="width: 75%" />
+        <div class="filter-section">
+          <div class="filter-content">
+            <div class="filter-columns">
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title text-light mb-2">Soldier tiers</h6>
+                  <div class="tier-filter-container">
+                    <div class="tier-filters">
+                      <label
+                        v-for="tier in availableTiers"
+                        :key="'soldier-tier-' + tier"
+                        class="tier-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="tier"
+                          v-model="selectedSoldierTiers"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`tier-badge tier-${tier}`">{{
+                          tier
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="filter-group mt-3">
+                  <h6 class="filter-title text-light mb-2">Soldier ratings</h6>
+                  <div class="rating-filter-container">
+                    <div class="rating-filters">
+                      <label
+                        v-for="rating in availableRatings"
+                        :key="'soldier-rating-' + rating"
+                        class="rating-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="rating"
+                          v-model="selectedSoldierRatings"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`rating-badge rating-${rating}`">{{
+                          rating
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title text-light mb-2">Demoman tiers</h6>
+                  <div class="tier-filter-container">
+                    <div class="tier-filters">
+                      <label
+                        v-for="tier in availableTiers"
+                        :key="'demo-tier-' + tier"
+                        class="tier-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="tier"
+                          v-model="selectedDemomanTiers"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`tier-badge tier-${tier}`">{{
+                          tier
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="filter-group mt-3">
+                  <h6 class="filter-title text-light mb-2">Demoman ratings</h6>
+                  <div class="rating-filter-container">
+                    <div class="rating-filters">
+                      <label
+                        v-for="rating in availableRatings"
+                        :key="'demo-rating-' + rating"
+                        class="rating-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="rating"
+                          v-model="selectedDemomanRatings"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`rating-badge rating-${rating}`">{{
+                          rating
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="filter-group mt-3">
-              <h6 class="filter-title text-light mb-2">Soldier ratings</h6>
-              <div class="rating-filter-container">
-                <div class="rating-filters">
-                  <label
-                    v-for="rating in availableRatings"
-                    :key="'soldier-rating-' + rating"
-                    class="rating-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="rating"
-                      v-model="selectedSoldierRatings"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`rating-badge rating-${rating}`">{{
-                      rating
-                    }}</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-column">
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Demoman tiers</h6>
-              <div class="tier-filter-container">
-                <div class="tier-filters">
-                  <label
-                    v-for="tier in availableTiers"
-                    :key="'demo-tier-' + tier"
-                    class="tier-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="tier"
-                      v-model="selectedDemomanTiers"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group mt-3">
-              <h6 class="filter-title text-light mb-2">Demoman ratings</h6>
-              <div class="rating-filter-container">
-                <div class="rating-filters">
-                  <label
-                    v-for="rating in availableRatings"
-                    :key="'demo-rating-' + rating"
-                    class="rating-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="rating"
-                      v-model="selectedDemomanRatings"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`rating-badge rating-${rating}`">{{
-                      rating
-                    }}</span>
-                  </label>
-                </div>
+            <div class="filter-actions">
+              <button @click="clearAllFilters" class="btn btn-secondary">
+                Clear filters
+              </button>
+              <span class="text-light"
+                >Showing {{ filteredAndSortedItems.length }} of
+                {{ currentItems.length }} items</span
+              >
+              <div class="search-input-wrapper">
+                <svg
+                  class="search-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input
+                  type="text"
+                  v-model="searchQuery"
+                  placeholder="Search for map..."
+                  class="search-input"
+                />
               </div>
             </div>
           </div>
         </div>
-
-        <div class="filter-actions">
-          <button @click="clearAllFilters" class="btn btn-secondary">
-            Clear filters
-          </button>
-          <span class="text-light"
-            >Showing {{ filteredAndSortedItems.length }} of
-            {{ currentItems.length }} items</span
-          >
-          <div class="search-input-wrapper">
-            <svg
-              class="search-icon"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Search for map..."
-              class="search-input"
-            />
+        <hr class="row-divider" style="width: 75%" />
+        <div v-if="loading" class="text-center">
+          <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading {{ currentView }}...</span>
           </div>
         </div>
-      </div>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div v-if="loading" class="text-center">
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Loading {{ currentView }}...</span>
-      </div>
-    </div>
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-    <div v-else class="table-container">
-      <div class="table-header-section">
-        <div class="picker-section" v-if="filteredAndSortedItems.length > 0">
-          <div class="picker-controls">
-            <button
-              @click="startRandomPicker"
-              :disabled="isPickerActive || filteredAndSortedItems.length <= 1"
-              class="btn picker-btn"
-              :class="{ 'picker-btn-active': isPickerActive }"
-            >
-              <span v-if="!isPickerActive">Random map picker</span>
-              <span v-else>Eliminating...</span>
-            </button>
-            <button
-              @click="resetPicker"
-              v-if="eliminatedRows.size > 0"
-              class="btn btn-secondary ml-2"
-            >
-              Reset
-            </button>
+        <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-else class="table-container">
+          <div class="table-header-section">
             <div
-              class="picker-status"
-              v-if="isPickerActive || eliminatedRows.size > 0"
+              class="picker-section"
+              v-if="filteredAndSortedItems.length > 0"
             >
-              <span class="remaining-count"
-                >{{ remainingCount }} remaining</span
+              <div class="picker-controls">
+                <button
+                  @click="startRandomPicker"
+                  :disabled="
+                    isPickerActive || filteredAndSortedItems.length <= 1
+                  "
+                  class="btn picker-btn"
+                  :class="{ 'picker-btn-active': isPickerActive }"
+                >
+                  <span v-if="!isPickerActive">Random map picker</span>
+                  <span v-else>Eliminating...</span>
+                </button>
+                <button
+                  @click="resetPicker"
+                  v-if="eliminatedRows.size > 0"
+                  class="btn btn-secondary ml-2"
+                >
+                  Reset
+                </button>
+                <div
+                  class="picker-status"
+                  v-if="isPickerActive || eliminatedRows.size > 0"
+                >
+                  <span class="remaining-count"
+                    >{{ remainingCount }} remaining</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="button-group">
+              <button
+                :class="{ active: currentView === 'maps' }"
+                @click="switchView('maps')"
+                class="toggle-btn btn btn-dark update-button"
               >
+                Maps
+              </button>
+              <button
+                :class="{ active: currentView === 'courses' }"
+                @click="switchView('courses')"
+                class="toggle-btn btn btn-dark update-button"
+              >
+                Courses
+              </button>
+              <button
+                :class="{ active: currentView === 'bonuses' }"
+                @click="switchView('bonuses')"
+                class="toggle-btn btn btn-dark update-button"
+              >
+                Bonuses
+              </button>
             </div>
           </div>
+          <div class="table-responsive w-100" style="max-width: 1296px">
+            <table class="table table-dark">
+              <thead class="table-header">
+                <tr>
+                  <th style="vertical-align: middle">Name</th>
+                  <th
+                    @click="sortBy('soldier_tier')"
+                    class="d-none d-sm-table-cell fixed-width"
+                  >
+                    [S] tier
+                    <span v-if="sortField === 'soldier_tier'">{{
+                      getSortArrowSymbol("soldier_tier")
+                    }}</span>
+                  </th>
+                  <th
+                    @click="sortBy('soldier_rating')"
+                    class="d-none d-sm-table-cell fixed-width"
+                  >
+                    [S] rating
+                    <span v-if="sortField === 'soldier_rating'">{{
+                      getSortArrowSymbol("soldier_rating")
+                    }}</span>
+                  </th>
+                  <th class="divider d-none d-sm-table-cell"></th>
+                  <th
+                    @click="sortBy('demoman_tier')"
+                    class="d-none d-sm-table-cell fixed-width"
+                  >
+                    [D] tier
+                    <span v-if="sortField === 'demoman_tier'">{{
+                      getSortArrowSymbol("demoman_tier")
+                    }}</span>
+                  </th>
+                  <th
+                    @click="sortBy('demoman_rating')"
+                    class="d-none d-sm-table-cell fixed-width"
+                  >
+                    [D] rating
+                    <span v-if="sortField === 'demoman_rating'">{{
+                      getSortArrowSymbol("demoman_rating")
+                    }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  ref="tableRows"
+                  v-for="(item, index) in filteredAndSortedItems"
+                  :key="currentView + '-' + index"
+                  :class="{
+                    'row-eliminated': eliminatedRows.has(getRowId(item, index)),
+                    'row-winner':
+                      pickerComplete &&
+                      !eliminatedRows.has(getRowId(item, index)),
+                    'row-eliminating':
+                      eliminatingRowId === getRowId(item, index),
+                  }"
+                  class="fade-in"
+                >
+                  <td
+                    class="align-middle map-name clickable"
+                    @click="goToRecords(item)"
+                  >
+                    {{
+                      currentView === "maps"
+                        ? item.name
+                        : `${item.map_name} (${currentView
+                            .slice(0, 1)
+                            .toUpperCase()}${item.index})`
+                    }}
+                  </td>
+                  <td
+                    class="align-middle text-center d-none d-sm-table-cell"
+                    :class="`tier-color tier-${item.soldier_tier}`"
+                  >
+                    T{{ item.soldier_tier }}
+                  </td>
+                  <td
+                    class="align-middle text-center d-none d-sm-table-cell"
+                    :class="`rating-color rating-${item.soldier_rating}`"
+                  >
+                    R{{ item.soldier_rating }}
+                  </td>
+                  <td class="divider d-none d-sm-table-cell"></td>
+                  <td
+                    class="align-middle text-center d-none d-sm-table-cell"
+                    :class="`tier-color tier-${item.demoman_tier}`"
+                  >
+                    T{{ item.demoman_tier }}
+                  </td>
+                  <td
+                    class="align-middle text-center d-none d-sm-table-cell"
+                    :class="`rating-color rating-${item.demoman_rating}`"
+                  >
+                    R{{ item.demoman_rating }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="button-group">
-          <button
-            :class="{ active: currentView === 'maps' }"
-            @click="switchView('maps')"
-            class="toggle-btn btn btn-dark update-button"
-          >
-            Maps
-          </button>
-          <button
-            :class="{ active: currentView === 'courses' }"
-            @click="switchView('courses')"
-            class="toggle-btn btn btn-dark update-button"
-          >
-            Courses
-          </button>
-          <button
-            :class="{ active: currentView === 'bonuses' }"
-            @click="switchView('bonuses')"
-            class="toggle-btn btn btn-dark update-button"
-          >
-            Bonuses
-          </button>
-        </div>
-      </div>
-      <div class="table-responsive w-100" style="max-width: 1296px">
-        <table class="table table-dark">
-          <thead class="table-header">
-            <tr>
-              <th style="vertical-align: middle">Name</th>
-              <th
-                @click="sortBy('soldier_tier')"
-                class="d-none d-sm-table-cell fixed-width"
-              >
-                Soldier tier
-                <span v-if="sortField === 'soldier_tier'">{{
-                  getSortArrowSymbol("soldier_tier")
-                }}</span>
-              </th>
-              <th
-                @click="sortBy('soldier_rating')"
-                class="d-none d-sm-table-cell fixed-width"
-              >
-                Soldier rating
-                <span v-if="sortField === 'soldier_rating'">{{
-                  getSortArrowSymbol("soldier_rating")
-                }}</span>
-              </th>
-              <th class="divider d-none d-sm-table-cell"></th>
-              <th
-                @click="sortBy('demoman_tier')"
-                class="d-none d-sm-table-cell fixed-width"
-              >
-                Demoman tier
-                <span v-if="sortField === 'demoman_tier'">{{
-                  getSortArrowSymbol("demoman_tier")
-                }}</span>
-              </th>
-              <th
-                @click="sortBy('demoman_rating')"
-                class="d-none d-sm-table-cell fixed-width"
-              >
-                Demoman rating
-                <span v-if="sortField === 'demoman_rating'">{{
-                  getSortArrowSymbol("demoman_rating")
-                }}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              ref="tableRows"
-              v-for="(item, index) in filteredAndSortedItems"
-              :key="currentView + '-' + index"
-              :class="{
-                'row-eliminated': eliminatedRows.has(getRowId(item, index)),
-                'row-winner':
-                  pickerComplete && !eliminatedRows.has(getRowId(item, index)),
-                'row-eliminating': eliminatingRowId === getRowId(item, index),
-              }"
-            >
-              <td
-                class="align-middle map-name clickable"
-                @click="goToRecords(item)"
-              >
-                {{
-                  currentView === "maps"
-                    ? item.name
-                    : `${item.map_name} (${currentView
-                        .slice(0, 1)
-                        .toUpperCase()}${item.index})`
-                }}
-              </td>
-              <td
-                class="align-middle text-center d-none d-sm-table-cell"
-                :class="`tier-color tier-${item.soldier_tier}`"
-              >
-                T{{ item.soldier_tier }}
-              </td>
-              <td
-                class="align-middle text-center d-none d-sm-table-cell"
-                :class="`rating-color rating-${item.soldier_rating}`"
-              >
-                R{{ item.soldier_rating }}
-              </td>
-              <td class="divider d-none d-sm-table-cell"></td>
-              <td
-                class="align-middle text-center d-none d-sm-table-cell"
-                :class="`tier-color tier-${item.demoman_tier}`"
-              >
-                T{{ item.demoman_tier }}
-              </td>
-              <td
-                class="align-middle text-center d-none d-sm-table-cell"
-                :class="`rating-color rating-${item.demoman_rating}`"
-              >
-                R{{ item.demoman_rating }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
@@ -642,11 +663,15 @@ export default {
 
 <style scoped>
 .maps-container {
-  font-family: "Segoe UI";
+  background-image: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' width='1728' height='1180' viewBox='0 0 1728 1180' fill='currentColor' class='position-absolute w-100 top-40 pointer-events-none' style='opacity: 0.3; z-index: 0' %3E%3Cg filter='url(%23filter0_f_226_149)'%3E%3Cpath d='M2123.75 293.105C1333.23 688.128 703.641 515.327 508.724 374.099C452.243 349.269 313.169 228.867 73.6286 197.922C-225.797 159.242 110.578 663.582 380.092 782.356C649.606 901.131 1580.73 925.224 2029.92 784.99C2601.98 606.399 3111.92 -200.674 2123.75 293.105Z' fill='url(%23paint0_radial_226_149)' fill-opacity='0.45' %3E%3C/path%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_f_226_149' x='-342.14' y='-163' width='3323.17' height='1342.42' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB' %3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'%3E%3C/feFlood%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape' %3E%3C/feBlend%3E%3CfeGaussianBlur stdDeviation='149.181' result='effect1_foregroundBlur_226_149' %3E%3C/feGaussianBlur%3E%3C/filter%3E%3CradialGradient id='paint0_radial_226_149' cx='0' cy='0' r='1' gradientUnits='userSpaceOnUse' gradientTransform='translate(2522.36 771.207) rotate(-178.79) scale(2230.36 879.25)' %3E%3Cstop stop-color='%236248FF'%3E%3C/stop%3E%3Cstop offset='0.369278' stop-color='%23E5FF48'%3E%3C/stop%3E%3Cstop offset='0.588842' stop-color='%23FF48ED'%3E%3C/stop%3E%3Cstop offset='0.708333' stop-color='%2348BDFF'%3E%3C/stop%3E%3Cstop offset='0.932292' stop-color='%236248FF'%3E%3C/stop%3E%3C/radialGradient%3E%3C/defs%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  min-height: 100vh;
 }
 
-.bg-dark-custom {
-  background: var(--color-background, #1a1a1a);
+.content-container {
+  width: 100%;
+  max-width: 1200px;
 }
 
 .search-input-wrapper {
@@ -665,7 +690,7 @@ export default {
 .search-input {
   width: 200px;
   padding: 8px 8px 8px 40px;
-  background: var(--color-row) !important;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   color: #ffffff;
@@ -684,11 +709,11 @@ export default {
 }
 
 .picker-section {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
   border: 1px solid var(--color-border);
   border-radius: 12px 12px 0px 0px !important;
   padding: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .picker-controls {
@@ -700,8 +725,8 @@ export default {
 }
 
 .picker-btn {
-  background: var(--color-button-light);
-  border: none;
+  background: rgba(255, 255, 255, 0.164);
+  border: 1px solid var(--color-border-soft);
   color: #ffffff;
   font-weight: bold;
   font-size: 16px;
@@ -712,7 +737,7 @@ export default {
 }
 
 .picker-btn:hover:not(:disabled) {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
   color: #ffffff;
   cursor: pointer;
 }
@@ -752,7 +777,6 @@ export default {
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: bold;
-  backdrop-filter: blur(10px);
 }
 
 .table tbody tr {
@@ -821,20 +845,8 @@ export default {
   font-weight: bold !important;
 }
 
-.toggle-btn {
-  background: var(--color-box);
-  color: var(--color-text);
-  padding: 12px 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  border: none;
-  border-radius: 0;
-  flex: 1;
-}
-
 .filter-section {
-  background: var(--color-box, #2a2a2a);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border, #444);
   border-radius: 8px;
   padding: 20px;
@@ -843,6 +855,7 @@ export default {
   justify-content: center;
   width: fit-content;
   max-width: 100%;
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
 }
 
 .filter-content {
@@ -948,17 +961,16 @@ export default {
 }
 
 .btn-secondary {
-  border: 1px solid var(--color-dark);
+  background: rgba(255, 255, 255, 0.164);
+  border: 1px solid var(--color-border-soft);
   font-weight: bold;
 }
 
 .btn-secondary:hover {
-  border: 1px solid var(--color-dark);
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .table-responsive {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   border-left: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
@@ -969,6 +981,7 @@ export default {
 .table-container {
   border-radius: 8px !important;
   border-top: none;
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
 }
 
 .button-group {
@@ -986,7 +999,7 @@ export default {
 }
 
 .table th:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .table td {
@@ -995,13 +1008,13 @@ export default {
 }
 
 .table-dark thead th {
-  background: var(--color-box);
+  background: rgba(74, 111, 165, 0.3) !important;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
 
 .table-dark td {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   border: 1px solid var(--color-border-soft);
   font-weight: bold;
@@ -1009,24 +1022,24 @@ export default {
 }
 
 .table-dark tr:nth-child(odd) .map-name:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .table-dark tr:nth-child(odd) .map-name {
-  background: var(--color-row-odd);
+  background: rgba(119, 119, 119, 0.05);
 }
 
 .table-dark {
   margin: 0;
 }
 
-.map-name {
-  color: var(--color-text-clickable) !important;
+.map-name:hover {
+  background: rgba(74, 111, 165, 0.8) !important;
+  color: white;
 }
 
-.map-name:hover {
-  background: var(--color-primary);
-  color: white;
+.map-name {
+  color: var(--color-text-clickable) !important;
 }
 
 .maps-title {
@@ -1169,7 +1182,12 @@ export default {
 .row-divider {
   border: none;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #4a9eff, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
   margin: 30px 0;
   opacity: 0.6;
 }

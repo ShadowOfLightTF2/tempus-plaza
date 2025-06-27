@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './components/Home.vue';
+import Servers from './components/Servers.vue';
 import Activity from './components/Activity.vue';
+import News from './components/News.vue';
 import Leaderboard from './components/Leaderboard.vue';
 import Maps from './components/Maps.vue';
 import Players from './components/Players.vue';
@@ -16,9 +18,19 @@ const routes = [
     component: Home,
   },
   {
+    path: '/servers',
+    name: 'Servers',
+    component: Servers
+  },
+  {
     path: '/activity/:view?',
     name: 'Activity',
     component: Activity
+  },
+  {
+    path: '/news',
+    name: 'News',
+    component: News,
   },
   {
     path: '/maps',
@@ -72,6 +84,7 @@ const routes = [
 const router = createRouter({
   history: createWebHistory('/tempus-plaza/'),
   routes,
+  scrollBehavior() { return { top: 0 }; },
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active'
 });

@@ -1,248 +1,271 @@
 <template>
-  <div class="container mx-auto py-4 d-flex flex-column align-items-center">
-    <div class="content-container">
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">📊</span>
-          Activity dashboard
-        </h1>
-        <p class="page-subtitle">Track the latest records</p>
-      </div>
-      <div class="button-group">
-        <button
-          :class="{ active: currentView === 'worldrecords' }"
-          @click="switchView('worldrecords')"
-          class="toggle-btn btn btn-dark update-button"
-        >
-          <span class="btn-text">World Records</span>
-        </button>
-        <button
-          :class="{ active: currentView === 'toptimes' }"
-          @click="switchView('toptimes')"
-          class="toggle-btn btn btn-dark update-button"
-        >
-          <span class="btn-text">Top Times</span>
-        </button>
-        <button
-          :class="{ active: currentView === 'group1s' }"
-          @click="switchView('group1s')"
-          class="toggle-btn btn btn-dark update-button"
-        >
-          <span class="btn-text">Group 1s</span>
-        </button>
-      </div>
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-light" role="status">
-          <span class="visually-hidden">Loading {{ currentView }}...</span>
+  <div
+    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
+  >
+    <div
+      class="container mx-auto py-4 d-flex flex-column align-items-center position-relative"
+      style="z-index: 1"
+    >
+      <div class="content-container">
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">📊</span>
+            Activity dashboard
+          </h1>
+          <p class="page-subtitle">Track the latest records</p>
         </div>
-      </div>
-      <div v-else class="table-container">
-        <div v-if="currentView === 'worldrecords'" class="table-wrapper">
-          <div class="table-header-content">
-            <div class="table-header-icon">🏆</div>
-            <div class="table-header-text">
-              <h3 class="table-header-title">Latest world records</h3>
-              <p class="table-header-subtitle">Updates every 5 minutes</p>
+        <hr class="divider" style="width: 100%" />
+        <div class="table-container-wrapper">
+          <div class="button-group">
+            <button
+              :class="{ active: currentView === 'worldrecords' }"
+              @click="switchView('worldrecords')"
+              class="toggle-btn btn"
+            >
+              <span class="btn-text">World Records</span>
+            </button>
+            <button
+              :class="{ active: currentView === 'toptimes' }"
+              @click="switchView('toptimes')"
+              class="toggle-btn btn"
+            >
+              <span class="btn-text">Top Times</span>
+            </button>
+            <button
+              :class="{ active: currentView === 'group1s' }"
+              @click="switchView('group1s')"
+              class="toggle-btn btn"
+            >
+              <span class="btn-text">Group 1s</span>
+            </button>
+          </div>
+          <div v-if="loading" class="text-center py-5">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Loading {{ currentView }}...</span>
             </div>
           </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Player</th>
-                  <th>Map</th>
-                  <th>Type</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(record, index) in worldRecordsData"
-                  :key="record.id"
-                >
-                  <td
-                    class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(record.player_id)"
-                  >
-                    <img
-                      :src="record.avatar"
-                      :alt="record.player + ' avatar'"
-                      class="avatar"
-                      onerror="this.src='/avatars/golly.jpg'"
-                    />
-                    {{ record.player }}
-                  </td>
-                  <td
-                    class="name-cell align-middle map-name clickable"
-                    @click="goToMap(record.map_id)"
-                  >
-                    <img
-                      :src="`/tempus-plaza/icons/${record.class}.png`"
-                      :alt="record.class"
-                      class="class-icon-small"
-                    />
-                    {{ record.map }}
-                  </td>
-                  <td>
-                    <div class="type-cell">
-                      <span
-                        class="record-type"
-                        :style="{ color: 'var(--color-text)' }"
+          <div v-else class="table-container">
+            <div v-if="currentView === 'worldrecords'" class="table-wrapper">
+              <div class="table-header-content">
+                <div class="table-header-icon">🏆</div>
+                <div class="table-header-text">
+                  <h3 class="table-header-title">Latest world records</h3>
+                  <p class="table-header-subtitle">Updates every 5 minutes</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Map</th>
+                      <th>Type</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(record, index) in worldRecordsData"
+                      :key="record.id"
+                      class="fade-in"
+                    >
+                      <td
+                        class="name-cell align-middle player-name clickable name-column"
+                        @click="goToPlayer(record.player_id)"
                       >
-                        <template v-if="record.recordType === 'map'"
-                          >🌍 Map</template
-                        >
-                        <template v-else-if="record.recordType === 'course'"
-                          >🚩 Course {{ record.index }}</template
-                        >
-                        <template v-else-if="record.recordType === 'bonus'"
-                          >⭐ Bonus {{ record.index }}</template
-                        >
-                      </span>
-                    </div>
-                  </td>
-                  <td class="timestamp-cell">{{ record.timestamp }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div v-if="currentView === 'toptimes'" class="table-wrapper">
-          <div class="table-header-content">
-            <div class="table-header-icon">🥇</div>
-            <div class="table-header-text">
-              <h3 class="table-header-title">Latest top times</h3>
-              <p class="table-header-subtitle">Updates twice a day</p>
+                        <img
+                          :src="record.avatar"
+                          :alt="record.player + ' avatar'"
+                          class="avatar"
+                          onerror="this.src='/avatars/golly.jpg'"
+                        />
+                        {{ record.player }}
+                      </td>
+                      <td
+                        class="name-cell align-middle map-name clickable"
+                        @click="goToMap(record.map_id)"
+                      >
+                        <img
+                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :alt="record.class"
+                          class="class-icon-small"
+                        />
+                        {{ record.map }}
+                      </td>
+                      <td>
+                        <div class="type-cell">
+                          <span
+                            class="record-type"
+                            :style="{ color: 'var(--color-text)' }"
+                          >
+                            <template v-if="record.recordType === 'map'"
+                              >🌍 Map</template
+                            >
+                            <template v-else-if="record.recordType === 'course'"
+                              >🚩 Course {{ record.index }}</template
+                            >
+                            <template v-else-if="record.recordType === 'bonus'"
+                              >⭐ Bonus {{ record.index }}</template
+                            >
+                          </span>
+                        </div>
+                      </td>
+                      <td class="timestamp-cell">{{ record.timestamp }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Player</th>
-                  <th>Map</th>
-                  <th>Type</th>
-                  <th>Rank</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(record, index) in topTimesData" :key="record.id">
-                  <td
-                    class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(record.player_id)"
-                  >
-                    <img
-                      :src="record.avatar"
-                      :alt="record.player + ' avatar'"
-                      class="avatar"
-                      onerror="this.src='/avatars/golly.jpg'"
-                    />
-                    {{ record.player }}
-                  </td>
-                  <td
-                    class="name-cell align-middle map-name clickable"
-                    @click="goToMap(record.map_id)"
-                  >
-                    <img
-                      :src="`/tempus-plaza/icons/${record.class}.png`"
-                      :alt="record.class"
-                      class="class-icon-small"
-                    />
-                    {{ record.map }}
-                  </td>
-                  <td>
-                    <div class="type-cell">
-                      <span
-                        class="record-type"
-                        :style="{ color: 'var(--color-text)' }"
+            <div v-if="currentView === 'toptimes'" class="table-wrapper">
+              <div class="table-header-content">
+                <div class="table-header-icon">🥇</div>
+                <div class="table-header-text">
+                  <h3 class="table-header-title">Latest top times</h3>
+                  <p class="table-header-subtitle">Updates twice a day</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Map</th>
+                      <th>Type</th>
+                      <th>Rank</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(record, index) in topTimesData"
+                      :key="record.id"
+                      class="fade-in"
+                    >
+                      <td
+                        class="name-cell align-middle player-name clickable name-column"
+                        @click="goToPlayer(record.player_id)"
                       >
-                        <template v-if="record.recordType === 'map'">
-                          🌍 Map
-                        </template>
-                        <template v-else-if="record.recordType === 'course'">
-                          🚩 Course {{ record.index }}
-                        </template>
-                        <template v-else-if="record.recordType === 'bonus'">
-                          ⭐ Bonus {{ record.index }}
-                        </template>
-                      </span>
-                    </div>
-                  </td>
-                  <td class="rank-cell">#{{ record.rank }}</td>
-                  <td class="timestamp-cell">{{ record.timestamp }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div v-if="currentView === 'group1s'" class="table-wrapper">
-          <div class="table-header-content">
-            <div class="table-header-icon">⏱️</div>
-            <div class="table-header-text">
-              <h3 class="table-header-title">Latest group 1s</h3>
-              <p class="table-header-subtitle">Updates twice a day</p>
+                        <img
+                          :src="record.avatar"
+                          :alt="record.player + ' avatar'"
+                          class="avatar"
+                          onerror="this.src='/avatars/golly.jpg'"
+                        />
+                        {{ record.player }}
+                      </td>
+                      <td
+                        class="name-cell align-middle map-name clickable"
+                        @click="goToMap(record.map_id)"
+                      >
+                        <img
+                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :alt="record.class"
+                          class="class-icon-small"
+                        />
+                        {{ record.map }}
+                      </td>
+                      <td>
+                        <div class="type-cell">
+                          <span
+                            class="record-type"
+                            :style="{ color: 'var(--color-text)' }"
+                          >
+                            <template v-if="record.recordType === 'map'">
+                              🌍 Map
+                            </template>
+                            <template
+                              v-else-if="record.recordType === 'course'"
+                            >
+                              🚩 Course {{ record.index }}
+                            </template>
+                            <template v-else-if="record.recordType === 'bonus'">
+                              ⭐ Bonus {{ record.index }}
+                            </template>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="rank-cell">#{{ record.rank }}</td>
+                      <td class="timestamp-cell">{{ record.timestamp }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Player</th>
-                  <th>Map</th>
-                  <th>Type</th>
-                  <th>Rank</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(record, index) in group1sData" :key="record.id">
-                  <td
-                    class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(record.player_id)"
-                  >
-                    <img
-                      :src="record.avatar"
-                      :alt="record.player + ' avatar'"
-                      class="avatar"
-                      onerror="this.src='/avatars/golly.jpg'"
-                    />
-                    {{ record.player }}
-                  </td>
-                  <td
-                    class="name-cell align-middle map-name clickable"
-                    @click="goToMap(record.map_id)"
-                  >
-                    <img
-                      :src="`/tempus-plaza/icons/${record.class}.png`"
-                      :alt="record.class"
-                      class="class-icon-small"
-                    />
-                    {{ record.map }}
-                  </td>
-                  <td>
-                    <div class="type-cell">
-                      <span
-                        class="record-type"
-                        :style="{ color: 'var(--color-text)' }"
+            <div v-if="currentView === 'group1s'" class="table-wrapper">
+              <div class="table-header-content">
+                <div class="table-header-icon">⏱️</div>
+                <div class="table-header-text">
+                  <h3 class="table-header-title">Latest group 1s</h3>
+                  <p class="table-header-subtitle">Updates twice a day</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Map</th>
+                      <th>Type</th>
+                      <th>Rank</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(record, index) in group1sData"
+                      :key="record.id"
+                      class="fade-in"
+                    >
+                      <td
+                        class="name-cell align-middle player-name clickable name-column"
+                        @click="goToPlayer(record.player_id)"
                       >
-                        <template v-if="record.recordType === 'map'">
-                          🌍 Map
-                        </template>
-                        <template v-else-if="record.recordType === 'course'">
-                          🚩 Course {{ record.index }}
-                        </template>
-                        <template v-else-if="record.recordType === 'bonus'">
-                          ⭐ Bonus {{ record.index }}
-                        </template>
-                      </span>
-                    </div>
-                  </td>
-                  <td class="rank-cell">#{{ record.rank }}</td>
-                  <td class="timestamp-cell">{{ record.timestamp }}</td>
-                </tr>
-              </tbody>
-            </table>
+                        <img
+                          :src="record.avatar"
+                          :alt="record.player + ' avatar'"
+                          class="avatar"
+                          onerror="this.src='/avatars/golly.jpg'"
+                        />
+                        {{ record.player }}
+                      </td>
+                      <td
+                        class="name-cell align-middle map-name clickable"
+                        @click="goToMap(record.map_id)"
+                      >
+                        <img
+                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :alt="record.class"
+                          class="class-icon-small"
+                        />
+                        {{ record.map }}
+                      </td>
+                      <td>
+                        <div class="type-cell">
+                          <span
+                            class="record-type"
+                            :style="{ color: 'var(--color-text)' }"
+                          >
+                            <template v-if="record.recordType === 'map'">
+                              🌍 Map
+                            </template>
+                            <template
+                              v-else-if="record.recordType === 'course'"
+                            >
+                              🚩 Course {{ record.index }}
+                            </template>
+                            <template v-else-if="record.recordType === 'bonus'">
+                              ⭐ Bonus {{ record.index }}
+                            </template>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="rank-cell">#{{ record.rank }}</td>
+                      <td class="timestamp-cell">{{ record.timestamp }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -384,10 +407,6 @@ export default {
 </script>
 
 <style scoped>
-.bg-dark-custom {
-  background: var(--color-background);
-}
-
 .flag-icon {
   width: 20px;
   height: auto;
@@ -399,10 +418,26 @@ export default {
   max-width: 1200px;
 }
 
+.table-container-wrapper {
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
+}
+
 .page-header {
   text-align: center;
   margin-bottom: 2rem;
   padding: 1.5rem 0;
+}
+.divider {
+  border: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
+  margin: 30px 0;
+  opacity: 0.6;
 }
 
 .table-wrapper {
@@ -417,7 +452,11 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
+  background: linear-gradient(
+    135deg,
+    rgba(74, 111, 165, 0.3),
+    rgba(37, 55, 82, 0.3)
+  );
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -451,7 +490,6 @@ export default {
 }
 
 .table-responsive {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-bottom: 0px;
 }
@@ -460,24 +498,29 @@ export default {
   margin: 0px;
 }
 
+.table-dark thead {
+  border-bottom: 1px solid var(--color-border);
+}
+
 .table-dark th {
-  background: var(--color-primary-dark);
+  background: rgba(74, 111, 165, 0.3) !important;
   color: var(--color-text);
   text-align: left;
   font-weight: bold;
-  border-top: 1px solid var(--color-border-soft);
-  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-dark td {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
   padding: 6px;
 }
 
 .table-dark tr:nth-child(odd) td {
-  background: var(--color-row-odd);
+  background: rgba(119, 119, 119, 0.05);
+}
+.table-dark tr:nth-child(odd) .name-cell:hover {
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .name-cell {
@@ -496,11 +539,7 @@ export default {
 .player-name:hover,
 .map-name:hover,
 .map-cell:hover {
-  background: var(--color-primary);
-}
-
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .clickable {
@@ -544,7 +583,6 @@ export default {
   color: var(--color-text);
 }
 
-/* Responsive styles for mobile phones */
 @media (max-width: 767.98px) {
   .button-group {
     flex-direction: column;

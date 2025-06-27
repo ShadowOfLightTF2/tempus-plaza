@@ -1,27 +1,291 @@
 <template>
   <div
-    class="container records-container py-4 d-flex flex-column align-items-center bg-dark-custom"
+    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="page-header">
-      <h1 class="page-title">
-        <span class="title-icon">🔍</span>
-        Lookup players
-      </h1>
-      <p class="page-subtitle">Search and filter through player records</p>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div
-      v-if="playerId"
-      class="player-name-display"
-      @click="goToPlayer(playerId)"
-    >
-      <h2
-        class="clickable"
-        v-html="sanitize(selectedPlayerName) || 'Selected Player'"
-      ></h2>
-    </div>
-    <div class="search-section">
-      <div class="search-container" @click.stop>
+    <div class="container py-4 d-flex flex-column align-items-center">
+      <div class="page-header">
+        <h1 class="page-title">
+          <span class="title-icon">🔍</span>
+          Lookup players
+        </h1>
+        <p class="page-subtitle">Search and filter through player records</p>
+      </div>
+      <hr class="row-divider" style="width: 75%" />
+      <div
+        v-if="playerId"
+        class="player-name-display"
+        @click="goToPlayer(playerId)"
+      >
+        <h2
+          class="clickable"
+          v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+        ></h2>
+      </div>
+      <div class="search-section">
+        <div class="search-container" @click.stop>
+          <div class="search-input-wrapper">
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              v-model="searchQuery"
+              @input="onSearch"
+              placeholder="Search for players..."
+              class="search-input"
+            />
+          </div>
+          <div
+            class="search-results-dropdown"
+            v-if="searchResults && searchResults.players.length"
+          >
+            <div>
+              <h6>Players</h6>
+              <ul>
+                <li
+                  v-for="player in searchResults.players"
+                  :key="player.id"
+                  @click="selectPlayer(player.id)"
+                  v-html="sanitize(player.name) || `Player ID: ${player.id}`"
+                ></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="searchResults && searchResults.players.length"
+          class="dropdown-overlay"
+          @click="searchResults = null"
+          style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            background: transparent;
+          "
+        ></div>
+      </div>
+      <hr class="row-divider" style="width: 75%" />
+      <div class="filter-section">
+        <div class="filter-content">
+          <div class="filter-columns">
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Soldier Tiers</h6>
+              <div class="tier-filter-container">
+                <div class="tier-filters">
+                  <label
+                    v-for="tier in availableTiers"
+                    :key="'soldier-tier-' + tier"
+                    class="tier-checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="tier"
+                      v-model="selectedSoldierTiers"
+                      @change="onFilterChange"
+                    />
+                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Demoman Tiers</h6>
+              <div class="tier-filter-container">
+                <div class="tier-filters">
+                  <label
+                    v-for="tier in availableTiers"
+                    :key="'demo-tier-' + tier"
+                    class="tier-checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="tier"
+                      v-model="selectedDemomanTiers"
+                      @change="onFilterChange"
+                    />
+                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-columns">
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Soldier Ratings</h6>
+              <div class="rating-filter-container">
+                <div class="rating-filters">
+                  <label
+                    v-for="rating in availableRatings"
+                    :key="'soldier-rating-' + rating"
+                    class="rating-checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="rating"
+                      v-model="selectedSoldierRatings"
+                      @change="onFilterChange"
+                    />
+                    <span :class="`rating-badge rating-${rating}`">{{
+                      rating
+                    }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Demoman Ratings</h6>
+              <div class="rating-filter-container">
+                <div class="rating-filters">
+                  <label
+                    v-for="rating in availableRatings"
+                    :key="'demo-rating-' + rating"
+                    class="rating-checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="rating"
+                      v-model="selectedDemomanRatings"
+                      @change="onFilterChange"
+                    />
+                    <span :class="`rating-badge rating-${rating}`">{{
+                      rating
+                    }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <h6 class="filter-title text-light mb-2">Placement</h6>
+            <div class="group-filter-container">
+              <div class="group-filters">
+                <label class="group-checkbox">
+                  <input
+                    type="checkbox"
+                    value="WR"
+                    v-model="selectedGroups"
+                    @change="onFilterChange"
+                  />
+                  <span class="group-badge group-wr">WR</span>
+                </label>
+                <label class="group-checkbox">
+                  <input
+                    type="checkbox"
+                    value="TT"
+                    v-model="selectedGroups"
+                    @change="onFilterChange"
+                  />
+                  <span class="group-badge group-tt">TT</span>
+                </label>
+                <label
+                  v-for="group in availableGroups"
+                  :key="'group-' + group"
+                  class="group-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    :value="group"
+                    v-model="selectedGroups"
+                    @change="onFilterChange"
+                  />
+                  <span :class="`group-badge group-${group}`"
+                    >G{{ group }}</span
+                  >
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="filter-columns">
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Class</h6>
+              <div class="class-filter-container">
+                <label
+                  v-for="classOption in ['soldier', 'demoman']"
+                  :key="classOption"
+                  class="class-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    :value="classOption"
+                    v-model="selectedClasses"
+                    @change="onFilterChange"
+                  />
+                  <span>{{ classOption }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Type</h6>
+              <div class="type-filter-container">
+                <label
+                  v-for="typeOption in ['map', 'course', 'bonus']"
+                  :key="typeOption"
+                  class="type-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    :value="typeOption"
+                    v-model="selectedTypes"
+                    @change="onFilterChange"
+                  />
+                  <span>{{ typeOption }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Sort by</h6>
+              <div class="dropdown">
+                <button
+                  class="btn btn-secondary dropdown-toggle"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {{ selectedSortOption }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <li v-for="option in dropdownOptions" :key="option.value">
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      @click.prevent="selectSortOption(option.value)"
+                      >{{ option.label }}</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button
+              type="button"
+              @click="clearAllFilters"
+              class="btn btn-secondary"
+            >
+              Clear filters
+            </button>
+            <span class="text-light"
+              >Displaying {{ filteredSortedItems.length }} of
+              {{ totalRecordsLength() }} records</span
+            >
+          </div>
+        </div>
+      </div>
+      <hr class="row-divider" style="width: 75%" />
+      <div class="search-records-container">
         <div class="search-input-wrapper">
           <svg
             class="search-icon"
@@ -33,339 +297,83 @@
             stroke-width="2"
           >
             <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
+            <path d="M21 21l-4.35-4.35"></path>
           </svg>
           <input
             type="text"
-            v-model="searchQuery"
-            @input="onSearch"
-            placeholder="Search for players..."
-            class="search-input"
+            v-model="recordSearchQuery"
+            placeholder="Search map..."
+            class="search-records-input"
           />
         </div>
-        <div
-          class="search-results-dropdown"
-          v-if="searchResults && searchResults.players.length"
-        >
-          <div>
-            <h6>Players</h6>
-            <ul>
-              <li
-                v-for="player in searchResults.players"
-                :key="player.id"
-                @click="selectPlayer(player.id)"
-                v-html="sanitize(player.name) || `Player ID: ${player.id}`"
-              ></li>
-            </ul>
-          </div>
+      </div>
+      <div v-if="loading" class="text-center">
+        <div class="spinner-border text-light" role="status">
+          <span class="visually-hidden">Loading records...</span>
         </div>
       </div>
+      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
       <div
-        v-if="searchResults && searchResults.players.length"
-        class="dropdown-overlay"
-        @click="searchResults = null"
-        style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 999;
-          background: transparent;
-        "
-      ></div>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div class="filter-section">
-      <div class="filter-content">
-        <div class="filter-columns">
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Soldier Tiers</h6>
-            <div class="tier-filter-container">
-              <div class="tier-filters">
-                <label
-                  v-for="tier in availableTiers"
-                  :key="'soldier-tier-' + tier"
-                  class="tier-checkbox"
+        v-else
+        class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
+      >
+        <div v-if="playerId != null" class="table-wrapper">
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th>Map</th>
+                  <th>Type</th>
+                  <th>Class</th>
+                  <th></th>
+                  <th></th>
+                  <th>Time</th>
+                  <th>Rank</th>
+                  <th>Completion</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="record in filteredRecords"
+                  :key="record.id"
+                  class="fade-in"
                 >
-                  <input
-                    type="checkbox"
-                    :value="tier"
-                    v-model="selectedSoldierTiers"
-                    @change="onFilterChange"
-                  />
-                  <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Demoman Tiers</h6>
-            <div class="tier-filter-container">
-              <div class="tier-filters">
-                <label
-                  v-for="tier in availableTiers"
-                  :key="'demo-tier-' + tier"
-                  class="tier-checkbox"
-                >
-                  <input
-                    type="checkbox"
-                    :value="tier"
-                    v-model="selectedDemomanTiers"
-                    @change="onFilterChange"
-                  />
-                  <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="filter-columns">
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Soldier Ratings</h6>
-            <div class="rating-filter-container">
-              <div class="rating-filters">
-                <label
-                  v-for="rating in availableRatings"
-                  :key="'soldier-rating-' + rating"
-                  class="rating-checkbox"
-                >
-                  <input
-                    type="checkbox"
-                    :value="rating"
-                    v-model="selectedSoldierRatings"
-                    @change="onFilterChange"
-                  />
-                  <span :class="`rating-badge rating-${rating}`">{{
-                    rating
-                  }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Demoman Ratings</h6>
-            <div class="rating-filter-container">
-              <div class="rating-filters">
-                <label
-                  v-for="rating in availableRatings"
-                  :key="'demo-rating-' + rating"
-                  class="rating-checkbox"
-                >
-                  <input
-                    type="checkbox"
-                    :value="rating"
-                    v-model="selectedDemomanRatings"
-                    @change="onFilterChange"
-                  />
-                  <span :class="`rating-badge rating-${rating}`">{{
-                    rating
-                  }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="filter-group">
-          <h6 class="filter-title text-light mb-2">Placement</h6>
-          <div class="group-filter-container">
-            <div class="group-filters">
-              <label class="group-checkbox">
-                <input
-                  type="checkbox"
-                  value="WR"
-                  v-model="selectedGroups"
-                  @change="onFilterChange"
-                />
-                <span class="group-badge group-wr">WR</span>
-              </label>
-              <label class="group-checkbox">
-                <input
-                  type="checkbox"
-                  value="TT"
-                  v-model="selectedGroups"
-                  @change="onFilterChange"
-                />
-                <span class="group-badge group-tt">TT</span>
-              </label>
-              <label
-                v-for="group in availableGroups"
-                :key="'group-' + group"
-                class="group-checkbox"
-              >
-                <input
-                  type="checkbox"
-                  :value="group"
-                  v-model="selectedGroups"
-                  @change="onFilterChange"
-                />
-                <span :class="`group-badge group-${group}`">G{{ group }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="filter-columns">
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Class</h6>
-            <div class="class-filter-container">
-              <label
-                v-for="classOption in ['soldier', 'demoman']"
-                :key="classOption"
-                class="class-checkbox"
-              >
-                <input
-                  type="checkbox"
-                  :value="classOption"
-                  v-model="selectedClasses"
-                  @change="onFilterChange"
-                />
-                <span>{{ classOption }}</span>
-              </label>
-            </div>
-          </div>
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Type</h6>
-            <div class="type-filter-container">
-              <label
-                v-for="typeOption in ['map', 'course', 'bonus']"
-                :key="typeOption"
-                class="type-checkbox"
-              >
-                <input
-                  type="checkbox"
-                  :value="typeOption"
-                  v-model="selectedTypes"
-                  @change="onFilterChange"
-                />
-                <span>{{ typeOption }}</span>
-              </label>
-            </div>
-          </div>
-          <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Sort by</h6>
-            <div class="dropdown">
+                  <td class="clickable" @click="goToMap(record.map_id)">
+                    {{ record.map_name }}
+                  </td>
+                  <td>
+                    {{ getRecordType(record.type) }}{{ formatIndex(record) }}
+                  </td>
+                  <td>
+                    <img
+                      :src="`/tempus-plaza/icons/${record.class}.png`"
+                      :alt="`${record.class}`"
+                      class="class-icon"
+                    />
+                  </td>
+                  <td>T{{ record.tier }}</td>
+                  <td>R{{ record.rating }}</td>
+                  <td>{{ formatDuration(record.duration) }}</td>
+                  <td :class="getRankColorClass(record.placement)">
+                    {{ record.rank }}
+                  </td>
+                  <td>{{ record.completion_count }}</td>
+                  <td class="text-small">
+                    {{ formatDate(new Date(record.date * 1000)) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="maps-footer">
               <button
-                class="btn btn-secondary dropdown-toggle"
-                type="button"
-                id="dropdownMenuButton"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+                v-if="displayCount < filteredSortedItems.length"
+                @click="showMore"
+                class="btn btn-dark update-button show-more-btn"
               >
-                {{ selectedSortOption }}
+                Show more
               </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li v-for="option in dropdownOptions" :key="option.value">
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    @click.prevent="selectSortOption(option.value)"
-                    >{{ option.label }}</a
-                  >
-                </li>
-              </ul>
             </div>
-          </div>
-        </div>
-        <div class="filter-actions">
-          <button
-            type="button"
-            @click="clearAllFilters"
-            class="btn btn-secondary"
-          >
-            Clear filters
-          </button>
-          <span class="text-light"
-            >Displaying {{ filteredSortedItems.length }} of
-            {{ totalRecordsLength() }} records</span
-          >
-        </div>
-      </div>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div class="search-records-container">
-      <div class="search-input-wrapper">
-        <svg
-          class="search-icon"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="M21 21l-4.35-4.35"></path>
-        </svg>
-        <input
-          type="text"
-          v-model="recordSearchQuery"
-          placeholder="Search map..."
-          class="search-records-input"
-        />
-      </div>
-    </div>
-    <div v-if="loading" class="text-center">
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Loading records...</span>
-      </div>
-    </div>
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-    <div
-      v-else
-      class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-    >
-      <div v-if="playerId != null" class="table-wrapper">
-        <div class="table-responsive">
-          <table class="table table-dark">
-            <thead>
-              <tr>
-                <th>Map</th>
-                <th>Type</th>
-                <th>Class</th>
-                <th></th>
-                <th></th>
-                <th>Time</th>
-                <th>Rank</th>
-                <th>Completion</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="record in filteredRecords" :key="record.id">
-                <td class="clickable" @click="goToMap(record.map_id)">
-                  {{ record.map_name }}
-                </td>
-                <td>
-                  {{ getRecordType(record.type) }}{{ formatIndex(record) }}
-                </td>
-                <td>
-                  <img
-                    :src="`/tempus-plaza/icons/${record.class}.png`"
-                    :alt="`${record.class}`"
-                    class="class-icon"
-                  />
-                </td>
-                <td>T{{ record.tier }}</td>
-                <td>R{{ record.rating }}</td>
-                <td>{{ formatDuration(record.duration) }}</td>
-                <td :class="getRankColorClass(record.placement)">
-                  {{ record.rank }}
-                </td>
-                <td>{{ record.completion_count }}</td>
-                <td class="text-small">
-                  {{ formatDate(new Date(record.date * 1000)) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="maps-footer">
-            <button
-              v-if="displayCount < filteredSortedItems.length"
-              @click="showMore"
-              class="btn btn-dark update-button show-more-btn"
-            >
-              Show more
-            </button>
           </div>
         </div>
       </div>
@@ -760,17 +768,13 @@ export default {
 </script>
 
 <style scoped>
-.bg-dark-custom {
-  background: var(--color-background);
-}
-
 .clickable {
   cursor: pointer;
   color: var(--color-text-clickable) !important;
 }
 
 .clickable:hover {
-  background-color: var(--color-primary) !important;
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .text-small {
@@ -803,7 +807,7 @@ export default {
 .search-input {
   width: 100%;
   padding: 16px 16px 16px 50px;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(68, 68, 68, 0.3);
   border-radius: 12px;
   color: #ffffff;
@@ -813,7 +817,7 @@ export default {
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
 }
 
@@ -829,17 +833,17 @@ export default {
     transparent,
     var(--color-primary),
     transparent
-  ) !important;
+  );
   margin: 30px 0;
   opacity: 0.6;
 }
 
 .filter-section {
-  background: rgba(42, 42, 42, 0.8);
-  border: 1px solid rgba(68, 68, 68, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 0 0 1px var(--color-border, #444);
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
   width: fit-content;
   max-width: 100%;
 }
@@ -913,18 +917,18 @@ export default {
 .type-checkbox input:checked + span {
   border: 2px solid var(--color-border);
   border-radius: 8px;
-  background-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .class-checkbox:hover input:not(:checked) + span,
 .type-checkbox:hover input:not(:checked) + span {
   border-radius: 8px;
-  background-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .search-results-dropdown {
   position: absolute;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(68, 68, 68, 0.3);
   border-radius: 12px;
   box-shadow: 0 0 0 1px var(--color-box, #444);
@@ -945,14 +949,14 @@ export default {
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 4px;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .search-results-dropdown li:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   transform: translateX(4px);
 }
 
@@ -971,7 +975,7 @@ export default {
 
 .form-select {
   padding: 12px 16px;
-  background: var(--color-row-odd);
+  background: rgba(119, 119, 119, 0.05);
   border: 2px solid rgba(68, 68, 68, 0.3);
   border-radius: 8px;
   color: #ffffff;
@@ -980,7 +984,7 @@ export default {
 }
 
 .form-select:focus {
-  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .form-option:hover {
@@ -1001,7 +1005,7 @@ export default {
 
 .btn-secondary:hover {
   border: 1px solid var(--color-dark);
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .tier-filter-container,
@@ -1312,7 +1316,7 @@ export default {
 
 .dropdown-item:hover {
   color: var(--color-text);
-  background-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .class-icon {
@@ -1330,7 +1334,7 @@ export default {
 .search-records-input {
   width: 100%;
   padding: 12px 12px 12px 50px;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(68, 68, 68, 0.3);
   border-radius: 8px;
   color: #ffffff;
@@ -1340,7 +1344,7 @@ export default {
 
 .search-records-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
 }
 
@@ -1349,34 +1353,27 @@ export default {
 }
 
 .table-responsive {
-  box-shadow: 0 0 0 1px var(--color-border, #444);
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
   overflow: hidden;
   margin-bottom: 0px;
 }
 
 .table-dark {
   margin: 0px;
-  background: transparent;
 }
 
 .table-dark thead {
-  background: linear-gradient(
-    90deg,
-    var(--color-primary),
-    var(--color-box)
-  ) !important;
+  border-bottom: 1px solid var(--color-border) !important;
 }
 
 .table-dark th {
   color: var(--color-text);
-  background: transparent;
+  background: rgba(74, 111, 165, 0.3) !important;
   text-align: center;
   font-weight: bold;
   padding: 16px 12px;
-  border-top: 1px solid var(--color-border-soft);
-  border-bottom: 1px solid var(--color-border-soft);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1384,15 +1381,16 @@ export default {
 }
 
 .table-dark td {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: 500;
   padding: 6px 12px;
   text-align: center;
   vertical-align: middle;
 }
+
 .table-dark tr:nth-child(odd) td {
-  background: var(--color-row-odd);
+  background: rgba(119, 119, 119, 0.05);
 }
 
 .spinner-border {
@@ -1424,10 +1422,14 @@ export default {
 }
 
 .show-more-btn {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
   font-weight: bold;
   width: 100%;
-  border-radius: 0 0 0 0;
+  border-radius: 0 0 10px 10px;
+}
+
+.show-more-btn:hover {
+  background-color: var(--color-row) !important;
 }
 
 @media (max-width: 767.98px) {

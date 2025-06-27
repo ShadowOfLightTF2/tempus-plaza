@@ -2,6 +2,7 @@
   --color-primary: #4a6fa5;
   --color-primary-dark: #253752;
   --color-background: #181818;
+  --color-background-new: #111418;
   --color-dark: #1D1D1D;
   --color-row: #2A2A2A;
   --color-row-odd: #353535;
@@ -13,24 +14,6 @@
   --color-border: #e0e0e0;
   --color-border-soft: #81818144;
   --color-transparent: #00000000;
-
-  /* Tier Colors */
-  --color-tier-1: #6ed0f61c;  /* Cold Blue */
-  --color-tier-2: #56b3e91c;  /* Sky Blue */
-  --color-tier-3: #45b8ad1a;  /* Teal */
-  --color-tier-4: #65c18b1e;  /* Mint */
-  --color-tier-5: #a3d9771c;  /* Lime Green */
-  --color-tier-6: #f3e6831f;  /* Yellow */
-  --color-tier-7: #f6c2671c;  /* Orange-Yellow */
-  --color-tier-8: #f08d5b1f;  /* Orange */
-  --color-tier-9: #e6695e21;  /* Coral */
-  --color-tier-10: #d6454521; /* Red */
-
-  /* Rating Colors */
-  --color-rating-1: #94c47d17;
-  --color-rating-2: #abd0991c;
-  --color-rating-3: #c3b2931e;
-  --color-rating-4: #e066661c;
 
   --color-emperor: #630404;
   --color-empress: #525252;
@@ -68,7 +51,7 @@ body, html {
   margin-bottom: 0;
 }
 .toggle-btn {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   padding: 12px 24px;
   cursor: pointer;
@@ -84,7 +67,7 @@ body, html {
 }
 
 .toggle-btn.active {
-  background: var(--color-primary) !important;
-  color: var(--color-text);
+  background: rgba(74, 111, 165, 0.8) !important;
   font-weight: bold;
+  color: var(--color-text);
 }

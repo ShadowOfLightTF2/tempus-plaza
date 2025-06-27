@@ -1,32 +1,39 @@
 <template>
   <div
-    class="container py-4 d-flex flex-column align-items-center bg-dark-custom"
+    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="page-header">
-      <h1 class="page-title">
-        <span class="title-icon">❤️</span>
-        Support the website
-      </h1>
-    </div>
-    <hr class="divider" style="width: 75%" />
-    <div class="donation-panel">
-      <div class="donation-options">
-        <a
-          href="https://ko-fi.com/shadowoflight"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="kofi-button"
-        >
-          <span class="kofi-text">Donate through ko-fi</span>
-        </a>
-      </div>
-      <p class="panel-description">
-        Your support helps me pay for server uptime and upgrade the websites
-        services
-      </p>
-      <hr class="divider" />
-      <div class="panel-footer">
-        <p class="thank-you">Thank you for your generosity!</p>
+    <div
+      class="container mx-auto py-4 d-flex flex-column align-items-center"
+      style="z-index: 1"
+    >
+      <div class="content-container" style="z-index: 1">
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">❤️</span>
+            Support the website
+          </h1>
+        </div>
+        <hr class="divider" style="width: 100%" />
+        <div class="donation-panel">
+          <div class="donation-options">
+            <a
+              href="https://ko-fi.com/shadowoflight"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="kofi-button"
+            >
+              <span class="kofi-text">Donate through ko-fi</span>
+            </a>
+          </div>
+          <p class="panel-description">
+            Your support helps me pay for server uptime and upgrade the websites
+            services
+          </p>
+          <hr class="divider" />
+          <div class="panel-footer">
+            <p class="thank-you">Thank you for your generosity!</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -54,9 +61,9 @@ export default {
 .donation-panel {
   max-width: 500px;
   margin: 40px auto;
-  background: var(--color-row);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
   padding: 40px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -80,7 +87,11 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
   color: white;
   text-decoration: none;
   padding: 16px 32px;
@@ -95,14 +106,23 @@ export default {
 .kofi-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 20px var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
+  background: linear-gradient(
+    225deg,
+    var(--color-primary-dark),
+    var(--color-primary)
+  );
 }
 
 .divider {
   border: none;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #4a9eff, transparent);
-  margin: 30px 5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
+  margin: 30px 0;
   opacity: 0.6;
 }
 

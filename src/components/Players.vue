@@ -1,272 +1,279 @@
 <template>
   <div
-    class="container players-container py-4 d-flex flex-column align-items-center bg-dark-custom"
+    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="content-container">
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">🏆</span>
-          Tempus top players
-        </h1>
-        <p class="page-subtitle">View the top players in various categories</p>
+    <div class="container py-4 d-flex flex-column align-items-center">
+      <div class="content-container">
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">🏆</span>
+            Tempus top players
+          </h1>
+          <p class="page-subtitle">
+            View the top players in various categories
+          </p>
+        </div>
       </div>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div class="category-tabs-container my-4">
-      <div class="category-tabs">
-        <button
-          v-for="cat in categoryNames"
-          :key="cat"
-          class="category-tab"
-          :class="{ active: selectedCategory === cat }"
-          @click="selectCategory(cat)"
+      <hr class="row-divider" style="width: 75%" />
+      <div class="category-tabs-container my-4">
+        <div class="category-tabs">
+          <button
+            v-for="cat in categoryNames"
+            :key="cat"
+            class="category-tab"
+            :class="{ active: selectedCategory === cat }"
+            @click="selectCategory(cat)"
+          >
+            {{ categoryDisplayNames[cat] || capitalize(cat) }}
+          </button>
+        </div>
+      </div>
+      <div class="subcategory-container my-3">
+        <div class="subcategory-pills">
+          <template v-if="hasCountSubmenu(selectedCategory)">
+            <div class="pill-row">
+              <button
+                v-for="item in dropdowns[selectedCategory]"
+                :key="item"
+                class="subcategory-pill"
+                :class="{ active: selectedItem === item && points }"
+                @click="selectItem(selectedCategory, item)"
+              >
+                {{ item }}
+              </button>
+            </div>
+            <div class="pill-row">
+              <button
+                v-for="item in getCountItems(selectedCategory)"
+                :key="item + '-count'"
+                class="subcategory-pill count-pill"
+                :class="{
+                  active: selectedItem === item + ' (count)' && !points,
+                }"
+                @click="selectItem(selectedCategory, item + ' (count)')"
+              >
+                {{ item }} <span class="count-badge">count</span>
+              </button>
+            </div>
+          </template>
+          <template v-else>
+            <div class="pill-row">
+              <button
+                v-for="item in dropdowns[selectedCategory]"
+                :key="item"
+                class="subcategory-pill"
+                :class="{ active: selectedItem === item }"
+                @click="selectItem(selectedCategory, item)"
+              >
+                {{ item }}
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <hr class="row-divider" style="width: 75%" />
+      <div v-if="loading && initialLoad" class="text-center">
+        <div
+          class="spinner-border text-light"
+          role="status"
+          style="margin-top: 100px"
         >
-          {{ categoryDisplayNames[cat] || capitalize(cat) }}
-        </button>
+          <span class="visually-hidden">Loading players...</span>
+        </div>
       </div>
-    </div>
-    <div class="subcategory-container my-3">
-      <div class="subcategory-pills">
-        <template v-if="hasCountSubmenu(selectedCategory)">
-          <div class="pill-row">
-            <button
-              v-for="item in dropdowns[selectedCategory]"
-              :key="item"
-              class="subcategory-pill"
-              :class="{ active: selectedItem === item && points }"
-              @click="selectItem(selectedCategory, item)"
-            >
-              {{ item }}
-            </button>
-          </div>
-          <div class="pill-row">
-            <button
-              v-for="item in getCountItems(selectedCategory)"
-              :key="item + '-count'"
-              class="subcategory-pill count-pill"
-              :class="{ active: selectedItem === item + ' (count)' && !points }"
-              @click="selectItem(selectedCategory, item + ' (count)')"
-            >
-              {{ item }} <span class="count-badge">count</span>
-            </button>
-          </div>
-        </template>
-        <template v-else>
-          <div class="pill-row">
-            <button
-              v-for="item in dropdowns[selectedCategory]"
-              :key="item"
-              class="subcategory-pill"
-              :class="{ active: selectedItem === item }"
-              @click="selectItem(selectedCategory, item)"
-            >
-              {{ item }}
-            </button>
-          </div>
-        </template>
-      </div>
-    </div>
-    <hr class="row-divider" style="width: 75%" />
-    <div v-if="loading && initialLoad" class="text-center">
+      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
       <div
-        class="spinner-border text-light"
-        role="status"
-        style="margin-top: 100px"
+        v-else
+        class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
       >
-        <span class="visually-hidden">Loading players...</span>
-      </div>
-    </div>
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-    <div
-      v-else
-      class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-    >
-      <div class="table-wrapper">
-        <div
-          class="header-content"
-          style="
-            background: linear-gradient(
-              90deg,
-              var(--color-primary),
-              var(--color-box)
-            );
-          "
-        >
-          <img src="/icons/soldier.png" alt="Soldier Icon" class="class-icon" />
-          <div class="header-text">
-            <p class="header-title">
-              {{
-                categoryDisplayNames[selectedCategory] ||
-                capitalize(selectedCategory)
-              }}
-              - {{ selectedItem }}
-            </p>
+        <div class="table-wrapper">
+          <div
+            class="header-content"
+            style="
+              background: linear-gradient(
+                135deg,
+                rgba(74, 111, 165, 0.3),
+                rgba(37, 55, 82, 0.3)
+              );
+            "
+          >
+            <img
+              src="/icons/soldier.png"
+              alt="Soldier Icon"
+              class="class-icon"
+            />
+            <div class="header-text">
+              <p class="header-title">
+                {{
+                  categoryDisplayNames[selectedCategory] ||
+                  capitalize(selectedCategory)
+                }}
+                - {{ selectedItem }}
+              </p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>
+                    {{
+                      points
+                        ? "Points"
+                        : selectedCategory === "completion"
+                        ? "Percentage"
+                        : "Count"
+                    }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(player, index) in displayedSoldierPlayers"
+                  :key="'soldier-' + player.id"
+                  class="fade-in"
+                >
+                  <td class="rank-column">#{{ index + 1 }}</td>
+                  <td
+                    class="name-cell align-middle player-name clickable name-column"
+                    @click="goToPlayer(player.player_id)"
+                  >
+                    <img
+                      :src="`${player.steam_avatar}`"
+                      alt="Steam Avatar"
+                      class="avatar"
+                      @error="handleError"
+                    />
+                    {{ player.name }}
+                  </td>
+                  <td
+                    class="points-column"
+                    :class="{
+                      'percentage-column': selectedCategory === 'completion',
+                    }"
+                  >
+                    {{
+                      selectedCategory === "completion"
+                        ? player.percentage + "%"
+                        : player.amount
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="players-footer">
+            <button
+              class="btn btn-dark update-button"
+              style="
+                background: rgba(74, 111, 165, 0.8);
+                font-weight: bold;
+                width: 100%;
+              "
+              @click="loadMoreSoldiers"
+              :disabled="loadingSoldiers"
+            >
+              <span v-if="!loadingSoldiers">Show more</span>
+              <span
+                v-else
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            </button>
           </div>
         </div>
-        <div class="table-responsive">
-          <table class="table table-dark">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>
-                  {{
-                    points
-                      ? "Points"
-                      : selectedCategory === "completion"
-                      ? "Percentage"
-                      : "Count"
-                  }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(player, index) in displayedSoldierPlayers"
-                :key="'soldier-' + player.id"
-              >
-                <td class="rank-column">#{{ index + 1 }}</td>
-                <td
-                  class="name-cell align-middle player-name clickable name-column"
-                  @click="goToPlayer(player.player_id)"
-                >
-                  <img
-                    :src="`${player.steam_avatar}`"
-                    alt="Steam Avatar"
-                    class="avatar"
-                    @error="handleError"
-                  />
-                  {{ player.name }}
-                </td>
-                <td
-                  class="points-column"
-                  :class="{
-                    'percentage-column': selectedCategory === 'completion',
-                  }"
-                >
-                  {{
-                    selectedCategory === "completion"
-                      ? player.percentage + "%"
-                      : player.amount
-                  }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="footer">
-          <button
-            class="btn btn-dark update-button"
-            style="
-              background: var(--color-primary);
-              font-weight: bold;
-              width: 100%;
-            "
-            @click="loadMoreSoldiers"
-            :disabled="loadingSoldiers"
-          >
-            <span v-if="!loadingSoldiers">Show more</span>
-            <span
-              v-else
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
-          </button>
-        </div>
-      </div>
-      <div class="table-wrapper">
-        <div
-          class="header-content"
-          style="
-            background: linear-gradient(
-              90deg,
-              var(--color-primary),
-              var(--color-box)
-            );
-          "
-        >
-          <img src="/icons/demoman.png" alt="Demoman Icon" class="class-icon" />
-          <div class="header-text">
-            <p class="header-title">
-              {{
-                categoryDisplayNames[selectedCategory] ||
-                capitalize(selectedCategory)
-              }}
-              - {{ selectedItem }}
-            </p>
+        <div class="table-wrapper">
+          <div class="header-content">
+            <img
+              src="/icons/demoman.png"
+              alt="Demoman Icon"
+              class="class-icon"
+            />
+            <div class="header-text">
+              <p class="header-title">
+                {{
+                  categoryDisplayNames[selectedCategory] ||
+                  capitalize(selectedCategory)
+                }}
+                - {{ selectedItem }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-dark">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>
-                  {{
-                    points
-                      ? "Points"
-                      : selectedCategory === "completion"
-                      ? "Percentage"
-                      : "Count"
-                  }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(player, index) in displayedDemomanPlayers"
-                :key="'demoman-' + player.id"
-              >
-                <td class="rank-column">#{{ index + 1 }}</td>
-                <td
-                  class="name-cell align-middle player-name clickable name-column"
-                  @click="goToPlayer(player.player_id)"
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>
+                    {{
+                      points
+                        ? "Points"
+                        : selectedCategory === "completion"
+                        ? "Percentage"
+                        : "Count"
+                    }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(player, index) in displayedDemomanPlayers"
+                  :key="'demoman-' + player.id"
+                  class="fade-in"
                 >
-                  <img
-                    :src="`${player.steam_avatar}`"
-                    alt="Avatar"
-                    class="avatar"
-                    @error="handleError"
-                  />
-                  {{ player.name }}
-                </td>
-                <td
-                  class="points-column"
-                  :class="{
-                    'percentage-column': selectedCategory === 'completion',
-                  }"
-                >
-                  {{
-                    selectedCategory === "completion"
-                      ? player.percentage + "%"
-                      : player.amount
-                  }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="footer">
-          <button
-            class="btn btn-dark update-button"
-            style="
-              background: var(--color-primary);
-              font-weight: bold;
-              width: 100%;
-            "
-            @click="loadMoreDemomen"
-            :disabled="loadingDemomen"
-          >
-            <span v-if="!loadingDemomen">Show more</span>
-            <span
-              v-else
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
-          </button>
+                  <td class="rank-column">#{{ index + 1 }}</td>
+                  <td
+                    class="name-cell align-middle player-name clickable name-column"
+                    @click="goToPlayer(player.player_id)"
+                  >
+                    <img
+                      :src="`${player.steam_avatar}`"
+                      alt="Avatar"
+                      class="avatar"
+                      @error="handleError"
+                    />
+                    {{ player.name }}
+                  </td>
+                  <td
+                    class="points-column"
+                    :class="{
+                      'percentage-column': selectedCategory === 'completion',
+                    }"
+                  >
+                    {{
+                      selectedCategory === "completion"
+                        ? player.percentage + "%"
+                        : player.amount
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="players-footer">
+            <button
+              class="btn btn-dark update-button"
+              style="
+                background: rgba(74, 111, 165, 0.8);
+                font-weight: bold;
+                width: 100%;
+              "
+              @click="loadMoreDemomen"
+              :disabled="loadingDemomen"
+            >
+              <span v-if="!loadingDemomen">Show more</span>
+              <span
+                v-else
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -548,15 +555,17 @@ export default {
 </script>
 
 <style scoped>
-.bg-dark-custom {
-  background: var(--color-background);
-}
-
 .header-content {
   border-radius: 10px 10px 0 0;
   display: flex;
   align-items: center;
   padding: 10px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 111, 165, 0.3),
+    rgba(37, 55, 82, 0.3)
+  );
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header-text {
@@ -581,37 +590,38 @@ export default {
 .table-wrapper {
   width: 100%;
   flex: 1;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
-}
-
-.table-responsive {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-bottom: 0px;
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
 }
 
 .table-dark {
   margin: 0px;
-  border-collapse: separate;
-  border-spacing: 0;
+}
+
+.table-dark thead {
+  border-bottom: 1px solid var(--color-border);
 }
 
 .table-dark th {
-  background: var(--color-primary-dark);
+  background: rgba(74, 111, 165, 0.3) !important;
   color: var(--color-text);
   text-align: left;
   font-weight: bold;
-  border-top: 1px solid var(--color-border-soft);
-  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-dark td {
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
   padding: 6px;
+}
+
+.table-dark tr:nth-child(odd) td {
+  background: rgba(119, 119, 119, 0.05);
+}
+.table-dark tr:nth-child(odd) .name-cell:hover {
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .name-cell {
@@ -639,23 +649,14 @@ export default {
 }
 
 .player-name:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
-
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: var(--color-primary);
-}
-
-.table-dark tr:nth-child(odd) td {
-  background: var(--color-row-odd);
-}
-
 .clickable {
   cursor: pointer;
 }
 
 .update-button {
-  border-radius: 0px;
+  border-radius: 0 0 10px 10px;
 }
 
 .update-button:hover {
@@ -697,11 +698,11 @@ export default {
 
 .category-tabs {
   display: flex;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 4px;
   gap: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
   border: 1px solid var(--color-border);
 }
 
@@ -720,13 +721,12 @@ export default {
 }
 
 .category-tab:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .category-tab.active {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
   color: var(--color-text);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subcategory-container {
@@ -756,7 +756,7 @@ export default {
   padding: 8px 16px;
   border: 2px solid var(--color-border);
   border-radius: 20px;
-  background: var(--color-box);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
   font-size: 13px;
@@ -769,15 +769,15 @@ export default {
 }
 
 .subcategory-pill:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
   transform: translateY(-1px);
 }
 
 .subcategory-pill.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
+  border-color: rgba(74, 111, 165, 0.8) !important;
   color: var(--color-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgb(0, 0, 0, 0.5);
 }
 
 .count-pill {
@@ -796,7 +796,12 @@ export default {
 .row-divider {
   border: none;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #4a9eff, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
   margin: 30px 0;
   opacity: 0.6;
 }

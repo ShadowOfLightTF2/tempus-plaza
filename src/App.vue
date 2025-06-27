@@ -57,7 +57,6 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-
         <!-- Collapsible navbar content -->
         <div class="collapse navbar-collapse" id="navbarNav">
           <!-- Main navigation links - centered -->
@@ -73,6 +72,15 @@
             </li>
             <li class="nav-item me-3">
               <router-link
+                to="/servers"
+                class="nav-link nav-link-bold"
+                :class="{ active: isNavItemActive('Servers') }"
+              >
+                <i class="bi bi-globe"></i> Servers
+              </router-link>
+            </li>
+            <li class="nav-item me-3">
+              <router-link
                 to="/activity"
                 class="nav-link nav-link-bold"
                 :class="{ active: isNavItemActive('Activity') }"
@@ -80,13 +88,22 @@
                 <i class="bi bi-graph-up"></i> Activity
               </router-link>
             </li>
+            <!-- <li class="nav-item me-3">
+              <router-link
+                to="/news"
+                class="nav-link nav-link-bold"
+                :class="{ active: isNavItemActive('News') }"
+              >
+                <i class="bi bi-newspaper"></i> News
+              </router-link>
+            </li> -->
             <li class="nav-item me-3">
               <router-link
                 to="/maps"
                 class="nav-link nav-link-bold"
                 :class="{ active: isNavItemActive('Maps') }"
               >
-                <i class="bi bi-globe"></i> Maps
+                <i class="bi bi-map"></i> Maps
               </router-link>
             </li>
             <li class="nav-item me-3">
@@ -117,57 +134,60 @@
               </router-link>
             </li>
             <!-- Search container -->
-            <div class="search-container me-3" @click.stop>
-              <div class="search-input-wrapper">
-                <svg
-                  class="search-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input
-                  type="text"
-                  v-model="searchQuery"
-                  placeholder="Search..."
-                  class="search-input"
-                />
-              </div>
-              <div
-                class="search-results-dropdown"
-                v-if="
-                  searchResults &&
-                  (searchResults.maps.length || searchResults.players.length)
-                "
-              >
-                <div v-if="searchResults.maps.length">
-                  <h6>Maps</h6>
-                  <ul>
-                    <li
-                      v-for="map in searchResults.maps"
-                      :key="map.id"
-                      @click="goToMap(map.id)"
-                      v-html="sanitize(map.name || `Map ID: ${map.id}`)"
-                    ></li>
-                  </ul>
+
+            <div class="navbar-right" v-if="!isHomePage">
+              <div class="search-container me-3" @click.stop>
+                <div class="search-input-wrapper">
+                  <svg
+                    class="search-icon"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                  <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Search..."
+                    class="search-input"
+                  />
                 </div>
-                <div v-if="searchResults.players.length">
-                  <h6>Players</h6>
-                  <ul>
-                    <li
-                      v-for="player in searchResults.players"
-                      :key="player.id"
-                      @click="goToPlayer(player.id)"
-                      v-html="
-                        sanitize(player.name || `Player ID: ${player.id}`)
-                      "
-                    ></li>
-                  </ul>
+                <div
+                  class="search-results-dropdown"
+                  v-if="
+                    searchResults &&
+                    (searchResults.maps.length || searchResults.players.length)
+                  "
+                >
+                  <div v-if="searchResults.maps.length">
+                    <h6>Maps</h6>
+                    <ul>
+                      <li
+                        v-for="map in searchResults.maps"
+                        :key="map.id"
+                        @click="goToMap(map.id)"
+                        v-html="sanitize(map.name || `Map ID: ${map.id}`)"
+                      ></li>
+                    </ul>
+                  </div>
+                  <div v-if="searchResults.players.length">
+                    <h6>Players</h6>
+                    <ul>
+                      <li
+                        v-for="player in searchResults.players"
+                        :key="player.id"
+                        @click="goToPlayer(player.id)"
+                        v-html="
+                          sanitize(player.name || `Player ID: ${player.id}`)
+                        "
+                      ></li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -382,6 +402,9 @@ export default {
     user() {
       return this.currentUser;
     },
+    isHomePage() {
+      return this.$route.name === "Home";
+    },
   },
   methods: {
     isNavItemActive(routeName) {
@@ -567,15 +590,22 @@ html {
   padding: 0;
   height: 100%;
   font-family: "Segoe UI";
-  background: var(--color-background) !important;
+  background: var(--color-background-new) !important;
 }
 
 #app {
   font-family: "Segoe UI";
-  background: var(--color-background);
+  background: var(--color-background-new);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.background-container {
+  background-image: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' width='1728' height='1180' viewBox='0 0 1728 1180' fill='currentColor' class='position-absolute w-100 top-40 pointer-events-none' style='opacity: 0.3; z-index: 0' %3E%3Cg filter='url(%23filter0_f_226_149)'%3E%3Cpath d='M2123.75 293.105C1333.23 688.128 703.641 515.327 508.724 374.099C452.243 349.269 313.169 228.867 73.6286 197.922C-225.797 159.242 110.578 663.582 380.092 782.356C649.606 901.131 1580.73 925.224 2029.92 784.99C2601.98 606.399 3111.92 -200.674 2123.75 293.105Z' fill='url(%23paint0_radial_226_149)' fill-opacity='0.45' %3E%3C/path%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_f_226_149' x='-342.14' y='-163' width='3323.17' height='1342.42' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB' %3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'%3E%3C/feFlood%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape' %3E%3C/feBlend%3E%3CfeGaussianBlur stdDeviation='149.181' result='effect1_foregroundBlur_226_149' %3E%3C/feGaussianBlur%3E%3C/filter%3E%3CradialGradient id='paint0_radial_226_149' cx='0' cy='0' r='1' gradientUnits='userSpaceOnUse' gradientTransform='translate(2522.36 771.207) rotate(-178.79) scale(2230.36 879.25)' %3E%3Cstop stop-color='%236248FF'%3E%3C/stop%3E%3Cstop offset='0.369278' stop-color='%23E5FF48'%3E%3C/stop%3E%3Cstop offset='0.588842' stop-color='%23FF48ED'%3E%3C/stop%3E%3Cstop offset='0.708333' stop-color='%2348BDFF'%3E%3C/stop%3E%3Cstop offset='0.932292' stop-color='%236248FF'%3E%3C/stop%3E%3C/radialGradient%3E%3C/defs%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  min-height: 100vh;
 }
 
 ::-webkit-scrollbar {
@@ -591,21 +621,21 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .navbar-dark .navbar-nav .nav-link:focus,
 .navbar-dark .navbar-nav .nav-link:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .navbar-dark .navbar-nav .router-link-exact-active {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   font-weight: bold;
 }
 
 .nav-link-bold.active {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   font-weight: bold;
 }
 
@@ -619,7 +649,7 @@ html {
 }
 
 .bg-dark-custom {
-  background: var(--color-background);
+  background: var(--color-background-new);
 }
 
 .user {
@@ -628,7 +658,7 @@ html {
 }
 
 .form-check-input:checked {
-  background: var(--color-primary) !important;
+  background: rgba(74, 111, 165, 0.8) !important;
   border-color: var(--color-primary);
 }
 
@@ -639,7 +669,7 @@ html {
 }
 
 .login-button:hover {
-  background: var(--color-primary) !important;
+  background: rgba(74, 111, 165, 0.8) !important;
   border-radius: 0;
 }
 
@@ -681,6 +711,28 @@ html {
   margin: 0;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
 .footer {
   background: var(--color-dark);
   border-top: 1px solid var(--color-border-soft);
@@ -713,7 +765,7 @@ html {
 }
 
 .footer-link:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   color: var(--color-text);
   text-decoration: none;
 }
@@ -857,13 +909,6 @@ html {
   align-items: center;
 }
 
-.row-divider {
-  width: 100%;
-  border: none;
-  border-top: 1px solid var(--color-primary) !important;
-  margin: 20px 0;
-}
-
 .dropdown-toggle {
   border-radius: 8px;
   border: 0;
@@ -883,7 +928,7 @@ html {
 }
 
 .dropdown-toggle:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8) !important;
   color: var(--color-text);
 }
 
@@ -899,12 +944,12 @@ html {
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   color: var(--color-text);
 }
 
@@ -914,7 +959,7 @@ html {
 }
 
 .dropdown-item.clickable:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   color: var(--color-text);
 }
 
@@ -955,7 +1000,7 @@ html {
   width: 200px;
   padding: 8px 8px 8px 40px;
   background: var(--color-box);
-  border: 2px solid rgba(68, 68, 68, 0.3);
+  border: 2px solid var(--color-border-soft);
   border-radius: 12px;
   color: #ffffff;
   font-size: 16px;
@@ -964,8 +1009,7 @@ html {
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
 }
 
 .search-input::placeholder {
@@ -996,13 +1040,14 @@ html {
   border-radius: 8px;
   margin-bottom: 4px;
   background: var(--color-box);
+  font-weight: bold;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .search-results-dropdown li:hover {
-  background: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
   transform: translateX(4px);
 }
 

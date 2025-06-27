@@ -1,194 +1,245 @@
 <template>
-  <!-- <div>
-    <button @click="downloadImage">Download Images</button>
-  </div> -->
-  <div class="min-h-screen bg-dark-custom">
-    <div class="header-hero">
-      <div class="header-overlay"></div>
-      <div class="header-content">
-        <h1 class="header-title">Tempus plaza</h1>
-        <p class="header-subtitle">Information about the Tempus network</p>
-      </div>
-    </div>
-    <div class="container mx-auto py-4 d-flex flex-column align-items-center">
-      <div class="content-container">
-        <div class="button-group">
-          <button
-            :class="{ active: currentView === 'topplayers' }"
-            @click="switchView('topplayers')"
-            class="toggle-btn btn btn-dark update-button"
+  <div id="app" @click="closeDropdown">
+    <div
+      class="position-relative min-vh-100 w-100 overflow-hidden background-container"
+    >
+      <div class="container hero">
+        <h1>Tempus plaza</h1>
+        <div class="search-container" @click.stop>
+          <div class="search-box">
+            <div class="search-icon-container">
+              <svg
+                class="search-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              v-model="searchQuery"
+              @input="onSearch"
+              @focus="onSearch"
+              placeholder="Search for players or maps..."
+              class="search-input"
+            />
+            <button class="search-btn" @click="performSearch">Search</button>
+          </div>
+          <div
+            class="search-results-dropdown"
+            v-if="
+              searchResults &&
+              (searchResults.maps.length || searchResults.players.length)
+            "
           >
-            Top players online
-          </button>
-          <button
-            :class="{ active: currentView === 'servers' }"
-            @click="switchView('servers')"
-            class="toggle-btn btn btn-dark update-button"
-          >
-            Servers
-          </button>
-        </div>
-        <div v-if="loading" class="text-center py-5">
-          <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading {{ currentView }}...</span>
+            <div v-if="searchResults.maps.length">
+              <h6>Maps</h6>
+              <ul>
+                <li
+                  v-for="map in searchResults.maps"
+                  :key="map.id"
+                  @click="goToMap(map.id)"
+                  v-html="sanitize(map.name || `Map ID: ${map.id}`)"
+                ></li>
+              </ul>
+            </div>
+            <div v-if="searchResults.players.length">
+              <h6>Players</h6>
+              <ul>
+                <li
+                  v-for="player in searchResults.players"
+                  :key="player.id"
+                  @click="goToPlayer(player.id)"
+                  v-html="sanitize(player.name || `Player ID: ${player.id}`)"
+                ></li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div v-else class="table-container">
-          <div v-if="currentView === 'topplayers'" class="table-wrapper">
-            <div class="table-header-content">
-              <div class="table-header-icon">🏆</div>
-              <div class="table-header-text">
-                <h3 class="table-header-title">Top players</h3>
-                <p class="table-header-subtitle">Updates every 5 minutes</p>
+        <hr class="divider" style="width: 100%; margin-top: 100px" />
+        <div class="section">
+          <div class="container">
+            <h2 class="section-title">Todays most popular maps</h2>
+            <div class="grid">
+              <div
+                class="card"
+                v-for="map in popularSoldierMaps"
+                :key="map.id"
+                @click="goToMap(map.map_id)"
+              >
+                <h5 class="section-subtitle">Soldier</h5>
+                <div class="card-image">
+                  <img
+                    :src="`/tempus-plaza/maps/${map.name}.jpg`"
+                    :alt="map.name"
+                  />
+                </div>
+                <h3>{{ map.name }}</h3>
+                <div class="compact-ratings-grid">
+                  <div class="rating-section">
+                    <div class="rating-label">Soldier</div>
+                    <div class="rating-pills">
+                      <span
+                        class="rating-pill tier-color"
+                        :class="'tier-' + map.soldier_tier"
+                      >
+                        T{{ map.soldier_tier }}
+                      </span>
+                      <span
+                        class="rating-pill rating-color"
+                        :class="'rating-' + map.soldier_rating"
+                      >
+                        R{{ map.soldier_rating }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="rating-section">
+                    <div class="rating-label">Demoman</div>
+                    <div class="rating-pills">
+                      <span
+                        class="rating-pill tier-color"
+                        :class="'tier-' + map.demoman_tier"
+                      >
+                        T{{ map.demoman_tier }}
+                      </span>
+                      <span
+                        class="rating-pill rating-color"
+                        :class="'rating-' + map.demoman_rating"
+                      >
+                        R{{ map.demoman_rating }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="completion-count">
+                  <i class="bi bi-check-circle me-1"></i>
+                  {{ map.run_count }}
+                  completions today
+                </div>
               </div>
             </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Map</th>
-                    <th>Server</th>
-                    <th>Connect</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(player, index) in topPlayersData"
-                    :key="player.player_id"
-                  >
-                    <td>
-                      {{ player.highest_rank }} {{ player.highest_rank_type }}
-                    </td>
-                    <td
-                      class="name-cell align-middle player-name clickable"
-                      @click="goToPlayer(player.player_id)"
-                      style="color: var(--color-text-clickable)"
-                    >
-                      <img
-                        :src="player.steam_avatar"
-                        alt="Avatar"
-                        class="avatar"
-                      />
-                      {{ player.player_name }}
-                    </td>
-                    <td
-                      class="map-cell align-middle map-name clickable"
-                      @click="goToMap(player.map_id)"
-                      style="color: var(--color-text-clickable)"
-                    >
-                      {{ player.current_map }}
-                    </td>
-                    <td>{{ player.shortname }} | {{ player.server_name }}</td>
-                    <td class="align-middle">
-                      <button
-                        @click.stop="
-                          connectToServer(player.ipaddr, player.port)
-                        "
-                        class="btn btn-primary btn-sm connect-btn"
-                        style="
-                          background: var(--color-primary);
-                          border: none;
-                          font-weight: bold;
-                        "
+            <hr class="divider" style="width: 100%" />
+            <div class="grid">
+              <div
+                class="card"
+                v-for="map in popularDemomanMaps"
+                :key="map.id"
+                @click="goToMap(map.map_id)"
+              >
+                <h5 class="section-subtitle">Demoman</h5>
+                <div class="card-image">
+                  <img
+                    :src="`/tempus-plaza/maps/${map.name}.jpg`"
+                    :alt="map.name"
+                  />
+                </div>
+                <h3>{{ map.name }}</h3>
+                <div class="compact-ratings-grid">
+                  <div class="rating-section">
+                    <div class="rating-label">Demoman</div>
+                    <div class="rating-pills">
+                      <span
+                        class="rating-pill tier-color"
+                        :class="'tier-' + map.demoman_tier"
                       >
-                        Connect
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        T{{ map.demoman_tier }}
+                      </span>
+                      <span
+                        class="rating-pill rating-color"
+                        :class="'rating-' + map.demoman_rating"
+                      >
+                        R{{ map.demoman_rating }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="rating-section">
+                    <div class="rating-label">Soldier</div>
+                    <div class="rating-pills">
+                      <span
+                        class="rating-pill tier-color"
+                        :class="'tier-' + map.soldier_tier"
+                      >
+                        T{{ map.soldier_tier }}
+                      </span>
+                      <span
+                        class="rating-pill rating-color"
+                        :class="'rating-' + map.soldier_rating"
+                      >
+                        R{{ map.soldier_rating }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="completion-count">
+                  <i class="bi bi-check-circle me-1"></i>
+                  {{ map.run_count }}
+                  completions today
+                </div>
+              </div>
             </div>
           </div>
-          <div v-if="currentView === 'servers'" class="table-wrapper">
-            <div class="table-header-content">
-              <div class="table-header-icon">🌍</div>
-              <div class="table-header-text">
-                <h3 class="table-header-title">Server status</h3>
-                <p class="table-header-subtitle">Updates every 5 minutes</p>
+        </div>
+        <hr class="divider" style="width: 100%" />
+        <div class="section">
+          <div class="container">
+            <h2 class="section-title">Recent YouTube Videos</h2>
+            <div class="grid">
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">📺</div>
+                <div class="video-title">
+                  10 Amazing Geography Facts That Will Blow Your Mind
+                </div>
+                <div class="video-meta">
+                  GeoExplorer • 2 days ago • 1.2M views
+                </div>
               </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th @click="sortServersByRegion" style="cursor: pointer">
-                      Location
-                      <span v-if="sortDirection === 1">↑</span>
-                      <span v-else>↓</span>
-                    </th>
-                    <th>Server</th>
-                    <th>Map</th>
-                    <th @click="sortServersByPlayers" style="cursor: pointer">
-                      Players
-                      <span v-if="sortDirection === 1">↓</span>
-                      <span v-else>↑</span>
-                    </th>
-                    <th>Connect</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(server, index) in serversData"
-                    :key="server.id"
-                    @click="selectServer(server)"
-                  >
-                    <td class="align-middle">
-                      <div class="server-location">
-                        <img
-                          :src="getFlagImageUrl(server.country_code)"
-                          alt="Flag"
-                          class="flag-icon"
-                        />
-                        {{ server.country }}
-                      </div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="server-name">{{ server.name }}</div>
-                    </td>
-                    <td
-                      class="map-cell align-middle map-name clickable"
-                      @click="goToMap(server.map_id)"
-                    >
-                      {{ server.currentMap }}
-                    </td>
-                    <td class="align-middle">
-                      <div class="player-info">
-                        <span
-                          >{{ server.playerCount }}/{{
-                            server.maxPlayers
-                          }}</span
-                        >
-                        <div
-                          class="server-status"
-                          :class="
-                            getServerStatusClass(
-                              server.playerCount,
-                              server.maxPlayers
-                            )
-                          "
-                        ></div>
-                      </div>
-                    </td>
-                    <td class="align-middle">
-                      <button
-                        @click.stop="
-                          connectToServer(server.ipAddr, server.port)
-                        "
-                        class="btn btn-primary btn-sm connect-btn"
-                        style="
-                          background: var(--color-primary);
-                          border: none;
-                          font-weight: bold;
-                        "
-                      >
-                        Connect
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">🎥</div>
+                <div class="video-title">
+                  How Satellite Mapping Changed Our World
+                </div>
+                <div class="video-meta">TechMaps • 4 days ago • 850K views</div>
+              </div>
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">🌐</div>
+                <div class="video-title">
+                  The Future of Interactive Maps and AR
+                </div>
+                <div class="video-meta">
+                  FutureGeo • 1 week ago • 720K views
+                </div>
+              </div>
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">🎬</div>
+                <div class="video-title">
+                  Hidden Gems: Secret Places on Google Earth
+                </div>
+                <div class="video-meta">
+                  MapMysteries • 1 week ago • 650K views
+                </div>
+              </div>
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">📱</div>
+                <div class="video-title">Best Map Apps for Travel in 2025</div>
+                <div class="video-meta">
+                  TravelTech • 2 weeks ago • 480K views
+                </div>
+              </div>
+              <div class="card youtube-card">
+                <div class="youtube-thumbnail">🌟</div>
+                <div class="video-title">
+                  Creating Beautiful Data Visualizations
+                </div>
+                <div class="video-meta">
+                  DataViz Pro • 2 weeks ago • 390K views
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -198,493 +249,512 @@
 </template>
 
 <script>
+import debounce from "debounce";
+import DOMPurify from "dompurify";
+
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
-  name: "Home",
+  name: "App",
   data() {
     return {
-      currentView: "topplayers",
-      loading: false,
-      topPlayersData: [],
-      serversData: [],
-      selectedServer: null,
-      sortDirection: 1,
+      searchQuery: "",
+      searchResults: null,
+      popularSoldierMaps: [],
+      popularDemomanMaps: [],
     };
   },
-  async created() {
-    document.title = "Tempus plaza - Home";
-    await this.fetchData();
-  },
   methods: {
-    async downloadImage() {
-      try {
-        window.location.href = `${API_BASE_URL}/maps/789/download-map-image`;
-      } catch (error) {
-        console.error("Error downloading images:", error);
-      }
-    },
-    async fetchData() {
-      this.loading = true;
-      try {
-        await Promise.all([
-          this.fetchTopPlayersData(),
-          this.fetchServersData(),
-        ]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    sortServersByPlayers() {
-      this.sortDirection *= -1;
-      this.serversData.sort((a, b) => {
-        return (a.playerCount - b.playerCount) * this.sortDirection;
-      });
-    },
-    sortServersByRegion() {
-      this.sortDirection *= -1;
-      const regionOrder = [
-        "north_america",
-        "europe",
-        "asia",
-        "oceania",
-        "south_america",
-        "africa",
-        "middle_east",
-      ];
-
-      this.serversData.sort((a, b) => {
-        const regionA = regionOrder.indexOf(a.region);
-        const regionB = regionOrder.indexOf(b.region);
-
-        if (regionA !== regionB)
-          return (regionA - regionB) * this.sortDirection;
-
-        return a.country.localeCompare(b.country) * this.sortDirection;
-      });
-    },
-    async fetchTopPlayersData() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/servers/top-players`);
-        const data = await response.json();
-
-        this.topPlayersData = data
-          .sort((a, b) => {
-            if (a.highest_rank === null) return 1;
-            if (b.highest_rank === null) return -1;
-
-            return a.highest_rank - b.highest_rank;
-          })
-          .slice(0, 20);
-      } catch (error) {
-        console.error(
-          "There was an error fetching the top players data:",
-          error
-        );
-      }
-    },
-    async fetchServersData() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/servers`);
-        const data = await response.json();
-
-        const regionOrder = [
-          "north_america",
-          "europe",
-          "asia",
-          "oceania",
-          "south_america",
-          "africa",
-          "middle_east",
-        ];
-        this.serversData = data.sort((a, b) => {
-          const regionA = regionOrder.indexOf(a.region);
-          const regionB = regionOrder.indexOf(b.region);
-
-          if (regionA !== regionB) return regionA - regionB;
-          return a.country.localeCompare(b.country);
-        });
-      } catch (error) {
-        console.error("There was an error fetching the servers data:", error);
-      }
-    },
-    getFlagImageUrl(countryCode) {
-      const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
-        ? countryCode.toLowerCase()
-        : "unknown";
-      return `https://flagcdn.com/24x18/${validCode}.png`;
-    },
-    switchView(view) {
-      if (this.currentView === view) return;
-      this.currentView = view;
-    },
-    getServerStatusClass(players, maxPlayers) {
-      const ratio = players / maxPlayers;
-      if (ratio > 0.8) return "status-high";
-      if (ratio > 0.4) return "status-medium";
-      return "status-low";
-    },
-    connectToServer(ip, port) {
-      window.open(`steam://connect/${ip}:${port}`, "_blank");
-    },
-    goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
+    closeDropdown() {
+      this.searchResults = null;
     },
     goToMap(mapId) {
-      this.$router.push({
-        name: "Records",
-        params: { mapId: mapId },
-      });
+      this.$router.push({ name: "Records", params: { mapId } });
+      this.searchResults = null;
     },
-    selectServer(server) {
-      this.selectedServer = server;
+    goToPlayer(playerId) {
+      this.$router.push({ name: "PlayerPage", params: { playerId } });
+      this.searchResults = null;
+    },
+    async fetchSearchResults() {
+      if (this.searchQuery.trim()) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: this.searchQuery }),
+          });
+
+          if (!response.ok) throw new Error("Failed to fetch search results");
+          const data = await response.json();
+
+          if (data.players && data.players.length > 20)
+            data.players = data.players.slice(0, 20);
+          if (data.maps && data.maps.length > 5)
+            data.maps = data.maps.slice(0, 5);
+
+          this.searchResults = data;
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+        }
+      } else {
+        this.searchResults = null;
+      }
+    },
+    async fetchPopularMaps() {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/maps/get-popular-maps"
+        );
+        if (!response.ok) throw new Error("Failed to fetch popular maps");
+        const data = await response.json();
+        this.popularSoldierMaps = data
+          .filter((map) => map.class_type === "soldier")
+          .sort((a, b) => b.run_count - a.run_count);
+
+        this.popularDemomanMaps = data
+          .filter((map) => map.class_type === "demoman")
+          .sort((a, b) => b.run_count - a.run_count);
+      } catch (error) {
+        console.error("Error fetching popular maps:", error);
+      }
+    },
+    onSearch() {
+      this.debouncedSearch();
+    },
+    sanitize(html) {
+      return DOMPurify.sanitize(html);
+    },
+  },
+  created() {
+    this.debouncedSearch = debounce(this.fetchSearchResults, 500);
+    this.fetchPopularMaps();
+  },
+  watch: {
+    searchQuery() {
+      this.debouncedSearch();
     },
   },
 };
 </script>
 
 <style scoped>
-.header-hero {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero {
+  padding: 80px 0;
+  text-align: center;
   position: relative;
-  height: 16rem;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-box));
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 40px;
+}
+
+.search-container {
+  margin: 40px 0;
+  position: relative;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-box {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.search-box:hover,
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+.search-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-left: 15px;
 }
 
-.header-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.5);
 }
-.header-content {
-  position: relative;
+
+.search-input {
+  flex: 1;
+  padding: 18px 10px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.search-results-dropdown {
+  position: absolute;
+  background: var(--color-box);
+  border: 1px solid rgba(68, 68, 68, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  min-width: 500px;
+  max-height: 500px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.search-results-dropdown ul {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+}
+
+.search-results-dropdown li {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--color-box);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: left;
+}
+
+.search-results-dropdown li:hover {
+  background: rgba(74, 111, 165, 0.8);
+  transform: translateX(4px);
+}
+
+.search-results-dropdown li:last-child {
+  margin-bottom: 0;
+}
+
+.search-results-dropdown h6 {
+  display: flex;
+  align-items: left;
+  margin: 12px 16px 8px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.search-btn {
+  padding: 18px 25px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.divider {
+  border: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
+  margin: 30px 0;
+  opacity: 0.6;
+}
+
+.section {
+  padding: 50px 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
   text-align: center;
-  color: white;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-subtitle {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
   z-index: 10;
 }
 
-.header-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  color: var(--color-text);
-  margin: 0 auto;
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-.header-subtitle {
-  font-size: 1.25rem;
-  opacity: 0.9;
-}
-
-.header-text {
-  margin-left: 10px;
-  text-align: left;
-  font-weight: bold;
-}
-
-.header-title {
-  font-size: 3rem;
-  font-weight: bold;
-}
-.bg-dark-custom {
-  background: var(--color-background);
-}
-
-.players-title {
-  color: var(--color-text);
-}
-
-.flag-icon {
-  width: 20px;
-  height: auto;
-  margin-right: 5px;
-}
-
-.content-container {
-  width: 100%;
-  max-width: 1200px;
-}
-
-.table-wrapper {
-  width: 100%;
-  border-radius: 0 0 8px 8px;
-  border-top: none;
-  border: 1px solid var(--color-border);
-}
-
-.table-header-content {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-box));
-  border-bottom: 1px solid var(--color-border);
-}
-
-.table-header-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-}
-
-.table-header-text {
-  flex: 1;
-}
-
-.table-header-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--color-text);
-}
-
-.table-header-subtitle {
-  margin: 0.2rem 0 0 0;
-  font-size: 0.9rem;
-  color: var(--color-text);
-  opacity: 0.8;
-}
-
-.table-responsive {
+.card {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 15px;
+  transition: all 0.3s ease;
+  position: relative;
   overflow: hidden;
-  margin-bottom: 0px;
-}
-
-.table-dark {
-  margin: 0px;
-}
-
-.table-dark th {
-  background: var(--color-primary-dark);
-  color: var(--color-text);
-  text-align: left;
-  font-weight: bold;
-  border-top: 1px solid var(--color-border-soft);
-  border-bottom: 1px solid var(--color-border-soft);
-}
-
-.table-dark td {
-  background: var(--color-box);
-  color: var(--color-text);
-  font-weight: bold;
-  padding: 6px;
-}
-
-.table-dark tr:nth-child(odd) td {
-  background: var(--color-row-odd);
-}
-
-.name-cell,
-.map-cell {
-  max-width: 250px;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--color-text-clickable) !important;
-}
-
-.name-column {
-  width: auto;
-  white-space: nowrap;
-}
-
-.player-name:hover,
-.map-name:hover {
-  background: var(--color-primary) !important;
-}
-
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: var(--color-primary);
-}
-
-.clickable {
-  cursor: pointer;
-}
-
-.class-icon-small {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.avatar {
-  width: 25px;
-  height: 25px;
-  margin-right: 8px;
-  border: 1px solid var(--color-primary);
-  border-radius: 2px;
-}
-
-.type-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.record-type {
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.25rem;
-  font-weight: bold;
-}
-
-.server-info {
   display: flex;
   flex-direction: column;
 }
 
-.server-name {
-  font-weight: bold;
-  color: var(--color-text);
+.card:hover {
+  transform: translateY(-10px) translateX(-10px) rotate(2deg);
+  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.server-ip {
-  color: var(--color-text);
-  opacity: 0.7;
+.card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #ffffff;
 }
 
-.player-info {
+.card p {
+  color: var(--color-text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.card-image {
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.server-status {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-}
-
-.status-high {
-  background: #ef4444;
-}
-
-.status-medium {
-  background: #eab308;
-}
-
-.status-low {
-  background: #22c55e;
-}
-
-.location-info {
+  justify-content: center;
   color: var(--color-text);
 }
 
-.connect-btn {
-  padding: 0.25rem 0.75rem;
-  transition: background-color 0.2s ease;
+.compact-ratings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.connect-btn:hover {
-  background: var(--color-row) !important;
+.rating-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.timestamp-cell {
+.rating-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.rating-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--color-dark);
+  text-shadow: none;
+  min-width: 40px;
+  text-align: center;
+}
+
+.rating-label {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.completion-count {
+  color: var(--color-text);
+  margin-top: 20px;
+}
+
+.tier-color.tier-0 {
+  background: rgba(51, 51, 51, 0.5);
+  color: var(--color-text);
+}
+.tier-color.tier-1 {
+  background: rgba(110, 208, 246, 0.5); /* Cold Blue */
+  color: var(--color-text);
+}
+.tier-color.tier-2 {
+  background: rgba(86, 179, 233, 0.5); /* Sky Blue */
+  color: var(--color-text);
+}
+.tier-color.tier-3 {
+  background: rgba(69, 184, 173, 0.5); /* Teal */
+  color: var(--color-text);
+}
+.tier-color.tier-4 {
+  background: rgba(101, 193, 139, 0.5); /* Mint */
+  color: var(--color-text);
+}
+.tier-color.tier-5 {
+  background: rgba(163, 217, 119, 0.5); /* Lime Green */
+  color: var(--color-text);
+}
+.tier-color.tier-6 {
+  background: rgba(243, 230, 131, 0.5); /* Yellow */
+  color: var(--color-text);
+}
+.tier-color.tier-7 {
+  background: rgba(246, 194, 103, 0.5); /* Orange-Yellow */
+  color: var(--color-text);
+}
+.tier-color.tier-8 {
+  background: rgba(240, 141, 91, 0.5); /* Orange */
+  color: var(--color-text);
+}
+.tier-color.tier-9 {
+  background: rgba(230, 105, 94, 0.5); /* Coral */
+  color: var(--color-text);
+}
+.tier-color.tier-10 {
+  background: rgba(214, 69, 69, 0.5); /* Red */
   color: var(--color-text);
 }
 
-@media (max-width: 767.98px) {
-  .header-hero {
-    height: 12rem;
+.rating-color.rating-1 {
+  background: rgba(148, 196, 125, 0.5);
+  color: var(--color-text);
+}
+.rating-color.rating-2 {
+  background: rgba(171, 208, 153, 0.5);
+  color: var(--color-text);
+}
+.rating-color.rating-3 {
+  background: rgba(195, 178, 147, 0.5);
+  color: var(--color-text);
+}
+.rating-color.rating-4 {
+  background: rgba(224, 102, 102, 0.5);
+  color: var(--color-text);
+}
+
+.youtube-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.youtube-thumbnail {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border-radius: 12px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.video-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.video-meta {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2.5rem;
   }
 
-  .header-title {
+  .nav {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
     font-size: 2rem;
   }
+  .search-results-dropdown {
+    min-width: 150px;
+    max-width: 300px;
+  }
 
-  .header-subtitle {
+  .card {
+    padding: 8px;
+  }
+
+  .card-image {
+    height: 80px;
+  }
+
+  .card h3 {
     font-size: 1rem;
   }
 
-  .button-group {
-    flex-direction: row;
-    width: 100%;
-    max-width: 100%;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .toggle-btn {
-    flex: 1;
-    margin: 5px;
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
-  .table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .table-responsive {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-
-  .table-dark th,
-  .table-dark td {
-    padding: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
-  .table-header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
-  }
-
-  .table-header-icon {
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  .table-header-text {
-    width: 100%;
-    text-align: center;
-  }
-
-  .name-cell,
-  .map-cell {
-    max-width: 150px;
-  }
-
-  .server-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .player-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .connect-btn {
-    padding: 5px 10px;
-    font-size: 12px;
-  }
-
-  .content-container {
-    padding: 0 15px;
-  }
-
-  .avatar {
-    width: 20px;
-    height: 20px;
+  .completion-count {
+    font-size: 0.7rem;
   }
 }
 </style>
