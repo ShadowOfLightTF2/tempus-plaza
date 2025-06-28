@@ -795,6 +795,7 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
+  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
 }
 
 .search-icon {
@@ -840,10 +841,9 @@ export default {
 
 .filter-section {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   width: fit-content;
   max-width: 100%;
 }
@@ -1353,8 +1353,8 @@ export default {
 }
 
 .table-responsive {
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
-  border: 1px solid var(--color-border);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+  border: 1px solid var(--color-border-soft);
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 0px;
@@ -1365,7 +1365,7 @@ export default {
 }
 
 .table-dark thead {
-  border-bottom: 1px solid var(--color-border) !important;
+  border-bottom: 1px solid var(--color-border-soft) !important;
 }
 
 .table-dark th {

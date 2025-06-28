@@ -387,15 +387,19 @@ export default {
   max-width: 1200px;
 }
 
+.button-group {
+  border: none;
+}
+
 .table-wrapper {
   width: 100%;
   border-radius: 0 0 8px 8px;
   border-top: none;
-  border: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-container-wrapper {
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .table-header-content {
@@ -408,7 +412,7 @@ export default {
     rgba(74, 111, 165, 0.3),
     rgba(37, 55, 82, 0.3)
   );
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-header-icon {
@@ -445,7 +449,7 @@ export default {
 }
 
 .table-dark thead {
-  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .table-dark th {

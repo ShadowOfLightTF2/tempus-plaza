@@ -20,21 +20,21 @@
             <button
               :class="{ active: currentView === 'worldrecords' }"
               @click="switchView('worldrecords')"
-              class="toggle-btn btn"
+              class="toggle-btn btn btn-dark update-button"
             >
               <span class="btn-text">World Records</span>
             </button>
             <button
               :class="{ active: currentView === 'toptimes' }"
               @click="switchView('toptimes')"
-              class="toggle-btn btn"
+              class="toggle-btn btn btn-dark update-button"
             >
               <span class="btn-text">Top Times</span>
             </button>
             <button
               :class="{ active: currentView === 'group1s' }"
               @click="switchView('group1s')"
-              class="toggle-btn btn"
+              class="toggle-btn btn btn-dark update-button"
             >
               <span class="btn-text">Group 1s</span>
             </button>
@@ -121,7 +121,7 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest top times</h3>
-                  <p class="table-header-subtitle">Updates twice a day</p>
+                  <p class="table-header-subtitle">Updates once a day</p>
                 </div>
               </div>
               <div class="table-responsive">
@@ -196,7 +196,7 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest group 1s</h3>
-                  <p class="table-header-subtitle">Updates twice a day</p>
+                  <p class="table-header-subtitle">Updates once a day</p>
                 </div>
               </div>
               <div class="table-responsive">
@@ -419,7 +419,11 @@ export default {
 }
 
 .table-container-wrapper {
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+}
+
+.button-group {
+  border: none;
 }
 
 .page-header {
@@ -444,7 +448,7 @@ export default {
   width: 100%;
   border-radius: 0 0 8px 8px;
   border-top: none;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
 }
 
 .table-header-content {
@@ -457,7 +461,6 @@ export default {
     rgba(74, 111, 165, 0.3),
     rgba(37, 55, 82, 0.3)
   );
-  border-bottom: 1px solid var(--color-border);
 }
 
 .table-header-icon {
@@ -499,7 +502,7 @@ export default {
 }
 
 .table-dark thead {
-  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .table-dark th {
@@ -589,7 +592,6 @@ export default {
     width: 100%;
     max-width: 300px;
     margin: 0 auto 2rem;
-    border-bottom: 1px solid var(--color-border) !important;
     border-radius: 12px;
   }
 

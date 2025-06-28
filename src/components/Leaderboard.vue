@@ -89,182 +89,186 @@
         v-else
         class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
       >
-        <div class="table-wrapper">
-          <div
-            class="maps-header"
-            style="
-              background: linear-gradient(
-                135deg,
-                rgba(74, 111, 165, 0.3),
-                rgba(37, 55, 82, 0.3)
-              );
-            "
-          >
-            <div class="header-content">
-              <img
-                src="/icons/soldier.png"
-                alt="Soldier Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-type">
-                  {{ selectedType }}
-                  {{ selectedIndex !== null ? selectedIndex : "" }}
-                </p>
-                <p class="header-tier-rating">
-                  T{{ selectedTier("soldier") }} - R{{
-                    selectedRating("soldier")
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Duration</th>
-                  <th>Player</th>
-                  <th style="text-align: right">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(entry, index) in displayedSoldierEntries"
-                  :key="'soldier-' + index"
-                  class="fade-in"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(entry.placement)"
-                  >
-                    <span v-if="index + 1 === 1">🥇</span>
-                    <span v-else-if="index + 1 === 2">🥈</span>
-                    <span v-else-if="index + 1 === 3">🥉</span>
-                    {{ index + 1 }}
-                  </td>
-                  <td class="duration-column">
-                    {{ formatDuration(entry.duration) }}
-                  </td>
-                  <td
-                    class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(entry.id)"
-                  >
-                    {{ entry.name }}
-                  </td>
-                  <td class="date-column">{{ formatDate(entry.date) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-if="showMoreLoading" class="text-center">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading records...</span>
-            </div>
-          </div>
-          <div v-else class="maps-footer">
-            <button
-              v-if="displayedSoldierEntries.length < selectedRecords.length"
-              @click="showMoreSoldierEntries"
-              class="btn btn-dark update-button"
+        <div class="soldier-table-container">
+          <div class="table-wrapper">
+            <div
+              class="maps-header"
               style="
-                background: rgba(74, 111, 165, 0.8);
-                font-weight: bold;
-                width: 100%;
+                background: linear-gradient(
+                  135deg,
+                  rgba(74, 111, 165, 0.3),
+                  rgba(37, 55, 82, 0.3)
+                );
               "
             >
-              Show more
-            </button>
+              <div class="header-content">
+                <img
+                  src="/icons/soldier.png"
+                  alt="Soldier Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-type">
+                    {{ selectedType }}
+                    {{ selectedIndex !== null ? selectedIndex : "" }}
+                  </p>
+                  <p class="header-tier-rating">
+                    T{{ selectedTier("soldier") }} - R{{
+                      selectedRating("soldier")
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Duration</th>
+                    <th>Player</th>
+                    <th style="text-align: right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(entry, index) in displayedSoldierEntries"
+                    :key="'soldier-' + index"
+                    class="fade-in"
+                  >
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(entry.placement)"
+                    >
+                      <span v-if="index + 1 === 1">🥇</span>
+                      <span v-else-if="index + 1 === 2">🥈</span>
+                      <span v-else-if="index + 1 === 3">🥉</span>
+                      {{ index + 1 }}
+                    </td>
+                    <td class="duration-column">
+                      {{ formatDuration(entry.duration) }}
+                    </td>
+                    <td
+                      class="name-cell align-middle player-name clickable name-column"
+                      @click="goToPlayer(entry.id)"
+                    >
+                      {{ entry.name }}
+                    </td>
+                    <td class="date-column">{{ formatDate(entry.date) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="showMoreLoading" class="text-center">
+              <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading records...</span>
+              </div>
+            </div>
+            <div v-else class="maps-footer">
+              <button
+                v-if="displayedSoldierEntries.length < selectedRecords.length"
+                @click="showMoreSoldierEntries"
+                class="btn btn-dark update-button"
+                style="
+                  background: rgba(74, 111, 165, 0.8);
+                  font-weight: bold;
+                  width: 100%;
+                "
+              >
+                Show more
+              </button>
+            </div>
           </div>
         </div>
-        <div class="table-wrapper">
-          <div
-            class="maps-header"
-            style="
-              background: linear-gradient(
-                135deg,
-                rgba(74, 111, 165, 0.3),
-                rgba(37, 55, 82, 0.3)
-              );
-            "
-          >
-            <div class="header-content">
-              <img
-                src="/icons/demoman.png"
-                alt="Demoman Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-type">
-                  {{ selectedType }}
-                  {{ selectedIndex !== null ? selectedIndex : "" }}
-                </p>
-                <p class="header-tier-rating">
-                  T{{ selectedTier("demoman") }} - R{{
-                    selectedRating("demoman")
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Duration</th>
-                  <th>Player</th>
-                  <th style="text-align: right">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(entry, index) in displayedDemomanEntries"
-                  :key="'demoman-' + index"
-                  class="fade-in"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(entry.placement)"
-                  >
-                    <span v-if="index + 1 === 1">🥇</span>
-                    <span v-else-if="index + 1 === 2">🥈</span>
-                    <span v-else-if="index + 1 === 3">🥉</span>
-                    {{ index + 1 }}
-                  </td>
-                  <td class="duration-column">
-                    {{ formatDuration(entry.duration) }}
-                  </td>
-                  <td
-                    class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(entry.id)"
-                  >
-                    {{ entry.name }}
-                  </td>
-                  <td class="date-column">{{ formatDate(entry.date) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-if="showMoreLoading" class="text-center">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading records...</span>
-            </div>
-          </div>
-          <div v-else class="maps-footer">
-            <button
-              v-if="displayedDemomanEntries.length < selectedRecords.length"
-              @click="showMoreDemomanEntries"
-              class="btn btn-dark update-button"
+        <div class="demoman-table-container">
+          <div class="table-wrapper">
+            <div
+              class="maps-header"
               style="
-                background: rgba(74, 111, 165, 0.8);
-                font-weight: bold;
-                width: 100%;
+                background: linear-gradient(
+                  135deg,
+                  rgba(74, 111, 165, 0.3),
+                  rgba(37, 55, 82, 0.3)
+                );
               "
             >
-              Show more
-            </button>
+              <div class="header-content">
+                <img
+                  src="/icons/demoman.png"
+                  alt="Demoman Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-type">
+                    {{ selectedType }}
+                    {{ selectedIndex !== null ? selectedIndex : "" }}
+                  </p>
+                  <p class="header-tier-rating">
+                    T{{ selectedTier("demoman") }} - R{{
+                      selectedRating("demoman")
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Duration</th>
+                    <th>Player</th>
+                    <th style="text-align: right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(entry, index) in displayedDemomanEntries"
+                    :key="'demoman-' + index"
+                    class="fade-in"
+                  >
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(entry.placement)"
+                    >
+                      <span v-if="index + 1 === 1">🥇</span>
+                      <span v-else-if="index + 1 === 2">🥈</span>
+                      <span v-else-if="index + 1 === 3">🥉</span>
+                      {{ index + 1 }}
+                    </td>
+                    <td class="duration-column">
+                      {{ formatDuration(entry.duration) }}
+                    </td>
+                    <td
+                      class="name-cell align-middle player-name clickable name-column"
+                      @click="goToPlayer(entry.id)"
+                    >
+                      {{ entry.name }}
+                    </td>
+                    <td class="date-column">{{ formatDate(entry.date) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="showMoreLoading" class="text-center">
+              <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading records...</span>
+              </div>
+            </div>
+            <div v-else class="maps-footer">
+              <button
+                v-if="displayedDemomanEntries.length < selectedRecords.length"
+                @click="showMoreDemomanEntries"
+                class="btn btn-dark update-button"
+                style="
+                  background: rgba(74, 111, 165, 0.8);
+                  font-weight: bold;
+                  width: 100%;
+                "
+              >
+                Show more
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -286,8 +290,8 @@ export default {
       loading: false,
       showMoreLoading: false,
       error: null,
-      soldierDisplayCount: 100,
-      demomanDisplayCount: 100,
+      soldierDisplayCount: 50,
+      demomanDisplayCount: 50,
       courseCount: 0,
       bonusCount: 0,
       Map__soldier_tier: 0,
@@ -486,8 +490,8 @@ export default {
         this.fetchBonusRecords(index);
       }
 
-      this.soldierDisplayCount = 100;
-      this.demomanDisplayCount = 100;
+      this.soldierDisplayCount = 50;
+      this.demomanDisplayCount = 50;
     },
     formatDuration(totalSeconds) {
       return formatDuration(totalSeconds);
@@ -522,7 +526,7 @@ export default {
       });
     },
     showMoreSoldierEntries() {
-      this.soldierOffset += 100;
+      this.soldierOffset += 50;
       if (this.selectedTypePill === "Map") {
         this.fetchLeaderboardData(
           0,
@@ -547,7 +551,7 @@ export default {
     },
 
     showMoreDemomanEntries() {
-      this.demomanOffset += 100;
+      this.demomanOffset += 50;
       if (this.selectedTypePill === "Map") {
         this.fetchLeaderboardData(
           0,
@@ -683,8 +687,7 @@ export default {
   width: 100%;
   flex: 1;
   border-radius: 12px;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .rank-column {
@@ -723,11 +726,18 @@ export default {
   cursor: pointer;
 }
 
+.maps-footer {
+  z-index: 10;
+}
+
 .update-button {
+  position: relative;
+  z-index: 10;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+  pointer-events: auto;
 }
 
 .update-button:hover {
@@ -747,8 +757,8 @@ export default {
     rgba(37, 55, 82, 0.3)
   );
   transition: all 0.3s ease;
-  border: 2px solid var(--color-border);
-  box-shadow: 0 6px 20px rgb(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
 }
@@ -843,7 +853,7 @@ export default {
 
 .subcategory-pill {
   padding: 8px 16px;
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
@@ -855,18 +865,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: transform 0.3s ease;
 }
 
 .subcategory-pill:hover {
   background: rgba(74, 111, 165, 0.8);
-  transform: translateY(-1px);
+  transform: scale(1.03);
 }
 
 .subcategory-pill.active {
   background: rgba(74, 111, 165, 0.8);
   border-color: var(--color-primary);
   color: var(--color-text);
-  box-shadow: 0 6px 20px rgb(0, 0, 0, 0.5);
+  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
 }
 
 .map-pill {
@@ -915,8 +926,8 @@ export default {
   border-radius: 12px;
   padding: 4px;
   gap: 2px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0, 0.5);
-  border: 1px solid var(--color-border);
+  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border-soft);
 }
 
 .category-tab {
@@ -930,10 +941,12 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  transition: transform 0.3s ease;
 }
 
 .category-tab:hover {
   background: rgba(74, 111, 165, 0.8);
+  transform: scale(1.03);
 }
 
 .category-tab.active {

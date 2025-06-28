@@ -63,10 +63,9 @@ export default {
   margin: 40px auto;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   padding: 40px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .panel-header h2 {

@@ -125,7 +125,7 @@ export default {
   background: var(--color-dark);
   border: 1px solid rgba(42, 42, 42, 0.99);
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 .card-header {
   background: linear-gradient(135deg, var(--color-primary), var(--color-box));
@@ -150,7 +150,7 @@ export default {
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 10px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   color: var(--color-text);
 }
 </style>

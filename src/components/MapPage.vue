@@ -684,7 +684,7 @@ export default {
   border-radius: 16px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .banner-content {
@@ -750,9 +750,14 @@ export default {
   background: rgba(29, 34, 43, 0.842);
   transition: all 0.3s ease;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.stat-block:hover {
+  transform: translateY(-2px);
 }
 
 .stat-icon {
@@ -837,7 +842,7 @@ export default {
   padding: 8px 16px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.4);
 }
 
 .video-title {
@@ -855,8 +860,14 @@ export default {
   padding: 16px;
   margin-bottom: 16px !important;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   transition: all 0.3s ease;
+  transition: transform 0.3s ease;
+}
+
+.video-card:hover {
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  transform: scale(1.01);
 }
 
 .authors-wrapper {
@@ -865,12 +876,18 @@ export default {
   width: 100%;
 }
 
+.author-card:hover,
+.map-date-added:hover {
+  transform: translateY(-1px);
+}
+
 .authors-block {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
   max-width: 600px;
+  transition: transform 0.3s ease;
 }
 
 .author-card {
@@ -918,6 +935,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   display: inline-flex;
   align-items: center;
+  transition: transform 0.3s ease;
 }
 
 .video-container {
@@ -1182,7 +1200,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   margin-bottom: 16px;
 }
 
@@ -1204,7 +1222,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   margin-bottom: 16px;
   transition: all 0.3s ease;
 }
@@ -1212,7 +1230,7 @@ export default {
 .collapsible-header:hover {
   background: rgba(74, 111, 165, 0.8);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .collapsible-header .video-section-title {

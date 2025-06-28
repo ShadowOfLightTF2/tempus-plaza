@@ -691,7 +691,7 @@ export default {
   width: 200px;
   padding: 8px 8px 8px 40px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
   border-radius: 12px;
   color: #ffffff;
   font-size: 16px;
@@ -711,7 +711,7 @@ export default {
 .picker-section {
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid var(--color-border);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
   border-radius: 12px 12px 0px 0px !important;
   padding: 20px;
 }
@@ -847,7 +847,7 @@ export default {
 
 .filter-section {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border, #444);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
@@ -855,7 +855,7 @@ export default {
   justify-content: center;
   width: fit-content;
   max-width: 100%;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .filter-content {
@@ -972,20 +972,20 @@ export default {
 
 .table-responsive {
   overflow: hidden;
-  border-left: 1px solid var(--color-border);
-  border-right: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
   border-radius: 0 0 8px 8px;
 }
 
 .table-container {
   border-radius: 8px !important;
   border-top: none;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .button-group {
-  border-top: none;
+  border: none;
   border-radius: 0;
 }
 
@@ -1004,13 +1004,12 @@ export default {
 
 .table td {
   padding: 12px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-dark thead th {
   background: rgba(74, 111, 165, 0.3) !important;
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .table-dark td {

@@ -65,21 +65,25 @@
         <hr class="divider" style="width: 100%; margin-top: 100px" />
         <div class="section">
           <div class="container">
-            <h2 class="section-title">Todays most popular maps</h2>
+            <h2 class="section-title">Most popular maps</h2>
             <div class="grid">
               <div
                 class="card"
                 v-for="map in popularSoldierMaps"
                 :key="map.id"
                 @click="goToMap(map.map_id)"
+                :style="{
+                  background: `
+                    linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                    url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+                  `,
+                  backgroundBlendMode: 'multiply, normal, normal',
+                  backgroundSize: 'cover, cover, cover',
+                  backgroundPosition: 'center, center, center',
+                }"
               >
                 <h5 class="section-subtitle">Soldier</h5>
-                <div class="card-image">
-                  <img
-                    :src="`/tempus-plaza/maps/${map.name}.jpg`"
-                    :alt="map.name"
-                  />
-                </div>
                 <h3>{{ map.name }}</h3>
                 <div class="compact-ratings-grid">
                   <div class="rating-section">
@@ -120,7 +124,7 @@
                 <div class="completion-count">
                   <i class="bi bi-check-circle me-1"></i>
                   {{ map.run_count }}
-                  completions today
+                  runs recently
                 </div>
               </div>
             </div>
@@ -131,14 +135,18 @@
                 v-for="map in popularDemomanMaps"
                 :key="map.id"
                 @click="goToMap(map.map_id)"
+                :style="{
+                  background: `
+                    linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                    url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+                  `,
+                  backgroundBlendMode: 'multiply, normal, normal',
+                  backgroundSize: 'cover, cover, cover',
+                  backgroundPosition: 'center, center, center',
+                }"
               >
                 <h5 class="section-subtitle">Demoman</h5>
-                <div class="card-image">
-                  <img
-                    :src="`/tempus-plaza/maps/${map.name}.jpg`"
-                    :alt="map.name"
-                  />
-                </div>
                 <h3>{{ map.name }}</h3>
                 <div class="compact-ratings-grid">
                   <div class="rating-section">
@@ -179,7 +187,7 @@
                 <div class="completion-count">
                   <i class="bi bi-check-circle me-1"></i>
                   {{ map.run_count }}
-                  completions today
+                  runs recently
                 </div>
               </div>
             </div>
@@ -188,56 +196,20 @@
         <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
-            <h2 class="section-title">Recent YouTube Videos</h2>
+            <h2 class="section-title">TF2RJWeekly uploads</h2>
             <div class="grid">
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">📺</div>
-                <div class="video-title">
-                  10 Amazing Geography Facts That Will Blow Your Mind
+              <div
+                class="video-card youtube-card"
+                v-for="video in tf2rjweeklyVideos"
+                :key="video.id"
+                @click="openYoutubeVideo(video.youtube_id)"
+              >
+                <div class="youtube-thumbnail">
+                  <img :src="video.thumbnail_url" alt="Video Thumbnail" />
                 </div>
+                <div class="video-title">{{ video.title }}</div>
                 <div class="video-meta">
-                  GeoExplorer • 2 days ago • 1.2M views
-                </div>
-              </div>
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">🎥</div>
-                <div class="video-title">
-                  How Satellite Mapping Changed Our World
-                </div>
-                <div class="video-meta">TechMaps • 4 days ago • 850K views</div>
-              </div>
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">🌐</div>
-                <div class="video-title">
-                  The Future of Interactive Maps and AR
-                </div>
-                <div class="video-meta">
-                  FutureGeo • 1 week ago • 720K views
-                </div>
-              </div>
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">🎬</div>
-                <div class="video-title">
-                  Hidden Gems: Secret Places on Google Earth
-                </div>
-                <div class="video-meta">
-                  MapMysteries • 1 week ago • 650K views
-                </div>
-              </div>
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">📱</div>
-                <div class="video-title">Best Map Apps for Travel in 2025</div>
-                <div class="video-meta">
-                  TravelTech • 2 weeks ago • 480K views
-                </div>
-              </div>
-              <div class="card youtube-card">
-                <div class="youtube-thumbnail">🌟</div>
-                <div class="video-title">
-                  Creating Beautiful Data Visualizations
-                </div>
-                <div class="video-meta">
-                  DataViz Pro • 2 weeks ago • 390K views
+                  {{ formatDate(video.published_on) }}
                 </div>
               </div>
             </div>
@@ -262,6 +234,7 @@ export default {
       searchResults: null,
       popularSoldierMaps: [],
       popularDemomanMaps: [],
+      tf2rjweeklyVideos: [],
     };
   },
   methods: {
@@ -321,16 +294,36 @@ export default {
         console.error("Error fetching popular maps:", error);
       }
     },
+    async fetchTF2RJWeeklyVideos() {
+      try {
+        const response = await fetch("http://localhost:3000/news/get-videos");
+        if (!response.ok) throw new Error("Failed to fetch TF2RJWeekly videos");
+        const data = await response.json();
+        this.tf2rjweeklyVideos = data;
+      } catch (error) {
+        console.error("Error fetching TF2RJWeekly videos:", error);
+      }
+    },
     onSearch() {
       this.debouncedSearch();
     },
     sanitize(html) {
       return DOMPurify.sanitize(html);
     },
+    formatDate(dateString) {
+      const options = { year: "numeric", month: "short", day: "numeric" };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    openYoutubeVideo(youtubeId) {
+      if (youtubeId) {
+        window.open(`https://www.youtube.com/watch?v=${youtubeId}`, "_blank");
+      }
+    },
   },
   created() {
     this.debouncedSearch = debounce(this.fetchSearchResults, 500);
     this.fetchPopularMaps();
+    this.fetchTF2RJWeeklyVideos();
   },
   watch: {
     searchQuery() {
@@ -525,6 +518,7 @@ export default {
   font-weight: 700;
   text-align: center;
   color: #ffffff;
+  margin-bottom: 50px;
   background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -541,23 +535,38 @@ export default {
   margin-bottom: 20px;
 }
 
-.card {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+.card,
+.video-card {
+  box-shadow: 0 0 20px rgba(0, 0, 0);
+  background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.288) 20%,
+      rgba(255, 255, 255, 0.15) 40%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    rgba(255, 255, 255, 0.05);
   border-radius: 20px;
-  padding: 15px;
+  padding: 10px;
+  padding-bottom: 25px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  cursor: pointer;
+}
+
+.video-card:hover {
   transform: translateY(-10px) translateX(-10px) rotate(2deg);
   box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card h3 {
@@ -570,17 +579,6 @@ export default {
   color: var(--color-text);
   line-height: 1.6;
   margin-bottom: 20px;
-}
-
-.card-image {
-  height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
 }
 
 .compact-ratings-grid {
@@ -697,7 +695,6 @@ export default {
 .youtube-thumbnail {
   width: 100%;
   height: 180px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   border-radius: 12px;
   margin-bottom: 15px;
   display: flex;
@@ -707,6 +704,12 @@ export default {
   font-size: 2rem;
   position: relative;
   overflow: hidden;
+}
+.youtube-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
 }
 .video-title {
   font-size: 1.1rem;

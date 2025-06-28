@@ -169,7 +169,7 @@
               <div class="chart-header">
                 <p class="section-header">Soldier points history</p>
               </div>
-              <div class="card-body">
+              <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
                   <div class="spinner-border text-light" role="status">
                     <span class="visually-hidden">Loading chart...</span>
@@ -190,7 +190,7 @@
               <div class="chart-header">
                 <p class="section-header">Overall points history</p>
               </div>
-              <div class="card-body">
+              <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
                   <div class="spinner-border text-light" role="status">
                     <span class="visually-hidden">Loading chart...</span>
@@ -211,7 +211,7 @@
               <div class="chart-header">
                 <p class="section-header">Demoman points history</p>
               </div>
-              <div class="card-body">
+              <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
                   <div class="spinner-border text-light" role="status">
                     <span class="visually-hidden">Loading chart...</span>
@@ -246,47 +246,61 @@
                     </div>
                     <div v-else>
                       <div class="row card-row">
-                        <div class="col-md-12 text-center mb-3 stat-item">
-                          <h4 class="card-title">Completion</h4>
-                          <p class="card-text player-stats">
-                            {{ stats.map.completion.soldier }}%
-                          </p>
+                        <div class="col-md-12 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h4 class="card-title">Completion</h4>
+                            <p class="card-text player-stats">
+                              {{ stats.map.completion.soldier }}%
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-6 text-center mb-3 stat-item">
-                          <h6 class="card-title">World records</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.worldRecordAmount.soldier }}
-                          </p>
+                        <div class="col-md-6 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">World records</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.worldRecordAmount.soldier }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-6 text-center mb-3 stat-item">
-                          <h6 class="card-title">Top times</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.topTimesAmount.soldier }}
-                          </p>
+                        <div class="col-md-6 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">Top times</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.topTimesAmount.soldier }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G1</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.soldier.G1 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G1</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.soldier.G1 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G2</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.soldier.G2 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G2</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.soldier.G2 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G3</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.soldier.G3 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G3</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.soldier.G3 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G4</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.soldier.G4 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G4</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.soldier.G4 }}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -372,17 +386,10 @@
           </div>
           <div class="col-md-6 tabs-container">
             <!-- Recent runs in the middle -->
-            <div
-              class="records-card"
-              style="
-                border: none;
-                box-shadow: 0 6px 20px rgb(0, 0, 0);
-                padding-top: 15px;
-              "
-            >
+            <div class="records-card">
               <div
                 class="card-header tabs-header text-white"
-                style="background: rgba(255, 255, 255, 0.05); border: none"
+                style="background: rgba(255, 255, 255, 0.05)"
               >
                 <div class="button-group">
                   <button
@@ -521,47 +528,61 @@
                     </div>
                     <div v-else>
                       <div class="row card-row">
-                        <div class="col-md-12 text-center mb-3 stat-item">
-                          <h4 class="card-title">Completion</h4>
-                          <p class="card-text player-stats">
-                            {{ stats.map.completion.demoman }}%
-                          </p>
+                        <div class="col-md-12 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h4 class="card-title">Completion</h4>
+                            <p class="card-text player-stats">
+                              {{ stats.map.completion.demoman }}%
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-6 text-center mb-3 stat-item">
-                          <h6 class="card-title">World records</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.worldRecordAmount.demoman }}
-                          </p>
+                        <div class="col-md-6 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">World records</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.worldRecordAmount.demoman }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-6 text-center mb-3 stat-item">
-                          <h6 class="card-title">Top times</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.topTimesAmount.demoman }}
-                          </p>
+                        <div class="col-md-6 text-center mb-3 p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">Top times</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.topTimesAmount.demoman }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G1</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.demoman.G1 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G1</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.demoman.G1 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G2</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.demoman.G2 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G2</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.demoman.G2 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G3</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.demoman.G3 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G3</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.demoman.G3 }}
+                            </p>
+                          </div>
                         </div>
-                        <div class="col-md-3 text-center stat-item">
-                          <h6 class="card-title">G4</h6>
-                          <p class="card-text player-stats">
-                            {{ stats.map.placement.demoman.G4 }}
-                          </p>
+                        <div class="col-md-3 text-center p-1">
+                          <div class="stat-item">
+                            <h6 class="card-title">G4</h6>
+                            <p class="card-text player-stats">
+                              {{ stats.map.placement.demoman.G4 }}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -774,6 +795,14 @@ export default {
         type: "line",
         height: 250,
         background: "rgba(255, 255, 255, 0.05)",
+        dropShadow: {
+          enabled: true,
+          color: "red",
+          top: 5,
+          left: 3,
+          blur: 8,
+          opacity: 0.5,
+        },
         toolbar: {
           show: false,
         },
@@ -829,6 +858,14 @@ export default {
         type: "line",
         height: 250,
         background: "rgba(255, 255, 255, 0.05)",
+        dropShadow: {
+          enabled: true,
+          color: "cyan",
+          top: 5,
+          left: 3,
+          blur: 8,
+          opacity: 0.5,
+        },
         toolbar: {
           show: false,
         },
@@ -884,6 +921,14 @@ export default {
         type: "line",
         height: 250,
         background: "rgba(255, 255, 255, 0.05)",
+        dropShadow: {
+          enabled: true,
+          color: "blue",
+          top: 5,
+          left: 3,
+          blur: 8,
+          opacity: 0.5,
+        },
         toolbar: {
           show: false,
         },
@@ -1260,7 +1305,7 @@ export default {
         const response = await axios.get(`${API_BASE_URL}/users/${playerId}`);
         const data = response.data;
         if (!data || data.length === 0) {
-          console.log("User not found");
+          console.log("User not found for");
           this.player = {
             ...this.player,
             gender: "male",
@@ -1582,9 +1627,13 @@ export default {
 .profile-banner {
   position: relative;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
+.vue-apexcharts {
+  min-height: 200px !important;
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.75);
+}
 .avatar {
   width: 96px;
   height: 96px;
@@ -1600,12 +1649,10 @@ export default {
 .shared-row {
   border: 1px solid var(--color-border-soft);
   background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
   color: var(--color-text-clickable);
   cursor: pointer;
-}
-
-.shared-row:hover {
-  background-color: var(--color-primary);
+  transition: transform 0.3s ease;
 }
 
 .shared-row-name {
@@ -1649,13 +1696,42 @@ export default {
 
 .banner-block {
   background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   border-radius: 10px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  transition: transform 0.3s ease;
+}
+
+.shared-row:hover,
+.record-item:hover {
+  transform: scale(1.03);
+  background-color: var(--color-primary);
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border-soft);
+  border-collapse: collapse;
+  border-radius: 2px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.banner-block:hover,
+.stat-item:hover {
+  transform: translateY(-2px);
 }
 .stat-block {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .stat-block .card-title,
@@ -1680,21 +1756,6 @@ export default {
   font-weight: bold !important;
 }
 
-.stat-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border-soft);
-  border-collapse: collapse;
-  border-radius: 2px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
 .section-header {
   color: var(--color-text);
   font-size: 20px;
@@ -1711,6 +1772,8 @@ export default {
   margin-bottom: 0;
   border-bottom: none;
   color: var(--color-text);
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
 }
 
 .card-header.tabs-header .button-group {
@@ -1732,13 +1795,15 @@ export default {
   padding: 0;
 }
 
-.card-body {
+.chart-body {
   padding: 0px 10px !important;
   border-radius: 0 0 10px 10px !important;
+  margin-bottom: 20px;
 }
 
 .card-row {
   padding: 0px 15px 10px 15px;
+  display: flex;
 }
 .rank-card-body {
   padding: 15px;
@@ -1766,6 +1831,7 @@ export default {
   border: 1px solid var(--color-border-soft);
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 0px 10px rgba(0, 0, 0, 0.75);
 }
 
 .list-group-item.record-item:hover {
@@ -1778,14 +1844,14 @@ export default {
   padding: 10px;
 }
 .records-card {
-  padding: 5px 0px 0px 0px !important;
   border-radius: 10px !important;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .completion-boxes,
 .records-boxes {
-  display: flex;
-  gap: 10px;
+  display: flex !important;
+  gap: 10px !important;
 }
 
 .completion-boxes .card,
@@ -1843,6 +1909,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  transition: transform 0.3s ease;
 }
 
 .record-time-detail-grid {
@@ -1946,11 +2013,10 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   padding: 0 5px;
-  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   margin-bottom: 20px;
   color: #fff;
 }
-
 .chart-header {
   margin-bottom: 10px;
   margin-top: 10px;

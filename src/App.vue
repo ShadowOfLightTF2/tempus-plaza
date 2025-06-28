@@ -679,7 +679,7 @@ html {
 
 .nav-link-bold {
   color: #ffffff !important;
-  font-weight: bold;
+  font-weight: bold !important;
   border-radius: 8px;
 }
 
@@ -762,16 +762,15 @@ html {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: transform 0.3s ease;
 }
 
 .footer-link:hover {
   background: rgba(74, 111, 165, 0.8);
   color: var(--color-text);
   text-decoration: none;
-}
-
-.footer-link i {
-  font-size: 1rem;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
