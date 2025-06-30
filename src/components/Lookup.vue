@@ -285,94 +285,95 @@
         </div>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <div class="search-records-container">
-        <div class="search-input-wrapper">
-          <svg
-            class="search-icon"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="M21 21l-4.35-4.35"></path>
-          </svg>
-          <input
-            type="text"
-            v-model="recordSearchQuery"
-            placeholder="Search map..."
-            class="search-records-input"
-          />
-        </div>
-      </div>
       <div v-if="loading" class="text-center">
         <div class="spinner-border text-light" role="status">
           <span class="visually-hidden">Loading records...</span>
         </div>
       </div>
       <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-      <div
-        v-else
-        class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-      >
-        <div v-if="playerId != null" class="table-wrapper">
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Map</th>
-                  <th>Type</th>
-                  <th>Class</th>
-                  <th></th>
-                  <th></th>
-                  <th>Time</th>
-                  <th>Rank</th>
-                  <th>Completion</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="record in filteredRecords"
-                  :key="record.id"
-                  class="fade-in"
+      <div v-else>
+        <div v-if="playerId != null" class="search-records-container">
+          <div class="search-input-wrapper">
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              v-model="recordSearchQuery"
+              placeholder="Search map..."
+              class="search-records-input"
+            />
+          </div>
+        </div>
+        <div
+          class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
+        >
+          <div v-if="playerId != null" class="table-wrapper">
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th>Map</th>
+                    <th>Type</th>
+                    <th>Class</th>
+                    <th></th>
+                    <th></th>
+                    <th>Time</th>
+                    <th>Rank</th>
+                    <th>Completion</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="record in filteredRecords"
+                    :key="record.id"
+                    class="fade-in"
+                  >
+                    <td class="clickable" @click="goToMap(record.map_id)">
+                      {{ record.map_name }}
+                    </td>
+                    <td>
+                      {{ getRecordType(record.type) }}{{ formatIndex(record) }}
+                    </td>
+                    <td>
+                      <img
+                        :src="`/icons/${record.class}.png`"
+                        :alt="`${record.class}`"
+                        class="class-icon"
+                      />
+                    </td>
+                    <td>T{{ record.tier }}</td>
+                    <td>R{{ record.rating }}</td>
+                    <td>{{ formatDuration(record.duration) }}</td>
+                    <td :class="getRankColorClass(record.placement)">
+                      {{ record.rank }}
+                    </td>
+                    <td>{{ record.completion_count }}</td>
+                    <td class="text-small">
+                      {{ formatDate(new Date(record.date * 1000)) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="maps-footer">
+                <button
+                  v-if="displayCount < filteredSortedItems.length"
+                  @click="showMore"
+                  class="btn btn-dark update-button show-more-btn"
                 >
-                  <td class="clickable" @click="goToMap(record.map_id)">
-                    {{ record.map_name }}
-                  </td>
-                  <td>
-                    {{ getRecordType(record.type) }}{{ formatIndex(record) }}
-                  </td>
-                  <td>
-                    <img
-                      :src="`/tempus-plaza/icons/${record.class}.png`"
-                      :alt="`${record.class}`"
-                      class="class-icon"
-                    />
-                  </td>
-                  <td>T{{ record.tier }}</td>
-                  <td>R{{ record.rating }}</td>
-                  <td>{{ formatDuration(record.duration) }}</td>
-                  <td :class="getRankColorClass(record.placement)">
-                    {{ record.rank }}
-                  </td>
-                  <td>{{ record.completion_count }}</td>
-                  <td class="text-small">
-                    {{ formatDate(new Date(record.date * 1000)) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="maps-footer">
-              <button
-                v-if="displayCount < filteredSortedItems.length"
-                @click="showMore"
-                class="btn btn-dark update-button show-more-btn"
-              >
-                Show more
-              </button>
+                  Show more
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -795,6 +796,7 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
   box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
 }
 
@@ -928,11 +930,24 @@ export default {
 
 .search-results-dropdown {
   position: absolute;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-box);
   border: 1px solid rgba(68, 68, 68, 0.3);
   border-radius: 12px;
   box-shadow: 0 0 0 1px var(--color-box, #444);
   width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  background: var(--color-box);
+  border: 1px solid rgba(68, 68, 68, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  width: 400px;
   max-height: 400px;
   overflow-y: auto;
   z-index: 1000;
@@ -949,7 +964,8 @@ export default {
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-box);
+  font-weight: bold;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -967,7 +983,7 @@ export default {
 .search-results-dropdown h6 {
   margin: 12px 16px 8px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 700;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1328,7 +1344,9 @@ export default {
 .search-records-container {
   width: 100%;
   max-width: 500px;
-  margin-bottom: 25px;
+  margin: 0 auto 25px auto;
+  display: flex;
+  justify-content: center;
 }
 
 .search-records-input {

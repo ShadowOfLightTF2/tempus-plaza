@@ -20,12 +20,12 @@ const routes = [
   {
     path: '/servers',
     name: 'Servers',
-    component: Servers
+    component: Servers,
   },
   {
     path: '/activity/:view?',
     name: 'Activity',
-    component: Activity
+    component: Activity,
   },
   {
     path: '/news',
@@ -33,7 +33,7 @@ const routes = [
     component: News,
   },
   {
-    path: '/maps',
+    path: '/maps/',
     name: 'Maps',
     component: Maps,
   },
@@ -43,7 +43,7 @@ const routes = [
     component: MapPage,
     props: route => ({
       mapId: Number(route.params.mapId)
-    })
+    }),
   },
   {
     path: '/maps/:mapId/records',
@@ -77,13 +77,14 @@ const routes = [
     component: PlayerPage,
     props: route => ({
       playerId: Number(route.params.playerId)
-    })
+    }),
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory('/tempus-plaza/'),
+  history: createWebHistory(),
   routes,
+  strict: false,
   scrollBehavior() { return { top: 0 }; },
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active'

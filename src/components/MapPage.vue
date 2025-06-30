@@ -36,7 +36,7 @@
             background: `
       linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
       radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+      url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
     `,
             backgroundBlendMode: 'multiply, normal, normal',
             backgroundSize: 'cover, cover, cover',
@@ -605,7 +605,7 @@ export default {
   },
   methods: {
     returnToAllMaps() {
-      this.$router.push("/maps");
+      this.$router.push({ name: "Maps" });
     },
     goBack() {
       this.$router.go(-1);

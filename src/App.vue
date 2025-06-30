@@ -414,7 +414,6 @@ export default {
       try {
         const response = await fetch(`${API_BASE_URL}/is-updating`);
         const data = await response.json();
-        console.log(data);
         this.isUpdating = data.isUpdating && !this.updateDismissed;
       } catch (error) {
         console.error("Error fetching update status:", error);
@@ -431,58 +430,49 @@ export default {
     loginWithSteam() {
       window.location.href = `${API_BASE_URL}/auth/steam`;
     },
-    logout() {
-      console.log(Cookies.get("user"), "user");
-      console.log(Cookies.get("session"), "session");
-      Cookies.remove("user", {
-        path: "/",
-        secure: false,
-        sameSite: "lax",
-      });
-      Cookies.remove("session", {
-        path: "/",
-        secure: false,
-        sameSite: "lax",
-      });
-      this.currentUser = null;
-      console.log(Cookies.get("user"));
-      this.$router.push({ name: "Home" });
+    async logout() {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        this.currentUser = null;
+        this.$router.push({ name: "Home" });
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
     },
     async updateUserPreferences() {
-      if (this.currentUser && this.currentUser.steamid) {
-        try {
-          const response = await fetch(
-            `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                rankPref: this.rankPreference,
-                gender: this.gender,
-              }),
-            }
-          );
-          if (!response.ok)
-            throw new Error("Failed to update user preferences");
-          const data = await response.json();
-          console.log("User preferences updated:", data);
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              rankPref: this.rankPreference,
+              gender: this.gender,
+            }),
+          }
+        );
 
-          const updatedUser = {
-            ...this.currentUser,
-            rankpref: this.rankPreference,
-            gender: this.gender,
-          };
-
-          this.currentUser = updatedUser;
-          Cookies.set("user", JSON.stringify(updatedUser), {
-            expires: 3650,
-            sameSite: "Lax",
-          });
-        } catch (error) {
-          console.error("Error updating user preferences:", error);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+
+        if (data.user) {
+          this.currentUser = data.user;
+        }
+
+        console.log("User preferences updated successfully");
+      } catch (error) {
+        console.error("Failed to update user preferences:", error);
       }
     },
 
@@ -565,6 +555,7 @@ export default {
   },
   mounted() {
     const userCookie = Cookies.get("user");
+    console.log("User cookie:", userCookie);
     if (userCookie) {
       try {
         const user = JSON.parse(userCookie);
@@ -1007,6 +998,7 @@ html {
 }
 
 .search-input:focus {
+  background: rgba(74, 111, 165, 0.8);
   outline: none;
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
 }

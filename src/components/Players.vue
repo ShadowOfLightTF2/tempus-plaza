@@ -517,8 +517,12 @@ export default {
     },
     async fetchPlayers(tableName, type, category, index) {
       try {
+        let indexFix = 0;
+        if (index > 0) indexFix = 50;
         const response = await axios.get(
-          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${index}`
+          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${
+            index - indexFix
+          }`
         );
         const players = response.data;
         if (index === 0) {

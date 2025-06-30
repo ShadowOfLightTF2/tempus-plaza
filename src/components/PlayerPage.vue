@@ -439,7 +439,7 @@
                             class="d-flex align-items-center record-class-map"
                           >
                             <img
-                              :src="`/tempus-plaza/icons/${record.class}.png`"
+                              :src="`/icons/${record.class}.png`"
                               :alt="record.class"
                               class="class-icon"
                               loading="lazy"
@@ -1295,10 +1295,10 @@ export default {
       this.showLauncherMenu = false;
     },
     handleImageError(event) {
-      event.target.src = "/tempus-plaza/icons/default-flag.jpg";
+      event.target.src = "/icons/default-flag.jpg";
     },
     returnToAllPlayers() {
-      this.$router.push("/players");
+      this.$router.push({ name: "Players" });
     },
     async fetchUserData(playerId) {
       try {
@@ -1313,7 +1313,7 @@ export default {
           };
           return;
         }
-        console.log(data);
+        console.log("Fetched user data:", data);
         this.player = {
           ...this.player,
           gender: data.gender,

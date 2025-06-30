@@ -86,7 +86,7 @@
                         @click="goToMap(record.map_id)"
                       >
                         <img
-                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :src="`/icons/${record.class}.png`"
                           :alt="record.class"
                           class="class-icon-small"
                         />
@@ -158,7 +158,7 @@
                         @click="goToMap(record.map_id)"
                       >
                         <img
-                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :src="`/icons/${record.class}.png`"
                           :alt="record.class"
                           class="class-icon-small"
                         />
@@ -233,7 +233,7 @@
                         @click="goToMap(record.map_id)"
                       >
                         <img
-                          :src="`/tempus-plaza/icons/${record.class}.png`"
+                          :src="`/icons/${record.class}.png`"
                           :alt="record.class"
                           class="class-icon-small"
                         />

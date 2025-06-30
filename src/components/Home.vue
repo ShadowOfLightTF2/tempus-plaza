@@ -4,7 +4,7 @@
       class="position-relative min-vh-100 w-100 overflow-hidden background-container"
     >
       <div class="container hero">
-        <h1>Tempus plaza</h1>
+        <h1>Tempus Plaza</h1>
         <div class="search-container" @click.stop>
           <div class="search-box">
             <div class="search-icon-container">
@@ -76,7 +76,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -139,7 +139,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/tempus-plaza/maps/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -196,7 +196,7 @@
         <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
-            <h2 class="section-title">TF2RJWeekly uploads</h2>
+            <h2 class="section-title">TF2RJweekly uploads</h2>
             <div class="grid">
               <div
                 class="video-card youtube-card"
@@ -278,9 +278,7 @@ export default {
     },
     async fetchPopularMaps() {
       try {
-        const response = await fetch(
-          "http://localhost:3000/maps/get-popular-maps"
-        );
+        const response = await fetch(`${API_BASE_URL}/maps/get-popular-maps`);
         if (!response.ok) throw new Error("Failed to fetch popular maps");
         const data = await response.json();
         this.popularSoldierMaps = data
@@ -296,7 +294,7 @@ export default {
     },
     async fetchTF2RJWeeklyVideos() {
       try {
-        const response = await fetch("http://localhost:3000/news/get-videos");
+        const response = await fetch(`${API_BASE_URL}/news/get-videos`);
         if (!response.ok) throw new Error("Failed to fetch TF2RJWeekly videos");
         const data = await response.json();
         this.tf2rjweeklyVideos = data;

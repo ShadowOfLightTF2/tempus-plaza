@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "homepage": "https://shadowoflighttf2.github.io/tempus-plaza/",
+  "homepage": "tempusplaza.xyz",
   "scripts": {
     "dev": "vite",
     "serve": "vue-cli-service serve",
