@@ -7,7 +7,7 @@ export function calculateGroups(totalCompletions) {
     return [g1, g2, g3, g4, g5];
 }
 
-export function formatDuration(recordDuration){
+export function formatDuration(recordDuration) {
     const totalSeconds = recordDuration;
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -15,13 +15,13 @@ export function formatDuration(recordDuration){
     const milliseconds = Math.floor((totalSeconds % 1) * 1000);
 
     if (hours > 0) {
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
     } else {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
     }
 }
 
-export function formatDate(unixTimestamp){
+export function formatDate(unixTimestamp) {
     const now = Date.now() / 1000;
     const secondsDifference = Math.floor(now - unixTimestamp);
 
@@ -42,7 +42,7 @@ export function formatDate(unixTimestamp){
         const minutes = Math.floor(secondsDifference / secondsInMinute);
         return pluralize(minutes, 'minute');
     } else if (secondsDifference < secondsInDay) {
-     const hours = Math.floor(secondsDifference / secondsInHour);
+        const hours = Math.floor(secondsDifference / secondsInHour);
         return pluralize(hours, 'hour');
     } else if (secondsDifference < secondsInWeek) {
         const days = Math.floor(secondsDifference / secondsInDay);

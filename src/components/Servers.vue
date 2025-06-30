@@ -208,10 +208,16 @@
 </template>
 
 <script>
+import { useHead } from "@vueuse/head";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
-  name: "Home",
+  name: "Servers",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Servers",
+    });
+  },
   data() {
     return {
       currentView: "topplayers",

@@ -601,7 +601,6 @@ export default {
   },
   async mounted() {
     await this.fetchAllMapData(this.mapId);
-    document.title = "Tempus plaza - " + (this.map.name || "Map");
   },
   methods: {
     returnToAllMaps() {

@@ -275,11 +275,17 @@
 
 <script>
 import { formatDate, formatDuration } from "@/utils/calculations";
+import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Activity",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Activity",
+    });
+  },
   props: {
     view: {
       type: String,
@@ -303,7 +309,6 @@ export default {
     },
   },
   async created() {
-    document.title = "Tempus plaza - Activity";
     await this.fetchData();
     const { view } = this.$route.params;
     if (view) {

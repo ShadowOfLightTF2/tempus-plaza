@@ -322,12 +322,18 @@
 
 <script>
 import axios from "axios";
+import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 
 export default {
   name: "Maps",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Maps",
+    });
+  },
   data() {
     return {
       maps: [],
@@ -354,7 +360,6 @@ export default {
   },
   mounted() {
     this.fetchData();
-    this.updateDocumentTitle();
   },
   computed: {
     currentItems() {
@@ -488,7 +493,6 @@ export default {
       if (this.currentView === view) return;
 
       this.currentView = view;
-      this.updateDocumentTitle();
 
       this.sortField = "soldier_tier";
       this.sortDirection = 1;
@@ -572,10 +576,6 @@ export default {
     getSortArrowSymbol(field) {
       if (this.sortField !== field) return "";
       return this.sortDirection === 1 ? "↑" : "↓";
-    },
-
-    updateDocumentTitle() {
-      document.title = `Tempus plaza - ${this.currentTitle}`;
     },
 
     clearAllFilters() {

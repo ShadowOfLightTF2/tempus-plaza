@@ -27,7 +27,8 @@
           </div>
           <p class="panel-description">
             Your support helps me pay for server uptime and upgrade the websites
-            services
+            services. Donator perks will be added to the website in the future.
+            (cosmetic changes only)
           </p>
           <hr class="divider" />
           <div class="panel-footer">
@@ -40,8 +41,14 @@
 </template>
 
 <script>
+import { useHead } from "@vueuse/head";
 export default {
   name: "DonatePage",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Donate",
+    });
+  },
   data() {
     return {};
   },

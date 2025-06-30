@@ -286,10 +286,16 @@
 
 <script>
 import axios from "axios";
+import { useHead } from "@vueuse/head";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Players",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Players",
+    });
+  },
   data: () => ({
     soldierPlayers: [],
     demomanPlayers: [],
@@ -331,7 +337,6 @@ export default {
     currentDemomanIndex: 50,
   }),
   mounted() {
-    document.title = "Tempus plaza - Players";
     this.fillDropdowns();
     const { category, item } = this.$route.params;
     if (category && item) {
@@ -733,7 +738,6 @@ export default {
 
 .category-tab:hover {
   background: rgba(74, 111, 165, 0.8) !important;
-  transform: scale(1.03);
 }
 
 .category-tab.active {

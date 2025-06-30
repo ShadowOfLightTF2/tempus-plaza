@@ -675,6 +675,8 @@
 <script>
 import axios from "axios";
 import VueApexCharts from "vue3-apexcharts";
+import { ref } from "vue";
+import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
 
@@ -682,6 +684,19 @@ const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerPage",
+  setup() {
+    const pageTitle = ref("Tempus Plaza | Player");
+
+    useHead({
+      title: pageTitle,
+    });
+
+    return {
+      updateTitle: (playerName) => {
+        pageTitle.value = `Tempus Plaza | ${playerName}`;
+      },
+    };
+  },
   props: {
     playerId: {
       type: Number,
@@ -729,11 +744,6 @@ export default {
       recentRecords: [],
       topTimes: [],
       worldRecords: [],
-    },
-    recordsDisplayed: {
-      "Latest runs": 10,
-      "Latest top times": 10,
-      "Latest world records": 10,
     },
     tabs: ["Latest runs", "Latest top times", "Latest world records"],
     currentTab: "Latest runs",
@@ -1057,13 +1067,8 @@ export default {
             "Latest top times": true,
             "Latest world records": true,
           };
-          this.recordsDisplayed = {
-            ...this.recordsDisplayed,
-            "Latest runs": 10,
-            "Latest top times": 10,
-            "Latest world records": 10,
-          };
-
+          this.currentPage = 1;
+          this.currentTab = "Latest runs";
           try {
             await Promise.all([
               this.fetchPlayerData(newId),
@@ -1146,12 +1151,6 @@ export default {
       ];
 
       this.loading.points = false;
-    },
-    loadMoreRecords() {
-      const tab = this.currentTab;
-      if (this.canShowMore) {
-        this.recordsDisplayed[tab] += 10;
-      }
     },
     goToRecords(mapId) {
       console.log("Navigating to records with mapId:", mapId);
@@ -1340,7 +1339,7 @@ export default {
           country: playerData.country || "unknown",
           country_code: playerData.country_code || "unknown",
         };
-        document.title = "Tempus plaza - " + (this.player.name || "Player");
+        this.updateTitle(this.player.name);
       } catch (error) {
         this.error = "Failed to fetch player data. Please try again later.";
         console.error("Error fetching player data:", error);

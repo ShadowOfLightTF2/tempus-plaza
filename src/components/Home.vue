@@ -221,13 +221,19 @@
 </template>
 
 <script>
+import { useHead } from "@vueuse/head";
 import debounce from "debounce";
 import DOMPurify from "dompurify";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
-  name: "App",
+  name: "Home",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Home",
+    });
+  },
   data() {
     return {
       searchQuery: "",

@@ -386,11 +386,17 @@
 import DOMPurify from "dompurify";
 import Cookies from "js-cookie";
 import { formatDuration } from "@/utils/calculations.js";
+import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerRecords",
+  setup() {
+    useHead({
+      title: "Tempus Plaza | Lookup",
+    });
+  },
   data: () => ({
     playerId: null,
     selectedPlayerName: null,
@@ -573,8 +579,6 @@ export default {
     },
   },
   mounted() {
-    document.title = "Tempus plaza - Lookup";
-
     const userCookie = Cookies.get("user");
     let user = null;
     if (userCookie) {

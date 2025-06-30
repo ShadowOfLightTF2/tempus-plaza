@@ -88,15 +88,6 @@
                 <i class="bi bi-graph-up"></i> Activity
               </router-link>
             </li>
-            <!-- <li class="nav-item me-3">
-              <router-link
-                to="/news"
-                class="nav-link nav-link-bold"
-                :class="{ active: isNavItemActive('News') }"
-              >
-                <i class="bi bi-newspaper"></i> News
-              </router-link>
-            </li> -->
             <li class="nav-item me-3">
               <router-link
                 to="/maps"

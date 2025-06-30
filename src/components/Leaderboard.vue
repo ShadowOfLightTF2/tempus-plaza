@@ -280,10 +280,26 @@
 import axios from "axios";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
+import { ref } from "vue";
+import { useHead } from "@vueuse/head";
+
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Records",
+  setup() {
+    const pageTitle = ref("Tempus Plaza");
+
+    useHead({
+      title: pageTitle,
+    });
+
+    return {
+      updateTitle: (mapName) => {
+        pageTitle.value = `Tempus Plaza | ${mapName}`;
+      },
+    };
+  },
   data() {
     return {
       selectedRecords: [],
@@ -415,7 +431,7 @@ export default {
         } else {
           this.selectedRecords = [...this.selectedRecords, ...response.data];
         }
-        document.title = "Tempus plaza - " + response.data[0].map_name;
+        this.updateTitle(response.data[0].map_name);
       } catch (error) {
         this.error = "Error fetching leaderboard data.";
         console.error("Error fetching leaderboard data:", error);
