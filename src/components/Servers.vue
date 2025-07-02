@@ -13,7 +13,7 @@
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">🌐</span>
-            Server dashboard
+            Server Dashboard
           </h1>
           <p class="page-subtitle">Top players online and server information</p>
         </div>
@@ -25,7 +25,7 @@
               @click="switchView('topplayers')"
               class="toggle-btn btn btn-dark update-button"
             >
-              Top players online
+              Top Players Online
             </button>
             <button
               :class="{ active: currentView === 'servers' }"
@@ -140,7 +140,6 @@
                     <tr
                       v-for="(server, index) in serversData"
                       :key="server.id"
-                      @click="selectServer(server)"
                       class="fade-in"
                     >
                       <td class="align-middle">
@@ -224,7 +223,6 @@ export default {
       loading: false,
       topPlayersData: [],
       serversData: [],
-      selectedServer: null,
       sortDirection: 1,
     };
   },
@@ -353,12 +351,9 @@ export default {
     },
     goToMap(mapId) {
       this.$router.push({
-        name: "Records",
+        name: "MapPage",
         params: { mapId: mapId },
       });
-    },
-    selectServer(server) {
-      this.selectedServer = server;
     },
   },
 };

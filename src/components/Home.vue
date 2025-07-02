@@ -67,11 +67,12 @@
           <div class="container">
             <h2 class="section-title">Most popular maps</h2>
             <div class="grid">
-              <div
+              <a
                 class="card"
                 v-for="map in popularSoldierMaps"
                 :key="map.id"
-                @click="goToMap(map.map_id)"
+                :href="`/maps/${map.map_id}`"
+                @click.prevent="goToMap(map.map_id)"
                 :style="{
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
@@ -126,15 +127,16 @@
                   {{ map.run_count }}
                   runs recently
                 </div>
-              </div>
+              </a>
             </div>
             <hr class="divider" style="width: 100%" />
             <div class="grid">
-              <div
+              <a
                 class="card"
                 v-for="map in popularDemomanMaps"
                 :key="map.id"
-                @click="goToMap(map.map_id)"
+                :href="`/maps/${map.map_id}`"
+                @click.prevent="goToMap(map.map_id)"
                 :style="{
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
@@ -189,7 +191,7 @@
                   {{ map.run_count }}
                   runs recently
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>
@@ -248,7 +250,7 @@ export default {
       this.searchResults = null;
     },
     goToMap(mapId) {
-      this.$router.push({ name: "Records", params: { mapId } });
+      this.$router.push({ name: "MapPage", params: { mapId } });
       this.searchResults = null;
     },
     goToPlayer(playerId) {

@@ -7,7 +7,7 @@
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">🏆</span>
-            Tempus top players
+            Tempus Top Players
           </h1>
           <p class="page-subtitle">
             View the top players in various categories

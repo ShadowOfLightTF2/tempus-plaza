@@ -1,274 +1,257 @@
 <template>
   <div
-    class="position-relative min-vh-100 w-100 overflow-hidden background-container"
+    class="container py-2 d-flex flex-column align-items-center"
+    style="z-index: 1"
   >
-    <div
-      class="container py-4 d-flex flex-column align-items-center"
-      style="z-index: 1"
-    >
-      <div class="content-container" style="z-index: 1"></div>
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">🗺️</span>
-          Map leaderboards
-        </h1>
-        <p class="page-subtitle">
-          Leaderboards for maps, courses and bonuses records
-        </p>
+    <hr class="row-divider" style="width: 100%" />
+    <div class="category-tabs-container my-4">
+      <div class="category-tabs">
+        <button
+          v-for="type in ['Map', 'Course', 'Bonus']"
+          :key="type"
+          class="category-tab"
+          :class="{ active: selectedTypePill === type }"
+          @click="selectType(type)"
+        >
+          {{ type }}
+        </button>
       </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div v-if="!loading && selectedRecords.length > 0">
-        <div class="map-name-container clickable" @click="goToMap(mapId)">
-          <h1 class="text-center maps-title">
-            {{ selectedRecords[0].map_name }}
-          </h1>
-        </div>
-      </div>
-      <div class="category-tabs-container my-4">
-        <div class="category-tabs">
-          <button
-            v-for="type in ['Map', 'Course', 'Bonus']"
-            :key="type"
-            class="category-tab"
-            :class="{ active: selectedTypePill === type }"
-            @click="selectType(type)"
-          >
-            {{ type }}
-          </button>
-        </div>
-      </div>
-      <div class="subcategory-container my-3">
-        <div class="subcategory-pills">
-          <template v-if="selectedTypePill === 'Map'">
-            <div class="pill-row">
-              <button
-                class="subcategory-pill map-pill"
-                :class="{ active: selectedIndex === '' }"
-                @click="selectRecords('map', '')"
-              >
-                Map
-              </button>
-            </div>
-          </template>
-          <template v-if="selectedTypePill === 'Course' && courseCount > 0">
-            <div class="pill-row">
-              <button
-                v-for="courseIndex in courseCount"
-                :key="'course-' + courseIndex"
-                class="subcategory-pill course-pill"
-                :class="{ active: selectedCourseIndex === courseIndex }"
-                @click="selectRecords('course', courseIndex)"
-              >
-                Course {{ courseIndex }}
-              </button>
-            </div>
-          </template>
-          <template v-if="selectedTypePill === 'Bonus' && bonusCount > 0">
-            <div class="pill-row">
-              <button
-                v-for="bonusIndex in bonusCount"
-                :key="'bonus-' + bonusIndex"
-                class="subcategory-pill bonus-pill"
-                :class="{ active: selectedBonusIndex === bonusIndex }"
-                @click="selectRecords('bonus', bonusIndex)"
-              >
-                Bonus {{ bonusIndex }}
-              </button>
-            </div>
-          </template>
-        </div>
-      </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div v-if="loading" class="text-center">
-        <div class="spinner-border text-light" role="status">
-          <span class="visually-hidden">Loading records...</span>
-        </div>
-      </div>
-      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-      <div
-        v-else
-        class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-      >
-        <div class="soldier-table-container">
-          <div class="table-wrapper">
-            <div
-              class="maps-header"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  rgba(74, 111, 165, 0.3),
-                  rgba(37, 55, 82, 0.3)
-                );
-              "
+    </div>
+    <div class="subcategory-container my-3">
+      <div class="subcategory-pills">
+        <template v-if="selectedTypePill === 'Map'">
+          <div class="pill-row">
+            <button
+              class="subcategory-pill map-pill"
+              :class="{ active: selectedIndex === '' }"
+              @click="selectRecords('map', '')"
             >
-              <div class="header-content">
-                <img
-                  src="/icons/soldier.png"
-                  alt="Soldier Icon"
-                  class="class-icon"
-                />
-                <div class="header-text">
-                  <p class="header-type">
-                    {{ selectedType }}
-                    {{ selectedIndex !== null ? selectedIndex : "" }}
-                  </p>
-                  <p class="header-tier-rating">
-                    T{{ selectedTier("soldier") }} - R{{
-                      selectedRating("soldier")
-                    }}
-                  </p>
-                </div>
+              Map
+            </button>
+          </div>
+        </template>
+        <template v-if="selectedTypePill === 'Course' && courseCount > 0">
+          <div class="pill-row">
+            <button
+              v-for="courseIndex in courseCount"
+              :key="'course-' + courseIndex"
+              class="subcategory-pill course-pill"
+              :class="{ active: selectedCourseIndex === courseIndex }"
+              @click="selectRecords('course', courseIndex)"
+            >
+              Course {{ courseIndex }}
+            </button>
+          </div>
+        </template>
+        <template v-if="selectedTypePill === 'Bonus' && bonusCount > 0">
+          <div class="pill-row">
+            <button
+              v-for="bonusIndex in bonusCount"
+              :key="'bonus-' + bonusIndex"
+              class="subcategory-pill bonus-pill"
+              :class="{ active: selectedBonusIndex === bonusIndex }"
+              @click="selectRecords('bonus', bonusIndex)"
+            >
+              Bonus {{ bonusIndex }}
+            </button>
+          </div>
+        </template>
+      </div>
+    </div>
+    <hr class="row-divider" style="width: 100%" />
+    <div v-if="loading" class="text-center">
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading records...</span>
+      </div>
+    </div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+    <div
+      v-else
+      class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
+    >
+      <div class="soldier-table-container">
+        <div class="table-wrapper">
+          <div
+            class="maps-header"
+            style="
+              background: linear-gradient(
+                135deg,
+                rgba(74, 111, 165, 0.3),
+                rgba(37, 55, 82, 0.3)
+              );
+            "
+          >
+            <div class="header-content">
+              <img
+                src="/icons/soldier.png"
+                alt="Soldier Icon"
+                class="class-icon"
+              />
+              <div class="header-text">
+                <p class="header-type">
+                  {{ selectedType }}
+                  {{ selectedIndex !== null ? selectedIndex : "" }}
+                </p>
+                <p class="header-tier-rating">
+                  T{{ selectedTier("soldier") }} - R{{
+                    selectedRating("soldier")
+                  }}
+                </p>
               </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Duration</th>
-                    <th>Player</th>
-                    <th style="text-align: right">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(entry, index) in displayedSoldierEntries"
-                    :key="'soldier-' + index"
-                    class="fade-in"
-                  >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(entry.placement)"
-                    >
-                      <span v-if="index + 1 === 1">🥇</span>
-                      <span v-else-if="index + 1 === 2">🥈</span>
-                      <span v-else-if="index + 1 === 3">🥉</span>
-                      {{ index + 1 }}
-                    </td>
-                    <td class="duration-column">
-                      {{ formatDuration(entry.duration) }}
-                    </td>
-                    <td
-                      class="name-cell align-middle player-name clickable name-column"
-                      @click="goToPlayer(entry.id)"
-                    >
-                      {{ entry.name }}
-                    </td>
-                    <td class="date-column">{{ formatDate(entry.date) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div v-if="showMoreLoading" class="text-center">
-              <div class="spinner-border text-light" role="status">
-                <span class="visually-hidden">Loading records...</span>
-              </div>
-            </div>
-            <div v-else class="maps-footer">
-              <button
-                v-if="displayedSoldierEntries.length < selectedRecords.length"
-                @click="showMoreSoldierEntries"
-                class="btn btn-dark update-button"
-                style="
-                  background: rgba(74, 111, 165, 0.8);
-                  font-weight: bold;
-                  width: 100%;
-                "
-              >
-                Show more
-              </button>
             </div>
           </div>
-        </div>
-        <div class="demoman-table-container">
-          <div class="table-wrapper">
-            <div
-              class="maps-header"
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Duration</th>
+                  <th>Player</th>
+                  <th style="text-align: right">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(entry, index) in displayedSoldierEntries"
+                  :key="'soldier-' + index"
+                  class="fade-in"
+                >
+                  <td
+                    class="rank-column"
+                    :class="getPlacementClass(entry.placement)"
+                  >
+                    <span v-if="index + 1 === 1">🥇</span>
+                    <span v-else-if="index + 1 === 2">🥈</span>
+                    <span v-else-if="index + 1 === 3">🥉</span>
+                    {{ index + 1 }}
+                  </td>
+                  <td class="duration-column">
+                    {{ formatDuration(entry.duration) }}
+                  </td>
+                  <td
+                    class="name-cell align-middle player-name clickable name-column"
+                    @click="goToPlayer(entry.id)"
+                  >
+                    {{ entry.name }}
+                  </td>
+                  <td class="date-column">{{ formatDate(entry.date) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="showMoreLoading" class="text-center">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Loading records...</span>
+            </div>
+          </div>
+          <div v-else class="maps-footer">
+            <button
+              v-if="
+                displayedSoldierEntries.length < selectedSoldierRecords.length
+              "
+              @click="showMoreSoldierEntries"
+              class="btn btn-dark update-button"
               style="
-                background: linear-gradient(
-                  135deg,
-                  rgba(74, 111, 165, 0.3),
-                  rgba(37, 55, 82, 0.3)
-                );
+                background: rgba(74, 111, 165, 0.8);
+                font-weight: bold;
+                width: 100%;
               "
             >
-              <div class="header-content">
-                <img
-                  src="/icons/demoman.png"
-                  alt="Demoman Icon"
-                  class="class-icon"
-                />
-                <div class="header-text">
-                  <p class="header-type">
-                    {{ selectedType }}
-                    {{ selectedIndex !== null ? selectedIndex : "" }}
-                  </p>
-                  <p class="header-tier-rating">
-                    T{{ selectedTier("demoman") }} - R{{
-                      selectedRating("demoman")
-                    }}
-                  </p>
-                </div>
+              Show more
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="demoman-table-container">
+        <div class="table-wrapper">
+          <div
+            class="maps-header"
+            style="
+              background: linear-gradient(
+                135deg,
+                rgba(74, 111, 165, 0.3),
+                rgba(37, 55, 82, 0.3)
+              );
+            "
+          >
+            <div class="header-content">
+              <img
+                src="/icons/demoman.png"
+                alt="Demoman Icon"
+                class="class-icon"
+              />
+              <div class="header-text">
+                <p class="header-type">
+                  {{ selectedType }}
+                  {{ selectedIndex !== null ? selectedIndex : "" }}
+                </p>
+                <p class="header-tier-rating">
+                  T{{ selectedTier("demoman") }} - R{{
+                    selectedRating("demoman")
+                  }}
+                </p>
               </div>
             </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Duration</th>
-                    <th>Player</th>
-                    <th style="text-align: right">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(entry, index) in displayedDemomanEntries"
-                    :key="'demoman-' + index"
-                    class="fade-in"
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Duration</th>
+                  <th>Player</th>
+                  <th style="text-align: right">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(entry, index) in displayedDemomanEntries"
+                  :key="'demoman-' + index"
+                  class="fade-in"
+                >
+                  <td
+                    class="rank-column"
+                    :class="getPlacementClass(entry.placement)"
                   >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(entry.placement)"
-                    >
-                      <span v-if="index + 1 === 1">🥇</span>
-                      <span v-else-if="index + 1 === 2">🥈</span>
-                      <span v-else-if="index + 1 === 3">🥉</span>
-                      {{ index + 1 }}
-                    </td>
-                    <td class="duration-column">
-                      {{ formatDuration(entry.duration) }}
-                    </td>
-                    <td
-                      class="name-cell align-middle player-name clickable name-column"
-                      @click="goToPlayer(entry.id)"
-                    >
-                      {{ entry.name }}
-                    </td>
-                    <td class="date-column">{{ formatDate(entry.date) }}</td>
-                  </tr>
-                </tbody>
-              </table>
+                    <span v-if="index + 1 === 1">🥇</span>
+                    <span v-else-if="index + 1 === 2">🥈</span>
+                    <span v-else-if="index + 1 === 3">🥉</span>
+                    {{ index + 1 }}
+                  </td>
+                  <td class="duration-column">
+                    {{ formatDuration(entry.duration) }}
+                  </td>
+                  <td
+                    class="name-cell align-middle player-name clickable name-column"
+                    @click="goToPlayer(entry.id)"
+                  >
+                    {{ entry.name }}
+                  </td>
+                  <td class="date-column">{{ formatDate(entry.date) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="showMoreLoading" class="text-center">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Loading records...</span>
             </div>
-            <div v-if="showMoreLoading" class="text-center">
-              <div class="spinner-border text-light" role="status">
-                <span class="visually-hidden">Loading records...</span>
-              </div>
-            </div>
-            <div v-else class="maps-footer">
-              <button
-                v-if="displayedDemomanEntries.length < selectedRecords.length"
-                @click="showMoreDemomanEntries"
-                class="btn btn-dark update-button"
-                style="
-                  background: rgba(74, 111, 165, 0.8);
-                  font-weight: bold;
-                  width: 100%;
-                "
-              >
-                Show more
-              </button>
-            </div>
+          </div>
+          <div v-else class="maps-footer">
+            <button
+              v-if="
+                displayedDemomanEntries.length < selectedDemomanRecords.length
+              "
+              @click="showMoreDemomanEntries"
+              class="btn btn-dark update-button"
+              style="
+                background: rgba(74, 111, 165, 0.8);
+                font-weight: bold;
+                width: 100%;
+              "
+            >
+              Show more
+            </button>
           </div>
         </div>
       </div>
@@ -284,6 +267,10 @@ import { ref } from "vue";
 import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+
+const capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
 
 export default {
   name: "Records",
@@ -302,7 +289,8 @@ export default {
   },
   data() {
     return {
-      selectedRecords: [],
+      selectedSoldierRecords: [],
+      selectedDemomanRecords: [],
       loading: false,
       showMoreLoading: false,
       error: null,
@@ -328,14 +316,16 @@ export default {
       return Number(this.$route.params.mapId);
     },
     displayedSoldierEntries() {
-      return this.selectedRecords
-        .filter((record) => record.class === "soldier")
-        .slice(0, this.soldierDisplayCount + this.soldierOffset);
+      return this.selectedSoldierRecords.slice(
+        0,
+        this.soldierDisplayCount + this.soldierOffset
+      );
     },
     displayedDemomanEntries() {
-      return this.selectedRecords
-        .filter((record) => record.class === "demoman")
-        .slice(0, this.demomanDisplayCount + this.demomanOffset);
+      return this.selectedDemomanRecords.slice(
+        0,
+        this.demomanDisplayCount + this.demomanOffset
+      );
     },
   },
   mounted() {
@@ -374,6 +364,7 @@ export default {
           `${API_BASE_URL}/maps/${this.mapId}/all-info`
         );
         const { map, courses, bonuses } = response.data;
+        this.updateTitle(response.data.map.name);
 
         this.courseCount = map.course_count || 0;
         this.bonusCount = map.bonus_count || 0;
@@ -407,7 +398,8 @@ export default {
             bonus.demoman_rating || 0;
         }
 
-        this.fetchLeaderboardData();
+        this.fetchRecords("map", "soldier");
+        this.fetchRecords("map", "demoman");
       } catch (error) {
         this.error = "Error fetching map data.";
         console.error("Error fetching map data:", error);
@@ -415,74 +407,62 @@ export default {
         this.loading = false;
       }
     },
-    async fetchLeaderboardData(offset = 0, limit = 100) {
-      if ((offset = 0)) {
+    async fetchRecords(
+      type,
+      classType = "both",
+      index = null,
+      offset = 0,
+      limit = 51
+    ) {
+      if (offset === 0) {
         this.loading = true;
       } else {
         this.showMoreLoading = true;
       }
       this.error = null;
+
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/maps/${this.mapId}/records/${offset}/${limit}`
-        );
-        if (offset === 0) {
-          this.selectedRecords = response.data;
-        } else {
-          this.selectedRecords = [...this.selectedRecords, ...response.data];
+        let url;
+        switch (type) {
+          case "map":
+            url = `${API_BASE_URL}/maps/${this.mapId}/records/${classType}/${offset}/${limit}`;
+            break;
+          case "course":
+            if (index === null) {
+              throw new Error("Course index is required for course records");
+            }
+            url = `${API_BASE_URL}/maps/${this.mapId}/course/${classType}/${index}/records/${offset}/${limit}`;
+            break;
+          case "bonus":
+            if (index === null) {
+              throw new Error("Bonus index is required for bonus records");
+            }
+            url = `${API_BASE_URL}/maps/${this.mapId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
+            break;
+          default:
+            throw new Error(
+              `Invalid type: ${type}. Must be 'map', 'course', or 'bonus'`
+            );
         }
-        this.updateTitle(response.data[0].map_name);
-      } catch (error) {
-        this.error = "Error fetching leaderboard data.";
-        console.error("Error fetching leaderboard data:", error);
-      } finally {
-        this.loading = false;
-        this.showMoreLoading = false;
-      }
-    },
-    async fetchCourseRecords(courseIndex, offset = 0, limit = 100) {
-      if ((offset = 0)) {
-        this.loading = true;
-      } else {
-        this.showMoreLoading = true;
-      }
-      this.error = null;
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/maps/${this.mapId}/course/${courseIndex}/records/${offset}/${limit}`
-        );
+
+        const response = await axios.get(url);
+        const capitalizedClassType = capitalizeFirstLetter(classType);
+
         if (offset === 0) {
-          this.selectedRecords = response.data;
+          this[`selected${capitalizedClassType}Records`] = response.data;
         } else {
-          this.selectedRecords = [...this.selectedRecords, ...response.data];
-        }
-      } catch (error) {
-        this.error = "Error fetching course records.";
-        console.error("Error fetching course records:", error);
-      } finally {
-        this.loading = false;
-        this.showMoreLoading = false;
-      }
-    },
-    async fetchBonusRecords(bonusIndex, offset = 0, limit = 100) {
-      if ((offset = 0)) {
-        this.loading = true;
-      } else {
-        this.showMoreLoading = true;
-      }
-      this.error = null;
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/maps/${this.mapId}/bonus/${bonusIndex}/records/${offset}/${limit}`
-        );
-        if (offset === 0) {
-          this.selectedRecords = response.data;
-        } else {
-          this.selectedRecords = [...this.selectedRecords, ...response.data];
+          this[`selected${capitalizedClassType}Records`].splice(
+            offset,
+            offset + 50
+          );
+          this[`selected${capitalizedClassType}Records`] = [
+            ...this[`selected${capitalizedClassType}Records`],
+            ...response.data,
+          ];
         }
       } catch (error) {
-        this.error = "Error fetching bonus records.";
-        console.error("Error fetching bonus records:", error);
+        this.error = `Error fetching ${type} records.`;
+        console.error(`Error fetching ${type} records:`, error);
       } finally {
         this.loading = false;
         this.showMoreLoading = false;
@@ -495,15 +475,18 @@ export default {
       this.demomanOffset = 0;
 
       if (type === "map") {
-        this.fetchLeaderboardData();
+        this.fetchRecords(type, "soldier");
+        this.fetchRecords(type, "demoman");
       } else if (type === "course") {
         this.selectedCourseIndex = index;
         this.selectedBonusIndex = null;
-        this.fetchCourseRecords(index);
+        this.fetchRecords(type, "soldier", index);
+        this.fetchRecords(type, "demoman", index);
       } else if (type === "bonus") {
         this.selectedCourseIndex = null;
         this.selectedBonusIndex = index;
-        this.fetchBonusRecords(index);
+        this.fetchRecords(type, "soldier", index);
+        this.fetchRecords(type, "demoman", index);
       }
 
       this.soldierDisplayCount = 50;
@@ -535,60 +518,62 @@ export default {
         params: { playerId: playerId },
       });
     },
-    goToMap(mapId) {
-      this.$router.push({
-        name: "MapPage",
-        params: { mapId: mapId },
-      });
-    },
     showMoreSoldierEntries() {
-      this.soldierOffset += 50;
       if (this.selectedTypePill === "Map") {
-        this.fetchLeaderboardData(
-          0,
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "soldier",
+          null,
           this.soldierDisplayCount + this.soldierOffset
         );
       } else if (
         this.selectedTypePill === "Course" &&
         this.selectedCourseIndex
       ) {
-        this.fetchCourseRecords(
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "soldier",
           this.selectedCourseIndex,
-          0,
           this.soldierDisplayCount + this.soldierOffset
         );
       } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
-        this.fetchBonusRecords(
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "soldier",
           this.selectedBonusIndex,
-          0,
           this.soldierDisplayCount + this.soldierOffset
         );
       }
+      this.soldierOffset += 50;
     },
 
     showMoreDemomanEntries() {
-      this.demomanOffset += 50;
       if (this.selectedTypePill === "Map") {
-        this.fetchLeaderboardData(
-          0,
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "demoman",
+          null,
           this.demomanDisplayCount + this.demomanOffset
         );
       } else if (
         this.selectedTypePill === "Course" &&
         this.selectedCourseIndex
       ) {
-        this.fetchCourseRecords(
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "demoman",
           this.selectedCourseIndex,
-          0,
           this.demomanDisplayCount + this.demomanOffset
         );
       } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
-        this.fetchBonusRecords(
+        this.fetchRecords(
+          this.selectedTypePill.toLowerCase(),
+          "demoman",
           this.selectedBonusIndex,
-          0,
           this.demomanDisplayCount + this.demomanOffset
         );
       }
+      this.demomanOffset += 50;
     },
   },
 };
@@ -644,16 +629,6 @@ export default {
   color: var(--color-text-clickable) !important;
 }
 
-.maps-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  color: var(--color-text-clickable);
-}
-
 .header-content {
   display: flex;
   align-items: center;
@@ -682,14 +657,6 @@ export default {
 .maps-header {
   color: var(--color-text);
   border-radius: 10px 10px 0 0;
-}
-
-.selected-record {
-  color: var(--color-text);
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 10px;
-  margin-bottom: 0px;
 }
 
 .tables-wrapper {
@@ -758,29 +725,6 @@ export default {
 
 .update-button:hover {
   background: var(--color-row) !important;
-}
-
-.map-name-container {
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  background: linear-gradient(
-    135deg,
-    rgba(74, 111, 165, 0.3),
-    rgba(37, 55, 82, 0.3)
-  );
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-border-soft);
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
-  position: relative;
-  overflow: hidden;
-}
-
-.map-name-container:hover {
-  background: rgba(74, 111, 165, 0.8);
 }
 
 .class-icon {

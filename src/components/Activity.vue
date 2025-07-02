@@ -403,7 +403,7 @@ export default {
     },
     goToMap(mapId) {
       this.$router.push({
-        name: "Records",
+        name: "MapPage",
         params: { mapId: mapId },
       });
     },

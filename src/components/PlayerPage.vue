@@ -800,6 +800,9 @@ export default {
     sharedTimesSoldier: [],
     sharedTimesDemoman: [],
     pointsHistory: [],
+    overallChartSeries: [],
+    soldierChartSeries: [],
+    demomanChartSeries: [],
     overallChartOptions: {
       chart: {
         type: "line",
@@ -855,6 +858,39 @@ export default {
         x: {
           format: "dd MMM yyyy",
         },
+        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+          const data =
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
+          const date = new Date(data.x).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+          const points = data.y;
+          const rank = data.overall_rank;
+
+          return `
+        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
+              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            </div>
+          </div>
+        </div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
+              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            </div>
+          </div>
+        </div>
+      `;
+        },
       },
       legend: {
         labels: {
@@ -862,7 +898,7 @@ export default {
         },
       },
     },
-    overallChartSeries: [],
+
     soldierChartOptions: {
       chart: {
         type: "line",
@@ -918,6 +954,39 @@ export default {
         x: {
           format: "dd MMM yyyy",
         },
+        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+          const data =
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
+          const date = new Date(data.x).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+          const points = data.y;
+          const rank = data.soldier_rank;
+
+          return `
+        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Soldier points: </span>
+              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            </div>
+          </div>
+        </div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Soldier rank: </span>
+              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            </div>
+          </div>
+        </div>
+      `;
+        },
       },
       legend: {
         labels: {
@@ -925,7 +994,7 @@ export default {
         },
       },
     },
-    soldierChartSeries: [],
+
     demomanChartOptions: {
       chart: {
         type: "line",
@@ -981,6 +1050,39 @@ export default {
         x: {
           format: "dd MMM yyyy",
         },
+        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+          const data =
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
+          const date = new Date(data.x).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+          const points = data.y;
+          const rank = data.demoman_rank;
+
+          return `
+        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Demoman points: </span>
+              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            </div>
+          </div>
+        </div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Demoman rank: </span>
+              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            </div>
+          </div>
+        </div>
+      `;
+        },
       },
       legend: {
         labels: {
@@ -988,7 +1090,6 @@ export default {
         },
       },
     },
-    demomanChartSeries: [],
   }),
   computed: {
     filteredRecords() {
@@ -1126,6 +1227,7 @@ export default {
           data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.overall_points,
+            overall_rank: point.overall_rank,
           })),
         },
       ];
@@ -1136,6 +1238,7 @@ export default {
           data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.soldier_points,
+            soldier_rank: point.soldier_rank,
           })),
         },
       ];
@@ -1146,6 +1249,7 @@ export default {
           data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.demoman_points,
+            demoman_rank: point.demoman_rank,
           })),
         },
       ];
@@ -1155,7 +1259,7 @@ export default {
     goToRecords(mapId) {
       console.log("Navigating to records with mapId:", mapId);
       this.$router.push({
-        name: "Records",
+        name: "MapPage",
         params: { mapId: mapId },
       });
     },
@@ -1304,7 +1408,6 @@ export default {
         const response = await axios.get(`${API_BASE_URL}/users/${playerId}`);
         const data = response.data;
         if (!data || data.length === 0) {
-          console.log("User not found for");
           this.player = {
             ...this.player,
             gender: "male",

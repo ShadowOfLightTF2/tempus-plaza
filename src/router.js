@@ -40,14 +40,6 @@ const routes = [
     }),
   },
   {
-    path: '/maps/:mapId/records',
-    name: 'Records',
-    component: Leaderboard,
-    props: route => ({
-      mapId: Number(route.params.mapId)
-    })
-  },
-  {
     path: '/players/:category?/:item?',
     name: 'Players',
     component: Players

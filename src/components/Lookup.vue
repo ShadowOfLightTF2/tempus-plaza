@@ -6,7 +6,7 @@
       <div class="page-header">
         <h1 class="page-title">
           <span class="title-icon">🔍</span>
-          Lookup players
+          Lookup Players
         </h1>
         <p class="page-subtitle">Search and filter through player records</p>
       </div>
@@ -622,7 +622,7 @@ export default {
     },
     goToMap(mapId) {
       this.$router.push({
-        name: "Records",
+        name: "MapPage",
         params: { mapId: mapId },
       });
     },

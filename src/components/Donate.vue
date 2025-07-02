@@ -10,7 +10,7 @@
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">❤️</span>
-            Support the website
+            Support the Website
           </h1>
         </div>
         <hr class="divider" style="width: 100%" />

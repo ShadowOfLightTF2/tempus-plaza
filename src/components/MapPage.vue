@@ -6,9 +6,9 @@
       <div class="page-header">
         <h1 class="page-title">
           <span class="title-icon">🔍</span>
-          Map page
+          Map Page
         </h1>
-        <p class="page-subtitle">More information about the map</p>
+        <p class="page-subtitle">Records and information about the map</p>
       </div>
       <hr class="row-divider" style="width: 100%" />
       <div
@@ -22,288 +22,298 @@
       </div>
       <div v-else>
         <div class="map-name-container">
-          <div class="map-name-display">
-            <h2 @click="goBack" class="map-name clickable">
-              {{ mapName }}
-            </h2>
-          </div>
+          <h1 class="text-center maps-title">
+            {{ mapName }}
+          </h1>
         </div>
         <hr class="row-divider" style="width: 100%" />
-        <div
-          v-if="map"
-          class="card map-banner mb-4"
-          :style="{
-            background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
-    `,
-            backgroundBlendMode: 'multiply, normal, normal',
-            backgroundSize: 'cover, cover, cover',
-            backgroundPosition: 'center, center, center',
-          }"
-        >
-          <div class="row g-0 banner-content">
-            <div class="col-md-12 d-flex flex-column align-items-center p-4">
-              <div class="map-info text-center w-100">
-                <div class="row p-3 map-overview w-100 g-3">
-                  <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card stat-block h-100">
-                      <div class="card-body text-center p-3">
-                        <div class="stat-icon mb-2">
-                          <i class="bi bi-bar-chart"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Soldier Tier</h5>
-                        <p
-                          class="card-text main-tier-color stat-value"
-                          :class="'tier-' + map.soldier_tier"
-                        >
-                          T{{ map.soldier_tier }}
-                        </p>
-                        <div class="completion-count">
-                          <i class="bi bi-check-circle me-1"></i>
-                          {{ map.soldier_completion_count || 0 }} completions
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card stat-block h-100">
-                      <div class="card-body text-center p-3">
-                        <div class="stat-icon mb-2">
-                          <i class="bi bi-star-fill"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Soldier Rating</h5>
-                        <p
-                          class="card-text main-rating-color stat-value"
-                          :class="'rating-' + map.soldier_rating"
-                        >
-                          R{{ map.soldier_rating }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card stat-block h-100">
-                      <div class="card-body text-center p-3">
-                        <div class="stat-icon mb-2">
-                          <i class="bi bi-bar-chart"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Demoman Tier</h5>
-                        <p
-                          class="card-text main-tier-color stat-value"
-                          :class="'tier-' + map.demoman_tier"
-                        >
-                          T{{ map.demoman_tier }}
-                        </p>
-                        <div class="completion-count">
-                          <i class="bi bi-check-circle me-1"></i>
-                          {{ map.demoman_completion_count || 0 }} completions
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card stat-block h-100">
-                      <div class="card-body text-center p-3">
-                        <div class="stat-icon mb-2">
-                          <i class="bi bi-star-fill"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Demoman Rating</h5>
-                        <p
-                          class="card-text main-rating-color stat-value"
-                          :class="'rating-' + map.demoman_rating"
-                        >
-                          R{{ map.demoman_rating }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <hr class="row-divider" style="width: 85%" />
-                <div class="row w-100" v-if="courses.length > 0">
-                  <div class="col-md-12">
-                    <h2 class="section-header mb-4">
-                      <i class="me-2"></i>🚩 Courses
-                    </h2>
-                    <div class="courses-block">
-                      <div
-                        v-for="course in courses"
-                        :key="course.id"
-                        class="course-item"
-                      >
-                        <div class="card stat-block h-100">
-                          <div class="card-body text-center p-3">
-                            <h5 class="card-title mb-3">
-                              Course {{ course.index }}
-                            </h5>
-                            <div class="compact-ratings-grid">
-                              <div class="rating-section">
-                                <div class="rating-label">Soldier</div>
-                                <div class="rating-pills">
-                                  <span
-                                    class="rating-pill tier-color"
-                                    :class="'tier-' + course.soldier_tier"
-                                  >
-                                    T{{ course.soldier_tier }}
-                                  </span>
-                                  <span
-                                    class="rating-pill rating-color"
-                                    :class="'rating-' + course.soldier_rating"
-                                  >
-                                    R{{ course.soldier_rating }}
-                                  </span>
-                                </div>
-                                <div class="completion-count-small">
-                                  <i class="bi bi-check-circle me-1"></i>
-                                  {{ course.soldier_completion_count || 0 }}
-                                </div>
-                              </div>
-                              <div class="rating-section">
-                                <div class="rating-label">Demoman</div>
-                                <div class="rating-pills">
-                                  <span
-                                    class="rating-pill tier-color"
-                                    :class="'tier-' + course.demoman_tier"
-                                  >
-                                    T{{ course.demoman_tier }}
-                                  </span>
-                                  <span
-                                    class="rating-pill rating-color"
-                                    :class="'rating-' + course.demoman_rating"
-                                  >
-                                    R{{ course.demoman_rating }}
-                                  </span>
-                                </div>
-                                <div class="completion-count-small">
-                                  <i class="bi bi-check-circle me-1"></i>
-                                  {{ course.demoman_completion_count || 0 }}
-                                </div>
-                              </div>
-                            </div>
+        <div class="collapsible-header" @click="toggleMapBanner">
+          <h4 class="video-section-title mb-0">
+            🗺️ Map Information
+            <i
+              class="bi"
+              :class="showMapBanner ? 'bi-chevron-up' : 'bi-chevron-down'"
+              style="margin-left: auto"
+            ></i>
+          </h4>
+        </div>
+        <div v-if="showMapBanner" class="collapsible-content">
+          <div
+            v-if="map"
+            class="card map-banner mb-4"
+            :style="{
+              background: `
+                linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+              `,
+              backgroundBlendMode: 'multiply, normal, normal',
+              backgroundSize: 'cover, cover, cover',
+              backgroundPosition: 'center, center, center',
+            }"
+          >
+            <div class="row g-0 banner-content">
+              <div class="col-md-12 d-flex flex-column align-items-center p-4">
+                <div class="map-info text-center w-100">
+                  <div class="row p-3 map-overview w-100 g-3">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card stat-block h-100">
+                        <div class="card-body text-center p-3">
+                          <div class="stat-icon mb-2">
+                            <i class="bi bi-bar-chart"></i>
+                          </div>
+                          <h5 class="card-title mb-2">Soldier Tier</h5>
+                          <p
+                            class="card-text main-tier-color stat-value"
+                            :class="'tier-' + map.soldier_tier"
+                          >
+                            T{{ map.soldier_tier }}
+                          </p>
+                          <div class="completion-count">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ map.soldier_completion_count || 0 }} completions
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <hr
-                  class="row-divider"
-                  style="width: 85%"
-                  v-if="courses.length > 0"
-                />
-                <div class="row w-100" v-if="bonuses.length > 0">
-                  <div class="col-md-12">
-                    <h2 class="section-header mb-4">⭐ Bonuses</h2>
-                    <div class="bonuses-block">
-                      <div
-                        v-for="bonus in bonuses"
-                        :key="bonus.id"
-                        class="bonus-item"
-                      >
-                        <div class="card stat-block h-100">
-                          <div class="card-body text-center p-3">
-                            <h5 class="card-title mb-3">
-                              Bonus {{ bonus.index }}
-                            </h5>
-                            <div class="compact-ratings-grid">
-                              <div class="rating-section">
-                                <div class="rating-label">Soldier</div>
-                                <div class="rating-pills">
-                                  <span
-                                    class="rating-pill tier-color"
-                                    :class="'tier-' + bonus.soldier_tier"
-                                  >
-                                    T{{ bonus.soldier_tier }}
-                                  </span>
-                                  <span
-                                    class="rating-pill rating-color"
-                                    :class="'rating-' + bonus.soldier_rating"
-                                  >
-                                    R{{ bonus.soldier_rating }}
-                                  </span>
-                                </div>
-                                <div class="completion-count-small">
-                                  <i class="bi bi-check-circle me-1"></i>
-                                  {{ bonus.soldier_completion_count || 0 }}
-                                </div>
-                              </div>
-                              <div class="rating-section">
-                                <div class="rating-label">Demoman</div>
-                                <div class="rating-pills">
-                                  <span
-                                    class="rating-pill tier-color"
-                                    :class="'tier-' + bonus.demoman_tier"
-                                  >
-                                    T{{ bonus.demoman_tier }}
-                                  </span>
-                                  <span
-                                    class="rating-pill rating-color"
-                                    :class="'rating-' + bonus.demoman_rating"
-                                  >
-                                    R{{ bonus.demoman_rating }}
-                                  </span>
-                                </div>
-                                <div class="completion-count-small">
-                                  <i class="bi bi-check-circle me-1"></i>
-                                  {{ bonus.demoman_completion_count || 0 }}
-                                </div>
-                              </div>
-                            </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card stat-block h-100">
+                        <div class="card-body text-center p-3">
+                          <div class="stat-icon mb-2">
+                            <i class="bi bi-star-fill"></i>
+                          </div>
+                          <h5 class="card-title mb-2">Soldier Rating</h5>
+                          <p
+                            class="card-text main-rating-color stat-value"
+                            :class="'rating-' + map.soldier_rating"
+                          >
+                            R{{ map.soldier_rating }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card stat-block h-100">
+                        <div class="card-body text-center p-3">
+                          <div class="stat-icon mb-2">
+                            <i class="bi bi-bar-chart"></i>
+                          </div>
+                          <h5 class="card-title mb-2">Demoman Tier</h5>
+                          <p
+                            class="card-text main-tier-color stat-value"
+                            :class="'tier-' + map.demoman_tier"
+                          >
+                            T{{ map.demoman_tier }}
+                          </p>
+                          <div class="completion-count">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ map.demoman_completion_count || 0 }} completions
                           </div>
                         </div>
                       </div>
                     </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card stat-block h-100">
+                        <div class="card-body text-center p-3">
+                          <div class="stat-icon mb-2">
+                            <i class="bi bi-star-fill"></i>
+                          </div>
+                          <h5 class="card-title mb-2">Demoman Rating</h5>
+                          <p
+                            class="card-text main-rating-color stat-value"
+                            :class="'rating-' + map.demoman_rating"
+                          >
+                            R{{ map.demoman_rating }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <hr
-                  class="row-divider"
-                  style="width: 85%"
-                  v-if="bonuses.length > 0"
-                />
-                <div class="row w-100">
-                  <div class="col-md-12">
-                    <h2 class="section-header mb-4">
-                      <i class="bi bi-people-fill me-2"></i>Authors
-                    </h2>
-                    <div class="authors-wrapper">
-                      <div class="authors-block">
+                  <hr class="row-divider" style="width: 85%" />
+                  <div class="row w-100" v-if="courses.length > 0">
+                    <div class="col-md-12">
+                      <h2 class="section-header mb-4">
+                        <i class="me-2"></i>🚩 Courses
+                      </h2>
+                      <div class="courses-block">
                         <div
-                          v-for="author in authors"
-                          :key="author.author_id"
-                          class="author-card"
+                          v-for="course in courses"
+                          :key="course.id"
+                          class="course-item"
                         >
-                          <div class="author-avatar-wrapper">
-                            <img
-                              :src="
-                                author &&
-                                author.player &&
-                                author.player.steam_avatar
-                                  ? `${author.player.steam_avatar}`
-                                  : '/avatars/default-avatar.jpg'
-                              "
-                              alt="Author Avatar"
-                              class="author-avatar"
-                            />
+                          <div class="card stat-block h-100">
+                            <div class="card-body text-center p-3">
+                              <h5 class="card-title mb-3">
+                                Course {{ course.index }}
+                              </h5>
+                              <div class="compact-ratings-grid">
+                                <div class="rating-section">
+                                  <div class="rating-label">Soldier</div>
+                                  <div class="rating-pills">
+                                    <span
+                                      class="rating-pill tier-color"
+                                      :class="'tier-' + course.soldier_tier"
+                                    >
+                                      T{{ course.soldier_tier }}
+                                    </span>
+                                    <span
+                                      class="rating-pill rating-color"
+                                      :class="'rating-' + course.soldier_rating"
+                                    >
+                                      R{{ course.soldier_rating }}
+                                    </span>
+                                  </div>
+                                  <div class="completion-count-small">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ course.soldier_completion_count || 0 }}
+                                  </div>
+                                </div>
+                                <div class="rating-section">
+                                  <div class="rating-label">Demoman</div>
+                                  <div class="rating-pills">
+                                    <span
+                                      class="rating-pill tier-color"
+                                      :class="'tier-' + course.demoman_tier"
+                                    >
+                                      T{{ course.demoman_tier }}
+                                    </span>
+                                    <span
+                                      class="rating-pill rating-color"
+                                      :class="'rating-' + course.demoman_rating"
+                                    >
+                                      R{{ course.demoman_rating }}
+                                    </span>
+                                  </div>
+                                  <div class="completion-count-small">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ course.demoman_completion_count || 0 }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <h6 class="author-name mt-2">
-                            {{
-                              author.author_name
-                                ? author.author_name
-                                : "Unknown Author"
-                            }}
-                          </h6>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                  <hr
+                    class="row-divider"
+                    style="width: 85%"
+                    v-if="courses.length > 0"
+                  />
+                  <div class="row w-100" v-if="bonuses.length > 0">
+                    <div class="col-md-12">
+                      <h2 class="section-header mb-4">⭐ Bonuses</h2>
+                      <div class="bonuses-block">
+                        <div
+                          v-for="bonus in bonuses"
+                          :key="bonus.id"
+                          class="bonus-item"
+                        >
+                          <div class="card stat-block h-100">
+                            <div class="card-body text-center p-3">
+                              <h5 class="card-title mb-3">
+                                Bonus {{ bonus.index }}
+                              </h5>
+                              <div class="compact-ratings-grid">
+                                <div class="rating-section">
+                                  <div class="rating-label">Soldier</div>
+                                  <div class="rating-pills">
+                                    <span
+                                      class="rating-pill tier-color"
+                                      :class="'tier-' + bonus.soldier_tier"
+                                    >
+                                      T{{ bonus.soldier_tier }}
+                                    </span>
+                                    <span
+                                      class="rating-pill rating-color"
+                                      :class="'rating-' + bonus.soldier_rating"
+                                    >
+                                      R{{ bonus.soldier_rating }}
+                                    </span>
+                                  </div>
+                                  <div class="completion-count-small">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ bonus.soldier_completion_count || 0 }}
+                                  </div>
+                                </div>
+                                <div class="rating-section">
+                                  <div class="rating-label">Demoman</div>
+                                  <div class="rating-pills">
+                                    <span
+                                      class="rating-pill tier-color"
+                                      :class="'tier-' + bonus.demoman_tier"
+                                    >
+                                      T{{ bonus.demoman_tier }}
+                                    </span>
+                                    <span
+                                      class="rating-pill rating-color"
+                                      :class="'rating-' + bonus.demoman_rating"
+                                    >
+                                      R{{ bonus.demoman_rating }}
+                                    </span>
+                                  </div>
+                                  <div class="completion-count-small">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ bonus.demoman_completion_count || 0 }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <hr
+                    class="row-divider"
+                    style="width: 85%"
+                    v-if="bonuses.length > 0"
+                  />
+                  <div class="row w-100">
+                    <div class="col-md-12">
+                      <h2 class="section-header mb-4">
+                        <i class="bi bi-people-fill me-2"></i>Authors
+                      </h2>
+                      <div class="authors-wrapper">
+                        <div class="authors-block">
+                          <div
+                            v-for="author in authors"
+                            :key="author.author_id"
+                            class="author-card"
+                          >
+                            <div class="author-avatar-wrapper">
+                              <img
+                                :src="
+                                  author &&
+                                  author.player &&
+                                  author.player.steam_avatar
+                                    ? `${author.player.steam_avatar}`
+                                    : '/avatars/default-avatar.jpg'
+                                "
+                                alt="Author Avatar"
+                                class="author-avatar"
+                              />
+                            </div>
+                            <h6 class="author-name mt-2">
+                              {{
+                                author.author_name
+                                  ? author.author_name
+                                  : "Unknown Author"
+                              }}
+                            </h6>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                <div class="map-date-wrapper mt-4">
-                  <p class="map-date-added">
-                    <i class="bi bi-calendar-plus me-2"></i>
-                    Added on: {{ formatDate(map.date_added) }}
-                  </p>
+                  <div class="map-date-wrapper mt-4">
+                    <p class="map-date-added">
+                      <i class="bi bi-calendar-plus me-2"></i>
+                      Added on: {{ formatDate(map.date_added) }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -313,73 +323,83 @@
           <div class="col-md-12 map-details">
             <div class="card map-videos mb-4">
               <div class="card-body p-4">
-                <h2 class="section-header mb-4">
-                  <i class="bi bi-play-circle me-2"></i>Record videos
-                </h2>
-                <div class="video-section mb-3">
-                  <div class="section-header-styled">
-                    <h4 class="video-section-title mb-0">🌍Map records</h4>
-                  </div>
-                  <div class="section-content">
-                    <div class="row g-4">
-                      <div class="col-lg-6">
-                        <div class="video-card">
-                          <h5 class="video-title">
-                            <i class="bi bi-person-fill me-2"></i>Soldier record
-                          </h5>
-                          <div class="video-container">
-                            <div
-                              v-if="
-                                map &&
-                                map.soldier_video &&
-                                map.soldier_video !== 'null'
-                              "
-                            >
-                              <iframe
-                                :src="
-                                  'https://www.youtube.com/embed/' +
-                                  map.soldier_video
+                <div class="collapsible-header" @click="toggleMapVideos">
+                  <h4 class="video-section-title mb-0">
+                    🌍Map WR Videos
+                    <i
+                      class="bi"
+                      :class="
+                        showMapVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                      "
+                      style="margin-left: auto"
+                    ></i>
+                  </h4>
+                </div>
+                <div v-if="showMapVideos" class="collapsible-content">
+                  <div class="video-section mb-3">
+                    <div class="section-content">
+                      <div class="row g-4">
+                        <div class="col-lg-6">
+                          <div class="video-card">
+                            <h5 class="video-title">
+                              <i class="bi bi-person-fill me-2"></i>Soldier
+                              record
+                            </h5>
+                            <div class="video-container">
+                              <div
+                                v-if="
+                                  map &&
+                                  map.soldier_video &&
+                                  map.soldier_video !== 'null'
                                 "
-                                frameborder="0"
-                                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
                               >
-                              </iframe>
-                            </div>
-                            <div v-else class="no-video-placeholder">
-                              <i class="bi bi-camera-video-off"></i>
-                              <span>No video available</span>
+                                <iframe
+                                  :src="
+                                    'https://www.youtube.com/embed/' +
+                                    map.soldier_video
+                                  "
+                                  frameborder="0"
+                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowfullscreen
+                                >
+                                </iframe>
+                              </div>
+                              <div v-else class="no-video-placeholder">
+                                <i class="bi bi-camera-video-off"></i>
+                                <span>No video available</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="col-lg-6">
-                        <div class="video-card">
-                          <h5 class="video-title">
-                            <i class="bi bi-person-fill me-2"></i>Demoman record
-                          </h5>
-                          <div class="video-container">
-                            <div
-                              v-if="
-                                map &&
-                                map.demoman_video &&
-                                map.demoman_video !== 'null'
-                              "
-                            >
-                              <iframe
-                                :src="
-                                  'https://www.youtube.com/embed/' +
-                                  map.demoman_video
+                        <div class="col-lg-6">
+                          <div class="video-card">
+                            <h5 class="video-title">
+                              <i class="bi bi-person-fill me-2"></i>Demoman
+                              record
+                            </h5>
+                            <div class="video-container">
+                              <div
+                                v-if="
+                                  map &&
+                                  map.demoman_video &&
+                                  map.demoman_video !== 'null'
                                 "
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
                               >
-                              </iframe>
-                            </div>
-                            <div v-else class="no-video-placeholder">
-                              <i class="bi bi-camera-video-off"></i>
-                              <span>No video available</span>
+                                <iframe
+                                  :src="
+                                    'https://www.youtube.com/embed/' +
+                                    map.demoman_video
+                                  "
+                                  frameborder="0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowfullscreen
+                                >
+                                </iframe>
+                              </div>
+                              <div v-else class="no-video-placeholder">
+                                <i class="bi bi-camera-video-off"></i>
+                                <span>No video available</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -390,7 +410,7 @@
                 <div v-if="courses.length > 0" class="video-section mb-3">
                   <div class="collapsible-header" @click="toggleCourseVideos">
                     <h4 class="video-section-title mb-0">
-                      🚩Course records
+                      🚩Course WR Videos
                       <i
                         class="bi"
                         :class="
@@ -479,7 +499,7 @@
                 <div v-if="bonuses.length > 0" class="video-section">
                   <div class="collapsible-header" @click="toggleBonusVideos">
                     <h4 class="video-section-title mb-0">
-                      ⭐Bonus records
+                      ⭐Bonus WR Videos
                       <i
                         class="bi"
                         :class="
@@ -565,6 +585,7 @@
                     </div>
                   </div>
                 </div>
+                <Leaderboard :mapId="mapId" v-if="mapId" />
               </div>
             </div>
           </div>
@@ -576,11 +597,15 @@
 
 <script>
 import axios from "axios";
+import Leaderboard from "./Leaderboard.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "MapPage",
+  components: {
+    Leaderboard,
+  },
   props: {
     mapId: {
       type: Number,
@@ -597,12 +622,37 @@ export default {
       mapNotFound: false,
       showCourseVideos: false,
       showBonusVideos: false,
+      showMapVideos: false,
+      showMapBanner: false,
     };
   },
   async mounted() {
     await this.fetchAllMapData(this.mapId);
   },
+  watch: {
+    mapId: {
+      immediate: false,
+      async handler(newMapId, oldMapId) {
+        if (newMapId !== oldMapId) {
+          this.resetComponentState();
+          await this.fetchAllMapData(newMapId);
+        }
+      },
+    },
+  },
   methods: {
+    resetComponentState() {
+      this.map = null;
+      this.mapName = "";
+      this.authors = [];
+      this.courses = [];
+      this.bonuses = [];
+      this.mapNotFound = false;
+      this.showCourseVideos = false;
+      this.showBonusVideos = false;
+      this.showMapVideos = false;
+      this.showMapBanner = false;
+    },
     returnToAllMaps() {
       this.$router.push({ name: "Maps" });
     },
@@ -648,15 +698,22 @@ export default {
       ];
       const monthName = monthNames[date.getMonth()];
       const year = date.getFullYear();
-
       return `${day} ${monthName} ${year}`;
     },
     toggleCourseVideos() {
       this.showCourseVideos = !this.showCourseVideos;
     },
-
     toggleBonusVideos() {
       this.showBonusVideos = !this.showBonusVideos;
+    },
+    toggleMapVideos() {
+      this.showMapVideos = !this.showMapVideos;
+    },
+    toggleMapBanner() {
+      this.showMapBanner = !this.showMapBanner;
+    },
+    toggleMapInfo() {
+      this.showMapInfo = !this.showMapInfo;
     },
   },
 };
@@ -677,6 +734,36 @@ export default {
   color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-name-container {
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 111, 165, 0.3),
+    rgba(37, 55, 82, 0.3)
+  );
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.maps-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--color-text);
 }
 
 .map-banner {

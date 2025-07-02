@@ -492,13 +492,16 @@ export default {
         console.error("Failed to login to backend:", error);
       }
     },
+
     goToMap(mapId) {
-      this.$router.push({ name: "Records", params: { mapId } });
+      this.$router.push({ name: "MapPage", params: { mapId } });
       this.searchResults = null;
+      this.searchQuery = "";
     },
     goToPlayer(playerId) {
       this.$router.push({ name: "PlayerPage", params: { playerId } });
       this.searchResults = null;
+      this.searchQuery = "";
     },
     async fetchSearchResults() {
       if (this.searchQuery.trim()) {

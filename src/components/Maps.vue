@@ -10,10 +10,10 @@
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">🗺️</span>
-            Tempus maps
+            Tempus Maps
           </h1>
           <p class="page-subtitle">
-            Explore and filter maps, courses and bonuses
+            Explore and filter maps, courses, and bonuses
           </p>
         </div>
         <hr class="row-divider" style="width: 75%" />
@@ -559,7 +559,7 @@ export default {
       const itemId = this.currentView === "maps" ? item.id : item.map_id;
       console.log(`Navigating to more info for ${this.currentView}:`, itemId);
       this.$router.push({
-        name: "Records",
+        name: "MapPage",
         params: { mapId: itemId },
       });
     },
@@ -1192,7 +1192,7 @@ export default {
 }
 
 @media (max-width: 767.98px) {
-  .table-responsive {
+  .table-container {
     width: 100%;
     overflow-x: auto;
   }
