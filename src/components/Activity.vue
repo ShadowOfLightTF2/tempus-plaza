@@ -121,7 +121,7 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest top times</h3>
-                  <p class="table-header-subtitle">Updates twice a day</p>
+                  <p class="table-header-subtitle">Updates every 8 hours</p>
                 </div>
               </div>
               <div class="table-responsive">
@@ -196,7 +196,7 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest group 1s</h3>
-                  <p class="table-header-subtitle">Updates twice a day</p>
+                  <p class="table-header-subtitle">Updates every 8 hours</p>
                 </div>
               </div>
               <div class="table-responsive">

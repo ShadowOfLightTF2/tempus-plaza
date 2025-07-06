@@ -338,7 +338,7 @@
                       </div>
                     </div>
                   </li>
-                  <!-- <li @click.stop>
+                  <li @click.stop>
                     <div class="dropdown-item non-clickable">
                       <h6>Banner colour</h6>
                       <div
@@ -387,7 +387,7 @@
                         </div>
                       </div>
                     </div>
-                  </li> -->
+                  </li>
                   <li>
                     <hr class="dropdown-divider" />
                   </li>

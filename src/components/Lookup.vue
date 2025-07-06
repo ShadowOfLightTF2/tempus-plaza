@@ -398,6 +398,7 @@ export default {
   },
   data: () => ({
     playerId: null,
+    playerName: null,
     selectedPlayerName: null,
     records: [],
     loading: false,
@@ -436,16 +437,6 @@ export default {
     displayCount: 300,
   }),
   computed: {
-    user() {
-      //const userCookie = Cookies.get("user");
-      // if (!userCookie) return null;
-      // try {
-      //   return JSON.parse(userCookie);
-      // } catch (e) {
-      //   console.error("Malformed user cookie:", e);
-      //   return null;
-      // }
-    },
     filteredSortedItems() {
       let recordsToFilter = [];
 
@@ -577,22 +568,34 @@ export default {
       }
     },
   },
-  mounted() {
-    //const userCookie = Cookies.get("user");
-    let user = null;
-    // if (userCookie) {
-    //   try {
-    //     user = JSON.parse(userCookie);
-    //   } catch (e) {
-    //     console.error("Malformed user cookie:", e);
-    //   }
-    // }
+  async mounted() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+        credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.log("Response not ok:", response.status, response.statusText);
+        return null;
+      }
+
+      const user = await response.json();
+      console.log("User data response in lookup:", user);
+      this.playerId = user.data.playerid;
+      this.playerName = user.data.name;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
       this.findPlayerName(this.playerId);
-    } else if (user && user.playerid) {
-      this.playerId = user.playerid;
-      this.selectedPlayerName = user.name;
+    } else if (this.playerId) {
+      console.log("playerId:", this.playerId);
+      this.selectedPlayerName = this.playerName;
       this.$router.push({
         name: "Lookup",
         params: { playerId: this.playerId },

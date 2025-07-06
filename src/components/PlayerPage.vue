@@ -1999,13 +1999,15 @@ export default {
   margin-bottom: 0;
 }
 .filter-button-container {
-  margin-left: 10px;
+  margin-left: auto;
 }
 .main-filter-button {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
+  border-radius: 8px;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
 }
 
 .filter-section {
@@ -2032,6 +2034,7 @@ export default {
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
+  padding-bottom: 15px;
 }
 
 .filter-group {
@@ -2077,7 +2080,7 @@ export default {
 }
 
 .filter-button:hover:not(.active) {
-  background: rgba(74, 111, 165, 0.8);
+  border-color: var(--color-border, #444);
 }
 
 .group-filter-container {
@@ -2161,7 +2164,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .btn-secondary {
