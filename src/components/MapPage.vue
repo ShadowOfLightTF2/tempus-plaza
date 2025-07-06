@@ -340,7 +340,7 @@
                     <div class="section-content">
                       <div class="row g-4">
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-soldier">
                             <h5 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Soldier
                               record
@@ -372,7 +372,7 @@
                           </div>
                         </div>
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-demoman">
                             <h5 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Demoman
                               record
@@ -431,7 +431,7 @@
                       </h5>
                       <div class="row g-4">
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-soldier">
                             <h6 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Soldier
                               record
@@ -462,7 +462,7 @@
                           </div>
                         </div>
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-demoman">
                             <h6 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Demoman
                               record
@@ -520,7 +520,7 @@
                       </h5>
                       <div class="row g-4">
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-soldier">
                             <h6 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Soldier
                               record
@@ -551,7 +551,7 @@
                           </div>
                         </div>
                         <div class="col-lg-6">
-                          <div class="video-card">
+                          <div class="video-card video-card-demoman">
                             <h6 class="video-title">
                               <i class="bi bi-person-fill me-2"></i>Demoman
                               record
@@ -948,12 +948,23 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   transition: all 0.3s ease;
-  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .video-card:hover {
+  z-index: 100;
+  position: relative;
+  background: var(--color-primary-dark);
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-  transform: scale(1.01);
+}
+
+.video-card-soldier:hover {
+  transform: scale(2) translateX(26%);
+}
+
+.video-card-demoman:hover {
+  transform: scale(2) translateX(-26%);
 }
 
 .authors-wrapper {
@@ -1349,6 +1360,11 @@ export default {
     font-size: 2rem;
   }
 
+  .maps-title {
+    font-size: 1.75rem;
+    color: var(--color-text);
+  }
+
   .back-button {
     position: static;
     margin-bottom: 20px;
@@ -1371,6 +1387,10 @@ export default {
 
   .stat-value {
     font-size: 1.5rem;
+  }
+
+  .video-card:hover {
+    transform: none;
   }
 }
 </style>

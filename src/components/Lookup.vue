@@ -384,7 +384,6 @@
 
 <script>
 import DOMPurify from "dompurify";
-import Cookies from "js-cookie";
 import { formatDuration } from "@/utils/calculations.js";
 import { useHead } from "@vueuse/head";
 
@@ -438,14 +437,14 @@ export default {
   }),
   computed: {
     user() {
-      const userCookie = Cookies.get("user");
-      if (!userCookie) return null;
-      try {
-        return JSON.parse(userCookie);
-      } catch (e) {
-        console.error("Malformed user cookie:", e);
-        return null;
-      }
+      //const userCookie = Cookies.get("user");
+      // if (!userCookie) return null;
+      // try {
+      //   return JSON.parse(userCookie);
+      // } catch (e) {
+      //   console.error("Malformed user cookie:", e);
+      //   return null;
+      // }
     },
     filteredSortedItems() {
       let recordsToFilter = [];
@@ -579,15 +578,15 @@ export default {
     },
   },
   mounted() {
-    const userCookie = Cookies.get("user");
+    //const userCookie = Cookies.get("user");
     let user = null;
-    if (userCookie) {
-      try {
-        user = JSON.parse(userCookie);
-      } catch (e) {
-        console.error("Malformed user cookie:", e);
-      }
-    }
+    // if (userCookie) {
+    //   try {
+    //     user = JSON.parse(userCookie);
+    //   } catch (e) {
+    //     console.error("Malformed user cookie:", e);
+    //   }
+    // }
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
       this.findPlayerName(this.playerId);

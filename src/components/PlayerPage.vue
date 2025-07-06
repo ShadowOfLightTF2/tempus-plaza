@@ -14,23 +14,17 @@
       </div>
       <div v-else>
         <div
-          class="profile-banner mb-4 shadow"
+          class="profile-banner mb-4"
           :class="{ 'golden-border': player.donator }"
-          style="
-            background: linear-gradient(
-              135deg,
-              rgba(74, 111, 165, 0.3),
-              rgba(37, 55, 82, 0.3)
-            );
-            border: 1px solid rgba(42, 42, 42, 0.99);
-          "
+          :style="{
+            background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
+          }"
         >
           <div v-if="loading.ranks" class="text-center">
             <div class="spinner-border text-light" role="status">
               <span class="visually-hidden">Loading ranks...</span>
             </div>
           </div>
-
           <div
             class="row g-0"
             style="height: 100%; display: flex; align-items: center"
@@ -64,25 +58,6 @@
                   </span>
                   <span style="color: var(--color-text-soft)">]</span>
                 </p>
-                <!-- <img
-                :src="getLauncherIcon(player.launcher_pref)"
-                alt="Launcher"
-                class="launcher-icon"
-                style="width: 64px; height: 64px; cursor: pointer; background: rgba(29, 29, 29, 0.5); border-radius: 50%;"
-                @click="showLauncherMenu = !showLauncherMenu"
-              />
-              <div v-if="showLauncherMenu" class="launcher-dropdown">
-                <img
-                  v-for="option in launcherOptions"
-                  :key="option.value"
-                  :src="option.icon"
-                  :alt="option.value"
-                  class="launcher-option"
-                  :class="{ selected: player.launcher_pref === option.value }"
-                  @click="setLauncherPreference(option.value)"
-                  style="width: 32px; height: 32px; margin: 4px; cursor: pointer;"
-                />
-              </div> -->
                 <p
                   class="country mb-3"
                   style="font-weight: bold; color: #d5d5d5"
@@ -228,7 +203,6 @@
             </div>
           </div>
         </div>
-
         <div class="row main-content-wrapper">
           <div class="col-md-3 stats-boxes">
             <!-- Soldier stats on the left -->
@@ -344,7 +318,6 @@
                           </div>
                           <div class="text-end">Count</div>
                         </div>
-
                         <!-- Player Rows -->
                         <div
                           v-for="(sharedPlayer, index) in sharedTimesSoldier"
@@ -368,7 +341,6 @@
                               {{ sharedPlayer.playerName }}
                             </span>
                           </div>
-
                           <!-- Count -->
                           <div
                             class="text-end fw-bold shared-count"
@@ -388,24 +360,148 @@
             <!-- Recent runs in the middle -->
             <div class="records-card">
               <div
-                class="card-header tabs-header text-white"
+                class="card-header tabs-header"
                 style="background: rgba(255, 255, 255, 0.05)"
               >
-                <div class="button-group">
-                  <button
-                    v-for="(tab, index) in tabs"
-                    :key="index"
-                    @click="currentTab = tab"
-                    class="toggle-btn btn"
-                    :class="{ active: currentTab === tab, 'btn-dark': true }"
-                    :style="{
-                      color: 'var(--color-text)',
-                      border: '1px solid var(--color-border-soft)',
-                      'font-weight': 'bold',
-                    }"
-                  >
-                    {{ tab }}
-                  </button>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="filter-button-container">
+                    <button
+                      @click="toggleFilterSection"
+                      class="toggle-btn btn main-filter-button"
+                      :class="{ 'btn-dark': true }"
+                      :style="{
+                        color: 'var(--color-text)',
+                        border: '1px solid var(--color-border-soft)',
+                        'font-weight': 'bold',
+                      }"
+                    >
+                      <i class="bi bi-filter"></i> Filters
+                      <i class="bi bi-chevron-down"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div
+                v-if="showFilterSection"
+                class="filter-section"
+                style="background: rgba(255, 255, 255, 0.05)"
+              >
+                <div class="filter-content">
+                  <div class="filter-columns">
+                    <div class="filter-group">
+                      <h6 class="filter-title text-light mb-2">Class</h6>
+                      <div class="class-filter-container">
+                        <button
+                          @click="toggleClassFilter('soldier')"
+                          :class="{
+                            active:
+                              filterOptions.selectedClasses.includes('soldier'),
+                          }"
+                          class="filter-button"
+                        >
+                          Soldier
+                        </button>
+                        <button
+                          @click="toggleClassFilter('demoman')"
+                          :class="{
+                            active:
+                              filterOptions.selectedClasses.includes('demoman'),
+                          }"
+                          class="filter-button"
+                        >
+                          Demoman
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="filter-group">
+                      <h6 class="filter-title text-light mb-2">Type</h6>
+                      <div class="type-filter-container">
+                        <button
+                          @click="toggleTypeFilter('map')"
+                          :class="{
+                            active: filterOptions.selectedTypes.includes('map'),
+                          }"
+                          class="filter-button"
+                        >
+                          Map
+                        </button>
+                        <button
+                          @click="toggleTypeFilter('course')"
+                          :class="{
+                            active:
+                              filterOptions.selectedTypes.includes('course'),
+                          }"
+                          class="filter-button"
+                        >
+                          Course
+                        </button>
+                        <button
+                          @click="toggleTypeFilter('bonus')"
+                          :class="{
+                            active:
+                              filterOptions.selectedTypes.includes('bonus'),
+                          }"
+                          class="filter-button"
+                        >
+                          Bonus
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Placement</h6>
+                    <div class="group-filter-container">
+                      <div class="group-filters">
+                        <button
+                          @click="togglePlacementFilter(1)"
+                          :class="{
+                            active:
+                              filterOptions.selectedPlacements.includes(1),
+                          }"
+                          class="filter-button group-badge group-wr"
+                        >
+                          WR
+                        </button>
+                        <button
+                          @click="togglePlacementFilter(2)"
+                          :class="{
+                            active:
+                              filterOptions.selectedPlacements.includes(2),
+                          }"
+                          class="filter-button group-badge group-tt"
+                        >
+                          TT
+                        </button>
+                        <button
+                          v-for="group in [11, 12, 13, 14, 15]"
+                          :key="'group-' + group"
+                          @click="togglePlacementFilter(group)"
+                          class="filter-button group-badge"
+                          :class="{
+                            active:
+                              filterOptions.selectedPlacements.includes(group),
+                            'group-1': group - 10 === 1,
+                            'group-2': group - 10 === 2,
+                            'group-3': group - 10 === 3,
+                            'group-4': group - 10 === 4,
+                            'group-5': group - 10 === 5,
+                          }"
+                        >
+                          G{{ group - 10 }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="filter-actions">
+                    <button
+                      type="button"
+                      @click="clearAllFilters"
+                      class="btn btn-secondary"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
                 </div>
               </div>
               <div
@@ -413,14 +509,14 @@
                 style="background: rgba(255, 255, 255, 0.05)"
               >
                 <div class="records-section">
-                  <div v-if="loading[currentTab]" class="text-center">
+                  <div v-if="loading['Latest runs']" class="text-center">
                     <div class="spinner-border text-light" role="status">
                       <span class="visually-hidden">Loading records...</span>
                     </div>
                   </div>
                   <div v-else>
                     <div
-                      v-for="(group, date) in paginatedRecords"
+                      v-for="(group, date) in filteredAndPaginatedRecords"
                       :key="date"
                       class="date-group fade-in"
                     >
@@ -626,7 +722,6 @@
                           </div>
                           <div class="text-end">Count</div>
                         </div>
-
                         <!-- Player Rows -->
                         <div
                           v-for="(sharedPlayer, index) in sharedTimesDemoman"
@@ -650,7 +745,6 @@
                               {{ sharedPlayer.playerName }}
                             </span>
                           </div>
-
                           <!-- Count -->
                           <div
                             class="text-end fw-bold shared-count"
@@ -679,18 +773,15 @@ import { ref } from "vue";
 import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
-
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerPage",
   setup() {
     const pageTitle = ref("Tempus Plaza | Player");
-
     useHead({
       title: pageTitle,
     });
-
     return {
       updateTitle: (playerName) => {
         pageTitle.value = `Tempus Plaza | ${playerName}`;
@@ -742,15 +833,9 @@ export default {
     showRankMenu: false,
     records: {
       recentRecords: [],
-      topTimes: [],
-      worldRecords: [],
     },
-    tabs: ["Latest runs", "Latest top times", "Latest world records"],
-    currentTab: "Latest runs",
     loading: {
       "Latest runs": true,
-      "Latest top times": true,
-      "Latest world records": true,
       shared: true,
       ranks: true,
       stats: true,
@@ -868,28 +953,27 @@ export default {
           });
           const points = data.y;
           const rank = data.overall_rank;
-
           return `
-        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
-              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
+                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
-              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
+                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
         },
       },
       legend: {
@@ -898,7 +982,6 @@ export default {
         },
       },
     },
-
     soldierChartOptions: {
       chart: {
         type: "line",
@@ -964,28 +1047,27 @@ export default {
           });
           const points = data.y;
           const rank = data.soldier_rank;
-
           return `
-        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Soldier points: </span>
-              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Soldier points: </span>
+                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Soldier rank: </span>
-              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Soldier rank: </span>
+                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
         },
       },
       legend: {
@@ -994,7 +1076,6 @@ export default {
         },
       },
     },
-
     demomanChartOptions: {
       chart: {
         type: "line",
@@ -1060,28 +1141,27 @@ export default {
           });
           const points = data.y;
           const rank = data.demoman_rank;
-
           return `
-        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Demoman points: </span>
-              <span class="apexcharts-tooltip-text-y-value">${points}</span>
+            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Demoman points: </span>
+                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Demoman rank: </span>
-              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
+              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+                <div class="apexcharts-tooltip-y-group">
+                  <span class="apexcharts-tooltip-text-y-label">Demoman rank: </span>
+                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
         },
       },
       legend: {
@@ -1090,39 +1170,57 @@ export default {
         },
       },
     },
+    showFilterSection: false,
+    filterOptions: {
+      selectedClasses: [],
+      selectedTypes: [],
+      selectedPlacements: [],
+    },
   }),
   computed: {
+    bannerColors() {
+      const color = this.player.color || "blue";
+      return {
+        color1: `var(--color-banner-${color}-1)`,
+        color2: `var(--color-banner-${color}-2)`,
+      };
+    },
     filteredRecords() {
-      const tab = this.currentTab;
-      if (tab === "Latest runs") {
-        return this.records.recentRecords;
-      } else if (tab === "Latest top times") {
-        return this.records.topTimes;
-      } else if (tab === "Latest world records") {
-        return this.records.worldRecords;
-      }
-      return [];
-    },
-    groupedRecords() {
-      const grouped = {};
-      this.filteredRecords.forEach((record) => {
-        const date = new Date(record.date * 1000).toDateString();
-        if (!grouped[date]) {
-          grouped[date] = [];
+      let recordsToFilter = this.records.recentRecords;
+      return recordsToFilter.filter((record) => {
+        if (
+          this.filterOptions.selectedClasses.length > 0 &&
+          !this.filterOptions.selectedClasses.includes(record.class)
+        ) {
+          return false;
         }
-        grouped[date].push(record);
+        if (
+          this.filterOptions.selectedTypes.length > 0 &&
+          !this.filterOptions.selectedTypes.includes(record.type)
+        ) {
+          return false;
+        }
+        if (
+          this.filterOptions.selectedPlacements.length > 0 &&
+          !this.filterOptions.selectedPlacements.some((placement) => {
+            if (placement === 1) return record.placement === 1;
+            if (placement === 2)
+              return record.placement >= 2 && record.placement <= 10;
+            return record.placement === placement;
+          })
+        ) {
+          return false;
+        }
+        return true;
       });
-      return grouped;
     },
-    paginatedRecords() {
+    filteredAndPaginatedRecords() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
-      const grouped = this.groupedRecords;
+      const grouped = this.groupRecords(this.filteredRecords);
       const dates = Object.keys(grouped);
-
       const paginated = {};
       let count = 0;
-
       for (const date of dates) {
         for (const record of grouped[date]) {
           if (count >= start && count < end) {
@@ -1134,7 +1232,6 @@ export default {
           count++;
         }
       }
-
       return paginated;
     },
   },
@@ -1165,11 +1262,8 @@ export default {
             stats: true,
             shared: true,
             "Latest runs": true,
-            "Latest top times": true,
-            "Latest world records": true,
           };
           this.currentPage = 1;
-          this.currentTab = "Latest runs";
           try {
             await Promise.all([
               this.fetchPlayerData(newId),
@@ -1186,8 +1280,60 @@ export default {
         }
       },
     },
+    filterOptions: {
+      handler() {
+        this.currentPage = 1;
+      },
+      deep: true,
+    },
   },
   methods: {
+    toggleClassFilter(classType) {
+      const index = this.filterOptions.selectedClasses.indexOf(classType);
+      if (index === -1) {
+        this.filterOptions.selectedClasses.push(classType);
+      } else {
+        this.filterOptions.selectedClasses.splice(index, 1);
+      }
+    },
+    toggleTypeFilter(type) {
+      const index = this.filterOptions.selectedTypes.indexOf(type);
+      if (index === -1) {
+        this.filterOptions.selectedTypes.push(type);
+      } else {
+        this.filterOptions.selectedTypes.splice(index, 1);
+      }
+    },
+    togglePlacementFilter(placement) {
+      const index = this.filterOptions.selectedPlacements.indexOf(placement);
+      if (index === -1) {
+        this.filterOptions.selectedPlacements.push(placement);
+      } else {
+        this.filterOptions.selectedPlacements.splice(index, 1);
+      }
+    },
+    toggleFilterSection() {
+      this.showFilterSection = !this.showFilterSection;
+    },
+    groupRecords(records) {
+      const grouped = {};
+      records.forEach((record) => {
+        const date = new Date(record.date * 1000).toDateString();
+        if (!grouped[date]) {
+          grouped[date] = [];
+        }
+        grouped[date].push(record);
+      });
+      return grouped;
+    },
+    clearAllFilters() {
+      this.filterOptions = {
+        selectedClasses: [],
+        selectedTypes: [],
+        selectedPlacements: [],
+      };
+      this.currentPage = 1;
+    },
     nextPage() {
       this.currentPage++;
     },
@@ -1213,58 +1359,56 @@ export default {
         console.error("Error fetching player points:", error);
       }
     },
-
     updateChartData() {
       if (!this.pointsHistory.length) return;
-
       const sortedData = [...this.pointsHistory].sort(
         (a, b) => a.date - b.date
       );
-
+      const dailyDataMap = new Map();
+      sortedData.forEach((point) => {
+        const date = new Date(point.date * 1000).toDateString();
+        dailyDataMap.set(date, point);
+      });
+      const dailyData = Array.from(dailyDataMap.values());
       this.overallChartSeries = [
         {
           name: "Overall Points",
-          data: sortedData.map((point) => ({
+          data: dailyData.map((point) => ({
             x: point.date * 1000,
             y: point.overall_points,
             overall_rank: point.overall_rank,
           })),
         },
       ];
-
       this.soldierChartSeries = [
         {
           name: "Soldier Points",
-          data: sortedData.map((point) => ({
+          data: dailyData.map((point) => ({
             x: point.date * 1000,
             y: point.soldier_points,
             soldier_rank: point.soldier_rank,
           })),
         },
       ];
-
       this.demomanChartSeries = [
         {
           name: "Demoman Points",
-          data: sortedData.map((point) => ({
+          data: dailyData.map((point) => ({
             x: point.date * 1000,
             y: point.demoman_points,
             demoman_rank: point.demoman_rank,
           })),
         },
       ];
-
       this.loading.points = false;
     },
     goToRecords(mapId) {
-      console.log("Navigating to records with mapId:", mapId);
       this.$router.push({
         name: "MapPage",
         params: { mapId: mapId },
       });
     },
     goToPlayer(playerId) {
-      console.log("Navigating to player with playerId:", playerId);
       this.$router.push({
         name: "PlayerPage",
         params: { playerId: playerId },
@@ -1353,7 +1497,6 @@ export default {
         { range: [4001, 5000], male: "Peasant VII", female: "Peasant VII" },
         { range: [5001, 999999], male: "Peon", female: "Peon" },
       ];
-
       for (const title of titles) {
         if (rank >= title.range[0] && rank <= title.range[1]) {
           const selectedTitle = gender === "male" ? title.male : title.female;
@@ -1366,7 +1509,6 @@ export default {
           };
         }
       }
-
       return { title: "Unranked", color: "--color-peon" };
     },
     getHighestRank() {
@@ -1412,6 +1554,7 @@ export default {
             ...this.player,
             gender: "male",
             donator: false,
+            color: "blue",
           };
           return;
         }
@@ -1421,7 +1564,7 @@ export default {
           gender: data.gender,
           rank_pref: data.rank_pref,
           donator: Boolean(data.donator),
-          // launcher_pref: data.launcher_pref
+          color: data.color,
         };
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -1451,7 +1594,6 @@ export default {
         this.loading.ranks = false;
       }
     },
-
     async fetchPlayerRanks(playerId) {
       try {
         const response = await axios.get(
@@ -1477,19 +1619,13 @@ export default {
         const response = await axios.get(
           `${API_BASE_URL}/players/${playerId}/recent-records`
         );
-        const recentRecords = response.data;
-
-        this.records.recentRecords = recentRecords.allRecords;
-        this.records.topTimes = recentRecords.top10Records;
-        this.records.worldRecords = recentRecords.worldRecords;
+        this.records.recentRecords = response.data;
       } catch (error) {
         this.error =
           "Failed to fetch player recent records. Please try again later.";
         console.error("Error fetching recent records:", error);
       } finally {
         this.loading["Latest runs"] = false;
-        this.loading["Latest top times"] = false;
-        this.loading["Latest world records"] = false;
       }
     },
     async fetchPlayerStats(playerId) {
@@ -1498,7 +1634,6 @@ export default {
           `${API_BASE_URL}/players/${playerId}/stats`
         );
         const stats = response.data;
-
         this.stats = {
           total: {
             completion: {
@@ -1634,7 +1769,6 @@ export default {
           soldier_maps_count: soldierTtCount,
           demoman_maps_count: demomanTtCount,
         };
-
         const fetchSharedData = async (classType, placement, isGroupOne) => {
           try {
             const response = await axios.get(
@@ -1651,7 +1785,6 @@ export default {
             return [];
           }
         };
-
         const processClassData = async (
           classType,
           countProperty,
@@ -1665,7 +1798,6 @@ export default {
             : "Shared top times";
           return await fetchSharedData(classType, placement, isGroupOne);
         };
-
         const [sharedSoldiers, sharedDemomans] = await Promise.all([
           processClassData(
             "soldier",
@@ -1680,7 +1812,6 @@ export default {
             11
           ),
         ]);
-
         this.sharedTimesSoldier = Object.entries(sharedSoldiers).map(
           ([_, data]) => ({
             playerId: data.player_id,
@@ -1689,7 +1820,6 @@ export default {
             avatar: data.avatar,
           })
         );
-
         this.sharedTimesDemoman = Object.entries(sharedDemomans).map(
           ([_, data]) => ({
             playerId: data.player_id,
@@ -1720,18 +1850,37 @@ export default {
   background: var(--color-box);
   color: var(--color-text);
 }
-
 .return-button:hover {
   background: rgba(74, 111, 165, 0.8) !important;
   color: var(--color-text);
 }
-
 .profile-banner {
+  background: linear-gradient(
+    135deg,
+    var(--color-banner-blue-1),
+    var(--color-banner-blue-2)
+  );
+  border: 1px solid rgba(42, 42, 42, 0.99);
   position: relative;
   border-radius: 12px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
-
+.golden-border {
+  border-radius: 12px;
+  border: 2px solid gold;
+  animation: goldenGlow 3s infinite;
+}
+@keyframes goldenGlow {
+  0% {
+    box-shadow: 0 0 5px gold;
+  }
+  50% {
+    box-shadow: 0 0 20px gold;
+  }
+  100% {
+    box-shadow: 0 0 5px gold;
+  }
+}
 .vue-apexcharts {
   min-height: 200px !important;
   box-shadow: 0 0px 20px rgba(0, 0, 0, 0.75);
@@ -1741,13 +1890,11 @@ export default {
   height: 96px;
   border: 3px solid #000e25;
 }
-
 .shared-avatar {
   width: 25px;
   height: 25px;
   border: 2px solid var(--color-primary);
 }
-
 .shared-row {
   border: 1px solid var(--color-border-soft);
   background: rgba(255, 255, 255, 0.05);
@@ -1756,18 +1903,15 @@ export default {
   cursor: pointer;
   transition: transform 0.3s ease;
 }
-
 .shared-row-name {
   white-space: nowrap;
   overflow: hidden;
   width: 80%;
 }
-
 .shared-count {
   color: var(--color-text);
   font-weight: bold;
 }
-
 .profile-info {
   position: relative;
   display: flex;
@@ -1777,7 +1921,6 @@ export default {
   text-align: center;
   max-width: 100%;
 }
-
 .player-name {
   white-space: nowrap;
   overflow: hidden;
@@ -1788,27 +1931,23 @@ export default {
   font-weight: 700;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
-
 .flag-icon {
   width: 24px;
   height: 18px;
   vertical-align: middle;
   border-radius: 2px;
 }
-
 .banner-block {
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   border-radius: 10px;
   transition: transform 0.3s ease;
 }
-
 .shared-row:hover,
 .record-item:hover {
   transform: scale(1.03);
   background-color: var(--color-primary);
 }
-
 .stat-item {
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
@@ -1825,7 +1964,6 @@ export default {
   max-width: 100%;
   transition: transform 0.3s ease;
 }
-
 .banner-block:hover,
 .stat-item:hover {
   transform: translateY(-2px);
@@ -1835,29 +1973,24 @@ export default {
   border-radius: 10px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
-
 .stat-block .card-title,
 .banner-block .card-title {
   color: #aaa;
   font-weight: bold;
 }
-
 .stat-block .card-text,
 .banner-block .card-text {
   font-size: 1.4rem;
   font-weight: bold;
 }
-
 .player-stats {
   color: var(--color-text) !important;
 }
-
 .player-shared-stats {
   color: var(--color-text) !important;
   font-size: 14px !important;
   font-weight: bold !important;
 }
-
 .section-header {
   color: var(--color-text);
   font-size: 20px;
@@ -1865,11 +1998,196 @@ export default {
   text-align: center;
   margin-bottom: 0;
 }
-
-.button-group {
-  border-radius: 8px;
-  border: 1px solid var(--color-border-soft);
+.filter-button-container {
+  margin-left: 10px;
 }
+.main-filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.filter-section {
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.filter-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0px 15px rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--color-border-soft);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-columns {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-title {
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.class-filter-container,
+.type-filter-container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(68, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.filter-button.active {
+  background: rgba(74, 111, 165, 0.8);
+  border-color: var(--color-border, #444);
+}
+
+.filter-button:hover:not(.active) {
+  background: rgba(74, 111, 165, 0.8);
+}
+
+.group-filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.group-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.group-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.group-checkbox input {
+  display: none;
+}
+
+.group-checkbox input:checked + .group-badge {
+  border-color: var(--color-border, #444);
+  box-shadow: 0 0 0 1px var(--color-border, #444);
+}
+
+.group-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  min-width: 28px;
+  text-align: center;
+}
+
+.group-badge.group-wr {
+  background: #ffd700 !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-tt {
+  background: #30869b !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-1 {
+  background: #ff9797af !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-2 {
+  background: #f7cf84 !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-3 {
+  background: #d27d2dbb !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-4 {
+  background: #b3b3b3ce !important;
+  color: var(--color-dark) !important;
+}
+
+.group-badge.group-5 {
+  background: #e4e4e4ce !important;
+  color: var(--color-dark) !important;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  border: 1px solid var(--color-dark);
+  font-weight: bold;
+}
+
+.btn-secondary:hover {
+  border: 1px solid var(--color-dark);
+  background: rgba(74, 111, 165, 0.8);
+}
+
+.clear-btn {
+  background: var(--color-box);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.clear-btn:hover {
+  background: rgba(74, 111, 165, 0.8);
+}
+
 .card-header {
   margin-bottom: 0;
   border-bottom: none;
@@ -1877,32 +2195,27 @@ export default {
   border-top-left-radius: 10px !important;
   border-top-right-radius: 10px !important;
 }
-
 .card-header.tabs-header .button-group {
   width: 100%;
   display: flex;
   padding: 0;
   margin: 0;
 }
-
 .card-header.tabs-header .btn {
   flex: 1;
   margin: 0;
   padding: 10px;
   text-align: center;
 }
-
 .card-body.tabs-content .records-section {
   width: 100%;
   padding: 0;
 }
-
 .chart-body {
   padding: 0px 10px !important;
   border-radius: 0 0 10px 10px !important;
   margin-bottom: 20px;
 }
-
 .card-row {
   padding: 0px 15px 10px 15px;
   display: flex;
@@ -1913,7 +2226,6 @@ export default {
 .shared-card-row {
   padding: 5px 5px 5px 5px;
 }
-
 .list-group {
   display: flex;
   flex-direction: column;
@@ -1922,7 +2234,6 @@ export default {
   margin: 0;
   width: 100%;
 }
-
 .list-group-item.record-item {
   display: flex;
   justify-content: space-between;
@@ -1935,12 +2246,10 @@ export default {
   box-sizing: border-box;
   box-shadow: 0 0px 10px rgba(0, 0, 0, 0.75);
 }
-
 .list-group-item.record-item:hover {
   background: rgba(74, 111, 165, 0.8) !important;
   cursor: pointer;
 }
-
 .card-body,
 .card-header {
   padding: 10px;
@@ -1949,61 +2258,50 @@ export default {
   border-radius: 10px !important;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
-
 .completion-boxes,
 .records-boxes {
   display: flex !important;
   gap: 10px !important;
 }
-
 .completion-boxes .card,
 .records-boxes .card {
   flex: 1;
 }
-
 .record-class-map {
   display: flex;
   align-items: center;
 }
-
 .shared-avatar {
   width: 25px;
   height: 25px;
   border: 2px solid var(--color-primary);
 }
-
 .record-map {
   color: var(--color-text-clickable);
   font-size: 15px;
   font-weight: bold;
 }
-
 .record-time-detail {
   min-width: 180px;
 }
-
 .record-detail {
   font-size: 14px;
   color: #aaa;
 }
-
 .record-duration {
   font-weight: bold;
   color: var(--color-text);
   font-size: 15px;
   white-space: nowrap;
 }
-
 .record-rank {
   min-width: 40px;
   text-align: right;
   white-space: nowrap;
 }
-
 .record-date {
   white-space: nowrap;
 }
-
 .record-item {
   background: var(--color-border-soft);
   border-radius: 5px;
@@ -2013,7 +2311,6 @@ export default {
   padding: 10px;
   transition: transform 0.3s ease;
 }
-
 .record-time-detail-grid {
   display: grid;
   grid-template-rows: auto auto auto;
@@ -2021,7 +2318,6 @@ export default {
   justify-items: end;
   min-width: 180px;
 }
-
 .pagination-controls {
   display: flex;
   justify-content: space-between;
@@ -2029,11 +2325,9 @@ export default {
   margin-top: 10px;
   padding-bottom: 10px;
 }
-
 .pagination-spacer {
   flex-grow: 1;
 }
-
 .latest-runs-btn {
   background: var(--color-box);
   color: var(--color-text);
@@ -2042,75 +2336,60 @@ export default {
   padding: 8px 16px;
   border-radius: 8px;
 }
-
 .latest-runs-btn:hover {
   color: var(--color-text);
   background: rgba(74, 111, 165, 0.8) !important;
 }
-
 .date-header {
   color: var(--color-text);
   padding-top: 5px;
 }
-
 .placement-gold {
   color: #ffd700;
   font-weight: bold;
 }
-
 .placement-silver {
   color: #c0c0c0;
   font-weight: bold;
 }
-
 .placement-bronze {
   color: #cd7f32;
   font-weight: bold;
 }
-
 .placement-blue {
   color: #30869b;
   font-weight: bold;
 }
-
 .placement-g1 {
   color: #ff9797af !important;
   font-weight: bold;
 }
-
 .placement-g2 {
   color: #f7cf84 !important;
   font-weight: bold;
 }
-
 .placement-g3 {
   color: #d27d2dbb !important;
   font-weight: bold;
 }
-
 .placement-g4 {
   color: #b3b3b3ce !important;
   font-weight: bold;
 }
-
 .placement-g5 {
   color: var(--color-text) !important;
   font-weight: bold;
 }
-
 .class-icon {
   width: 36px;
   height: 36px;
 }
-
 .tabs-header .btn-group {
   width: 100%;
 }
-
 .tabs-header .btn {
   flex: 1;
 }
-
 .chart-container {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
@@ -2124,34 +2403,27 @@ export default {
   margin-top: 10px;
   color: var(--color-text);
 }
-
 .stats-boxes {
   flex: 1;
   padding: 10px;
 }
-
 .tabs-container {
   flex: 2;
   padding: 10px;
 }
-
 .record-item {
   font-size: 0.9rem;
   padding: 8px;
 }
-
 .clickable {
   cursor: pointer;
 }
-
 .clickable:hover {
   background: rgba(74, 111, 165, 0.8) !important;
 }
-
 .clickable-text {
   color: var(--color-text-clickable) !important;
 }
-
 .launcher-dropdown {
   position: absolute;
   background: var(--color-dark);
@@ -2165,14 +2437,12 @@ export default {
   border: 2px solid #ffd700;
   border-radius: 4px;
 }
-
 .rank-name {
   color: var(--color-text);
   font-weight: bold;
   font-size: large;
   margin-bottom: 10px;
 }
-
 .rank-dropdown {
   position: absolute;
   background: var(--color-dark);
@@ -2183,22 +2453,18 @@ export default {
   transform: translateX(-50%);
   padding: 5px;
 }
-
 .rank-option {
   padding: 5px;
   cursor: pointer;
   color: var(--color-text);
 }
-
 .rank-option:hover {
   background: var(--color-primary);
 }
-
 .rank-option.selected {
   background: var(--color-primary);
   border-radius: 4px;
 }
-
 .rank-color-emperor {
   color: var(--color-emperor);
 }
@@ -2256,7 +2522,6 @@ export default {
 .rank-color-peon {
   color: var(--color-peon);
 }
-
 .donator-badge {
   position: absolute;
   top: 10px;
@@ -2268,7 +2533,6 @@ export default {
   font-weight: bold;
   animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
@@ -2278,24 +2542,6 @@ export default {
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
-  }
-}
-
-.golden-border {
-  border-radius: 12px;
-  border: 2px solid gold !important;
-  animation: goldenGlow 2s infinite;
-}
-
-@keyframes goldenGlow {
-  0% {
-    box-shadow: 0 0 5px gold;
-  }
-  50% {
-    box-shadow: 0 0 20px gold;
-  }
-  100% {
-    box-shadow: 0 0 5px gold;
   }
 }
 </style>

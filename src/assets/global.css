@@ -34,6 +34,29 @@
   --color-plebeian: #66924C;
   --color-peasant: #AFE06C;
   --color-peon: #8C785D;
+
+  --color-banner-blue-1: #4A6FA54D;
+  --color-banner-blue-2: #2537524D;
+  --color-banner-red-1: #FA52524D;
+  --color-banner-red-2: #C92A2A4D;
+  --color-banner-green-1: #40C0574D;
+  --color-banner-green-2: #298B3F4D;
+  --color-banner-purple-1: #9D75D44D;
+  --color-banner-purple-2: #6F42C14D;
+  --color-banner-yellow-1: #FCC4194D;
+  --color-banner-yellow-2: #D4A0174D;
+  --color-banner-pink-1: #FF8FBC4D;
+  --color-banner-pink-2: #D6336C4D;
+  --color-banner-orange-1: #FD7E144D;
+  --color-banner-orange-2: #E8590C4D;
+  --color-banner-teal-1: #20C9974D;
+  --color-banner-teal-2: #12B8864D;
+  --color-banner-indigo-1: #6610F24D;
+  --color-banner-indigo-2: #5705B44D;
+  --color-banner-cyan-1: #15AABF4D;
+  --color-banner-cyan-2: #0D8A994D;
+  --color-banner-lime-1: #74B8164D;
+  --color-banner-lime-2: #5C940D4D;
 }
 body, html {
   margin: 0;

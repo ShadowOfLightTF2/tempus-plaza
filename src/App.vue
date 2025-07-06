@@ -338,6 +338,56 @@
                       </div>
                     </div>
                   </li>
+                  <!-- <li @click.stop>
+                    <div class="dropdown-item non-clickable">
+                      <h6>Banner colour</h6>
+                      <div
+                        class="color-picker-container"
+                        :class="{ 'position-relative': true }"
+                      >
+                        <div
+                          v-for="(color, index) in colorOptions"
+                          :key="index"
+                          class="color-option-wrapper"
+                          @click="selectColor(color.value)"
+                        >
+                          <input
+                            class="d-none"
+                            type="radio"
+                            :id="'color-' + index"
+                            name="colorPreference"
+                            v-model="colorPreference"
+                            :value="color.value"
+                            @change="updateUserPreferences"
+                            :disabled="donator === 0"
+                          />
+                          <label
+                            class="color-swatch"
+                            :for="'color-' + index"
+                            :class="{
+                              selected: colorPreference === color.value,
+                            }"
+                            :style="{ backgroundColor: color.color }"
+                          ></label>
+                        </div>
+                        <div
+                          v-if="showTooltip"
+                          class="supporter-tooltip"
+                          @click.stop
+                        >
+                          <div class="tooltip-content">
+                            <p>
+                              You need to become a supporter to select colors!
+                            </p>
+                            <button @click="goToDonate" class="tooltip-button">
+                              Become a Supporter
+                            </button>
+                          </div>
+                          <div class="tooltip-arrow"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </li> -->
                   <li>
                     <hr class="dropdown-divider" />
                   </li>
@@ -371,7 +421,6 @@
 
 <script>
 import DOMPurify from "dompurify";
-import Cookies from "js-cookie";
 import debounce from "debounce";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
@@ -384,9 +433,25 @@ export default {
       searchResults: null,
       rankPreference: "overall",
       gender: "male",
+      donator: 0,
       currentUser: null,
       isUpdating: false,
       updateDismissed: false,
+      showTooltip: false,
+      tooltipTimeout: null,
+      colorPreference: "blue",
+      colorOptions: [
+        { value: "blue", color: "var(--color-banner-blue-1)" },
+        { value: "red", color: "var(--color-banner-red-1)" },
+        { value: "green", color: "var(--color-banner-green-1)" },
+        { value: "purple", color: "var(--color-banner-purple-1)" },
+        { value: "yellow", color: "var(--color-banner-yellow-1)" },
+        { value: "cyan", color: "var(--color-banner-cyan-1)" },
+        { value: "orange", color: "var(--color-banner-orange-1)" },
+        { value: "teal", color: "var(--color-banner-teal-1)" },
+        { value: "indigo", color: "var(--color-banner-indigo-1)" },
+        { value: "pink", color: "var(--color-banner-pink-1)" },
+      ],
     };
   },
   computed: {
@@ -423,18 +488,95 @@ export default {
     },
     async logout() {
       try {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
           method: "POST",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
-        this.currentUser = null;
-        this.$router.push({ name: "Home" });
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          console.error("Logout failed:", response.status);
+        }
       } catch (error) {
         console.error("Logout failed:", error);
       }
     },
+    async selectColor(colorValue) {
+      const user = await this.fetchUserData();
+      if (user.donator === 0) {
+        this.showTooltip = true;
+        if (this.tooltipTimeout) {
+          clearTimeout(this.tooltipTimeout);
+        }
+        this.tooltipTimeout = setTimeout(() => {
+          this.showTooltip = false;
+        }, 3000);
+        return;
+      }
+      this.colorPreference = colorValue;
+      this.updateUserPreferences();
+    },
+    async checkDonatorStatus() {
+      const user = await this.fetchUserData();
+      return user.donator > 0;
+    },
+    goToDonate() {
+      this.$router.push({ name: "Donate" });
+    },
+    async checkAuthStatus() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/status`, {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Auth status response:", data);
+        return data.isAuthenticated;
+      } catch (error) {
+        console.error("Error checking auth status:", error);
+        return false;
+      }
+    },
+    async fetchUserData() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.log("Response not ok:", response.status, response.statusText);
+          return null;
+        }
+
+        const result = await response.json();
+        console.log("User data response:", result);
+        return result.data;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    },
     async updateUserPreferences() {
+      const currentUser = await this.fetchUserData();
+      if (currentUser.donator === 0) {
+        this.colorPreference = "blue";
+      }
       try {
         const response = await fetch(
           `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
@@ -447,49 +589,30 @@ export default {
             body: JSON.stringify({
               rankPref: this.rankPreference,
               gender: this.gender,
+              color: this.colorPreference,
             }),
           }
         );
 
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.user) {
-          this.currentUser = data.user;
-        }
 
         console.log("User preferences updated successfully");
       } catch (error) {
         console.error("Failed to update user preferences:", error);
       }
     },
-
     async goToProfile() {
-      if (!this.currentUser || !this.currentUser.steamid) {
+      if (!this.currentUser || !this.currentUser.playerid) {
         console.log("No user logged in or invalid user data.");
         return;
       }
+
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/players/login/${this.currentUser.steamid}`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        if (!response.ok) throw new Error("Failed to fetch playerId");
-        const data = await response.json();
-        const playerId = data[0].id;
-        if (playerId) {
-          this.$router.push({ name: "PlayerPage", params: { playerId } });
-        } else {
-          throw new Error("playerId missing in response");
-        }
+        const playerId = this.currentUser.playerid;
+        this.$router.push({ name: "PlayerPage", params: { playerId } });
       } catch (error) {
-        console.error("Failed to login to backend:", error);
+        console.error("Failed to navigate to profile:", error);
       }
     },
 
@@ -547,21 +670,39 @@ export default {
       this.debouncedSearch();
     },
   },
-  mounted() {
-    const userCookie = Cookies.get("user");
-    console.log("User cookie:", userCookie);
-    if (userCookie) {
-      try {
-        const user = JSON.parse(userCookie);
-        this.currentUser = user;
-        this.rankPreference = user.rankpref || "overall";
-        this.gender = user.gender || "male";
-        this.donator = user.donator || 0;
-      } catch (error) {
-        console.error("Error parsing user cookie:", error);
-        this.logout();
+  async mounted() {
+    console.log("Component mounted, checking auth...");
+
+    try {
+      //console.log("Document cookies:", document.cookie);
+
+      const isAuthenticated = await this.checkAuthStatus();
+      console.log("Auth check result:", isAuthenticated);
+
+      if (isAuthenticated) {
+        console.log("User is authenticated, fetching user data...");
+        const userData = await this.fetchUserData();
+        console.log("User data received:", userData);
+
+        if (userData) {
+          this.currentUser = userData;
+          this.rankPreference = userData.rankpref || "overall";
+          this.gender = userData.gender || "male";
+          this.donator = userData.donator || 0;
+          this.colorPreference = userData.color || "blue";
+          console.log("User state updated:", {
+            currentUser: this.currentUser,
+            rankPreference: this.rankPreference,
+            gender: this.gender,
+            donator: this.donator,
+            colorPreference: this.colorPreference,
+          });
+        }
+      } else {
+        console.log("User is not authenticated");
       }
-    } else {
+    } catch (error) {
+      console.error("Error during authentication check:", error);
       this.currentUser = null;
     }
   },
@@ -961,6 +1102,99 @@ html {
 
 .dropdown-item h6 {
   font-weight: bold !important;
+}
+.color-picker-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 140px;
+}
+
+.color-option-wrapper {
+  margin: 2px;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 2px solid transparent;
+}
+
+.color-swatch:hover {
+  border: 1px solid var(--color-border);
+}
+
+.color-swatch.selected {
+  border: 2px solid var(--color-text);
+}
+
+.supporter-tooltip {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-dark);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 200px;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: tooltipSlideIn 0.3s ease-out;
+}
+
+.tooltip-content {
+  text-align: center;
+}
+
+.tooltip-content p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.tooltip-button {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tooltip-button:hover {
+  background: rgba(74, 111, 165, 0.9);
+  transform: translateY(-1px);
+}
+
+.tooltip-arrow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--color-primary);
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .search-container {

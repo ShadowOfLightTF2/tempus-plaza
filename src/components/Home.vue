@@ -561,6 +561,7 @@ export default {
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
 }
 
 .card:hover {
