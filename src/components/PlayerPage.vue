@@ -142,7 +142,7 @@
           <div class="col-md-4">
             <div class="card chart-container">
               <div class="chart-header">
-                <p class="section-header">Soldier points history</p>
+                <p class="section-header">Soldier Points History</p>
               </div>
               <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
@@ -163,7 +163,7 @@
           <div class="col-md-4">
             <div class="card chart-container">
               <div class="chart-header">
-                <p class="section-header">Overall points history</p>
+                <p class="section-header">Overall Points History</p>
               </div>
               <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
@@ -184,7 +184,7 @@
           <div class="col-md-4">
             <div class="card chart-container">
               <div class="chart-header">
-                <p class="section-header">Demoman points history</p>
+                <p class="section-header">Demoman Points History</p>
               </div>
               <div class="chart-body">
                 <div v-if="loading.points" class="text-center">
@@ -209,8 +209,13 @@
             <div class="stats-container">
               <div class="class-section">
                 <div class="card stat-block mb-3">
+                  <div
+                    class="nav-bar left-nav-bar"
+                    @click="prevStatType('soldier')"
+                  ></div>
                   <div class="card-header">
-                    <p class="section-header">Soldier stats (map)</p>
+                    <p class="section-header">Soldier Stats</p>
+                    <p class="stat-type-label">{{ currentStatType.soldier }}</p>
                   </div>
                   <div class="card-body">
                     <div v-if="loading.stats" class="text-center">
@@ -224,7 +229,10 @@
                           <div class="stat-item">
                             <h4 class="card-title">Completion</h4>
                             <p class="card-text player-stats">
-                              {{ stats.map.completion.soldier }}%
+                              {{
+                                stats[currentStatType["soldier"]].completion
+                                  .soldier
+                              }}%
                             </p>
                           </div>
                         </div>
@@ -232,7 +240,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">World records</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.worldRecordAmount.soldier }}
+                              {{
+                                stats[currentStatType["soldier"]]
+                                  .worldRecordAmount.soldier
+                              }}
                             </p>
                           </div>
                         </div>
@@ -240,7 +251,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">Top times</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.topTimesAmount.soldier }}
+                              {{
+                                stats[currentStatType["soldier"]].topTimesAmount
+                                  .soldier
+                              }}
                             </p>
                           </div>
                         </div>
@@ -248,7 +262,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G1</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.soldier.G1 }}
+                              {{
+                                stats[currentStatType["soldier"]].placement
+                                  .soldier.G1
+                              }}
                             </p>
                           </div>
                         </div>
@@ -256,7 +273,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G2</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.soldier.G2 }}
+                              {{
+                                stats[currentStatType["soldier"]].placement
+                                  .soldier.G2
+                              }}
                             </p>
                           </div>
                         </div>
@@ -264,7 +284,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G3</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.soldier.G3 }}
+                              {{
+                                stats[currentStatType["soldier"]].placement
+                                  .soldier.G3
+                              }}
                             </p>
                           </div>
                         </div>
@@ -272,13 +295,20 @@
                           <div class="stat-item">
                             <h6 class="card-title">G4</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.soldier.G4 }}
+                              {{
+                                stats[currentStatType["soldier"]].placement
+                                  .soldier.G4
+                              }}
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div
+                    class="nav-bar right-nav-bar"
+                    @click="nextStatType('soldier')"
+                  ></div>
                 </div>
               </div>
               <div
@@ -291,7 +321,7 @@
                 <div class="card stat-block mb-3">
                   <div class="card-header">
                     <p class="section-header">
-                      {{ player.shared_soldier_type }}
+                      {{ player.shared_soldier_type }} (maps)
                     </p>
                   </div>
                   <div class="card-body">
@@ -613,8 +643,13 @@
             <div class="stats-container">
               <div class="class-section">
                 <div class="card stat-block mb-3">
+                  <div
+                    class="nav-bar left-nav-bar"
+                    @click="prevStatType('demoman')"
+                  ></div>
                   <div class="card-header">
-                    <p class="section-header">Demoman stats (map)</p>
+                    <p class="section-header">Demoman Stats</p>
+                    <p class="stat-type-label">{{ currentStatType.demoman }}</p>
                   </div>
                   <div class="card-body">
                     <div v-if="loading.stats" class="text-center">
@@ -628,7 +663,10 @@
                           <div class="stat-item">
                             <h4 class="card-title">Completion</h4>
                             <p class="card-text player-stats">
-                              {{ stats.map.completion.demoman }}%
+                              {{
+                                stats[currentStatType["demoman"]].completion
+                                  .demoman
+                              }}%
                             </p>
                           </div>
                         </div>
@@ -636,7 +674,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">World records</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.worldRecordAmount.demoman }}
+                              {{
+                                stats[currentStatType["demoman"]]
+                                  .worldRecordAmount.demoman
+                              }}
                             </p>
                           </div>
                         </div>
@@ -644,7 +685,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">Top times</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.topTimesAmount.demoman }}
+                              {{
+                                stats[currentStatType["demoman"]].topTimesAmount
+                                  .demoman
+                              }}
                             </p>
                           </div>
                         </div>
@@ -652,7 +696,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G1</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.demoman.G1 }}
+                              {{
+                                stats[currentStatType["demoman"]].placement
+                                  .demoman.G1
+                              }}
                             </p>
                           </div>
                         </div>
@@ -660,7 +707,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G2</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.demoman.G2 }}
+                              {{
+                                stats[currentStatType["demoman"]].placement
+                                  .demoman.G2
+                              }}
                             </p>
                           </div>
                         </div>
@@ -668,7 +718,10 @@
                           <div class="stat-item">
                             <h6 class="card-title">G3</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.demoman.G3 }}
+                              {{
+                                stats[currentStatType["demoman"]].placement
+                                  .demoman.G3
+                              }}
                             </p>
                           </div>
                         </div>
@@ -676,13 +729,20 @@
                           <div class="stat-item">
                             <h6 class="card-title">G4</h6>
                             <p class="card-text player-stats">
-                              {{ stats.map.placement.demoman.G4 }}
+                              {{
+                                stats[currentStatType["demoman"]].placement
+                                  .demoman.G4
+                              }}
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div
+                    class="nav-bar right-nav-bar"
+                    @click="nextStatType('demoman')"
+                  ></div>
                 </div>
               </div>
               <div
@@ -695,7 +755,7 @@
                 <div class="card stat-block mb-3">
                   <div class="card-header">
                     <p class="section-header">
-                      {{ player.shared_demoman_type }}
+                      {{ player.shared_demoman_type }} (maps)
                     </p>
                   </div>
                   <div class="card-body">
@@ -760,6 +820,171 @@
               </div>
             </div>
           </div>
+          <div v-if="isCurrentUser || hasFavoriteMaps" class="map-section">
+            <div class="map-container">
+              <h4 class="map-section-title">Favourite Maps</h4>
+              <div class="map-grid">
+                <div
+                  class="map-card"
+                  v-for="(map, index) in displayedMaps"
+                  :key="index"
+                  v-show="!map.invisible"
+                  :class="{ 'map-empty-map': !map.name }"
+                  @click="
+                    isCurrentUser ? openMapSearch(index) : goToRecords(map.id)
+                  "
+                  :style="
+                    map.name
+                      ? {
+                          background: `
+                  linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                  radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                  url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+                `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <h5 class="map-card-subtitle" v-if="map.name">
+                    {{ map.class_type }}
+                  </h5>
+                  <h3>{{ map.name || "Click to add a map" }}</h3>
+                  <div class="map-compact-ratings-grid" v-if="map.name">
+                    <div class="map-rating-section">
+                      <div class="map-rating-label">Soldier</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.map_soldier_tier"
+                        >
+                          T{{ map.map_soldier_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.map_soldier_rating"
+                        >
+                          R{{ map.map_soldier_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="map-rating-section">
+                      <div class="map-rating-label">Demoman</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.map_demoman_tier"
+                        >
+                          T{{ map.map_demoman_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.map_demoman_rating"
+                        >
+                          R{{ map.map_demoman_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="record-row">
+                      <img
+                        :src="`/icons/${map.class_type}.png`"
+                        :alt="map.class_type"
+                        class="map-class-icon"
+                        loading="lazy"
+                      />
+                      {{ formatDuration(map.player_record_duration) }} |
+                      <span :class="getPlacementClass(map.record_placement)">
+                        #{{ map.record_rank }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="showMapSearch" class="map-search-overlay">
+            <div class="map-search-container">
+              <div class="class-selection">
+                <h3>Select a class:</h3>
+                <div class="class-icons">
+                  <div
+                    class="class-option"
+                    :class="{ active: selectedClass === 'soldier' }"
+                    @click="selectClass('soldier')"
+                  >
+                    <img
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="class-icon"
+                      loading="lazy"
+                    />
+                    <span>Soldier</span>
+                  </div>
+                  <div
+                    class="class-option"
+                    :class="{ active: selectedClass === 'demoman' }"
+                    @click="selectClass('demoman')"
+                  >
+                    <img
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="class-icon"
+                      loading="lazy"
+                    />
+                    <span>Demoman</span>
+                  </div>
+                </div>
+              </div>
+              <div class="search-input-wrapper">
+                <svg
+                  class="search-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input
+                  type="text"
+                  v-model="mapSearchQuery"
+                  placeholder="Search maps..."
+                  class="search-input"
+                  @input="searchMap"
+                />
+              </div>
+              <div
+                class="search-results-dropdown"
+                v-if="mapSearchResults && mapSearchResults.length > 0"
+              >
+                <div>
+                  <ul>
+                    <li
+                      v-for="map in mapSearchResults"
+                      :key="map.id"
+                      @click="handleMapClick(map)"
+                      :class="{ disabled: !selectedClass }"
+                    >
+                      {{ map.name || `Map ID: ${map.id}` }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div v-if="showClassWarning" class="class-warning-popup">
+                Select a class first
+              </div>
+              <div class="search-buttons">
+                <button @click="cancelMapSearch" class="btn cancel-button">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -798,6 +1023,55 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
+    currentUser: null,
+    selectedClass: null,
+    showClassWarning: false,
+    classWarningTimeout: null,
+    favoriteMaps: [
+      {
+        id: null,
+        name: "",
+        index: 0,
+        class_type: null,
+        map_soldier_tier: null,
+        map_soldier_rating: null,
+        map_demoman_tier: null,
+        map_demoman_rating: null,
+        player_record_duration: null,
+        record_rank: null,
+        record_placement: null,
+      },
+      {
+        id: null,
+        name: "",
+        index: 1,
+        class_type: null,
+        map_soldier_tier: null,
+        map_soldier_rating: null,
+        map_demoman_tier: null,
+        map_demoman_rating: null,
+        player_record_duration: null,
+        record_rank: null,
+        record_placement: null,
+      },
+      {
+        id: null,
+        name: "",
+        index: 2,
+        class_type: null,
+        map_soldier_tier: null,
+        map_soldier_rating: null,
+        map_demoman_tier: null,
+        map_demoman_rating: null,
+        player_record_duration: null,
+        record_rank: null,
+        record_placement: null,
+      },
+    ],
+    showMapSearch: false,
+    currentMapIndex: null,
+    mapSearchQuery: "",
+    mapSearchResults: [],
     player: {
       id: null,
       steamid: null,
@@ -824,7 +1098,6 @@ export default {
       { value: 2, icon: "/icons/cowmangler.png" },
       { value: 3, icon: "/icons/original.png" },
     ],
-    showLauncherMenu: false,
     rankOptions: [
       { value: 1, label: "Overall Rank" },
       { value: 2, label: "Soldier Rank" },
@@ -842,7 +1115,7 @@ export default {
       points: true,
     },
     currentPage: 1,
-    pageSize: 10,
+    pageSize: 8,
     playerNotFound: false,
     stats: {
       total: {
@@ -881,6 +1154,10 @@ export default {
           demoman: { G1: 0, G2: 0, G3: 0, G4: 0 },
         },
       },
+    },
+    currentStatType: {
+      soldier: "total",
+      demoman: "total",
     },
     sharedTimesSoldier: [],
     sharedTimesDemoman: [],
@@ -1178,6 +1455,45 @@ export default {
     },
   }),
   computed: {
+    hasFavoriteMaps() {
+      return this.favoriteMaps.some(
+        (map) => map.name && map.name.trim() !== ""
+      );
+    },
+
+    filteredFavoriteMaps() {
+      return this.favoriteMaps.filter(
+        (map) => map.name && map.name.trim() !== ""
+      );
+    },
+
+    displayedMaps() {
+      const displayArray = [
+        { name: null, id: null, invisible: true },
+        { name: null, id: null, invisible: true },
+        { name: null, id: null, invisible: true },
+      ];
+
+      this.favoriteMaps.forEach((map, index) => {
+        if (index < 3) {
+          if (map.name && map.name.trim() !== "") {
+            displayArray[index] = { ...map, invisible: false };
+          } else if (this.isCurrentUser) {
+            displayArray[index] = { name: null, id: null, invisible: false };
+          }
+        }
+      });
+
+      if (!this.isCurrentUser) {
+        return displayArray.filter((map) => !map.invisible);
+      }
+
+      return displayArray;
+    },
+
+    isCurrentUser() {
+      return this.currentUser && this.currentUser.playerid === this.playerId;
+    },
     bannerColors() {
       const color = this.player.color || "blue";
       return {
@@ -1237,12 +1553,14 @@ export default {
   },
   async mounted() {
     try {
+      this.currentUser = await this.fetchUser();
       await Promise.all([
         this.fetchPlayerData(this.playerId),
         this.fetchUserData(this.playerId),
         this.fetchPlayerRanks(this.playerId),
         this.fetchRecentRecords(this.playerId),
         this.fetchPlayerPoints(this.playerId),
+        this.fetchFavoriteMaps(this.playerId),
       ]);
       await this.fetchPlayerStats(this.playerId);
       await this.fetchSharedTimes(this.playerId);
@@ -1264,6 +1582,49 @@ export default {
             "Latest runs": true,
           };
           this.currentPage = 1;
+          this.currentStatType.soldier = "total";
+          this.currentStatType.demoman = "total";
+          this.favoriteMaps = [
+            {
+              id: null,
+              name: "",
+              index: 0,
+              class_type: null,
+              map_soldier_tier: null,
+              map_soldier_rating: null,
+              map_demoman_tier: null,
+              map_demoman_rating: null,
+              player_record_duration: null,
+              record_rank: null,
+              record_placement: null,
+            },
+            {
+              id: null,
+              name: "",
+              index: 1,
+              class_type: null,
+              map_soldier_tier: null,
+              map_soldier_rating: null,
+              map_demoman_tier: null,
+              map_demoman_rating: null,
+              player_record_duration: null,
+              record_rank: null,
+              record_placement: null,
+            },
+            {
+              id: null,
+              name: "",
+              index: 2,
+              class_type: null,
+              map_soldier_tier: null,
+              map_soldier_rating: null,
+              map_demoman_tier: null,
+              map_demoman_rating: null,
+              player_record_duration: null,
+              record_rank: null,
+              record_placement: null,
+            },
+          ];
           try {
             await Promise.all([
               this.fetchPlayerData(newId),
@@ -1271,6 +1632,7 @@ export default {
               this.fetchPlayerRanks(newId),
               this.fetchRecentRecords(newId),
               this.fetchPlayerPoints(newId),
+              this.fetchFavoriteMaps(newId),
             ]);
             await this.fetchPlayerStats(newId);
             await this.fetchSharedTimes(newId);
@@ -1288,6 +1650,160 @@ export default {
     },
   },
   methods: {
+    openMapSearch(index) {
+      this.currentMapIndex = index;
+      this.showMapSearch = true;
+      this.mapSearchResults = [];
+      this.mapSearchQuery = "";
+    },
+    async searchMap() {
+      if (!this.mapSearchQuery.trim()) {
+        this.mapSearchResults = [];
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: this.mapSearchQuery }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch search results");
+        const data = await response.json();
+
+        this.mapSearchResults = data.maps || data || [];
+
+        if (this.mapSearchResults.length > 5) {
+          this.mapSearchResults = this.mapSearchResults.slice(0, 5);
+        }
+      } catch (error) {
+        console.error("Error searching for maps:", error);
+        this.mapSearchResults = [];
+      }
+    },
+    selectClass(className) {
+      this.selectedClass = className;
+      this.hideClassWarning();
+    },
+
+    handleMapClick(map) {
+      if (!this.selectedClass) {
+        this.showClassWarningPopup();
+        return;
+      }
+      this.selectMap(map, this.selectedClass);
+    },
+    selectMap(mapData, classType) {
+      this.updateMap(mapData.id, classType);
+      this.cancelMapSearch();
+    },
+    showClassWarningPopup() {
+      this.showClassWarning = true;
+      if (this.classWarningTimeout) {
+        clearTimeout(this.classWarningTimeout);
+      }
+      this.classWarningTimeout = setTimeout(() => {
+        this.hideClassWarning();
+      }, 2000);
+    },
+
+    hideClassWarning() {
+      this.showClassWarning = false;
+      if (this.classWarningTimeout) {
+        clearTimeout(this.classWarningTimeout);
+        this.classWarningTimeout = null;
+      }
+    },
+    async fetchUser() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.log("Response not ok:", response.status, response.statusText);
+          return null;
+        }
+
+        const result = await response.json();
+        return result.data;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    },
+    async updateMap(mapId, classType) {
+      const currentUser = await this.fetchUser();
+      const index = this.currentMapIndex;
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/${currentUser.playerid}/update-favorite-maps/${mapId}/${index}/${classType}`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        console.log("Favorite map updated successfully");
+      } catch (error) {
+        console.error("Failed to update favorite map:", error);
+      }
+    },
+    async clearFavoriteMaps() {
+      const currentUser = await this.fetchUser();
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/update-user/${currentUser.playerid}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              favorite_maps: [],
+            }),
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        console.log("Favorite maps cleared successfully");
+      } catch (error) {
+        console.error("Failed to clear favorite maps:", error);
+      }
+    },
+    cancelMapSearch() {
+      this.selectedClass = null;
+      this.hideClassWarning();
+      this.showMapSearch = false;
+      this.mapSearchQuery = "";
+      this.mapSearchResults = [];
+    },
+    prevStatType(classType) {
+      const statTypes = ["total", "map", "course", "bonus"];
+      const currentIndex = statTypes.indexOf(this.currentStatType[classType]);
+      const prevIndex =
+        (currentIndex - 1 + statTypes.length) % statTypes.length;
+      this.currentStatType[classType] = statTypes[prevIndex];
+    },
+
+    nextStatType(classType) {
+      const statTypes = ["total", "map", "course", "bonus"];
+      const currentIndex = statTypes.indexOf(this.currentStatType[classType]);
+      const nextIndex = (currentIndex + 1) % statTypes.length;
+      this.currentStatType[classType] = statTypes[nextIndex];
+    },
     toggleClassFilter(classType) {
       const index = this.filterOptions.selectedClasses.indexOf(classType);
       if (index === -1) {
@@ -1483,18 +1999,18 @@ export default {
         { range: [701, 800], male: "Jester III", female: "Jester III" },
         { range: [801, 900], male: "Jester II", female: "Jester II" },
         { range: [901, 1000], male: "Jester I", female: "Jester I" },
-        { range: [1001, 1300], male: "Plebeian I", female: "Plebeian I" },
-        { range: [1301, 1600], male: "Plebeian II", female: "Plebeian II" },
+        { range: [1001, 1300], male: "Plebeian V", female: "Plebeian V" },
+        { range: [1301, 1600], male: "Plebeian IV", female: "Plebeian IV" },
         { range: [1601, 1900], male: "Plebeian III", female: "Plebeian III" },
-        { range: [1901, 2200], male: "Plebeian IV", female: "Plebeian IV" },
-        { range: [2201, 2500], male: "Plebeian V", female: "Plebeian V" },
-        { range: [2501, 2700], male: "Peasant I", female: "Peasant I" },
-        { range: [2701, 2900], male: "Peasant II", female: "Peasant II" },
+        { range: [1901, 2200], male: "Plebeian II", female: "Plebeian II" },
+        { range: [2201, 2500], male: "Plebeian I", female: "Plebeian I" },
+        { range: [2501, 2700], male: "Peasant V", female: "Peasant V" },
+        { range: [2701, 2900], male: "Peasant IV", female: "Peasant IV" },
         { range: [2901, 3100], male: "Peasant III", female: "Peasant III" },
-        { range: [3101, 3300], male: "Peasant IV", female: "Peasant IV" },
-        { range: [3301, 3500], male: "Peasant V", female: "Peasant V" },
-        { range: [3501, 4000], male: "Peasant VI", female: "Peasant VI" },
-        { range: [4001, 5000], male: "Peasant VII", female: "Peasant VII" },
+        { range: [3101, 3300], male: "Peasant II", female: "Peasant II" },
+        { range: [3301, 3500], male: "Peasant I", female: "Peasant I" },
+        { range: [3501, 4000], male: "Peasant I", female: "Peasant I" },
+        { range: [4001, 5000], male: "Peasant I", female: "Peasant I" },
         { range: [5001, 999999], male: "Peon", female: "Peon" },
       ];
       for (const title of titles) {
@@ -1529,16 +2045,6 @@ export default {
         : "unknown";
       return `https://flagcdn.com/24x18/${validCode}.png`;
     },
-    getLauncherIcon(preference) {
-      const option = this.launcherOptions.find(
-        (opt) => opt.value === preference
-      );
-      return option ? option.icon : "/icons/rocketlauncher.png";
-    },
-    setLauncherPreference(preference) {
-      this.player.launcher_pref = preference;
-      this.showLauncherMenu = false;
-    },
     handleImageError(event) {
       event.target.src = "/icons/default-flag.jpg";
     },
@@ -1558,7 +2064,7 @@ export default {
           };
           return;
         }
-        console.log("Fetched user data:", data);
+        //console.log("Fetched user data:", data);
         this.player = {
           ...this.player,
           gender: data.gender,
@@ -1568,6 +2074,54 @@ export default {
         };
       } catch (error) {
         console.error("Error fetching user data:", error);
+      }
+    },
+    async fetchFavoriteMaps(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/users/${playerId}/get-favorite-maps`
+        );
+        this.populateFavoriteMaps(response.data);
+      } catch (error) {
+        console.error("Error fetching favorite maps:", error);
+      }
+    },
+    populateFavoriteMaps(favoriteMapData) {
+      if (!favoriteMapData) {
+        return;
+      }
+
+      let parsedMaps = [];
+
+      if (typeof favoriteMapData === "string") {
+        try {
+          parsedMaps = JSON.parse(favoriteMapData);
+        } catch (e) {
+          console.error("Error parsing favorite_maps JSON:", e);
+          return;
+        }
+      } else if (Array.isArray(favoriteMapData)) {
+        parsedMaps = favoriteMapData;
+      }
+
+      if (Array.isArray(parsedMaps)) {
+        parsedMaps.forEach((mapData) => {
+          if (mapData.favorite_index >= 0 && mapData.favorite_index <= 2) {
+            this.favoriteMaps[mapData.favorite_index] = {
+              id: mapData.map_id || null,
+              name: mapData.map_name || "",
+              index: mapData.favorite_index,
+              class_type: mapData.class_type || null,
+              map_soldier_tier: mapData.map_soldier_tier || null,
+              map_soldier_rating: mapData.map_soldier_rating || null,
+              map_demoman_tier: mapData.map_demoman_tier || null,
+              map_demoman_rating: mapData.map_demoman_rating || null,
+              player_record_duration: mapData.player_record_duration || null,
+              record_rank: mapData.record_rank || null,
+              record_placement: mapData.record_placement || null,
+            };
+          }
+        });
       }
     },
     async fetchPlayerData(playerId) {
@@ -1637,8 +2191,14 @@ export default {
         this.stats = {
           total: {
             completion: {
-              soldier: stats.soldier.completion.total,
-              demoman: stats.demoman.completion.total,
+              soldier:
+                Math.round(
+                  (stats.soldier.completion.total + Number.EPSILON) * 100
+                ) / 100,
+              demoman:
+                Math.round(
+                  (stats.demoman.completion.total + Number.EPSILON) * 100
+                ) / 100,
             },
             worldRecordAmount: {
               soldier: stats.soldier.worldRecords.total,
@@ -1699,8 +2259,14 @@ export default {
           },
           course: {
             completion: {
-              soldier: stats.soldier.completion.course,
-              demoman: stats.demoman.completion.course,
+              soldier:
+                Math.round(
+                  (stats.soldier.completion.course + Number.EPSILON) * 100
+                ) / 100,
+              demoman:
+                Math.round(
+                  (stats.demoman.completion.course + Number.EPSILON) * 100
+                ) / 100,
             },
             worldRecordAmount: {
               soldier: stats.soldier.worldRecords.course,
@@ -1727,8 +2293,14 @@ export default {
           },
           bonus: {
             completion: {
-              soldier: stats.soldier.completion.bonus,
-              demoman: stats.demoman.completion.bonus,
+              soldier:
+                Math.round(
+                  (stats.soldier.completion.bonus + Number.EPSILON) * 100
+                ) / 100,
+              demoman:
+                Math.round(
+                  (stats.demoman.completion.bonus + Number.EPSILON) * 100
+                ) / 100,
             },
             worldRecordAmount: {
               soldier: stats.soldier.worldRecords.bonus,
@@ -1794,8 +2366,8 @@ export default {
           const placement = stats[countProperty] === 0 ? groupOnePlacement : 10;
           const isGroupOne = stats[countProperty] === 0;
           this.player[sharedTypeProperty] = isGroupOne
-            ? "Shared group 1s"
-            : "Shared top times";
+            ? "Shared Group 1s"
+            : "Shared Top Times";
           return await fetchSharedData(classType, placement, isGroupOne);
         };
         const [sharedSoldiers, sharedDemomans] = await Promise.all([
@@ -1901,7 +2473,6 @@ export default {
   box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
   color: var(--color-text-clickable);
   cursor: pointer;
-  transition: transform 0.3s ease;
 }
 .shared-row-name {
   white-space: nowrap;
@@ -1941,7 +2512,6 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   border-radius: 10px;
-  transition: transform 0.3s ease;
 }
 .shared-row:hover,
 .record-item:hover {
@@ -1962,10 +2532,8 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-  transition: transform 0.3s ease;
 }
-.banner-block:hover,
-.stat-item:hover {
+.banner-block:hover {
   transform: translateY(-2px);
 }
 .stat-block {
@@ -1999,13 +2567,15 @@ export default {
   margin-bottom: 0;
 }
 .filter-button-container {
-  margin-left: 10px;
+  margin-left: auto;
 }
 .main-filter-button {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
+  border-radius: 8px;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
 }
 
 .filter-section {
@@ -2032,6 +2602,7 @@ export default {
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
+  padding-bottom: 15px;
 }
 
 .filter-group {
@@ -2069,6 +2640,7 @@ export default {
   font-weight: bold;
   font-size: 13px;
   text-transform: capitalize;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
 }
 
 .filter-button.active {
@@ -2161,7 +2733,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .btn-secondary {
@@ -2207,9 +2779,68 @@ export default {
   padding: 10px;
   text-align: center;
 }
-.card-body.tabs-content .records-section {
+.card-body.tabs-content .records-section,
+.card-map-body {
   width: 100%;
   padding: 0;
+}
+
+.nav-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  width: 5%;
+  background: rgba(172, 172, 172, 0);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-bar:hover {
+  background: rgba(172, 172, 172, 0.1);
+}
+
+.left-nav-bar {
+  left: 1px;
+}
+
+.left-nav-bar::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 9px solid rgba(255, 255, 255, 0.3);
+}
+
+.right-nav-bar {
+  right: 1px;
+}
+
+.right-nav-bar::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 9px solid rgba(255, 255, 255, 0.3);
+}
+
+.stat-type-label {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0;
+  text-transform: capitalize;
+}
+
+.card-body {
+  position: relative;
+  padding: 20px;
 }
 .chart-body {
   padding: 0px 10px !important;
@@ -2253,6 +2884,7 @@ export default {
 .card-body,
 .card-header {
   padding: 10px;
+  padding-bottom: 0;
 }
 .records-card {
   border-radius: 10px !important;
@@ -2309,7 +2941,6 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  transition: transform 0.3s ease;
 }
 .record-time-detail-grid {
   display: grid;
@@ -2424,19 +3055,6 @@ export default {
 .clickable-text {
   color: var(--color-text-clickable) !important;
 }
-.launcher-dropdown {
-  position: absolute;
-  background: var(--color-dark);
-  border: 1px solid var(--color-border);
-  z-index: 10;
-  border-radius: 8px;
-  left: 100%;
-  transform: translateX(-60%);
-}
-.launcher-option.selected {
-  border: 2px solid #ffd700;
-  border-radius: 4px;
-}
 .rank-name {
   color: var(--color-text);
   font-weight: bold;
@@ -2542,6 +3160,431 @@ export default {
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+.map-section {
+  padding: 15px 0;
+}
+
+.map-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+}
+
+.map-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--color-text);
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.map-card {
+  box-shadow: 0 0 20px rgba(0, 0, 0);
+  background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.288) 20%,
+      rgba(255, 255, 255, 0.15) 40%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 10px;
+  padding-bottom: 25px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  min-height: 300px;
+}
+
+.map-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  cursor: pointer;
+}
+
+.map-card-subtitle {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 10;
+  text-transform: capitalize;
+}
+
+.map-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.map-compact-ratings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.map-rating-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-rating-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.map-rating-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--color-dark);
+  text-shadow: none;
+  min-width: 40px;
+  text-align: center;
+}
+
+.map-rating-label {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.record-row {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--color-text);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.map-class-icon {
+  height: 24px;
+  width: 24px;
+}
+
+.map-tier-color.tier-0 {
+  background: rgba(51, 51, 51, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-1 {
+  background: rgba(110, 208, 246, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-2 {
+  background: rgba(86, 179, 233, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-3 {
+  background: rgba(69, 184, 173, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-4 {
+  background: rgba(101, 193, 139, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-5 {
+  background: rgba(163, 217, 119, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-6 {
+  background: rgba(243, 230, 131, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-7 {
+  background: rgba(246, 194, 103, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-8 {
+  background: rgba(240, 141, 91, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-9 {
+  background: rgba(230, 105, 94, 0.5);
+  color: var(--color-text);
+}
+.map-tier-color.tier-10 {
+  background: rgba(214, 69, 69, 0.5);
+  color: var(--color-text);
+}
+
+.map-rating-color.rating-1 {
+  background: rgba(148, 196, 125, 0.5);
+  color: var(--color-text);
+}
+.map-rating-color.rating-2 {
+  background: rgba(171, 208, 153, 0.5);
+  color: var(--color-text);
+}
+.map-rating-color.rating-3 {
+  background: rgba(195, 178, 147, 0.5);
+  color: var(--color-text);
+}
+.map-rating-color.rating-4 {
+  background: rgba(224, 102, 102, 0.5);
+  color: var(--color-text);
+}
+
+.map-empty-map {
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.map-empty-map h3 {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.map-search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.map-search-container {
+  background: var(--color-dark);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+  position: relative;
+  min-width: 300px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #888;
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 8px 8px 40px;
+  background: var(--color-box);
+  border: 2px solid var(--color-border-soft);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  background: rgba(74, 111, 165, 0.8);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
+}
+
+.search-input::placeholder {
+  color: #888;
+}
+
+.search-results-dropdown {
+  background: var(--color-box);
+  border: 1px solid rgba(68, 68, 68, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-bottom: 15px;
+}
+
+.search-results-dropdown ul {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+}
+
+.search-results-dropdown li {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--color-box);
+  font-weight: bold;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-results-dropdown li:hover {
+  background: rgba(74, 111, 165, 0.8);
+  transform: translateX(4px);
+}
+
+.search-results-dropdown li:last-child {
+  margin-bottom: 0;
+}
+
+.search-results-dropdown li.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: var(--color-box);
+}
+
+.search-results-dropdown li.disabled:hover {
+  background: var(--color-box);
+  transform: none;
+}
+
+.search-results-dropdown h6 {
+  margin: 12px 16px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.search-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cancel-button {
+  background: var(--color-box);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-soft);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  color: var(--color-text);
+  background: var(--color-primary);
+}
+
+.class-selection {
+  margin-bottom: 20px;
+}
+
+.class-selection h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.class-icons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.class-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border: 2px solid var(--color-border-soft);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  background: var(--color-box);
+}
+
+.class-option:hover {
+  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
+}
+
+.class-option.active {
+  border-color: var(--color-primary);
+  background: rgba(74, 111, 165, 0.8);
+}
+
+.class-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+}
+
+.class-option span {
+  font-size: 12px;
+  color: #ffffff;
+  text-transform: capitalize;
+}
+
+.class-warning-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ff4444;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 1001;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .nav-bar {
+    height: 50px;
+    width: 30px;
+    background: rgba(172, 172, 172, 0.4);
+  }
+
+  .left-nav-bar {
+    left: 1px;
+  }
+
+  .right-nav-bar {
+    right: 1px;
   }
 }
 </style>

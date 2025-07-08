@@ -34,31 +34,39 @@
           <div
             class="search-results-dropdown"
             v-if="
-              searchResults &&
-              (searchResults.maps.length || searchResults.players.length)
+              searchQuery.trim() &&
+              (showLoading ||
+                (searchResults &&
+                  (searchResults.maps.length || searchResults.players.length)))
             "
           >
-            <div v-if="searchResults.maps.length">
-              <h6>Maps</h6>
-              <ul>
-                <li
-                  v-for="map in searchResults.maps"
-                  :key="map.id"
-                  @click="goToMap(map.id)"
-                  v-html="sanitize(map.name || `Map ID: ${map.id}`)"
-                ></li>
-              </ul>
+            <div v-if="showLoading" class="loading-container">
+              <div class="loading-spinner"></div>
+              <span>Searching...</span>
             </div>
-            <div v-if="searchResults.players.length">
-              <h6>Players</h6>
-              <ul>
-                <li
-                  v-for="player in searchResults.players"
-                  :key="player.id"
-                  @click="goToPlayer(player.id)"
-                  v-html="sanitize(player.name || `Player ID: ${player.id}`)"
-                ></li>
-              </ul>
+            <div v-else>
+              <div v-if="searchResults.maps.length">
+                <h6>Maps</h6>
+                <ul>
+                  <li
+                    v-for="map in searchResults.maps"
+                    :key="map.id"
+                    @click="goToMap(map.id)"
+                    v-html="sanitize(map.name || `Map ID: ${map.id}`)"
+                  ></li>
+                </ul>
+              </div>
+              <div v-if="searchResults.players.length">
+                <h6>Players</h6>
+                <ul>
+                  <li
+                    v-for="player in searchResults.players"
+                    :key="player.id"
+                    @click="goToPlayer(player.id)"
+                    v-html="sanitize(player.name || `Player ID: ${player.id}`)"
+                  ></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -240,6 +248,8 @@ export default {
     return {
       searchQuery: "",
       searchResults: null,
+      showLoading: false,
+      debounceTimer: null,
       popularSoldierMaps: [],
       popularDemomanMaps: [],
       tf2rjweeklyVideos: [],
@@ -248,6 +258,7 @@ export default {
   methods: {
     closeDropdown() {
       this.searchResults = null;
+      this.showLoading = false;
     },
     goToMap(mapId) {
       this.$router.push({ name: "MapPage", params: { mapId } });
@@ -259,30 +270,44 @@ export default {
     },
     async fetchSearchResults() {
       if (this.searchQuery.trim()) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/search`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ query: this.searchQuery }),
-          });
-
-          if (!response.ok) throw new Error("Failed to fetch search results");
-          const data = await response.json();
-
-          if (data.players && data.players.length > 20)
-            data.players = data.players.slice(0, 20);
-          if (data.maps && data.maps.length > 5)
-            data.maps = data.maps.slice(0, 5);
-
-          this.searchResults = data;
-        } catch (error) {
-          console.error("Error fetching search results:", error);
-        }
+        this.showLoading = true;
       } else {
+        this.showLoading = false;
         this.searchResults = null;
+        return;
       }
+
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(async () => {
+        if (this.searchQuery.trim()) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/search`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query: this.searchQuery }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch search results");
+            const data = await response.json();
+
+            if (data.players && data.players.length > 20)
+              data.players = data.players.slice(0, 20);
+            if (data.maps && data.maps.length > 5)
+              data.maps = data.maps.slice(0, 5);
+
+            this.searchResults = data;
+          } catch (error) {
+            console.error("Error fetching search results:", error);
+          } finally {
+            this.showLoading = false;
+          }
+        } else {
+          this.searchResults = null;
+          this.showLoading = false;
+        }
+      }, 500);
     },
     async fetchPopularMaps() {
       try {
@@ -335,6 +360,9 @@ export default {
     searchQuery() {
       this.debouncedSearch();
     },
+  },
+  beforeDestroy() {
+    clearTimeout(this.debounceTimer);
   },
 };
 </script>
@@ -491,6 +519,34 @@ export default {
   font-weight: 600;
 }
 
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .divider {
   border: none;
   height: 2px;
@@ -560,7 +616,6 @@ export default {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;
 }
 

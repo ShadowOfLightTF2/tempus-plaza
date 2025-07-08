@@ -46,18 +46,27 @@
           </div>
           <div
             class="search-results-dropdown"
-            v-if="searchResults && searchResults.players.length"
+            v-if="
+              searchQuery.trim() &&
+              (showLoading || (searchResults && searchResults.players.length))
+            "
           >
-            <div>
-              <h6>Players</h6>
-              <ul>
-                <li
-                  v-for="player in searchResults.players"
-                  :key="player.id"
-                  @click="selectPlayer(player.id)"
-                  v-html="sanitize(player.name) || `Player ID: ${player.id}`"
-                ></li>
-              </ul>
+            <div v-if="showLoading" class="loading-container">
+              <div class="loading-spinner"></div>
+              <span>Searching...</span>
+            </div>
+            <div v-else>
+              <div>
+                <h6>Players</h6>
+                <ul>
+                  <li
+                    v-for="player in searchResults.players"
+                    :key="player.id"
+                    @click="selectPlayer(player.id)"
+                    v-html="sanitize(player.name) || `Player ID: ${player.id}`"
+                  ></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -398,6 +407,7 @@ export default {
   },
   data: () => ({
     playerId: null,
+    playerName: null,
     selectedPlayerName: null,
     records: [],
     loading: false,
@@ -416,6 +426,7 @@ export default {
     recordSearchQuery: "",
     searchQuery: "",
     searchResults: null,
+    showLoading: false,
     debounceTimer: null,
     cachedRecords: {
       records: [],
@@ -436,16 +447,6 @@ export default {
     displayCount: 300,
   }),
   computed: {
-    user() {
-      //const userCookie = Cookies.get("user");
-      // if (!userCookie) return null;
-      // try {
-      //   return JSON.parse(userCookie);
-      // } catch (e) {
-      //   console.error("Malformed user cookie:", e);
-      //   return null;
-      // }
-    },
     filteredSortedItems() {
       let recordsToFilter = [];
 
@@ -577,22 +578,34 @@ export default {
       }
     },
   },
-  mounted() {
-    //const userCookie = Cookies.get("user");
-    let user = null;
-    // if (userCookie) {
-    //   try {
-    //     user = JSON.parse(userCookie);
-    //   } catch (e) {
-    //     console.error("Malformed user cookie:", e);
-    //   }
-    // }
+  async mounted() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+        credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.log("Response not ok:", response.status, response.statusText);
+        return null;
+      }
+
+      const user = await response.json();
+      console.log("User data response in lookup:", user);
+      this.playerId = user.data.playerid;
+      this.playerName = user.data.name;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
       this.findPlayerName(this.playerId);
-    } else if (user && user.playerid) {
-      this.playerId = user.playerid;
-      this.selectedPlayerName = user.name;
+    } else if (this.playerId) {
+      console.log("playerId:", this.playerId);
+      this.selectedPlayerName = this.playerName;
       this.$router.push({
         name: "Lookup",
         params: { playerId: this.playerId },
@@ -671,6 +684,14 @@ export default {
       return `${year}/${month}/${day}`;
     },
     async onSearch() {
+      if (this.searchQuery.trim()) {
+        this.showLoading = true;
+      } else {
+        this.showLoading = false;
+        this.searchResults = null;
+        return;
+      }
+
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(async () => {
         if (this.searchQuery.trim()) {
@@ -683,7 +704,7 @@ export default {
               body: JSON.stringify({ query: this.searchQuery }),
             });
 
-            if (!response.ok) throw new Error("Failed to fetch search results");
+            if (!response.ok) throw new Error("Failed to search results");
             const data = await response.json();
 
             if (data.players && data.players.length > 20) {
@@ -693,9 +714,12 @@ export default {
             this.searchResults = { players: data.players };
           } catch (error) {
             console.error("Error fetching search results:", error);
+          } finally {
+            this.showLoading = false;
           }
         } else {
           this.searchResults = null;
+          this.showLoading = false;
         }
       }, 500);
     },
@@ -990,6 +1014,34 @@ export default {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .form-select {
