@@ -151,33 +151,42 @@
                 <div
                   class="search-results-dropdown"
                   v-if="
-                    searchResults &&
-                    (searchResults.maps.length || searchResults.players.length)
+                    searchQuery.trim() &&
+                    (showLoading ||
+                      (searchResults &&
+                        (searchResults.maps.length ||
+                          searchResults.players.length)))
                   "
                 >
-                  <div v-if="searchResults.maps.length">
-                    <h6>Maps</h6>
-                    <ul>
-                      <li
-                        v-for="map in searchResults.maps"
-                        :key="map.id"
-                        @click="goToMap(map.id)"
-                        v-html="sanitize(map.name || `Map ID: ${map.id}`)"
-                      ></li>
-                    </ul>
+                  <div v-if="showLoading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <span>Searching...</span>
                   </div>
-                  <div v-if="searchResults.players.length">
-                    <h6>Players</h6>
-                    <ul>
-                      <li
-                        v-for="player in searchResults.players"
-                        :key="player.id"
-                        @click="goToPlayer(player.id)"
-                        v-html="
-                          sanitize(player.name || `Player ID: ${player.id}`)
-                        "
-                      ></li>
-                    </ul>
+                  <div v-else>
+                    <div v-if="searchResults.maps.length">
+                      <h6>Maps</h6>
+                      <ul>
+                        <li
+                          v-for="map in searchResults.maps"
+                          :key="map.id"
+                          @click="goToMap(map.id)"
+                          v-html="sanitize(map.name || `Map ID: ${map.id}`)"
+                        ></li>
+                      </ul>
+                    </div>
+                    <div v-if="searchResults.players.length">
+                      <h6>Players</h6>
+                      <ul>
+                        <li
+                          v-for="player in searchResults.players"
+                          :key="player.id"
+                          @click="goToPlayer(player.id)"
+                          v-html="
+                            sanitize(player.name || `Player ID: ${player.id}`)
+                          "
+                        ></li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -377,7 +386,7 @@
                         >
                           <div class="tooltip-content">
                             <p>
-                              You need to become a supporter to select colors!
+                              You need to become a supporter to select colors
                             </p>
                             <button @click="goToDonate" class="tooltip-button">
                               Become a Supporter
@@ -431,6 +440,8 @@ export default {
     return {
       searchQuery: "",
       searchResults: null,
+      showLoading: false,
+      debounceTimer: null,
       rankPreference: "overall",
       gender: "male",
       donator: 0,
@@ -481,8 +492,8 @@ export default {
     },
     closeDropdown() {
       this.searchResults = null;
+      this.showLoading = false;
     },
-
     loginWithSteam() {
       window.location.href = `${API_BASE_URL}/auth/steam`;
     },
@@ -542,7 +553,7 @@ export default {
         }
 
         const data = await response.json();
-        console.log("Auth status response:", data);
+        //console.log("Auth status response:", data);
         return data.isAuthenticated;
       } catch (error) {
         console.error("Error checking auth status:", error);
@@ -565,7 +576,7 @@ export default {
         }
 
         const result = await response.json();
-        console.log("User data response:", result);
+        //console.log("User data response:", result);
         return result.data;
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -628,30 +639,44 @@ export default {
     },
     async fetchSearchResults() {
       if (this.searchQuery.trim()) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/search`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ query: this.searchQuery }),
-          });
-
-          if (!response.ok) throw new Error("Failed to fetch search results");
-          const data = await response.json();
-
-          if (data.players && data.players.length > 20)
-            data.players = data.players.slice(0, 20);
-          if (data.maps && data.maps.length > 5)
-            data.maps = data.maps.slice(0, 5);
-
-          this.searchResults = data;
-        } catch (error) {
-          console.error("Error fetching search results:", error);
-        }
+        this.showLoading = true;
       } else {
+        this.showLoading = false;
         this.searchResults = null;
+        return;
       }
+
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(async () => {
+        if (this.searchQuery.trim()) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/search`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query: this.searchQuery }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch search results");
+            const data = await response.json();
+
+            if (data.players && data.players.length > 20)
+              data.players = data.players.slice(0, 20);
+            if (data.maps && data.maps.length > 5)
+              data.maps = data.maps.slice(0, 5);
+
+            this.searchResults = data;
+          } catch (error) {
+            console.error("Error fetching search results:", error);
+          } finally {
+            this.showLoading = false;
+          }
+        } else {
+          this.searchResults = null;
+          this.showLoading = false;
+        }
+      }, 500);
     },
     sanitize(text) {
       return DOMPurify.sanitize(text);
@@ -680,9 +705,8 @@ export default {
       console.log("Auth check result:", isAuthenticated);
 
       if (isAuthenticated) {
-        console.log("User is authenticated, fetching user data...");
+        //console.log("User is authenticated, fetching user data...");
         const userData = await this.fetchUserData();
-        console.log("User data received:", userData);
 
         if (userData) {
           this.currentUser = userData;
@@ -690,13 +714,6 @@ export default {
           this.gender = userData.gender || "male";
           this.donator = userData.donator || 0;
           this.colorPreference = userData.color || "blue";
-          console.log("User state updated:", {
-            currentUser: this.currentUser,
-            rankPreference: this.rankPreference,
-            gender: this.gender,
-            donator: this.donator,
-            colorPreference: this.colorPreference,
-          });
         }
       } else {
         console.log("User is not authenticated");
@@ -705,6 +722,9 @@ export default {
       console.error("Error during authentication check:", error);
       this.currentUser = null;
     }
+  },
+  beforeDestroy() {
+    clearTimeout(this.debounceTimer);
   },
 };
 </script>
@@ -1043,6 +1063,7 @@ html {
 
 .login-button {
   border-radius: 8px;
+  margin-top: 1%;
 }
 
 .avatar {
@@ -1281,6 +1302,33 @@ html {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .navbar-toggler {
