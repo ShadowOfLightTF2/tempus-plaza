@@ -393,7 +393,23 @@
                 class="card-header tabs-header"
                 style="background: rgba(255, 255, 255, 0.05)"
               >
-                <div class="d-flex justify-content-between align-items-center">
+                <div
+                  class="d-flex justify-content-between align-items-center button-container-wrapper"
+                >
+                  <div class="allruns-button-container">
+                    <button
+                      @click="goToLookup()"
+                      class="toggle-btn btn main-filter-button"
+                      :class="{ 'btn-dark': true }"
+                      :style="{
+                        color: 'var(--color-text)',
+                        border: '1px solid var(--color-border-soft)',
+                        'font-weight': 'bold',
+                      }"
+                    >
+                      All Runs
+                    </button>
+                  </div>
                   <div class="filter-button-container">
                     <button
                       @click="toggleFilterSection"
@@ -837,10 +853,10 @@
                     map.name
                       ? {
                           background: `
-                  linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-                  radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                  url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
-                `,
+        linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+      `,
                           backgroundBlendMode: 'multiply, normal, normal',
                           backgroundSize: 'cover, cover, cover',
                           backgroundPosition: 'center, center, center',
@@ -1696,9 +1712,10 @@ export default {
       }
       this.selectMap(map, this.selectedClass);
     },
-    selectMap(mapData, classType) {
-      this.updateMap(mapData.id, classType);
+    async selectMap(mapData, classType) {
       this.cancelMapSearch();
+      await this.updateMap(mapData.id, classType);
+      window.location.reload();
     },
     showClassWarningPopup() {
       this.showClassWarning = true;
@@ -1752,8 +1769,6 @@ export default {
 
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
-
-        console.log("Favorite map updated successfully");
       } catch (error) {
         console.error("Failed to update favorite map:", error);
       }
@@ -1928,6 +1943,12 @@ export default {
       this.$router.push({
         name: "PlayerPage",
         params: { playerId: playerId },
+      });
+    },
+    goToLookup() {
+      this.$router.push({
+        name: "Lookup",
+        params: { playerId: this.player.id },
       });
     },
     getPlacementClass(placement) {
@@ -2566,9 +2587,18 @@ export default {
   text-align: center;
   margin-bottom: 0;
 }
-.filter-button-container {
-  margin-left: auto;
+.button-container-wrapper {
+  display: flex;
+  width: 100%;
 }
+
+.allruns-button-container,
+.filter-button-container {
+  display: flex;
+  justify-content: center;
+  width: 50%;
+}
+
 .main-filter-button {
   display: flex;
   align-items: center;
@@ -2576,6 +2606,7 @@ export default {
   gap: 5px;
   border-radius: 8px;
   box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
+  max-width: 150px;
 }
 
 .filter-section {
@@ -3165,11 +3196,12 @@ export default {
 
 .map-section {
   padding: 15px 0;
+  display: flex;
+  justify-content: center;
 }
 
 .map-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: fit-content;
   padding: 20px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
@@ -3186,10 +3218,26 @@ export default {
 
 .map-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 20px;
   margin-bottom: 20px;
+  justify-content: center;
+  max-width: 1200px;
+}
+
+.map-grid:has(.map-card:nth-child(1):last-child) {
+  grid-template-columns: 1fr;
+  width: 600px;
+}
+
+.map-grid:has(.map-card:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+  width: 800px;
+}
+
+.map-grid:has(.map-card:nth-child(3):last-child) {
+  grid-template-columns: repeat(3, minmax(300px, 1fr));
+  width: 1200px;
 }
 
 .map-card {
