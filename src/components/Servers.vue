@@ -1,7 +1,4 @@
 <template>
-  <!-- <div>
-    <button @click="downloadImage">Download Images</button>
-  </div> -->
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
@@ -69,10 +66,13 @@
                       <td>
                         {{ player.highest_rank }} {{ player.highest_rank_type }}
                       </td>
-                      <td
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.player_id },
+                        }"
                         class="name-cell align-middle player-name clickable"
-                        @click="goToPlayer(player.player_id)"
-                        style="color: var(--color-text-clickable)"
                       >
                         <img
                           :src="player.steam_avatar"
@@ -80,14 +80,17 @@
                           class="avatar"
                         />
                         {{ player.player_name }}
-                      </td>
-                      <td
+                      </SmartLink>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'MapPage',
+                          params: { mapId: player.map_id },
+                        }"
                         class="map-cell align-middle map-name clickable"
-                        @click="goToMap(player.map_id)"
-                        style="color: var(--color-text-clickable)"
                       >
                         {{ player.current_map }}
-                      </td>
+                      </SmartLink>
                       <td>{{ player.shortname }} | {{ player.server_name }}</td>
                       <td class="align-middle">
                         <button
@@ -137,64 +140,118 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
+                    <template
                       v-for="(server, index) in serversData"
                       :key="server.id"
-                      class="fade-in"
                     >
-                      <td class="align-middle">
-                        <div class="server-location">
-                          <img
-                            :src="getFlagImageUrl(server.country_code)"
-                            alt="Flag"
-                            class="flag-icon"
-                          />
-                          {{ server.country }}
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <div class="server-name">{{ server.name }}</div>
-                      </td>
-                      <td
-                        class="map-cell align-middle map-name clickable"
-                        @click="goToMap(server.map_id)"
+                      <tr
+                        class="fade-in server-row"
+                        @click="toggleServerExpansion(server.id)"
+                        style="cursor: pointer"
                       >
-                        {{ server.currentMap }}
-                      </td>
-                      <td class="align-middle">
-                        <div class="player-info">
-                          <span
-                            >{{ server.playerCount }}/{{
-                              server.maxPlayers
-                            }}</span
-                          >
-                          <div
-                            class="server-status"
-                            :class="
-                              getServerStatusClass(
-                                server.playerCount,
-                                server.maxPlayers
-                              )
-                            "
-                          ></div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button
-                          @click.stop="
-                            connectToServer(server.ipAddr, server.port)
-                          "
-                          class="btn btn-primary btn-sm connect-btn"
-                          style="
-                            background: var(--color-primary);
-                            border: none;
-                            font-weight: bold;
-                          "
+                        <td class="align-middle">
+                          <div class="server-location">
+                            <img
+                              :src="getFlagImageUrl(server.country_code)"
+                              alt="Flag"
+                              class="flag-icon"
+                            />
+                            {{ server.country }}
+                          </div>
+                        </td>
+                        <td class="align-middle">
+                          <div class="server-name">
+                            <span v-if="expandedServerId === server.id">▼</span>
+                            <span v-else>▶</span>
+                            {{ server.name }}
+                          </div>
+                        </td>
+                        <SmartLink
+                          tag="td"
+                          :to="{
+                            name: 'MapPage',
+                            params: { mapId: server.map_id },
+                          }"
+                          class="map-cell align-middle map-name clickable"
+                          style="color: var(--color-text-clickable)"
+                          @click.stop
                         >
-                          Connect
-                        </button>
-                      </td>
-                    </tr>
+                          {{ server.currentMap }}
+                        </SmartLink>
+                        <td class="align-middle">
+                          <div class="player-info">
+                            <span
+                              >{{ server.playerCount }}/{{
+                                server.maxPlayers
+                              }}</span
+                            >
+                            <div
+                              class="server-status"
+                              :class="
+                                getServerStatusClass(
+                                  server.playerCount,
+                                  server.maxPlayers
+                                )
+                              "
+                            ></div>
+                          </div>
+                        </td>
+                        <td class="align-middle">
+                          <button
+                            @click.stop="
+                              connectToServer(server.ipAddr, server.port)
+                            "
+                            class="btn btn-primary btn-sm connect-btn"
+                            style="
+                              background: var(--color-primary);
+                              border: none;
+                              font-weight: bold;
+                            "
+                          >
+                            Connect
+                          </button>
+                        </td>
+                      </tr>
+                      <tr
+                        v-if="expandedServerId === server.id"
+                        class="server-players-row"
+                      >
+                        <td colspan="5" class="server-players-container">
+                          <div class="players-list">
+                            <h5>Players in {{ server.name }}:</h5>
+                            <div
+                              v-if="
+                                !server.players || server.players.length === 0
+                              "
+                              class="no-players"
+                            >
+                              No players currently online
+                            </div>
+                            <div v-else class="players-grid">
+                              <SmartLink
+                                v-for="player in server.players"
+                                :key="player.player_id"
+                                :to="{
+                                  name: 'PlayerPage',
+                                  params: { playerId: player.player_id },
+                                }"
+                                class="player-item"
+                                style="text-decoration: none; color: inherit"
+                              >
+                                <img
+                                  :src="player.steam_avatar"
+                                  alt="Avatar"
+                                  class="avatar"
+                                />
+                                <span class="player-name-server">{{
+                                  player.name
+                                }}</span>
+                              </SmartLink>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>
@@ -217,25 +274,43 @@ export default {
       title: "Tempus Plaza | Servers",
     });
   },
+  props: {
+    view: {
+      type: String,
+      default: "topplayers",
+    },
+  },
   data() {
     return {
       currentView: "topplayers",
       loading: false,
       topPlayersData: [],
       serversData: [],
+      expandedServerId: null,
       sortDirection: 1,
     };
+  },
+  watch: {
+    $route(to) {
+      if (to.params.view) {
+        this.currentView = to.params.view;
+      }
+    },
   },
   async created() {
     document.title = "Tempus plaza - Home";
     await this.fetchData();
+    const { view } = this.$route.params;
+    if (view) {
+      this.currentView = view;
+    }
   },
   methods: {
-    async downloadImage() {
-      try {
-        window.location.href = `${API_BASE_URL}/maps/789/download-map-image`;
-      } catch (error) {
-        console.error("Error downloading images:", error);
+    toggleServerExpansion(serverId) {
+      if (this.expandedServerId === serverId) {
+        this.expandedServerId = null;
+      } else {
+        this.expandedServerId = serverId;
       }
     },
     async fetchData() {
@@ -313,13 +388,20 @@ export default {
           "africa",
           "middle_east",
         ];
-        this.serversData = data.sort((a, b) => {
-          const regionA = regionOrder.indexOf(a.region);
-          const regionB = regionOrder.indexOf(b.region);
 
-          if (regionA !== regionB) return regionA - regionB;
-          return a.country.localeCompare(b.country);
-        });
+        this.serversData = data
+          .filter((server) => server.hidden !== 1)
+          .map((server) => ({
+            ...server,
+            players: server.players ? JSON.parse(server.players) : [],
+          }))
+          .sort((a, b) => {
+            const regionA = regionOrder.indexOf(a.region);
+            const regionB = regionOrder.indexOf(b.region);
+
+            if (regionA !== regionB) return regionA - regionB;
+            return a.country.localeCompare(b.country);
+          });
       } catch (error) {
         console.error("There was an error fetching the servers data:", error);
       }
@@ -343,17 +425,10 @@ export default {
     connectToServer(ip, port) {
       window.open(`steam://connect/${ip}:${port}`, "_blank");
     },
-    goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
-    },
-    goToMap(mapId) {
-      this.$router.push({
-        name: "MapPage",
-        params: { mapId: mapId },
-      });
+    switchView(view) {
+      if (this.currentView === view) return;
+      this.currentView = view;
+      this.$router.push({ name: "Servers", params: { view } });
     },
   },
 };
@@ -395,6 +470,7 @@ export default {
 .table-wrapper {
   width: 100%;
   border-radius: 0 0 8px 8px;
+  overflow: hidden;
   border-top: none;
   border-bottom: 1px solid var(--color-border-soft);
 }
@@ -581,88 +657,104 @@ export default {
 }
 
 @media (max-width: 767.98px) {
-  .header-hero {
-    height: 12rem;
-  }
-
-  .header-title {
-    font-size: 2rem;
-  }
-
-  .header-subtitle {
-    font-size: 1rem;
-  }
-
   .button-group {
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
-    max-width: 100%;
+    max-width: 300px;
+    margin: 0 auto 2rem;
+    border-radius: 12px;
+  }
+
+  .toggle-btn {
     justify-content: center;
-    gap: 10px;
-  }
-
-  .table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .table-responsive {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-
-  .table-dark th,
-  .table-dark td {
-    padding: 8px;
-    font-size: 12px;
-    white-space: nowrap;
+    margin-bottom: 0.5rem;
   }
 
   .table-header-content {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
-  }
-
-  .table-header-icon {
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  .table-header-text {
-    width: 100%;
     text-align: center;
+    gap: 1rem;
   }
 
-  .name-cell,
-  .map-cell {
-    max-width: 150px;
+  .table-responsive {
+    display: block;
+    overflow-x: auto;
   }
 
-  .server-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .player-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .connect-btn {
-    padding: 5px 10px;
-    font-size: 12px;
-  }
-
-  .content-container {
-    padding: 0 15px;
+  .table-dark td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .avatar {
     width: 20px;
     height: 20px;
+  }
+
+  .table-header-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.server-row:hover {
+  background: rgba(74, 111, 165, 0.2) !important;
+}
+
+.server-players-row {
+  background: rgba(37, 55, 82, 0.3) !important;
+}
+
+.server-players-container {
+  padding: 1rem !important;
+}
+
+.players-list h5 {
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.player-item:hover {
+  background: rgba(74, 111, 165, 0.4);
+}
+
+.player-name-server {
+  color: var(--color-text-clickable);
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.no-players {
+  color: var(--color-text);
+  opacity: 0.7;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .player-item {
+    padding: 0.75rem;
   }
 }
 </style>

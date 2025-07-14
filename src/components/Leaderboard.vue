@@ -4,10 +4,34 @@
     style="z-index: 1"
   >
     <hr class="row-divider" style="width: 100%" />
-    <div class="category-tabs-container my-4">
+    <div
+      v-if="courseCount > 0 || bonusCount > 0"
+      class="category-tabs-container my-4"
+    >
       <div class="category-tabs">
         <button
-          v-for="type in ['Map', 'Course', 'Bonus']"
+          v-if="true"
+          v-for="type in ['Map']"
+          :key="type"
+          class="category-tab"
+          :class="{ active: selectedTypePill === type }"
+          @click="selectType(type)"
+        >
+          {{ type }}
+        </button>
+        <button
+          v-if="courseCount > 0"
+          v-for="type in ['Course']"
+          :key="type"
+          class="category-tab"
+          :class="{ active: selectedTypePill === type }"
+          @click="selectType(type)"
+        >
+          {{ type }}
+        </button>
+        <button
+          v-if="bonusCount > 0"
+          v-for="type in ['Bonus']"
           :key="type"
           class="category-tab"
           :class="{ active: selectedTypePill === type }"
@@ -17,9 +41,12 @@
         </button>
       </div>
     </div>
-    <div class="subcategory-container my-3">
+    <div
+      v-if="courseCount > 0 || bonusCount > 0"
+      class="subcategory-container my-3"
+    >
       <div class="subcategory-pills">
-        <template v-if="selectedTypePill === 'Map'">
+        <div v-show="selectedTypePill === 'Map'">
           <div class="pill-row">
             <button
               class="subcategory-pill map-pill"
@@ -29,8 +56,8 @@
               Map
             </button>
           </div>
-        </template>
-        <template v-if="selectedTypePill === 'Course' && courseCount > 0">
+        </div>
+        <div v-show="selectedTypePill === 'Course' && courseCount > 0">
           <div class="pill-row">
             <button
               v-for="courseIndex in courseCount"
@@ -42,8 +69,8 @@
               Course {{ courseIndex }}
             </button>
           </div>
-        </template>
-        <template v-if="selectedTypePill === 'Bonus' && bonusCount > 0">
+        </div>
+        <div v-show="selectedTypePill === 'Bonus' && bonusCount > 0">
           <div class="pill-row">
             <button
               v-for="bonusIndex in bonusCount"
@@ -55,20 +82,18 @@
               Bonus {{ bonusIndex }}
             </button>
           </div>
-        </template>
+        </div>
       </div>
     </div>
-    <hr class="row-divider" style="width: 100%" />
-    <div v-if="loading" class="text-center">
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Loading records...</span>
-      </div>
-    </div>
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+    <hr
+      v-if="courseCount > 0 || bonusCount > 0"
+      class="row-divider"
+      style="width: 100%"
+    />
     <div
-      v-else
       class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
     >
+      <!-- Soldier Table -->
       <div class="soldier-table-container">
         <div class="table-wrapper">
           <div
@@ -111,7 +136,18 @@
                 </tr>
               </thead>
               <tbody>
+                <tr v-if="loading">
+                  <td colspan="4" class="text-center">
+                    <div class="spinner-border text-light" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="error" class="text-center">
+                  <td colspan="4" class="alert alert-danger">{{ error }}</td>
+                </tr>
                 <tr
+                  v-else
                   v-for="(entry, index) in displayedSoldierEntries"
                   :key="'soldier-' + index"
                   class="fade-in"
@@ -120,20 +156,24 @@
                     class="rank-column"
                     :class="getPlacementClass(entry.placement)"
                   >
-                    <span v-if="index + 1 === 1">🥇</span>
-                    <span v-else-if="index + 1 === 2">🥈</span>
-                    <span v-else-if="index + 1 === 3">🥉</span>
-                    {{ index + 1 }}
+                    <span v-if="entry.rank === 1">🥇</span>
+                    <span v-else-if="entry.rank === 2">🥈</span>
+                    <span v-else-if="entry.rank === 3">🥉</span>
+                    {{ entry.rank }}
                   </td>
                   <td class="duration-column">
                     {{ formatDuration(entry.duration) }}
                   </td>
-                  <td
+                  <SmartLink
+                    tag="td"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: entry.id },
+                    }"
                     class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(entry.id)"
                   >
                     {{ entry.name }}
-                  </td>
+                  </SmartLink>
                   <td class="date-column">{{ formatDate(entry.date) }}</td>
                 </tr>
               </tbody>
@@ -162,6 +202,8 @@
           </div>
         </div>
       </div>
+
+      <!-- Demoman Table -->
       <div class="demoman-table-container">
         <div class="table-wrapper">
           <div
@@ -204,7 +246,18 @@
                 </tr>
               </thead>
               <tbody>
+                <tr v-if="loading">
+                  <td colspan="4" class="text-center">
+                    <div class="spinner-border text-light" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="error" class="text-center">
+                  <td colspan="4" class="alert alert-danger">{{ error }}</td>
+                </tr>
                 <tr
+                  v-else
                   v-for="(entry, index) in displayedDemomanEntries"
                   :key="'demoman-' + index"
                   class="fade-in"
@@ -213,20 +266,24 @@
                     class="rank-column"
                     :class="getPlacementClass(entry.placement)"
                   >
-                    <span v-if="index + 1 === 1">🥇</span>
-                    <span v-else-if="index + 1 === 2">🥈</span>
-                    <span v-else-if="index + 1 === 3">🥉</span>
-                    {{ index + 1 }}
+                    <span v-if="entry.rank === 1">🥇</span>
+                    <span v-else-if="entry.rank === 2">🥈</span>
+                    <span v-else-if="entry.rank === 3">🥉</span>
+                    {{ entry.rank }}
                   </td>
                   <td class="duration-column">
                     {{ formatDuration(entry.duration) }}
                   </td>
-                  <td
+                  <SmartLink
+                    tag="td"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: entry.id },
+                    }"
                     class="name-cell align-middle player-name clickable name-column"
-                    @click="goToPlayer(entry.id)"
                   >
                     {{ entry.name }}
-                  </td>
+                  </SmartLink>
                   <td class="date-column">{{ formatDate(entry.date) }}</td>
                 </tr>
               </tbody>
@@ -333,6 +390,7 @@ export default {
   },
   watch: {
     mapId() {
+      this.resetComponents();
       this.fetchMapData();
     },
   },
@@ -355,6 +413,28 @@ export default {
         return this[rating] || 0;
       }
       return 0;
+    },
+    resetComponents() {
+      this.selectedSoldierRecords = [];
+      this.selectedDemomanRecords = [];
+      this.soldierDisplayCount = 50;
+      this.demomanDisplayCount = 50;
+      this.soldierOffset = 0;
+      this.demomanOffset = 0;
+      this.loading = false;
+      this.showMoreLoading = false;
+      this.error = null;
+      this.courseCount = 0;
+      this.bonusCount = 0;
+      this.Map__soldier_tier = 0;
+      this.Map__soldier_rating = 0;
+      this.Map__demoman_tier = 0;
+      this.Map__demoman_rating = 0;
+      this.selectedType = "Map";
+      this.selectedTypePill = "Map";
+      this.selectedIndex = "";
+      this.selectedCourseIndex = "";
+      this.selectedBonusIndex = "";
     },
     async fetchMapData() {
       this.loading = true;
@@ -512,12 +592,6 @@ export default {
       if (placement >= 4 && placement <= 10) return "placement-blue";
       return placementClasses[placement] || "";
     },
-    async goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
-    },
     showMoreSoldierEntries() {
       if (this.selectedTypePill === "Map") {
         this.fetchRecords(
@@ -660,6 +734,7 @@ export default {
 }
 
 .tables-wrapper {
+  min-height: 2113px;
   display: flex;
   gap: 50px;
   width: 100%;
@@ -667,6 +742,7 @@ export default {
 }
 
 .table-wrapper {
+  min-height: 100%;
   width: 100%;
   flex: 1;
   border-radius: 12px;

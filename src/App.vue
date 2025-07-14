@@ -125,7 +125,6 @@
               </router-link>
             </li>
             <!-- Search container -->
-
             <div class="navbar-right" v-if="!isHomePage">
               <div class="search-container me-3" @click.stop>
                 <div class="search-input-wrapper">
@@ -166,25 +165,32 @@
                     <div v-if="searchResults.maps.length">
                       <h6>Maps</h6>
                       <ul>
-                        <li
+                        <SmartLink
                           v-for="map in searchResults.maps"
                           :key="map.id"
-                          @click="goToMap(map.id)"
-                          v-html="sanitize(map.name || `Map ID: ${map.id}`)"
-                        ></li>
+                          :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                          tag="li"
+                          class="search-result-item"
+                        >
+                          {{ map.name || `Map ID: ${map.id}` }}
+                        </SmartLink>
                       </ul>
                     </div>
                     <div v-if="searchResults.players.length">
                       <h6>Players</h6>
                       <ul>
-                        <li
+                        <SmartLink
                           v-for="player in searchResults.players"
                           :key="player.id"
-                          @click="goToPlayer(player.id)"
-                          v-html="
-                            sanitize(player.name || `Player ID: ${player.id}`)
-                          "
-                        ></li>
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: player.id },
+                          }"
+                          tag="li"
+                          class="search-result-item"
+                        >
+                          {{ player.name || `Player ID: ${player.id}` }}
+                        </SmartLink>
                       </ul>
                     </div>
                   </div>
@@ -224,13 +230,13 @@
                   aria-labelledby="playerDropdown"
                 >
                   <li>
-                    <a
+                    <SmartLink
+                      tag="a"
+                      :to="getPlayerRoute()"
                       class="dropdown-item clickable"
-                      @click="goToProfile"
-                      href="#"
                     >
                       My profile
-                    </a>
+                    </SmartLink>
                   </li>
                   <li>
                     <div class="dropdown-item non-clickable">
@@ -613,69 +619,56 @@ export default {
         console.error("Failed to update user preferences:", error);
       }
     },
-    async goToProfile() {
-      if (!this.currentUser || !this.currentUser.playerid) {
-        console.log("No user logged in or invalid user data.");
-        return;
-      }
-
-      try {
-        const playerId = this.currentUser.playerid;
-        this.$router.push({ name: "PlayerPage", params: { playerId } });
-      } catch (error) {
-        console.error("Failed to navigate to profile:", error);
-      }
-    },
-
-    goToMap(mapId) {
-      this.$router.push({ name: "MapPage", params: { mapId } });
-      this.searchResults = null;
-      this.searchQuery = "";
-    },
-    goToPlayer(playerId) {
-      this.$router.push({ name: "PlayerPage", params: { playerId } });
-      this.searchResults = null;
-      this.searchQuery = "";
+    getPlayerRoute() {
+      const playerId = this.currentUser.playerid;
+      return { name: "PlayerPage", params: { playerId } };
     },
     async fetchSearchResults() {
-      if (this.searchQuery.trim()) {
-        this.showLoading = true;
-      } else {
-        this.showLoading = false;
+      if (!this.searchQuery.trim() || this.searchQuery.trim().length < 2) {
         this.searchResults = null;
+        this.showLoading = false;
         return;
       }
 
+      this.showLoading = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: this.searchQuery.trim() }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch search results");
+        const data = await response.json();
+
+        if (data.players && data.players.length > 20)
+          data.players = data.players.slice(0, 20);
+        if (data.maps && data.maps.length > 5)
+          data.maps = data.maps.slice(0, 5);
+
+        this.searchResults = data;
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        this.searchResults = null;
+      } finally {
+        this.showLoading = false;
+      }
+    },
+    debouncedSearch() {
       clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(async () => {
-        if (this.searchQuery.trim()) {
-          try {
-            const response = await fetch(`${API_BASE_URL}/search`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ query: this.searchQuery }),
-            });
 
-            if (!response.ok) throw new Error("Failed to fetch search results");
-            const data = await response.json();
+      if (!this.searchQuery.trim()) {
+        this.searchResults = null;
+        this.showLoading = false;
+        return;
+      }
 
-            if (data.players && data.players.length > 20)
-              data.players = data.players.slice(0, 20);
-            if (data.maps && data.maps.length > 5)
-              data.maps = data.maps.slice(0, 5);
-
-            this.searchResults = data;
-          } catch (error) {
-            console.error("Error fetching search results:", error);
-          } finally {
-            this.showLoading = false;
-          }
-        } else {
-          this.searchResults = null;
-          this.showLoading = false;
-        }
+      this.showLoading = true;
+      this.debounceTimer = setTimeout(() => {
+        this.fetchSearchResults();
       }, 500);
     },
     sanitize(text) {
@@ -683,12 +676,12 @@ export default {
     },
   },
   created() {
-    this.debouncedSearch = debounce(this.fetchSearchResults, 500);
     this.checkUpdateStatus();
     this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
   },
   beforeDestroy() {
     clearInterval(this.updateInterval);
+    clearTimeout(this.debounceTimer);
   },
   watch: {
     searchQuery() {

@@ -11,16 +11,17 @@
         <p class="page-subtitle">Search and filter through player records</p>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <div
+      <SmartLink
         v-if="playerId"
+        tag="div"
+        :to="{ name: 'PlayerPage', params: { playerId: playerId } }"
         class="player-name-display"
-        @click="goToPlayer(playerId)"
       >
         <h2
           class="clickable"
           v-html="sanitize(selectedPlayerName) || 'Selected Player'"
         ></h2>
-      </div>
+      </SmartLink>
       <div class="search-section">
         <div class="search-container" @click.stop>
           <div class="search-input-wrapper">
@@ -348,9 +349,16 @@
                     :key="record.id"
                     class="fade-in"
                   >
-                    <td class="clickable" @click="goToMap(record.map_id)">
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'MapPage',
+                        params: { mapId: record.map_id },
+                      }"
+                      class="clickable"
+                    >
                       {{ record.map_name }}
-                    </td>
+                    </SmartLink>
                     <td>
                       {{ getRecordType(record.type) }}{{ formatIndex(record) }}
                     </td>
@@ -365,7 +373,7 @@
                     <td>R{{ record.rating }}</td>
                     <td>{{ formatDuration(record.duration) }}</td>
                     <td :class="getRankColorClass(record.placement)">
-                      {{ record.rank }}
+                      {{ record.rank }} {{ formatPlacement(record.placement) }}
                     </td>
                     <td>{{ record.completion_count }}</td>
                     <td class="text-small">
@@ -616,6 +624,14 @@ export default {
     }
   },
   methods: {
+    formatPlacement(placement) {
+      if (placement <= 10) {
+        return "";
+      } else if (placement <= 15) {
+        return "(G" + (placement - 10) + ")";
+      }
+      return placement;
+    },
     async findPlayerName(playerId) {
       const response = await fetch(`${API_BASE_URL}/players/${playerId}`);
       const data = await response.json();
@@ -625,18 +641,6 @@ export default {
       const type = record.type;
       if (type === "map") return "";
       return `${type.charAt(0).toUpperCase()}${record.index}`;
-    },
-    goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
-    },
-    goToMap(mapId) {
-      this.$router.push({
-        name: "MapPage",
-        params: { mapId: mapId },
-      });
     },
     getRecordType(type) {
       const firstLetter = type.slice(0, 1).toUpperCase();

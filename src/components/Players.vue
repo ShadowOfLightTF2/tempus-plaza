@@ -137,18 +137,22 @@
                     class="fade-in"
                   >
                     <td class="rank-column">#{{ index + 1 }}</td>
-                    <td
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.player_id },
+                      }"
                       class="name-cell align-middle player-name clickable name-column"
-                      @click="goToPlayer(player.player_id)"
                     >
                       <img
-                        :src="`${player.steam_avatar}`"
+                        :src="player.steam_avatar"
                         alt="Steam Avatar"
                         class="avatar"
                         @error="handleError"
                       />
                       {{ player.name }}
-                    </td>
+                    </SmartLink>
                     <td
                       class="points-column"
                       :class="{
@@ -229,18 +233,22 @@
                     class="fade-in"
                   >
                     <td class="rank-column">#{{ index + 1 }}</td>
-                    <td
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.player_id },
+                      }"
                       class="name-cell align-middle player-name clickable name-column"
-                      @click="goToPlayer(player.player_id)"
                     >
                       <img
-                        :src="`${player.steam_avatar}`"
-                        alt="Avatar"
+                        :src="player.steam_avatar"
+                        alt="Steam Avatar"
                         class="avatar"
                         @error="handleError"
                       />
                       {{ player.name }}
-                    </td>
+                    </SmartLink>
                     <td
                       class="points-column"
                       :class="{

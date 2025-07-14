@@ -48,23 +48,32 @@
               <div v-if="searchResults.maps.length">
                 <h6>Maps</h6>
                 <ul>
-                  <li
+                  <SmartLink
                     v-for="map in searchResults.maps"
                     :key="map.id"
-                    @click="goToMap(map.id)"
-                    v-html="sanitize(map.name || `Map ID: ${map.id}`)"
-                  ></li>
+                    :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                    tag="li"
+                    class="search-result-item"
+                  >
+                    {{ map.name || `Map ID: ${map.id}` }}
+                  </SmartLink>
                 </ul>
               </div>
               <div v-if="searchResults.players.length">
                 <h6>Players</h6>
                 <ul>
-                  <li
+                  <SmartLink
                     v-for="player in searchResults.players"
                     :key="player.id"
-                    @click="goToPlayer(player.id)"
-                    v-html="sanitize(player.name || `Player ID: ${player.id}`)"
-                  ></li>
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: player.id },
+                    }"
+                    tag="li"
+                    class="search-result-item"
+                  >
+                    {{ player.name || `Player ID: ${player.id}` }}
+                  </SmartLink>
                 </ul>
               </div>
             </div>
@@ -75,12 +84,11 @@
           <div class="container">
             <h2 class="section-title">Most popular maps</h2>
             <div class="grid">
-              <a
+              <SmartLink
                 class="card"
                 v-for="map in popularSoldierMaps"
                 :key="map.id"
-                :href="`/maps/${map.map_id}`"
-                @click.prevent="goToMap(map.map_id)"
+                :to="{ name: 'MapPage', params: { mapId: map.map_id } }"
                 :style="{
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
@@ -132,19 +140,17 @@
                 </div>
                 <div class="completion-count">
                   <i class="bi bi-check-circle me-1"></i>
-                  {{ map.run_count }}
-                  runs recently
+                  {{ map.run_count }} runs recently
                 </div>
-              </a>
+              </SmartLink>
             </div>
             <hr class="divider" style="width: 100%" />
             <div class="grid">
-              <a
+              <SmartLink
                 class="card"
                 v-for="map in popularDemomanMaps"
                 :key="map.id"
-                :href="`/maps/${map.map_id}`"
-                @click.prevent="goToMap(map.map_id)"
+                :to="{ name: 'MapPage', params: { mapId: map.map_id } }"
                 :style="{
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
@@ -196,10 +202,9 @@
                 </div>
                 <div class="completion-count">
                   <i class="bi bi-check-circle me-1"></i>
-                  {{ map.run_count }}
-                  runs recently
+                  {{ map.run_count }} runs recently
                 </div>
-              </a>
+              </SmartLink>
             </div>
           </div>
         </div>
@@ -260,55 +265,6 @@ export default {
       this.searchResults = null;
       this.showLoading = false;
     },
-    goToMap(mapId) {
-      this.$router.push({ name: "MapPage", params: { mapId } });
-      this.searchResults = null;
-    },
-    goToPlayer(playerId) {
-      this.$router.push({ name: "PlayerPage", params: { playerId } });
-      this.searchResults = null;
-    },
-    async fetchSearchResults() {
-      if (this.searchQuery.trim()) {
-        this.showLoading = true;
-      } else {
-        this.showLoading = false;
-        this.searchResults = null;
-        return;
-      }
-
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(async () => {
-        if (this.searchQuery.trim()) {
-          try {
-            const response = await fetch(`${API_BASE_URL}/search`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ query: this.searchQuery }),
-            });
-
-            if (!response.ok) throw new Error("Failed to fetch search results");
-            const data = await response.json();
-
-            if (data.players && data.players.length > 20)
-              data.players = data.players.slice(0, 20);
-            if (data.maps && data.maps.length > 5)
-              data.maps = data.maps.slice(0, 5);
-
-            this.searchResults = data;
-          } catch (error) {
-            console.error("Error fetching search results:", error);
-          } finally {
-            this.showLoading = false;
-          }
-        } else {
-          this.searchResults = null;
-          this.showLoading = false;
-        }
-      }, 500);
-    },
     async fetchPopularMaps() {
       try {
         const response = await fetch(`${API_BASE_URL}/maps/get-popular-maps`);
@@ -335,12 +291,6 @@ export default {
         console.error("Error fetching TF2RJWeekly videos:", error);
       }
     },
-    onSearch() {
-      this.debouncedSearch();
-    },
-    sanitize(html) {
-      return DOMPurify.sanitize(html);
-    },
     formatDate(dateString) {
       const options = { year: "numeric", month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
@@ -350,19 +300,71 @@ export default {
         window.open(`https://www.youtube.com/watch?v=${youtubeId}`, "_blank");
       }
     },
+    async fetchSearchResults() {
+      if (!this.searchQuery.trim() || this.searchQuery.trim().length < 2) {
+        this.searchResults = null;
+        this.showLoading = false;
+        return;
+      }
+
+      this.showLoading = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: this.searchQuery.trim() }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch search results");
+        const data = await response.json();
+
+        if (data.players && data.players.length > 20)
+          data.players = data.players.slice(0, 20);
+        if (data.maps && data.maps.length > 5)
+          data.maps = data.maps.slice(0, 5);
+
+        this.searchResults = data;
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        this.searchResults = null;
+      } finally {
+        this.showLoading = false;
+      }
+    },
+    debouncedSearch() {
+      clearTimeout(this.debounceTimer);
+
+      if (!this.searchQuery.trim()) {
+        this.searchResults = null;
+        this.showLoading = false;
+        return;
+      }
+
+      this.showLoading = true;
+      this.debounceTimer = setTimeout(() => {
+        this.fetchSearchResults();
+      }, 500);
+    },
+    sanitize(text) {
+      return DOMPurify.sanitize(text);
+    },
   },
   created() {
-    this.debouncedSearch = debounce(this.fetchSearchResults, 500);
+    this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
+  },
+  beforeDestroy() {
+    clearInterval(this.updateInterval);
+    clearTimeout(this.debounceTimer);
   },
   watch: {
     searchQuery() {
       this.debouncedSearch();
     },
-  },
-  beforeDestroy() {
-    clearTimeout(this.debounceTimer);
   },
 };
 </script>

@@ -214,43 +214,36 @@
               </button>
             </div>
           </div>
-          <div class="table-responsive w-100" style="max-width: 1296px">
+          <div class="table-responsive">
             <table class="table table-dark">
               <thead class="table-header">
                 <tr>
-                  <th style="vertical-align: middle">Name</th>
-                  <th
-                    @click="sortBy('soldier_tier')"
-                    class="d-none d-sm-table-cell fixed-width"
-                  >
+                  <th style="vertical-align: middle" @click="sortBy('name')">
+                    Name
+                    <span v-if="sortField === 'name'">{{
+                      getSortArrowSymbol("name")
+                    }}</span>
+                  </th>
+                  <th @click="sortBy('soldier_tier')" class="fixed-width">
                     [S] tier
                     <span v-if="sortField === 'soldier_tier'">{{
                       getSortArrowSymbol("soldier_tier")
                     }}</span>
                   </th>
-                  <th
-                    @click="sortBy('soldier_rating')"
-                    class="d-none d-sm-table-cell fixed-width"
-                  >
+                  <th @click="sortBy('soldier_rating')" class="fixed-width">
                     [S] rating
                     <span v-if="sortField === 'soldier_rating'">{{
                       getSortArrowSymbol("soldier_rating")
                     }}</span>
                   </th>
-                  <th class="divider d-none d-sm-table-cell"></th>
-                  <th
-                    @click="sortBy('demoman_tier')"
-                    class="d-none d-sm-table-cell fixed-width"
-                  >
+                  <th class="divider"></th>
+                  <th @click="sortBy('demoman_tier')" class="fixed-width">
                     [D] tier
                     <span v-if="sortField === 'demoman_tier'">{{
                       getSortArrowSymbol("demoman_tier")
                     }}</span>
                   </th>
-                  <th
-                    @click="sortBy('demoman_rating')"
-                    class="d-none d-sm-table-cell fixed-width"
-                  >
+                  <th @click="sortBy('demoman_rating')" class="fixed-width">
                     [D] rating
                     <span v-if="sortField === 'demoman_rating'">{{
                       getSortArrowSymbol("demoman_rating")
@@ -273,9 +266,10 @@
                   }"
                   class="fade-in"
                 >
-                  <td
+                  <SmartLink
+                    tag="td"
+                    :to="getMapRoute(item)"
                     class="align-middle map-name clickable"
-                    @click="goToRecords(item)"
                   >
                     {{
                       currentView === "maps"
@@ -284,28 +278,28 @@
                             .slice(0, 1)
                             .toUpperCase()}${item.index})`
                     }}
-                  </td>
+                  </SmartLink>
                   <td
-                    class="align-middle text-center d-none d-sm-table-cell"
+                    class="align-middle text-center"
                     :class="`tier-color tier-${item.soldier_tier}`"
                   >
                     T{{ item.soldier_tier }}
                   </td>
                   <td
-                    class="align-middle text-center d-none d-sm-table-cell"
+                    class="align-middle text-center"
                     :class="`rating-color rating-${item.soldier_rating}`"
                   >
                     R{{ item.soldier_rating }}
                   </td>
-                  <td class="divider d-none d-sm-table-cell"></td>
+                  <td class="divider"></td>
                   <td
-                    class="align-middle text-center d-none d-sm-table-cell"
+                    class="align-middle text-center"
                     :class="`tier-color tier-${item.demoman_tier}`"
                   >
                     T{{ item.demoman_tier }}
                   </td>
                   <td
-                    class="align-middle text-center d-none d-sm-table-cell"
+                    class="align-middle text-center"
                     :class="`rating-color rating-${item.demoman_rating}`"
                   >
                     R{{ item.demoman_rating }}
@@ -424,6 +418,22 @@ export default {
     },
     filteredAndSortedItems() {
       return this.filteredItems.slice().sort((a, b) => {
+        if (this.sortField === "name") {
+          const nameA =
+            this.currentView === "maps"
+              ? a.name
+              : `${a.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
+                  a.index
+                })`;
+          const nameB =
+            this.currentView === "maps"
+              ? b.name
+              : `${b.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
+                  b.index
+                })`;
+          return nameA.localeCompare(nameB) * this.sortDirection;
+        }
+
         const fieldA = a[this.sortField];
         const fieldB = b[this.sortField];
 
@@ -489,6 +499,10 @@ export default {
   },
 
   methods: {
+    getMapRoute(item) {
+      const itemId = this.currentView === "maps" ? item.id : item.map_id;
+      return { name: "MapPage", params: { mapId: itemId } };
+    },
     async switchView(view) {
       if (this.currentView === view) return;
 
@@ -553,15 +567,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-
-    async goToRecords(item) {
-      const itemId = this.currentView === "maps" ? item.id : item.map_id;
-      console.log(`Navigating to more info for ${this.currentView}:`, itemId);
-      this.$router.push({
-        name: "MapPage",
-        params: { mapId: itemId },
-      });
     },
 
     sortBy(field) {
@@ -971,6 +976,7 @@ export default {
 }
 
 .table-responsive {
+  width: 100%;
   overflow: hidden;
   border-left: 1px solid var(--color-border-soft);
   border-right: 1px solid var(--color-border-soft);
@@ -1051,7 +1057,7 @@ export default {
 }
 
 .fixed-width {
-  width: 100px;
+  max-width: 120px;
   min-width: 100px;
 }
 
@@ -1192,9 +1198,54 @@ export default {
 }
 
 @media (max-width: 767.98px) {
+  .button-group {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .toggle-btn {
+    justify-content: center;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
   .table-container {
+    width: 95vw;
+    overflow-x: auto;
+    border-radius: 0;
+  }
+
+  .table-responsive {
     width: 100%;
     overflow-x: auto;
+  }
+
+  .table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .table-dark td {
+    white-space: nowrap;
+  }
+
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .table-header-icon {
+    font-size: 1.5rem;
   }
 
   .filter-section {
@@ -1229,18 +1280,6 @@ export default {
   .picker-controls {
     flex-direction: column;
     align-items: center;
-  }
-
-  .button-group {
-    flex-direction: row;
-    justify-content: center;
-    width: 100%;
-    gap: 10px;
-  }
-
-  .toggle-btn {
-    flex: 1;
-    margin: 5px;
   }
 }
 </style>

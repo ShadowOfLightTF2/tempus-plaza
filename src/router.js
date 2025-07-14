@@ -17,7 +17,7 @@ const routes = [
     component: Home,
   },
   {
-    path: '/servers',
+    path: '/servers/:view?',
     name: 'Servers',
     component: Servers,
   },

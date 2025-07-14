@@ -332,7 +332,6 @@
                         </div>
                       </div>
                       <div v-else class="shared-body">
-                        <!-- Header Row -->
                         <div
                           class="d-flex align-items-center justify-content-between px-2 mb-2"
                           style="
@@ -348,12 +347,15 @@
                           </div>
                           <div class="text-end">Count</div>
                         </div>
-                        <!-- Player Rows -->
-                        <div
+                        <SmartLink
                           v-for="(sharedPlayer, index) in sharedTimesSoldier"
                           :key="index"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: sharedPlayer.playerId },
+                          }"
+                          tag="div"
                           class="d-flex align-items-center justify-content-between px-2 py-2 mb-2 shared-row"
-                          @click="goToPlayer(sharedPlayer.playerId)"
                         >
                           <!-- Avatar + Name -->
                           <div
@@ -378,7 +380,7 @@
                           >
                             {{ sharedPlayer.count }}
                           </div>
-                        </div>
+                        </SmartLink>
                       </div>
                     </div>
                   </div>
@@ -397,8 +399,9 @@
                   class="d-flex justify-content-between align-items-center button-container-wrapper"
                 >
                   <div class="allruns-button-container">
-                    <button
-                      @click="goToLookup()"
+                    <SmartLink
+                      :to="{ name: 'Lookup', params: { playerId: player.id } }"
+                      tag="button"
                       class="toggle-btn btn main-filter-button"
                       :class="{ 'btn-dark': true }"
                       :style="{
@@ -408,7 +411,7 @@
                       }"
                     >
                       All Runs
-                    </button>
+                    </SmartLink>
                   </div>
                   <div class="filter-button-container">
                     <button
@@ -570,12 +573,16 @@
                         <h5>{{ formatDateHeader(date) }}</h5>
                       </div>
                       <ul class="list-group">
-                        <li
+                        <SmartLink
                           v-for="record in group"
                           :key="record.id"
+                          :to="{
+                            name: 'MapPage',
+                            params: { mapId: record.map_id },
+                          }"
+                          tag="li"
                           class="list-group-item record-item"
                           style="background: rgba(255, 255, 255, 0.05)"
-                          @click="goToRecords(record.map_id)"
                         >
                           <div
                             class="d-flex align-items-center record-class-map"
@@ -588,8 +595,8 @@
                             />
                             <span class="ms-2 record-map">
                               {{ record.map_name }}
-                              <span v-if="record.type !== 'map'"
-                                >|
+                              <span v-if="record.type !== 'map'">
+                                |
                                 <template v-if="record.type === 'course'"
                                   >🚩</template
                                 >
@@ -619,7 +626,8 @@
                                 <span
                                   class="record-rank"
                                   :class="getPlacementClass(record.placement)"
-                                  >{{ getMedal(record.rank) }} #{{
+                                >
+                                  {{ getMedal(record.rank) }} #{{
                                     record.rank
                                   }}</span
                                 >
@@ -629,7 +637,7 @@
                               </span>
                             </div>
                           </div>
-                        </li>
+                        </SmartLink>
                       </ul>
                     </div>
                     <div class="pagination-controls">
@@ -1039,6 +1047,7 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
+    debounceTimer: null,
     currentUser: null,
     selectedClass: null,
     showClassWarning: false,
@@ -1597,6 +1606,13 @@ export default {
             shared: true,
             "Latest runs": true,
           };
+
+          this.currentPage = 1;
+          this.filterOptions = {
+            selectedClasses: [],
+            selectedTypes: [],
+            selectedPlacements: [],
+          };
           this.currentPage = 1;
           this.currentStatType.soldier = "total";
           this.currentStatType.demoman = "total";
@@ -1658,12 +1674,6 @@ export default {
         }
       },
     },
-    filterOptions: {
-      handler() {
-        this.currentPage = 1;
-      },
-      deep: true,
-    },
   },
   methods: {
     openMapSearch(index) {
@@ -1672,33 +1682,52 @@ export default {
       this.mapSearchResults = [];
       this.mapSearchQuery = "";
     },
-    async searchMap() {
+    searchMap() {
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+
       if (!this.mapSearchQuery.trim()) {
+        console.log("Search query is empty");
         this.mapSearchResults = [];
         return;
       }
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/search`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: this.mapSearchQuery }),
-        });
+      this.debounceTimer = setTimeout(async () => {
+        console.log("Executing search after timeout for:", this.mapSearchQuery);
 
-        if (!response.ok) throw new Error("Failed to fetch search results");
-        const data = await response.json();
-
-        this.mapSearchResults = data.maps || data || [];
-
-        if (this.mapSearchResults.length > 5) {
-          this.mapSearchResults = this.mapSearchResults.slice(0, 5);
+        if (!this.mapSearchQuery.trim()) {
+          this.mapSearchResults = [];
+          return;
         }
-      } catch (error) {
-        console.error("Error searching for maps:", error);
-        this.mapSearchResults = [];
-      }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: this.mapSearchQuery }),
+          });
+
+          if (!response.ok) throw new Error("Failed to fetch search results");
+
+          const data = await response.json();
+          this.mapSearchResults = data.maps || data || [];
+
+          if (this.mapSearchResults.length > 5) {
+            this.mapSearchResults = this.mapSearchResults.slice(0, 5);
+          }
+
+          console.log(
+            "Search completed, results:",
+            this.mapSearchResults.length
+          );
+        } catch (error) {
+          console.error("Error searching for maps:", error);
+          this.mapSearchResults = [];
+        }
+      }, 500);
     },
     selectClass(className) {
       this.selectedClass = className;
@@ -2435,6 +2464,9 @@ export default {
       return formatDate(unixTimestamp);
     },
   },
+  beforeDestroy() {
+    clearTimeout(this.debounceTimer);
+  },
 };
 </script>
 
@@ -2671,7 +2703,7 @@ export default {
   font-weight: bold;
   font-size: 13px;
   text-transform: capitalize;
-  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.35);
 }
 
 .filter-button.active {
@@ -2991,12 +3023,12 @@ export default {
   flex-grow: 1;
 }
 .latest-runs-btn {
-  background: var(--color-box);
   color: var(--color-text);
   border: 1px solid var(--color-border-soft);
   font-weight: bold;
   padding: 8px 16px;
   border-radius: 8px;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
 }
 .latest-runs-btn:hover {
   color: var(--color-text);

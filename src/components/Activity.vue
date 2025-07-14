@@ -52,6 +52,7 @@
                   <h3 class="table-header-title">Latest world records</h3>
                   <p class="table-header-subtitle">Updates every 5 minutes</p>
                 </div>
+                <div class="filter-container"></div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">
@@ -65,13 +66,17 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(record, index) in worldRecordsData"
+                      v-for="(record, index) in filteredWorldRecordsData"
                       :key="record.id"
                       class="fade-in"
                     >
-                      <td
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: record.player_id },
+                        }"
                         class="name-cell align-middle player-name clickable name-column"
-                        @click="goToPlayer(record.player_id)"
                       >
                         <img
                           :src="record.avatar"
@@ -80,10 +85,14 @@
                           onerror="this.src='/avatars/golly.jpg'"
                         />
                         {{ record.player }}
-                      </td>
-                      <td
+                      </SmartLink>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'MapPage',
+                          params: { mapId: record.map_id },
+                        }"
                         class="name-cell align-middle map-name clickable"
-                        @click="goToMap(record.map_id)"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -91,7 +100,7 @@
                           class="class-icon-small"
                         />
                         {{ record.map }}
-                      </td>
+                      </SmartLink>
                       <td>
                         <div class="type-cell">
                           <span
@@ -121,8 +130,9 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest top times</h3>
-                  <p class="table-header-subtitle">Updates every 8 hours</p>
+                  <p class="table-header-subtitle">Updates every 6 hours</p>
                 </div>
+                <div class="filter-container"></div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">
@@ -137,13 +147,17 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(record, index) in topTimesData"
+                      v-for="(record, index) in filteredTopTimesData"
                       :key="record.id"
                       class="fade-in"
                     >
-                      <td
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: record.player_id },
+                        }"
                         class="name-cell align-middle player-name clickable name-column"
-                        @click="goToPlayer(record.player_id)"
                       >
                         <img
                           :src="record.avatar"
@@ -152,10 +166,14 @@
                           onerror="this.src='/avatars/golly.jpg'"
                         />
                         {{ record.player }}
-                      </td>
-                      <td
+                      </SmartLink>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'MapPage',
+                          params: { mapId: record.map_id },
+                        }"
                         class="name-cell align-middle map-name clickable"
-                        @click="goToMap(record.map_id)"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -163,24 +181,22 @@
                           class="class-icon-small"
                         />
                         {{ record.map }}
-                      </td>
+                      </SmartLink>
                       <td>
                         <div class="type-cell">
                           <span
                             class="record-type"
                             :style="{ color: 'var(--color-text)' }"
                           >
-                            <template v-if="record.recordType === 'map'">
-                              🌍 Map
-                            </template>
-                            <template
-                              v-else-if="record.recordType === 'course'"
+                            <template v-if="record.recordType === 'map'"
+                              >🌍 Map</template
                             >
-                              🚩 Course {{ record.index }}
-                            </template>
-                            <template v-else-if="record.recordType === 'bonus'">
-                              ⭐ Bonus {{ record.index }}
-                            </template>
+                            <template v-else-if="record.recordType === 'course'"
+                              >🚩 Course {{ record.index }}</template
+                            >
+                            <template v-else-if="record.recordType === 'bonus'"
+                              >⭐ Bonus {{ record.index }}</template
+                            >
                           </span>
                         </div>
                       </td>
@@ -196,8 +212,9 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest group 1s</h3>
-                  <p class="table-header-subtitle">Updates every 8 hours</p>
+                  <p class="table-header-subtitle">Updates every 6 hours</p>
                 </div>
+                <div class="filter-container"></div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">
@@ -212,13 +229,17 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(record, index) in group1sData"
+                      v-for="(record, index) in filteredGroup1sData"
                       :key="record.id"
                       class="fade-in"
                     >
-                      <td
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: record.player_id },
+                        }"
                         class="name-cell align-middle player-name clickable name-column"
-                        @click="goToPlayer(record.player_id)"
                       >
                         <img
                           :src="record.avatar"
@@ -227,10 +248,14 @@
                           onerror="this.src='/avatars/golly.jpg'"
                         />
                         {{ record.player }}
-                      </td>
-                      <td
+                      </SmartLink>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'MapPage',
+                          params: { mapId: record.map_id },
+                        }"
                         class="name-cell align-middle map-name clickable"
-                        @click="goToMap(record.map_id)"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -238,24 +263,22 @@
                           class="class-icon-small"
                         />
                         {{ record.map }}
-                      </td>
+                      </SmartLink>
                       <td>
                         <div class="type-cell">
                           <span
                             class="record-type"
                             :style="{ color: 'var(--color-text)' }"
                           >
-                            <template v-if="record.recordType === 'map'">
-                              🌍 Map
-                            </template>
-                            <template
-                              v-else-if="record.recordType === 'course'"
+                            <template v-if="record.recordType === 'map'"
+                              >🌍 Map</template
                             >
-                              🚩 Course {{ record.index }}
-                            </template>
-                            <template v-else-if="record.recordType === 'bonus'">
-                              ⭐ Bonus {{ record.index }}
-                            </template>
+                            <template v-else-if="record.recordType === 'course'"
+                              >🚩 Course {{ record.index }}</template
+                            >
+                            <template v-else-if="record.recordType === 'bonus'"
+                              >⭐ Bonus {{ record.index }}</template
+                            >
                           </span>
                         </div>
                       </td>
@@ -299,7 +322,22 @@ export default {
       topTimesData: [],
       group1sData: [],
       loading: false,
+      filterOptions: {
+        selectedClasses: [],
+        selectedTypes: [],
+      },
     };
+  },
+  computed: {
+    filteredWorldRecordsData() {
+      return this.filterData(this.worldRecordsData);
+    },
+    filteredTopTimesData() {
+      return this.filterData(this.topTimesData);
+    },
+    filteredGroup1sData() {
+      return this.filterData(this.group1sData);
+    },
   },
   watch: {
     $route(to) {
@@ -316,6 +354,36 @@ export default {
     }
   },
   methods: {
+    toggleClassFilter(classType) {
+      const index = this.filterOptions.selectedClasses.indexOf(classType);
+      if (index === -1) {
+        this.filterOptions.selectedClasses.push(classType);
+      } else {
+        this.filterOptions.selectedClasses.splice(index, 1);
+      }
+    },
+    toggleTypeFilter(type) {
+      const index = this.filterOptions.selectedTypes.indexOf(type);
+      if (index === -1) {
+        this.filterOptions.selectedTypes.push(type);
+      } else {
+        this.filterOptions.selectedTypes.splice(index, 1);
+      }
+    },
+    filterData(data) {
+      let filteredData = [...data];
+      if (this.filterOptions.selectedClasses.length > 0) {
+        filteredData = filteredData.filter((record) =>
+          this.filterOptions.selectedClasses.includes(record.class)
+        );
+      }
+      if (this.filterOptions.selectedTypes.length > 0) {
+        filteredData = filteredData.filter((record) =>
+          this.filterOptions.selectedTypes.includes(record.recordType)
+        );
+      }
+      return filteredData;
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -334,7 +402,6 @@ export default {
             fetch(`${API_BASE_URL}/maps/recent-top-times`),
             fetch(`${API_BASE_URL}/maps/recent-g1s`),
           ]);
-
         const [worldRecordsData, topTimesData, group1sData] = await Promise.all(
           [
             worldRecordsResponse.json(),
@@ -342,7 +409,6 @@ export default {
             group1sResponse.json(),
           ]
         );
-
         this.worldRecordsData = worldRecordsData.map((item) => ({
           id: item.id,
           player: item.player_name,
@@ -356,7 +422,6 @@ export default {
           index: item.type_index,
           timestamp: formatDate(item.record_date),
         }));
-
         this.topTimesData = topTimesData.map((record) => ({
           id: record.id,
           player: record.player_name,
@@ -371,7 +436,6 @@ export default {
           index: record.index,
           timestamp: formatDate(record.date),
         }));
-
         this.group1sData = group1sData.map((record) => ({
           id: record.id,
           player: record.player_name,
@@ -395,27 +459,63 @@ export default {
       this.currentView = view;
       this.$router.push({ name: "Activity", params: { view } });
     },
-    goToPlayer(playerId) {
-      this.$router.push({
-        name: "PlayerPage",
-        params: { playerId: playerId },
-      });
-    },
-    goToMap(mapId) {
-      this.$router.push({
-        name: "MapPage",
-        params: { mapId: mapId },
-      });
-    },
   },
 };
 </script>
 
 <style scoped>
-.flag-icon {
-  width: 20px;
-  height: auto;
-  margin-right: 5px;
+.filter-container {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-title {
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.class-filter-container,
+.type-filter-container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(68, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: capitalize;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
+}
+
+.filter-button.active {
+  background: rgba(74, 111, 165, 0.8);
+  border-color: var(--color-border, #444);
+}
+
+.filter-button:hover:not(.active) {
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .content-container {
@@ -436,6 +536,7 @@ export default {
   margin-bottom: 2rem;
   padding: 1.5rem 0;
 }
+
 .divider {
   border: none;
   height: 2px;
@@ -492,11 +593,6 @@ export default {
   opacity: 0.8;
 }
 
-.table-header-badge {
-  display: flex;
-  align-items: center;
-}
-
 .table-responsive {
   overflow: hidden;
   margin-bottom: 0px;
@@ -527,6 +623,7 @@ export default {
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
+
 .table-dark tr:nth-child(odd) .name-cell:hover {
   background: rgba(74, 111, 165, 0.8) !important;
 }
@@ -616,10 +713,10 @@ export default {
     overflow-x: auto;
   }
 
-  .name-cell,
-  .name-column {
+  .table-dark td {
     white-space: nowrap;
-    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .avatar {
