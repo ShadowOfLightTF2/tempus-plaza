@@ -1231,7 +1231,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
@@ -1256,26 +1265,26 @@ export default {
           const points = data.y;
           const rank = data.overall_rank;
           return `
-            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
-                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
-                </div>
-              </div>
+        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
+              <span class="apexcharts-tooltip-text-y-value">${points}</span>
             </div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
-                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
-                </div>
-              </div>
+          </div>
+        </div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
+              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
             </div>
-          `;
+          </div>
+        </div>
+      `;
         },
       },
       legend: {
@@ -1325,7 +1334,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
@@ -1419,7 +1437,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
