@@ -10,7 +10,7 @@
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">📊</span>
-            Activity dashboard
+            Activity Dashboard
           </h1>
           <p class="page-subtitle">Track the latest records</p>
         </div>
@@ -49,7 +49,7 @@
               <div class="table-header-content">
                 <div class="table-header-icon">🏆</div>
                 <div class="table-header-text">
-                  <h3 class="table-header-title">Latest world records</h3>
+                  <h3 class="table-header-title">Latest World Records</h3>
                   <p class="table-header-subtitle">Updates every 5 minutes</p>
                 </div>
                 <div class="filter-container">
@@ -188,8 +188,8 @@
               <div class="table-header-content">
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
-                  <h3 class="table-header-title">Latest top times</h3>
-                  <p class="table-header-subtitle">Updates 6 hours</p>
+                  <h3 class="table-header-title">Latest Top Times</h3>
+                  <p class="table-header-subtitle">Updates every 6 hours</p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -329,7 +329,7 @@
               <div class="table-header-content">
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
-                  <h3 class="table-header-title">Latest group 1s</h3>
+                  <h3 class="table-header-title">Latest Group 1s</h3>
                   <p class="table-header-subtitle">Updates every 6 hours</p>
                 </div>
                 <div class="filter-container">
