@@ -52,7 +52,66 @@
                   <h3 class="table-header-title">Latest world records</h3>
                   <p class="table-header-subtitle">Updates every 5 minutes</p>
                 </div>
-                <div class="filter-container"></div>
+                <div class="filter-container">
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Class</h6>
+                    <div class="class-filter-container">
+                      <button
+                        @click="toggleClassFilter('soldier')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('soldier'),
+                        }"
+                        class="filter-button"
+                      >
+                        Soldier
+                      </button>
+                      <button
+                        @click="toggleClassFilter('demoman')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('demoman'),
+                        }"
+                        class="filter-button"
+                      >
+                        Demoman
+                      </button>
+                    </div>
+                  </div>
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Type</h6>
+                    <div class="type-filter-container">
+                      <button
+                        @click="toggleTypeFilter('map')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('map'),
+                        }"
+                        class="filter-button"
+                      >
+                        Map
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('course')"
+                        :class="{
+                          active:
+                            filterOptions.selectedTypes.includes('course'),
+                        }"
+                        class="filter-button"
+                      >
+                        Course
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('bonus')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('bonus'),
+                        }"
+                        class="filter-button"
+                      >
+                        Bonus
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">
@@ -130,9 +189,68 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest top times</h3>
-                  <p class="table-header-subtitle">Updates every 6 hours</p>
+                  <p class="table-header-subtitle">Updates 6 hours</p>
                 </div>
-                <div class="filter-container"></div>
+                <div class="filter-container">
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Class</h6>
+                    <div class="class-filter-container">
+                      <button
+                        @click="toggleClassFilter('soldier')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('soldier'),
+                        }"
+                        class="filter-button"
+                      >
+                        Soldier
+                      </button>
+                      <button
+                        @click="toggleClassFilter('demoman')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('demoman'),
+                        }"
+                        class="filter-button"
+                      >
+                        Demoman
+                      </button>
+                    </div>
+                  </div>
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Type</h6>
+                    <div class="type-filter-container">
+                      <button
+                        @click="toggleTypeFilter('map')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('map'),
+                        }"
+                        class="filter-button"
+                      >
+                        Map
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('course')"
+                        :class="{
+                          active:
+                            filterOptions.selectedTypes.includes('course'),
+                        }"
+                        class="filter-button"
+                      >
+                        Course
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('bonus')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('bonus'),
+                        }"
+                        class="filter-button"
+                      >
+                        Bonus
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">
@@ -214,7 +332,66 @@
                   <h3 class="table-header-title">Latest group 1s</h3>
                   <p class="table-header-subtitle">Updates every 6 hours</p>
                 </div>
-                <div class="filter-container"></div>
+                <div class="filter-container">
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Class</h6>
+                    <div class="class-filter-container">
+                      <button
+                        @click="toggleClassFilter('soldier')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('soldier'),
+                        }"
+                        class="filter-button"
+                      >
+                        Soldier
+                      </button>
+                      <button
+                        @click="toggleClassFilter('demoman')"
+                        :class="{
+                          active:
+                            filterOptions.selectedClasses.includes('demoman'),
+                        }"
+                        class="filter-button"
+                      >
+                        Demoman
+                      </button>
+                    </div>
+                  </div>
+                  <div class="filter-group">
+                    <h6 class="filter-title text-light mb-2">Type</h6>
+                    <div class="type-filter-container">
+                      <button
+                        @click="toggleTypeFilter('map')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('map'),
+                        }"
+                        class="filter-button"
+                      >
+                        Map
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('course')"
+                        :class="{
+                          active:
+                            filterOptions.selectedTypes.includes('course'),
+                        }"
+                        class="filter-button"
+                      >
+                        Course
+                      </button>
+                      <button
+                        @click="toggleTypeFilter('bonus')"
+                        :class="{
+                          active: filterOptions.selectedTypes.includes('bonus'),
+                        }"
+                        class="filter-button"
+                      >
+                        Bonus
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="table-responsive">
                 <table class="table table-dark">

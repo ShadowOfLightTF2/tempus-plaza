@@ -28,7 +28,9 @@
           <p class="panel-description">
             Your support helps me pay for server uptime and upgrade the
             website's services. Donator perks will be added to the website in
-            the future. (cosmetic changes only)
+            the future. (cosmetic changes only). Currently you will get this
+            nice border around your player page banner + ability to change the
+            colour of it
           </p>
           <hr class="divider" />
 

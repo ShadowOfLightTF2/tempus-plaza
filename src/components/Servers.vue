@@ -738,6 +738,9 @@ export default {
   color: var(--color-text-clickable);
   font-weight: bold;
   font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .no-players {
