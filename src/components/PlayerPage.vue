@@ -539,20 +539,33 @@
                 style="background: rgba(255, 255, 255, 0.05)"
               >
                 <div class="records-section">
-                  <div v-if="loading['Latest runs']" class="text-center">
-                    <div class="spinner-border text-light" role="status">
-                      <span class="visually-hidden">Loading records...</span>
+                  <!-- Navigation Tabs -->
+                  <div class="card-header tabs-header">
+                    <div class="btn-group" role="group">
+                      <button
+                        @click="currentTab = 'recentRuns'"
+                        :class="{ active: currentTab === 'recentRuns' }"
+                        class="btn btn-tab"
+                      >
+                        Recent Runs
+                      </button>
+                      <button
+                        @click="currentTab = 'lostRecords'"
+                        :class="{ active: currentTab === 'lostRecords' }"
+                        class="btn btn-tab"
+                      >
+                        Lost Records
+                      </button>
                     </div>
                   </div>
-                  <div v-else>
-                    <div
-                      v-for="(group, date) in filteredAndPaginatedRecords"
-                      :key="date"
-                      class="date-group fade-in"
-                    >
-                      <div class="date-header">
-                        <h5>{{ formatDateHeader(date) }}</h5>
+
+                  <!-- Content for Recent Runs -->
+                  <div v-if="currentTab === 'recentRuns'">
+                    <div v-if="loading['Latest runs']" class="text-center">
+                      <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading records...</span>
                       </div>
+<<<<<<< Updated upstream
                       <ul class="list-group">
                         <li
                           v-for="record in group"
@@ -615,23 +628,214 @@
                           </div>
                         </li>
                       </ul>
+=======
                     </div>
-                    <div class="pagination-controls">
-                      <button
-                        v-if="currentPage > 1"
-                        @click="prevPage"
-                        class="btn latest-runs-btn"
+                    <div v-else>
+                      <div
+                        v-for="(group, date) in filteredAndPaginatedRecords"
+                        :key="date"
+                        class="date-group fade-in"
                       >
-                        Previous
-                      </button>
-                      <div class="pagination-spacer"></div>
-                      <button
-                        v-if="currentPage * pageSize < filteredRecords.length"
-                        @click="nextPage"
-                        class="btn latest-runs-btn"
+                        <div class="date-header">
+                          <h5>{{ formatDateHeader(date) }}</h5>
+                        </div>
+                        <ul class="list-group">
+                          <SmartLink
+                            v-for="record in group"
+                            :key="record.id"
+                            :to="{
+                              name: 'MapPage',
+                              params: { mapId: record.map_id },
+                            }"
+                            tag="li"
+                            class="list-group-item record-item"
+                            style="background: rgba(255, 255, 255, 0.05)"
+                          >
+                            <div
+                              class="d-flex align-items-center record-class-map"
+                            >
+                              <img
+                                :src="`/icons/${record.class}.png`"
+                                :alt="record.class"
+                                class="class-icon"
+                                loading="lazy"
+                              />
+                              <span class="ms-2 record-map">
+                                {{ record.map_name }}
+                                <span v-if="record.type !== 'map'">
+                                  |
+                                  <template v-if="record.type === 'course'"
+                                    >🚩</template
+                                  >
+                                  <template v-if="record.type === 'bonus'"
+                                    >⭐</template
+                                  >
+                                  {{ record.type.slice(0, 1).toUpperCase()
+                                  }}{{ record.index }}
+                                </span>
+                              </span>
+                            </div>
+                            <div
+                              class="text-end align-items-center record-time-detail"
+                            >
+                              <div class="d-flex flex-column align-items-end">
+                                <div class="d-flex align-items-center gap-2">
+                                  <span
+                                    class="record-detail record-duration"
+                                    :class="[
+                                      record.rank >= 1 && record.rank <= 3
+                                        ? getPlacementClass(record.rank)
+                                        : '',
+                                    ]"
+                                  >
+                                    {{ formatDuration(record.duration) }}
+                                  </span>
+                                  <span
+                                    class="record-rank"
+                                    :class="getPlacementClass(record.placement)"
+                                  >
+                                    {{ getMedal(record.rank) }} #{{
+                                      record.rank
+                                    }}
+                                  </span>
+                                </div>
+                                <span class="record-detail record-date">
+                                  {{ formatDate(record.date) }}
+                                </span>
+                              </div>
+                            </div>
+                          </SmartLink>
+                        </ul>
+                      </div>
+                      <div class="pagination-controls">
+                        <button
+                          v-if="currentPage > 1"
+                          @click="prevPage"
+                          class="btn latest-runs-btn"
+                        >
+                          Previous
+                        </button>
+                        <div class="pagination-spacer"></div>
+                        <button
+                          v-if="currentPage * pageSize < filteredRecords.length"
+                          @click="nextPage"
+                          class="btn latest-runs-btn"
+                        >
+                          Next
+                        </button>
+                      </div>
+>>>>>>> Stashed changes
+                    </div>
+                  </div>
+
+                  <!-- Content for Lost Records -->
+                  <div v-if="currentTab === 'lostRecords'">
+                    <div v-if="loading.lostRecords" class="text-center">
+                      <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden"
+                          >Loading lost records...</span
+                        >
+                      </div>
+                    </div>
+                    <div v-else>
+                      <div
+                        v-for="(group, date) in filteredAndPaginatedLostRecords"
+                        :key="date"
+                        class="date-group fade-in"
                       >
-                        Next
-                      </button>
+                        <div class="date-header">
+                          <h5>{{ formatDateHeader(date) }}</h5>
+                        </div>
+                        <ul class="list-group">
+                          <li
+                            v-for="record in group"
+                            :key="record.id"
+                            class="list-group-item record-item"
+                          >
+                            <div
+                              class="d-flex align-items-center record-class-map"
+                            >
+                              <img
+                                :src="`/icons/${record.class}.png`"
+                                :alt="record.class"
+                                class="class-icon"
+                                loading="lazy"
+                              />
+                              <span class="ms-2 record-map">
+                                {{ record.map_name }}
+                                <span v-if="record.type !== 'map'">
+                                  |
+                                  {{ record.type === "course" ? "🚩" : "⭐" }}
+                                  {{ record.type.slice(0, 1).toUpperCase()
+                                  }}{{ record.index }}
+                                </span>
+                              </span>
+                            </div>
+                            <div
+                              class="text-end align-items-center record-time-detail"
+                            >
+                              <div class="d-flex flex-column align-items-end">
+                                <div class="d-flex align-items-center gap-2">
+                                  <span
+                                    class="record-detail record-duration"
+                                    :class="[
+                                      record.old_placement >= 1 &&
+                                      record.old_placement <= 3
+                                        ? getPlacementClass(
+                                            record.old_placement
+                                          )
+                                        : '',
+                                    ]"
+                                  >
+                                    {{ formatDuration(record.duration) }}
+                                  </span>
+                                  <span class="record-rank">
+                                    <span
+                                      :class="
+                                        getPlacementClass(record.old_placement)
+                                      "
+                                    >
+                                      {{ getMedal(record.old_placement) }} #{{
+                                        record.old_placement
+                                      }}
+                                    </span>
+                                    →
+                                    <span
+                                      :class="
+                                        getPlacementClass(record.new_placement)
+                                      "
+                                    >
+                                      {{ getMedal(record.new_placement) }} #{{
+                                        record.new_placement
+                                      }}
+                                    </span>
+                                  </span>
+                                </div>
+                                <span class="record-detail record-date">
+                                  {{ formatDate(record.date) }}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="pagination-controls">
+                        <button
+                          v-if="currentPage > 1"
+                          @click="prevPage"
+                          class="btn latest-runs-btn"
+                        >
+                          Previous
+                        </button>
+                        <div class="pagination-spacer"></div>
+                        <button
+                          v-if="currentPage * pageSize < filteredRecords.length"
+                          @click="nextPage"
+                          class="btn latest-runs-btn"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1024,6 +1228,7 @@ export default {
   },
   data: () => ({
     currentUser: null,
+    currentTab: "recentRuns",
     selectedClass: null,
     showClassWarning: false,
     classWarningTimeout: null,
@@ -1106,9 +1311,11 @@ export default {
     showRankMenu: false,
     records: {
       recentRecords: [],
+      lostRecords: [],
     },
     loading: {
       "Latest runs": true,
+      lostRecords: true,
       shared: true,
       ranks: true,
       stats: true,
@@ -1206,7 +1413,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
@@ -1231,26 +1447,26 @@ export default {
           const points = data.y;
           const rank = data.overall_rank;
           return `
-            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
-                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
-                </div>
-              </div>
+        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
+              <span class="apexcharts-tooltip-text-y-value">${points}</span>
             </div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
-                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
-                </div>
-              </div>
+          </div>
+        </div>
+        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
+          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
+          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
+            <div class="apexcharts-tooltip-y-group">
+              <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
+              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
             </div>
-          `;
+          </div>
+        </div>
+      `;
         },
       },
       legend: {
@@ -1300,7 +1516,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
@@ -1394,7 +1619,16 @@ export default {
           style: {
             colors: "#aaa",
           },
+          formatter: function (value, timestamp) {
+            const date = new Date(timestamp);
+            const day = date.getDate();
+            const month = date.toLocaleDateString("en-US", { month: "short" });
+            return `${day} ${month}`;
+          },
+          maxHeight: undefined,
+          rotate: 0,
         },
+        tickAmount: 6,
       },
       yaxis: {
         labels: {
@@ -1502,7 +1736,10 @@ export default {
       };
     },
     filteredRecords() {
-      let recordsToFilter = this.records.recentRecords;
+      let recordsToFilter =
+        this.currentTab === "recentRuns"
+          ? this.records.recentRecords
+          : this.records.lostRecords;
       return recordsToFilter.filter((record) => {
         if (
           this.filterOptions.selectedClasses.length > 0 &&
@@ -1519,10 +1756,9 @@ export default {
         if (
           this.filterOptions.selectedPlacements.length > 0 &&
           !this.filterOptions.selectedPlacements.some((placement) => {
-            if (placement === 1) return record.placement === 1;
-            if (placement === 2)
-              return record.placement >= 2 && record.placement <= 10;
-            return record.placement === placement;
+            if (placement === 1) return record.rank === 1;
+            if (placement === 2) return record.rank >= 2 && record.rank <= 10;
+            return record.rank === placement;
           })
         ) {
           return false;
@@ -1531,6 +1767,26 @@ export default {
       });
     },
     filteredAndPaginatedRecords() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      const grouped = this.groupRecords(this.filteredRecords);
+      const dates = Object.keys(grouped);
+      const paginated = {};
+      let count = 0;
+      for (const date of dates) {
+        for (const record of grouped[date]) {
+          if (count >= start && count < end) {
+            if (!paginated[date]) {
+              paginated[date] = [];
+            }
+            paginated[date].push(record);
+          }
+          count++;
+        }
+      }
+      return paginated;
+    },
+    filteredAndPaginatedLostRecords() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       const grouped = this.groupRecords(this.filteredRecords);
@@ -1561,6 +1817,7 @@ export default {
         this.fetchRecentRecords(this.playerId),
         this.fetchPlayerPoints(this.playerId),
         this.fetchFavoriteMaps(this.playerId),
+        this.fetchLostRecords(this.playerId),
       ]);
       await this.fetchPlayerStats(this.playerId);
       await this.fetchSharedTimes(this.playerId);
@@ -2180,6 +2437,32 @@ export default {
         console.error("Error fetching recent records:", error);
       } finally {
         this.loading["Latest runs"] = false;
+      }
+    },
+    async fetchLostRecords(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/players/${playerId}/lost-records`
+        );
+        this.records.lostRecords = response.data.map((record) => ({
+          ...record,
+          date: record.change_date,
+          map_name: record.map_name || "Unknown Map",
+          class: record.record_type.split("_")[0],
+          duration: record.old_duration,
+          old_placement: record.old_placement,
+          new_placement: record.new_placement,
+          type: record.record_type.includes("course")
+            ? "course"
+            : record.record_type.includes("bonus")
+            ? "bonus"
+            : "map",
+          index: record.index,
+        }));
+      } catch (error) {
+        console.error("Error fetching lost records:", error);
+      } finally {
+        this.loading.lostRecords = false;
       }
     },
     async fetchPlayerStats(playerId) {
@@ -2871,7 +3154,7 @@ export default {
   align-items: center;
   border: none;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 6px 10px;
   border: 1px solid var(--color-border-soft);
   width: 100%;
   box-sizing: border-box;
@@ -3012,8 +3295,8 @@ export default {
   font-weight: bold;
 }
 .class-icon {
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
 }
 .tabs-header .btn-group {
   width: 100%;
@@ -3570,6 +3853,23 @@ export default {
   z-index: 1001;
   pointer-events: none;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.btn-tab {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-tab.active {
+  background: rgba(74, 111, 165, 0.8);
+  font-weight: bold;
+}
+
+.btn-tab:hover:not(.active) {
+  background: rgba(74, 111, 165, 0.5);
 }
 
 @media (max-width: 768px) {
