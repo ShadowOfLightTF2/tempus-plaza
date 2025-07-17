@@ -50,13 +50,13 @@
                   {{ player.name }}
                 </h1>
                 <p class="rank-name mb-2">
-                  <span style="color: var(--color-text-soft)">[</span>
+                  <span style="color: var(--color-text-soft)"></span>
                   <span
                     :class="getRankName(getHighestRank(), player.gender).color"
                   >
                     {{ getRankName(getHighestRank(), player.gender).title }}
                   </span>
-                  <span style="color: var(--color-text-soft)">]</span>
+                  <span style="color: var(--color-text-soft)"></span>
                 </p>
                 <p
                   class="country mb-3"
@@ -1605,6 +1605,7 @@ export default {
   },
   async mounted() {
     try {
+      fetch(`${API_BASE_URL}/players/${this.playerId}/update-player-last-seen`);
       this.currentUser = await this.fetchUser();
       await Promise.all([
         this.fetchPlayerData(this.playerId),

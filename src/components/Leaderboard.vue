@@ -174,7 +174,16 @@
                   >
                     {{ entry.name }}
                   </SmartLink>
-                  <td class="date-column">{{ formatDate(entry.date) }}</td>
+                  <td
+                    class="date-column"
+                    :title="
+                      new Date(entry.date * 1000)
+                        .toLocaleDateString('en-CA')
+                        .replace(/-/g, '/')
+                    "
+                  >
+                    {{ formatDate(entry.date) }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -284,7 +293,16 @@
                   >
                     {{ entry.name }}
                   </SmartLink>
-                  <td class="date-column">{{ formatDate(entry.date) }}</td>
+                  <td
+                    class="date-column"
+                    :title="
+                      new Date(entry.date * 1000)
+                        .toLocaleDateString('en-CA')
+                        .replace(/-/g, '/')
+                    "
+                  >
+                    {{ formatDate(entry.date) }}
+                  </td>
                 </tr>
               </tbody>
             </table>

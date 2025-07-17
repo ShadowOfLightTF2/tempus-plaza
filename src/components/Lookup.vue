@@ -339,6 +339,7 @@
                     <th></th>
                     <th>Time</th>
                     <th>Rank</th>
+                    <th>Points</th>
                     <th>Completion</th>
                     <th>Date</th>
                   </tr>
@@ -375,6 +376,7 @@
                     <td :class="getRankColorClass(record.placement)">
                       {{ record.rank }} {{ formatPlacement(record.placement) }}
                     </td>
+                    <td>{{ record.points }}</td>
                     <td>{{ record.completion_count }}</td>
                     <td class="text-small">
                       {{ formatDate(new Date(record.date * 1000)) }}
@@ -446,6 +448,8 @@ export default {
       { value: "oldest", label: "Oldest" },
       { value: "highestRank", label: "Highest Rank" },
       { value: "lowestRank", label: "Lowest Rank" },
+      { value: "pointsAscending", label: "Points Ascending" },
+      { value: "pointsDescending", label: "Points Descending" },
       { value: "highestPercentage", label: "Highest %" },
       { value: "lowestPercentage", label: "Lowest %" },
       { value: "shortestDuration", label: "Shortest Duration" },
@@ -536,6 +540,10 @@ export default {
           return a.rank - b.rank;
         } else if (this.sortByDate === "lowestRank") {
           return b.rank - a.rank;
+        } else if (this.sortByDate === "pointsAscending") {
+          return a.points - b.points;
+        } else if (this.sortByDate === "pointsDescending") {
+          return b.points - a.points;
         } else if (this.sortByDate === "highestPercentage") {
           return b.completion_count / b.rank - a.completion_count / a.rank;
         } else if (this.sortByDate === "lowestPercentage") {
