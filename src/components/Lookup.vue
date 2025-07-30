@@ -280,17 +280,37 @@
             </div>
           </div>
           <div class="filter-actions">
-            <button
-              type="button"
-              @click="clearAllFilters"
-              class="btn btn-secondary"
-            >
-              Clear filters
-            </button>
-            <span class="text-light"
-              >Displaying {{ filteredSortedItems.length }} of
-              {{ totalRecordsLength() }} records</span
-            >
+            <div class="filter-group">
+              <h6 class="filter-title text-light mb-2">Status</h6>
+              <div class="status-filter-container">
+                <label
+                  v-for="statusOption in ['completed', 'incomplete']"
+                  :key="statusOption"
+                  class="class-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    :value="statusOption"
+                    v-model="selectedStatus"
+                    @change="onFilterChange"
+                  />
+                  <span>{{ statusOption }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group clear-filter">
+              <button
+                type="button"
+                @click="clearAllFilters"
+                class="btn btn-secondary clear-filters-btn"
+              >
+                Clear filters
+              </button>
+              <span class="text-light"
+                >Displaying {{ filteredSortedItems.length }} of
+                {{ totalRecordsLength() }} records</span
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -339,9 +359,10 @@
                     <th></th>
                     <th>Time</th>
                     <th>Rank</th>
-                    <th>Points</th>
                     <th>Completion</th>
+                    <th>Points</th>
                     <th>Date</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -372,14 +393,32 @@
                     </td>
                     <td>T{{ record.tier }}</td>
                     <td>R{{ record.rating }}</td>
-                    <td>{{ formatDuration(record.duration) }}</td>
-                    <td :class="getRankColorClass(record.placement)">
-                      {{ record.rank }} {{ formatPlacement(record.placement) }}
+                    <td>
+                      {{
+                        record.duration !== null
+                          ? formatDuration(record.duration)
+                          : ""
+                      }}
                     </td>
-                    <td>{{ record.points }}</td>
+                    <td :class="getRankColorClass(record.placement)">
+                      {{ record.rank !== null ? record.rank : "" }}
+                      {{
+                        record.placement !== null
+                          ? formatPlacement(record.placement)
+                          : ""
+                      }}
+                    </td>
                     <td>{{ record.completion_count }}</td>
+                    <td>{{ record.points !== null ? record.points : "" }}</td>
                     <td class="text-small">
-                      {{ formatDate(new Date(record.date * 1000)) }}
+                      {{
+                        record.date !== null
+                          ? formatDate(new Date(record.date * 1000))
+                          : ""
+                      }}
+                    </td>
+                    <td class="text-center">
+                      {{ record.duration !== null ? "✓" : "X" }}
                     </td>
                   </tr>
                 </tbody>
@@ -424,6 +463,7 @@ export default {
     error: null,
     selectedClasses: [],
     selectedTypes: [],
+    selectedStatus: ["completed"],
     selectedSoldierTiers: [],
     selectedSoldierRatings: [],
     selectedDemomanTiers: [],
@@ -454,6 +494,8 @@ export default {
       { value: "lowestPercentage", label: "Lowest %" },
       { value: "shortestDuration", label: "Shortest Duration" },
       { value: "longestDuration", label: "Longest Duration" },
+      { value: "tierAscending", label: "Tier Ascending" },
+      { value: "tierDescending", label: "Tier Descending" },
     ],
     validPlacements: [],
     displayCount: 300,
@@ -486,6 +528,20 @@ export default {
           !this.selectedClasses.includes(record.class)
         ) {
           return false;
+        }
+
+        if (this.selectedStatus.length > 0) {
+          const isComplete = record.duration !== null;
+          const shouldShowComplete = this.selectedStatus.includes("completed");
+          const shouldShowIncomplete =
+            this.selectedStatus.includes("incomplete");
+
+          if (isComplete && !shouldShowComplete) {
+            return false;
+          }
+          if (!isComplete && !shouldShowIncomplete) {
+            return false;
+          }
         }
 
         if (record.class === "soldier") {
@@ -552,6 +608,10 @@ export default {
           return a.duration - b.duration;
         } else if (this.sortByDate === "longestDuration") {
           return b.duration - a.duration;
+        } else if (this.sortByDate === "tierAscending") {
+          return a.tier - b.tier;
+        } else if (this.sortByDate === "tierDescending") {
+          return b.tier - a.tier;
         }
         return 0;
       });
@@ -632,6 +692,9 @@ export default {
     }
   },
   methods: {
+    onFilterChange() {
+      // This method can be used to trigger any additional filter change logic
+    },
     formatPlacement(placement) {
       if (placement <= 10) {
         return "";
@@ -708,7 +771,7 @@ export default {
       this.debounceTimer = setTimeout(async () => {
         if (this.searchQuery.trim()) {
           try {
-            const response = await fetch(`${API_BASE_URL}/search`, {
+            const response = await fetch(`${API_BASE_URL}/search/players`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -761,27 +824,26 @@ export default {
       }
 
       try {
-        const urls = [
-          `${API_BASE_URL}/players/${playerId}/records`,
-          `${API_BASE_URL}/players/${playerId}/course-records`,
-          `${API_BASE_URL}/players/${playerId}/bonus-records`,
-        ];
-
-        const responses = await Promise.all(urls.map((url) => fetch(url)));
-        const data = await Promise.all(
-          responses.map((response) => {
-            if (!response.ok) throw new Error("Failed to fetch records");
-            return response.json();
-          })
+        const response = await fetch(
+          `${API_BASE_URL}/players/${playerId}/all-records`
         );
 
+        if (!response.ok) {
+          throw new Error("Failed to fetch records");
+        }
+
+        const allRecords = await response.json();
+
         this.cachedRecords = {
-          records: data[0],
-          courseRecords: data[1],
-          bonusRecords: data[2],
+          records: allRecords.filter((record) => record.type === "map"),
+          courseRecords: allRecords.filter(
+            (record) => record.type === "course"
+          ),
+          bonusRecords: allRecords.filter((record) => record.type === "bonus"),
+          allRecords: allRecords,
         };
 
-        this.records = this.cachedRecords.records;
+        this.records = allRecords;
       } catch (error) {
         this.error = "Error fetching records.";
         console.error("Error fetching records:", error);
@@ -792,6 +854,7 @@ export default {
     clearAllFilters() {
       this.selectedClasses = [];
       this.selectedTypes = [];
+      this.selectedStatus = ["completed"];
       this.selectedSoldierTiers = [];
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
@@ -908,6 +971,9 @@ export default {
   align-items: center;
   gap: 8px;
 }
+.clear-filter {
+  padding-left: 50px;
+}
 
 .filter-title {
   font-weight: bold;
@@ -918,7 +984,8 @@ export default {
 }
 
 .class-filter-container,
-.type-filter-container {
+.type-filter-container,
+.status-filter-container {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -965,6 +1032,10 @@ export default {
 .type-checkbox:hover input:not(:checked) + span {
   border-radius: 8px;
   background: rgba(74, 111, 165, 0.8);
+}
+
+.clear-filters-btn {
+  margin-right: 10px;
 }
 
 .search-results-dropdown {
@@ -1518,6 +1589,11 @@ export default {
 }
 
 @media (max-width: 767.98px) {
+  .clear-filter {
+    padding: none;
+    margin: none;
+    margin-top: 10px;
+  }
   .filter-section {
     padding: 15px;
     width: 100%;

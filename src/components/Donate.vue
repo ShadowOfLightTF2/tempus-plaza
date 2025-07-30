@@ -29,8 +29,10 @@
             Your support helps me pay for server uptime and upgrade the
             website's services. Donator perks will be added to the website in
             the future. (cosmetic changes only). Currently you will get this
-            nice border around your player page banner + ability to change the
-            colour of it
+            golden border around your player page banner + ability to change the
+            colour of it (with minimum donation of 3€). Please include one of
+            the following in your message so I can give you the donator tag:
+            name, id, steamid
           </p>
           <hr class="divider" />
 

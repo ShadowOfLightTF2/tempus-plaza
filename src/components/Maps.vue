@@ -117,6 +117,38 @@
               </div>
             </div>
 
+            <div class="column-toggles-section">
+              <div class="column-toggles">
+                <button
+                  @click="toggleColumns('soldier')"
+                  class="filter-button"
+                  :class="{ active: !showSoldierColumns }"
+                >
+                  <span v-if="showSoldierColumns">Hide</span>
+                  <span v-else>Show</span>
+                  Soldier
+                </button>
+                <button
+                  @click="toggleColumns('demoman')"
+                  class="filter-button"
+                  :class="{ active: !showDemomanColumns }"
+                >
+                  <span v-if="showDemomanColumns">Hide</span>
+                  <span v-else>Show</span>
+                  Demoman
+                </button>
+                <button
+                  @click="toggleColumns('completions')"
+                  class="filter-button"
+                  :class="{ active: !showCompletionColumns }"
+                >
+                  <span v-if="showCompletionColumns">Hide</span>
+                  <span v-else>Show</span>
+                  Completions
+                </button>
+              </div>
+            </div>
+
             <div class="filter-actions">
               <button @click="clearAllFilters" class="btn btn-secondary">
                 Clear filters
@@ -224,29 +256,77 @@
                       getSortArrowSymbol("name")
                     }}</span>
                   </th>
-                  <th @click="sortBy('soldier_tier')" class="fixed-width">
+                  <th
+                    v-if="showSoldierColumns"
+                    @click="sortBy('soldier_tier')"
+                    class="fixed-width"
+                  >
                     [S] tier
                     <span v-if="sortField === 'soldier_tier'">{{
                       getSortArrowSymbol("soldier_tier")
                     }}</span>
                   </th>
-                  <th @click="sortBy('soldier_rating')" class="fixed-width">
+                  <th
+                    v-if="showSoldierColumns"
+                    @click="sortBy('soldier_rating')"
+                    class="fixed-width"
+                  >
                     [S] rating
                     <span v-if="sortField === 'soldier_rating'">{{
                       getSortArrowSymbol("soldier_rating")
                     }}</span>
                   </th>
-                  <th class="divider"></th>
-                  <th @click="sortBy('demoman_tier')" class="fixed-width">
+                  <th
+                    v-if="showSoldierColumns && showDemomanColumns"
+                    class="divider"
+                  ></th>
+                  <th
+                    v-if="showDemomanColumns"
+                    @click="sortBy('demoman_tier')"
+                    class="fixed-width"
+                  >
                     [D] tier
                     <span v-if="sortField === 'demoman_tier'">{{
                       getSortArrowSymbol("demoman_tier")
                     }}</span>
                   </th>
-                  <th @click="sortBy('demoman_rating')" class="fixed-width">
+                  <th
+                    v-if="showDemomanColumns"
+                    @click="sortBy('demoman_rating')"
+                    class="fixed-width"
+                  >
                     [D] rating
                     <span v-if="sortField === 'demoman_rating'">{{
                       getSortArrowSymbol("demoman_rating")
+                    }}</span>
+                  </th>
+                  <th
+                    v-if="
+                      (showSoldierColumns || showDemomanColumns) &&
+                      showCompletionColumns
+                    "
+                    class="divider"
+                  ></th>
+                  <th
+                    v-if="showSoldierColumns && showCompletionColumns"
+                    @click="sortBy('soldier_completion_count')"
+                    class="fixed-width"
+                    title="Soldier Completions"
+                  >
+                    [S] compl
+                    <span v-if="sortField === 'soldier_completion_count'">{{
+                      getSortArrowSymbol("soldier_completion_count")
+                    }}</span>
+                  </th>
+                  <th
+                    v-if="showDemomanColumns && showCompletionColumns"
+                    @click="sortBy('demoman_completion_count')"
+                    class="fixed-width"
+                    title="Demoman Completions"
+                  >
+                    [D] compl
+                    <span v-if="sortField === 'demoman_completion_count'">{{
+                      getSortArrowSymbol("demoman_completion_count")
                     }}</span>
                   </th>
                 </tr>
@@ -280,29 +360,55 @@
                     }}
                   </SmartLink>
                   <td
+                    v-if="showSoldierColumns"
                     class="align-middle text-center"
                     :class="`tier-color tier-${item.soldier_tier}`"
                   >
                     T{{ item.soldier_tier }}
                   </td>
                   <td
+                    v-if="showSoldierColumns"
                     class="align-middle text-center"
                     :class="`rating-color rating-${item.soldier_rating}`"
                   >
                     R{{ item.soldier_rating }}
                   </td>
-                  <td class="divider"></td>
                   <td
+                    v-if="showSoldierColumns && showDemomanColumns"
+                    class="divider"
+                  ></td>
+                  <td
+                    v-if="showDemomanColumns"
                     class="align-middle text-center"
                     :class="`tier-color tier-${item.demoman_tier}`"
                   >
                     T{{ item.demoman_tier }}
                   </td>
                   <td
+                    v-if="showDemomanColumns"
                     class="align-middle text-center"
                     :class="`rating-color rating-${item.demoman_rating}`"
                   >
                     R{{ item.demoman_rating }}
+                  </td>
+                  <td
+                    v-if="
+                      (showSoldierColumns || showDemomanColumns) &&
+                      showCompletionColumns
+                    "
+                    class="divider"
+                  ></td>
+                  <td
+                    v-if="showSoldierColumns && showCompletionColumns"
+                    class="align-middle text-center"
+                  >
+                    {{ item.soldier_completion_count }}
+                  </td>
+                  <td
+                    v-if="showDemomanColumns && showCompletionColumns"
+                    class="align-middle text-center"
+                  >
+                    {{ item.demoman_completion_count }}
                   </td>
                 </tr>
               </tbody>
@@ -350,6 +456,9 @@ export default {
       eliminatingRowId: null,
       shouldContinuePicker: true,
       searchQuery: "",
+      showSoldierColumns: true,
+      showDemomanColumns: true,
+      showCompletionColumns: false,
     };
   },
   mounted() {
@@ -445,6 +554,14 @@ export default {
           if (primaryComparison !== 0) return primaryComparison;
         }
 
+        if (
+          ["soldier_completion_count", "demoman_completion_count"].includes(
+            this.sortField
+          )
+        ) {
+          return (fieldB - fieldA) * this.sortDirection;
+        }
+
         if (fieldA < fieldB) return -1 * this.sortDirection;
         if (fieldA > fieldB) return 1 * this.sortDirection;
 
@@ -499,6 +616,15 @@ export default {
   },
 
   methods: {
+    toggleColumns(type) {
+      if (type === "soldier") {
+        this.showSoldierColumns = !this.showSoldierColumns;
+      } else if (type === "demoman") {
+        this.showDemomanColumns = !this.showDemomanColumns;
+      } else if (type === "completions") {
+        this.showCompletionColumns = !this.showCompletionColumns;
+      }
+    },
     getMapRoute(item) {
       const itemId = this.currentView === "maps" ? item.id : item.map_id;
       return { name: "MapPage", params: { mapId: itemId } };
@@ -510,8 +636,6 @@ export default {
 
       this.sortField = "soldier_tier";
       this.sortDirection = 1;
-
-      this.clearAllFilters();
       this.resetPicker();
 
       await this.fetchData();
@@ -588,6 +712,9 @@ export default {
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
+      this.showSoldierColumns = true;
+      this.showDemomanColumns = true;
+      this.showCompletionColumns = false;
       this.resetPicker();
     },
 
@@ -609,12 +736,14 @@ export default {
 
       const totalItems = this.filteredAndSortedItems.length;
       const maxEliminationTime = 5000;
-      const eliminationInterval = maxEliminationTime / (totalItems - 1);
+      const targetSteps = Math.min(30, totalItems - 1);
+      const stepInterval = maxEliminationTime / targetSteps;
+      const itemsPerStep = Math.ceil((totalItems - 1) / targetSteps);
 
-      await this.eliminateRandomly(eliminationInterval);
+      await this.eliminateRandomly(stepInterval, itemsPerStep);
     },
 
-    async eliminateRandomly(eliminationInterval) {
+    async eliminateRandomly(stepInterval, itemsPerStep) {
       if (!this.shouldContinuePicker) return;
 
       const availableRows = this.filteredAndSortedItems
@@ -636,23 +765,22 @@ export default {
         return;
       }
 
-      const randomIndex = Math.floor(Math.random() * availableRows.length);
-      const rowToEliminate = availableRows[randomIndex];
-
-      this.eliminatingRowId = rowToEliminate.id;
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, eliminationInterval / 2)
+      const remainingToEliminate = availableRows.length - 1;
+      const itemsToEliminateThisStep = Math.min(
+        itemsPerStep,
+        remainingToEliminate
       );
 
-      this.eliminatedRows.add(rowToEliminate.id);
-      this.eliminatingRowId = null;
+      const shuffledRows = [...availableRows].sort(() => Math.random() - 0.5);
+      const rowsToEliminate = shuffledRows.slice(0, itemsToEliminateThisStep);
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, eliminationInterval / 2)
-      );
+      rowsToEliminate.forEach((row) => {
+        this.eliminatedRows.add(row.id);
+      });
 
-      await this.eliminateRandomly(eliminationInterval);
+      await new Promise((resolve) => setTimeout(resolve, stepInterval));
+
+      await this.eliminateRandomly(stepInterval, itemsPerStep);
     },
 
     resetPicker() {
@@ -949,15 +1077,48 @@ export default {
   box-shadow: 0 0 0 1px var(--color-border, #444);
 }
 
+.column-toggles-section {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.column-toggles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .filter-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 15px;
+  gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 35px;
-  margin-bottom: 0;
-  padding-bottom: 0;
+  justify-content: center;
+}
+
+.filter-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(68, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: capitalize;
+  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.35);
+}
+
+.filter-button.active {
+  background: rgba(74, 111, 165, 0.8);
+  border-color: var(--color-border, #444);
+}
+
+.filter-button:hover:not(.active) {
+  background: rgba(74, 111, 165, 0.8);
 }
 
 .text-light {
@@ -1057,8 +1218,7 @@ export default {
 }
 
 .fixed-width {
-  max-width: 120px;
-  min-width: 100px;
+  width: 120px;
 }
 
 .tier-color.tier-0 {

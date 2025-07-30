@@ -1,5 +1,67 @@
 <template>
   <div id="app" @click="closeDropdown">
+    <div
+      v-if="showLoginPopup"
+      class="login-popup-overlay"
+      @click="closeLoginPopup"
+    >
+      <div class="login-popup" @click.stop>
+        <div class="login-popup-content">
+          <button
+            class="popup-close"
+            @click="closeLoginPopup"
+            aria-label="Close"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="popup-header">
+            <h3>Welcome to Tempus Plaza!</h3>
+            <p>Login for enhanced features and personalized experience</p>
+            <small class="popup-disclaimer"
+              >This popup will not appear again</small
+            >
+          </div>
+
+          <div class="popup-features">
+            <div class="feature-item">
+              <i class="bi bi-person-circle"></i>
+              <span>Easy navigation to your profile</span>
+            </div>
+            <div class="feature-item">
+              <i class="bi bi-person-fill-gear"></i>
+              <span>Personalized player profiles</span>
+            </div>
+            <div class="feature-item">
+              <i class="bi bi-graph-up"></i>
+              <span>See your own run on map leaderboards</span>
+            </div>
+            <div class="feature-item">
+              <i class="bi bi-trophy"></i>
+              <span>Automatically loads your player lookup</span>
+            </div>
+          </div>
+          <div class="popup-actions">
+            <button class="btn login-popup-btn" @click="loginWithSteam">
+              <i class="bi bi-steam"></i> Login with Steam
+            </button>
+            <button class="btn continue-btn" @click="closeLoginPopup">
+              Continue without login
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Update Banner -->
     <div v-if="isUpdating" class="update-banner">
       <div class="update-banner-content">
@@ -41,8 +103,13 @@
           </svg>
         </button>
       </div>
+      <div class="progress-bar-container">
+        <div
+          class="progress-bar"
+          :style="{ width: updatingPercentage + '%' }"
+        ></div>
+      </div>
     </div>
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-custom">
       <div class="container-fluid">
         <!-- Mobile navbar toggler -->
@@ -151,47 +218,60 @@
                   class="search-results-dropdown"
                   v-if="
                     searchQuery.trim() &&
-                    (showLoading ||
-                      (searchResults &&
-                        (searchResults.maps.length ||
-                          searchResults.players.length)))
+                    (loadingMaps || loadingPlayers || searchResults)
                   "
                 >
-                  <div v-if="showLoading" class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <span>Searching...</span>
-                  </div>
-                  <div v-else>
-                    <div v-if="searchResults.maps.length">
-                      <h6>Maps</h6>
-                      <ul>
-                        <SmartLink
-                          v-for="map in searchResults.maps"
-                          :key="map.id"
-                          :to="{ name: 'MapPage', params: { mapId: map.id } }"
-                          tag="li"
-                          class="search-result-item"
-                        >
-                          {{ map.name || `Map ID: ${map.id}` }}
-                        </SmartLink>
-                      </ul>
+                  <div class="search-section">
+                    <h6>Maps</h6>
+                    <div v-if="loadingMaps" class="loading-container">
+                      <div class="loading-spinner"></div>
+                      <span>Loading maps...</span>
                     </div>
-                    <div v-if="searchResults.players.length">
-                      <h6>Players</h6>
-                      <ul>
-                        <SmartLink
-                          v-for="player in searchResults.players"
-                          :key="player.id"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: player.id },
-                          }"
-                          tag="li"
-                          class="search-result-item"
-                        >
-                          {{ player.name || `Player ID: ${player.id}` }}
-                        </SmartLink>
-                      </ul>
+                    <ul v-else-if="searchResults && searchResults.maps.length">
+                      <SmartLink
+                        v-for="map in searchResults.maps"
+                        :key="map.id"
+                        :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                        tag="li"
+                        class="search-result-item"
+                      >
+                        {{ map.name || `Map ID: ${map.id}` }}
+                      </SmartLink>
+                    </ul>
+                    <div
+                      v-else-if="!loadingMaps && searchResults"
+                      class="no-results"
+                    >
+                      No maps found
+                    </div>
+                  </div>
+                  <div class="search-section">
+                    <h6>Players</h6>
+                    <div v-if="loadingPlayers" class="loading-container">
+                      <div class="loading-spinner"></div>
+                      <span>Loading players...</span>
+                    </div>
+                    <ul
+                      v-else-if="searchResults && searchResults.players.length"
+                    >
+                      <SmartLink
+                        v-for="player in searchResults.players"
+                        :key="player.id"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.id },
+                        }"
+                        tag="li"
+                        class="search-result-item"
+                      >
+                        {{ player.name || `Player ID: ${player.id}` }}
+                      </SmartLink>
+                    </ul>
+                    <div
+                      v-else-if="!loadingPlayers && searchResults"
+                      class="no-results"
+                    >
+                      No players found
                     </div>
                   </div>
                 </div>
@@ -422,11 +502,29 @@
     <footer class="footer">
       <div class="container-fluid">
         <div class="footer-content">
-          <a href="https://tempus2.xyz" class="footer-link">
+          <a
+            href="https://tempus2.xyz"
+            class="footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <i class="bi bi-globe"></i> Tempus
           </a>
-          <a href="https://discord.gg/ed9s9H22" class="footer-link">
+          <a
+            href="https://discord.gg/U48JYd9h99"
+            class="footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <i class="bi bi-discord"></i> Discord
+          </a>
+          <a
+            href="https://docs.google.com/spreadsheets/d/1kL76rEPL2AtMSu5RWI2VtW5ZJ2QIQx61BNowdfN-09M/edit?usp=sharing"
+            class="footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="bi bi-journals"></i> Encyclopedia
           </a>
         </div>
       </div>
@@ -437,6 +535,7 @@
 <script>
 import DOMPurify from "dompurify";
 import debounce from "debounce";
+import { provide, reactive } from "vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -444,15 +543,19 @@ export default {
   name: "App",
   data() {
     return {
+      showLoginPopup: false,
+      hasVisitedBefore: false,
       searchQuery: "",
-      searchResults: null,
-      showLoading: false,
+      searchResults: { maps: [], players: [] },
+      loadingMaps: false,
+      loadingPlayers: false,
       debounceTimer: null,
       rankPreference: "overall",
       gender: "male",
       donator: 0,
       currentUser: null,
       isUpdating: false,
+      updatingPercentage: 0,
       updateDismissed: false,
       showTooltip: false,
       tooltipTimeout: null,
@@ -469,6 +572,11 @@ export default {
         { value: "indigo", color: "var(--color-banner-indigo-1)" },
         { value: "pink", color: "var(--color-banner-pink-1)" },
       ],
+      profileUpdateTracker: reactive({
+        rank: "overall",
+        color: "blue",
+        updateCount: 0,
+      }),
     };
   },
   computed: {
@@ -479,7 +587,21 @@ export default {
       return this.$route.name === "Home";
     },
   },
+  provide() {
+    return {
+      profileUpdateTracker: this.profileUpdateTracker,
+    };
+  },
   methods: {
+    closeLoginPopup() {
+      this.showLoginPopup = false;
+      localStorage.setItem("tempus_popup_shown", "true");
+    },
+
+    checkFirstVisit() {
+      const hasSeenPopup = localStorage.getItem("tempus_popup_shown");
+      return !hasSeenPopup;
+    },
     isNavItemActive(routeName) {
       return this.$route.name === routeName;
     },
@@ -488,6 +610,7 @@ export default {
         const response = await fetch(`${API_BASE_URL}/is-updating`);
         const data = await response.json();
         this.isUpdating = data.isUpdating && !this.updateDismissed;
+        this.updatingPercentage = data.progress;
       } catch (error) {
         console.error("Error fetching update status:", error);
       }
@@ -498,7 +621,8 @@ export default {
     },
     closeDropdown() {
       this.searchResults = null;
-      this.showLoading = false;
+      this.loadingMaps = false;
+      this.loadingPlayers = false;
     },
     loginWithSteam() {
       window.location.href = `${API_BASE_URL}/auth/steam`;
@@ -535,7 +659,7 @@ export default {
         return;
       }
       this.colorPreference = colorValue;
-      this.updateUserPreferences();
+      await this.updateUserPreferences();
     },
     async checkDonatorStatus() {
       const user = await this.fetchUserData();
@@ -615,6 +739,10 @@ export default {
           throw new Error(`HTTP error! status: ${response.status}`);
 
         console.log("User preferences updated successfully");
+
+        this.profileUpdateTracker.rank = this.rankPreference;
+        this.profileUpdateTracker.color = this.colorPreference;
+        this.profileUpdateTracker.updateCount++;
       } catch (error) {
         console.error("Failed to update user preferences:", error);
       }
@@ -623,56 +751,83 @@ export default {
       const playerId = this.currentUser.playerid;
       return { name: "PlayerPage", params: { playerId } };
     },
+    async fetchMaps(query) {
+      const response = await fetch(`${API_BASE_URL}/search/maps`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch maps");
+      return await response.json();
+    },
+
+    async fetchPlayers(query) {
+      const response = await fetch(`${API_BASE_URL}/search/players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch players");
+      return await response.json();
+    },
+
     async fetchSearchResults() {
-      if (!this.searchQuery.trim() || this.searchQuery.trim().length < 2) {
-        this.searchResults = null;
-        this.showLoading = false;
-        return;
-      }
+      const query = this.searchQuery.trim();
 
-      this.showLoading = true;
+      this.searchResults = { maps: [], players: [] };
+      this.loadingMaps = true;
+      this.loadingPlayers = true;
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/search`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: this.searchQuery.trim() }),
+      this.fetchMaps(query)
+        .then((results) => {
+          this.searchResults.maps = (results.maps || []).slice(0, 5);
+        })
+        .catch((error) => {
+          console.error("Error fetching maps:", error);
+          this.searchResults.maps = [];
+        })
+        .finally(() => {
+          this.loadingMaps = false;
         });
 
-        if (!response.ok) throw new Error("Failed to fetch search results");
-        const data = await response.json();
-
-        if (data.players && data.players.length > 20)
-          data.players = data.players.slice(0, 20);
-        if (data.maps && data.maps.length > 5)
-          data.maps = data.maps.slice(0, 5);
-
-        this.searchResults = data;
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-        this.searchResults = null;
-      } finally {
-        this.showLoading = false;
-      }
+      this.fetchPlayers(query)
+        .then((results) => {
+          this.searchResults.players = (results.players || []).slice(0, 20);
+        })
+        .catch((error) => {
+          console.error("Error fetching players:", error);
+          this.searchResults.players = [];
+        })
+        .finally(() => {
+          this.loadingPlayers = false;
+        });
     },
+
     debouncedSearch() {
       clearTimeout(this.debounceTimer);
 
       if (!this.searchQuery.trim()) {
         this.searchResults = null;
-        this.showLoading = false;
+        this.loadingMaps = false;
+        this.loadingPlayers = false;
         return;
       }
 
-      this.showLoading = true;
+      this.loadingMaps = true;
+      this.loadingPlayers = true;
+
       this.debounceTimer = setTimeout(() => {
         this.fetchSearchResults();
       }, 500);
     },
     sanitize(text) {
       return DOMPurify.sanitize(text);
+    },
+    async updateRankPreference(newRank) {
+      this.rankPreference = newRank;
+      await this.updateUserPreferences();
     },
   },
   created() {
@@ -689,8 +844,6 @@ export default {
     },
   },
   async mounted() {
-    console.log("Component mounted, checking auth...");
-
     try {
       //console.log("Document cookies:", document.cookie);
 
@@ -707,6 +860,10 @@ export default {
           this.gender = userData.gender || "male";
           this.donator = userData.donator || 0;
           this.colorPreference = userData.color || "blue";
+
+          // Initialize the reactive tracker
+          this.profileUpdateTracker.rank = this.rankPreference;
+          this.profileUpdateTracker.color = this.colorPreference;
         }
       } else {
         console.log("User is not authenticated");
@@ -714,6 +871,11 @@ export default {
     } catch (error) {
       console.error("Error during authentication check:", error);
       this.currentUser = null;
+    }
+    if (!this.currentUser && this.checkFirstVisit()) {
+      setTimeout(() => {
+        this.showLoginPopup = true;
+      }, 1000);
     }
   },
   beforeDestroy() {
@@ -912,6 +1074,150 @@ html {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.login-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  backdrop-filter: blur(4px);
+}
+
+.login-popup {
+  background: rgba(74, 111, 165, 0.8);
+  border-radius: 12px;
+  max-width: 450px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
+}
+
+.login-popup-content {
+  padding: 2rem;
+  position: relative;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.popup-close:hover {
+  background: var(--color-dark);
+  color: var(--color-text);
+}
+
+.popup-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.popup-header h3 {
+  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.popup-header p {
+  color: var(--color-text);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.popup-disclaimer {
+  color: var(--color-text-soft);
+  font-size: 0.85rem;
+  opacity: 0.8;
+  display: block;
+  margin: 0;
+}
+
+.popup-features {
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.feature-item i {
+  margin-right: 0.75rem;
+  color: var(--color-primary-dark);
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-popup-btn {
+  background: #1b2838;
+  color: var(--color-text) !important;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-popup-btn:hover {
+  background: #2a3f5f;
+  transform: translateY(-1px);
+}
+
+.continue-btn {
+  background: transparent;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.continue-btn:hover {
+  background: var(--color-dark) !important;
+  border-color: var(--color-border) !important;
+}
+
+@media (max-width: 576px) {
+  .login-popup-content {
+    padding: 1.5rem;
+  }
+
+  .popup-header h3 {
+    font-size: 1.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar-collapse {
     background: var(--color-dark);
@@ -1018,6 +1324,20 @@ html {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.progress-bar-container {
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: white;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
 @keyframes slideDown {
   from {
     transform: translateY(-100%);
@@ -1074,6 +1394,7 @@ html {
 .dropdown-menu {
   background: var(--color-box);
   border: 1px solid var(--color-border);
+  min-width: 174px;
 }
 
 .dropdown-item {
@@ -1322,6 +1643,13 @@ html {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.no-results {
+  padding: 8px 12px;
+  color: #999;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 .navbar-toggler {

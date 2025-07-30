@@ -35,54 +35,159 @@
             class="search-results-dropdown"
             v-if="
               searchQuery.trim() &&
-              (showLoading ||
-                (searchResults &&
-                  (searchResults.maps.length || searchResults.players.length)))
+              (loadingMaps || loadingPlayers || searchResults)
             "
           >
-            <div v-if="showLoading" class="loading-container">
-              <div class="loading-spinner"></div>
-              <span>Searching...</span>
-            </div>
-            <div v-else>
-              <div v-if="searchResults.maps.length">
-                <h6>Maps</h6>
-                <ul>
-                  <SmartLink
-                    v-for="map in searchResults.maps"
-                    :key="map.id"
-                    :to="{ name: 'MapPage', params: { mapId: map.id } }"
-                    tag="li"
-                    class="search-result-item"
-                  >
-                    {{ map.name || `Map ID: ${map.id}` }}
-                  </SmartLink>
-                </ul>
+            <!-- Maps Section -->
+            <div class="search-section">
+              <h6>Maps</h6>
+              <div v-if="loadingMaps" class="loading-container">
+                <div class="loading-spinner"></div>
+                <span>Loading maps...</span>
               </div>
-              <div v-if="searchResults.players.length">
-                <h6>Players</h6>
-                <ul>
-                  <SmartLink
-                    v-for="player in searchResults.players"
-                    :key="player.id"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: player.id },
-                    }"
-                    tag="li"
-                    class="search-result-item"
-                  >
-                    {{ player.name || `Player ID: ${player.id}` }}
-                  </SmartLink>
-                </ul>
+              <ul v-else-if="searchResults && searchResults.maps.length">
+                <SmartLink
+                  v-for="map in searchResults.maps"
+                  :key="map.id"
+                  :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                  tag="li"
+                  class="search-result-item"
+                >
+                  {{ map.name || `Map ID: ${map.id}` }}
+                </SmartLink>
+              </ul>
+              <div v-else-if="!loadingMaps && searchResults" class="no-results">
+                No maps found
+              </div>
+            </div>
+
+            <!-- Players Section -->
+            <div class="search-section">
+              <h6>Players</h6>
+              <div v-if="loadingPlayers" class="loading-container">
+                <div class="loading-spinner"></div>
+                <span>Loading players...</span>
+              </div>
+              <ul v-else-if="searchResults && searchResults.players.length">
+                <SmartLink
+                  v-for="player in searchResults.players"
+                  :key="player.id"
+                  :to="{
+                    name: 'PlayerPage',
+                    params: { playerId: player.id },
+                  }"
+                  tag="li"
+                  class="search-result-item"
+                >
+                  {{ player.name || `Player ID: ${player.id}` }}
+                </SmartLink>
+              </ul>
+              <div
+                v-else-if="!loadingPlayers && searchResults"
+                class="no-results"
+              >
+                No players found
               </div>
             </div>
           </div>
         </div>
         <hr class="divider" style="width: 100%; margin-top: 100px" />
+
+        <!-- Today's Top Players Section -->
+        <div class="section">
+          <div class="container">
+            <h2 class="section-title">Most points gained</h2>
+            <h5 class="section-title-subtitle">(past 3 days)</h5>
+            <div class="top-players-grid">
+              <!-- Soldier Top Players -->
+              <div class="class-section">
+                <h5 class="section-subtitle">Soldier</h5>
+                <div class="players-list">
+                  <SmartLink
+                    v-for="(player, index) in topSoldiers"
+                    :key="player.id"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: player.player_id },
+                    }"
+                    class="player-card"
+                  >
+                    <div class="player-rank">#{{ index + 1 }}</div>
+                    <img
+                      :src="player.steam_avatar"
+                      alt="Avatar"
+                      class="player-avatar"
+                    />
+                    <div class="player-info">
+                      <div class="player-name">{{ player.player_name }}</div>
+                      <div class="country">
+                        <img
+                          :src="getFlagImageUrl(player.country_code)"
+                          alt="flag"
+                          class="flag-icon"
+                          @error="handleImageError"
+                        />
+                        {{ player.country }}
+                      </div>
+                      <div class="points-gained">
+                        <span class="points-value"
+                          >+{{ player.points_gained }}</span
+                        >
+                        <span class="points-label">points gained</span>
+                      </div>
+                    </div>
+                  </SmartLink>
+                </div>
+              </div>
+              <!-- Demoman Top Players -->
+              <div class="class-section">
+                <h5 class="section-subtitle">Demoman</h5>
+                <div class="players-list">
+                  <SmartLink
+                    v-for="(player, index) in topDemomen"
+                    :key="player.id"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: player.player_id },
+                    }"
+                    class="player-card"
+                  >
+                    <div class="player-rank">#{{ index + 1 }}</div>
+                    <img
+                      :src="player.steam_avatar"
+                      alt="Avatar"
+                      class="player-avatar"
+                    />
+                    <div class="player-info">
+                      <div class="player-name">{{ player.player_name }}</div>
+                      <div class="country">
+                        <img
+                          :src="getFlagImageUrl(player.country_code)"
+                          alt="flag"
+                          class="flag-icon"
+                          @error="handleImageError"
+                        />
+                        {{ player.country }}
+                      </div>
+                      <div class="points-gained">
+                        <span class="points-value"
+                          >+{{ player.points_gained }}</span
+                        >
+                        <span class="points-label">points gained</span>
+                      </div>
+                    </div>
+                  </SmartLink>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
             <h2 class="section-title">Most popular maps</h2>
+            <h5 class="section-title-subtitle">(past 3 days)</h5>
             <div class="grid">
               <SmartLink
                 class="card"
@@ -211,7 +316,9 @@
         <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
-            <h2 class="section-title">TF2RJweekly uploads</h2>
+            <h2 class="section-title" style="margin-bottom: 50px">
+              TF2RJweekly uploads
+            </h2>
             <div class="grid">
               <div
                 class="video-card youtube-card"
@@ -253,17 +360,47 @@ export default {
     return {
       searchQuery: "",
       searchResults: null,
-      showLoading: false,
+      loadingMaps: false,
+      loadingPlayers: false,
       debounceTimer: null,
       popularSoldierMaps: [],
       popularDemomanMaps: [],
       tf2rjweeklyVideos: [],
+      topSoldiers: [],
+      topDemomen: [],
     };
   },
   methods: {
+    getFlagImageUrl(countryCode) {
+      const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
+        ? countryCode.toLowerCase()
+        : "unknown";
+      return `https://flagcdn.com/24x18/${validCode}.png`;
+    },
     closeDropdown() {
       this.searchResults = null;
-      this.showLoading = false;
+      this.loadingMaps = false;
+      this.loadingPlayers = false;
+    },
+    async fetchTopPlayers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/players/get-top-gainers`);
+        if (!response.ok) throw new Error("Failed to fetch top players");
+        const data = await response.json();
+
+        // Separate soldiers and demomen, take top 3 of each
+        this.topSoldiers = data
+          .filter((player) => player.class_type === "soldier")
+          .sort((a, b) => b.points_gained - a.points_gained)
+          .slice(0, 3);
+
+        this.topDemomen = data
+          .filter((player) => player.class_type === "demoman")
+          .sort((a, b) => b.points_gained - a.points_gained)
+          .slice(0, 3);
+      } catch (error) {
+        console.error("Error fetching top players:", error);
+      }
     },
     async fetchPopularMaps() {
       try {
@@ -300,50 +437,73 @@ export default {
         window.open(`https://www.youtube.com/watch?v=${youtubeId}`, "_blank");
       }
     },
+    async fetchMaps(query) {
+      const response = await fetch(`${API_BASE_URL}/search/maps`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch maps");
+      return await response.json();
+    },
+
+    async fetchPlayers(query) {
+      const response = await fetch(`${API_BASE_URL}/search/players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch players");
+      return await response.json();
+    },
+
     async fetchSearchResults() {
-      if (!this.searchQuery.trim() || this.searchQuery.trim().length < 2) {
-        this.searchResults = null;
-        this.showLoading = false;
-        return;
-      }
+      const query = this.searchQuery.trim();
 
-      this.showLoading = true;
+      this.searchResults = { maps: [], players: [] };
+      this.loadingMaps = true;
+      this.loadingPlayers = true;
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/search`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: this.searchQuery.trim() }),
+      this.fetchMaps(query)
+        .then((results) => {
+          this.searchResults.maps = (results.maps || []).slice(0, 5);
+        })
+        .catch((error) => {
+          console.error("Error fetching maps:", error);
+          this.searchResults.maps = [];
+        })
+        .finally(() => {
+          this.loadingMaps = false;
         });
 
-        if (!response.ok) throw new Error("Failed to fetch search results");
-        const data = await response.json();
-
-        if (data.players && data.players.length > 20)
-          data.players = data.players.slice(0, 20);
-        if (data.maps && data.maps.length > 5)
-          data.maps = data.maps.slice(0, 5);
-
-        this.searchResults = data;
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-        this.searchResults = null;
-      } finally {
-        this.showLoading = false;
-      }
+      this.fetchPlayers(query)
+        .then((results) => {
+          this.searchResults.players = (results.players || []).slice(0, 20);
+        })
+        .catch((error) => {
+          console.error("Error fetching players:", error);
+          this.searchResults.players = [];
+        })
+        .finally(() => {
+          this.loadingPlayers = false;
+        });
     },
+
     debouncedSearch() {
       clearTimeout(this.debounceTimer);
 
       if (!this.searchQuery.trim()) {
         this.searchResults = null;
-        this.showLoading = false;
+        this.loadingMaps = false;
+        this.loadingPlayers = false;
         return;
       }
 
-      this.showLoading = true;
+      this.loadingMaps = true;
+      this.loadingPlayers = true;
+
       this.debounceTimer = setTimeout(() => {
         this.fetchSearchResults();
       }, 500);
@@ -354,6 +514,7 @@ export default {
   },
   created() {
     this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
+    this.fetchTopPlayers();
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
   },
@@ -549,6 +710,13 @@ export default {
   }
 }
 
+.no-results {
+  padding: 8px 12px;
+  color: #999;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 .divider {
   border: none;
   height: 2px;
@@ -563,18 +731,31 @@ export default {
 }
 
 .section {
-  padding: 50px 0;
+  padding: 25px 0;
 }
 
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 50px;
   background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.section-title-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 35px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 10;
 }
 
 .section-subtitle {
@@ -582,13 +763,176 @@ export default {
   font-weight: 700;
   text-align: center;
   color: #ffffff;
-  margin-bottom: 50px;
   background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
   z-index: 10;
+}
+/* Top Players Styles */
+.top-players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.class-section {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-subtitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.player-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+  cursor: pointer;
+}
+
+.player-card:nth-child(1) {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.15) 0%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+}
+
+.player-card:nth-child(2) {
+  background: linear-gradient(
+    135deg,
+    rgba(192, 192, 192, 0.15) 0%,
+    rgba(192, 192, 192, 0.05) 100%
+  );
+}
+
+.player-card:nth-child(3) {
+  background: linear-gradient(
+    135deg,
+    rgba(205, 127, 50, 0.15) 0%,
+    rgba(205, 127, 50, 0.05) 100%
+  );
+}
+
+.player-rank {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-right: 15px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.player-card:nth-child(1) .player-rank {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.player-card:nth-child(2) .player-rank {
+  color: #c0c0c0;
+  text-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+}
+
+.player-card:nth-child(3) .player-rank {
+  color: #cd7f32;
+  text-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.player-avatar {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  margin-right: 25px;
+  border: 2px solid var(--color-primary);
+}
+
+.player-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 5px;
+  align-self: flex-start;
+}
+
+.country {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: #d5d5d5;
+  margin-bottom: 10px;
+  align-self: flex-start;
+}
+
+.flag-icon {
+  margin-right: 8px;
+  width: 20px;
+  height: auto;
+}
+
+.points-gained {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+}
+
+.points-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.points-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .grid {
@@ -803,6 +1147,7 @@ export default {
   .section-title {
     font-size: 2rem;
   }
+
   .search-results-dropdown {
     min-width: 150px;
     max-width: 300px;
@@ -822,6 +1167,38 @@ export default {
 
   .completion-count {
     font-size: 0.7rem;
+  }
+
+  /* Mobile styles for top players */
+  .top-players-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .class-section {
+    padding: 20px;
+  }
+
+  .class-title {
+    font-size: 1.5rem;
+  }
+
+  .player-card {
+    padding: 15px;
+  }
+
+  .player-rank {
+    font-size: 1.5rem;
+    margin-right: 15px;
+    min-width: 40px;
+  }
+
+  .player-name {
+    font-size: 1.1rem;
+  }
+
+  .points-value {
+    font-size: 1rem;
   }
 }
 </style>

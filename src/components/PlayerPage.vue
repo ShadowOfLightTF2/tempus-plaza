@@ -36,12 +36,25 @@
               <div v-if="player.donator" class="donator-badge">
                 <span class="badge-text">Donator</span>
               </div>
-              <img
-                :src="`${player.steam_avatar}`"
-                alt="Avatar"
-                class="rounded-circle avatar mb-3"
-                onerror="this.src='/avatars/golly.jpg'"
-              />
+              <a
+                :href="
+                  player.steamid
+                    ? `https://steamcommunity.com/profiles/${convertSteamId(
+                        player.steamid
+                      )}`
+                    : '#'
+                "
+                :class="{ 'pointer-events-none': !player.steamid }"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  :src="`${player.steam_avatar}`"
+                  alt="Avatar"
+                  class="rounded-circle avatar mb-3"
+                  onerror="this.src='/avatars/golly.jpg'"
+                />
+              </a>
               <div v-if="player.donator" class="donator-badge">
                 <span class="badge-text">Donator</span>
               </div>
@@ -1025,6 +1038,7 @@ import { formatDate } from "@/utils/calculations.js";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
+  inject: ["profileUpdateTracker"],
   name: "PlayerPage",
   setup() {
     const pageTitle = ref("Tempus Plaza | Player");
@@ -1605,7 +1619,15 @@ export default {
   },
   async mounted() {
     try {
-      fetch(`${API_BASE_URL}/players/${this.playerId}/update-player-last-seen`);
+      fetch(
+        `https://api.tempusplaza.xyz/players/${this.playerId}/update-player-last-seen`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       this.currentUser = await this.fetchUser();
       await Promise.all([
         this.fetchPlayerData(this.playerId),
@@ -1622,6 +1644,20 @@ export default {
     }
   },
   watch: {
+    profileUpdateTracker: {
+      handler(newTracker) {
+        // console.log(
+        //   "Profile updated! New rank:",
+        //   newTracker.rank,
+        //   "New color:",
+        //   newTracker.color
+        // );
+        //this.refreshPlayerData();
+        //this.$router.go(0);
+        this.fetchUserData(this.playerId);
+      },
+      deep: true,
+    },
     playerId: {
       immediate: false,
       async handler(newId, oldId) {
@@ -1686,6 +1722,15 @@ export default {
             },
           ];
           try {
+            fetch(
+              `https://api.tempusplaza.xyz/players/${newId}/update-player-last-seen`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
             await Promise.all([
               this.fetchPlayerData(newId),
               this.fetchUserData(newId),
@@ -1704,6 +1749,23 @@ export default {
     },
   },
   methods: {
+    convertSteamId(steamId) {
+      if (!steamId) {
+        return "#";
+      }
+
+      const parts = steamId.split(":");
+      if (parts.length === 3 && parts[0] === "STEAM_0") {
+        const y = parseInt(parts[1]);
+        const z = parseInt(parts[2]);
+        return (
+          BigInt(z) * BigInt(2) +
+          BigInt(y) +
+          BigInt("76561197960265728")
+        ).toString();
+      }
+      return "#";
+    },
     openMapSearch(index) {
       this.currentMapIndex = index;
       this.showMapSearch = true;
@@ -1730,7 +1792,7 @@ export default {
         }
 
         try {
-          const response = await fetch(`${API_BASE_URL}/search`, {
+          const response = await fetch(`${API_BASE_URL}/search/maps`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -2541,7 +2603,7 @@ export default {
 .avatar {
   width: 96px;
   height: 96px;
-  border: 3px solid #000e25;
+  border: 3px solid var(--color-primary);
 }
 .shared-avatar {
   width: 25px;
@@ -2828,27 +2890,13 @@ export default {
 }
 
 .btn-secondary {
-  border: 1px solid var(--color-dark);
+  background: rgba(255, 255, 255, 0.164);
+  border: 1px solid var(--color-border-soft);
   font-weight: bold;
 }
 
 .btn-secondary:hover {
-  border: 1px solid var(--color-dark);
-  background: rgba(74, 111, 165, 0.8);
-}
-
-.clear-btn {
-  background: var(--color-box);
-  color: var(--color-text);
-  border: 1px solid var(--color-border-soft);
-  border-radius: 5px;
-  padding: 5px 10px;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.clear-btn:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .card-header {

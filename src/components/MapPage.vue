@@ -25,6 +25,14 @@
           <h1 class="text-center maps-title">
             {{ mapName }}
           </h1>
+          <a
+            :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
+            class="download-btn"
+            :download="`${mapName}.bsp.bz2`"
+            title="Download Map"
+          >
+            <i class="bi bi-download"></i>
+          </a>
         </div>
         <hr class="row-divider" style="width: 100%" />
         <div class="collapsible-header" @click="toggleMapBanner">
@@ -721,7 +729,7 @@ export default {
 
 <style scoped>
 .return-button {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-box);
   color: var(--color-text);
   border-radius: 8px;
   padding: 12px 24px;
@@ -764,6 +772,39 @@ export default {
   font-weight: 700;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   color: var(--color-text);
+}
+
+.download-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
+}
+
+.download-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.download-btn:active {
+  transform: translateY(0);
 }
 
 .map-banner {

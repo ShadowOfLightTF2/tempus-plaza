@@ -136,6 +136,43 @@
                 </tr>
               </thead>
               <tbody>
+                <tr
+                  v-if="userRecord.soldier && userRecord.soldier.rank > 1"
+                  class="fade-in"
+                  style="border-bottom: 2px solid var(--color-border)"
+                >
+                  <td
+                    class="rank-column"
+                    :class="getPlacementClass(userRecord.soldier.placement)"
+                  >
+                    <span v-if="userRecord.soldier.rank === 2">🥈</span>
+                    <span v-else-if="userRecord.soldier.rank === 3">🥉</span>
+                    {{ userRecord.soldier.rank }}
+                  </td>
+                  <td class="duration-column">
+                    {{ formatDuration(userRecord.soldier.duration) }}
+                  </td>
+                  <SmartLink
+                    tag="td"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: userRecord.soldier.id },
+                    }"
+                    class="name-cell align-middle player-name clickable name-column"
+                  >
+                    {{ userRecord.soldier.name }}
+                  </SmartLink>
+                  <td
+                    class="date-column"
+                    :title="
+                      new Date(userRecord.soldier.date * 1000)
+                        .toLocaleDateString('en-CA')
+                        .replace(/-/g, '/')
+                    "
+                  >
+                    {{ formatDate(userRecord.soldier.date) }}
+                  </td>
+                </tr>
                 <tr v-if="loading">
                   <td colspan="4" class="text-center">
                     <div class="spinner-border text-light" role="status">
@@ -166,10 +203,7 @@
                   </td>
                   <SmartLink
                     tag="td"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: entry.id },
-                    }"
+                    :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
                     class="name-cell align-middle player-name clickable name-column"
                   >
                     {{ entry.name }}
@@ -211,7 +245,6 @@
           </div>
         </div>
       </div>
-
       <!-- Demoman Table -->
       <div class="demoman-table-container">
         <div class="table-wrapper">
@@ -255,6 +288,43 @@
                 </tr>
               </thead>
               <tbody>
+                <tr
+                  v-if="userRecord.demoman && userRecord.demoman.rank > 1"
+                  class="fade-in"
+                  style="border-bottom: 2px solid var(--color-border)"
+                >
+                  <td
+                    class="rank-column"
+                    :class="getPlacementClass(userRecord.demoman.placement)"
+                  >
+                    <span v-if="userRecord.demoman.rank === 2">🥈</span>
+                    <span v-else-if="userRecord.demoman.rank === 3">🥉</span>
+                    {{ userRecord.demoman.rank }}
+                  </td>
+                  <td class="duration-column">
+                    {{ formatDuration(userRecord.demoman.duration) }}
+                  </td>
+                  <SmartLink
+                    tag="td"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: userRecord.demoman.id },
+                    }"
+                    class="name-cell align-middle player-name clickable name-column"
+                  >
+                    {{ userRecord.demoman.name }}
+                  </SmartLink>
+                  <td
+                    class="date-column"
+                    :title="
+                      new Date(userRecord.demoman.date * 1000)
+                        .toLocaleDateString('en-CA')
+                        .replace(/-/g, '/')
+                    "
+                  >
+                    {{ formatDate(userRecord.demoman.date) }}
+                  </td>
+                </tr>
                 <tr v-if="loading">
                   <td colspan="4" class="text-center">
                     <div class="spinner-border text-light" role="status">
@@ -285,10 +355,7 @@
                   </td>
                   <SmartLink
                     tag="td"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: entry.id },
-                    }"
+                    :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
                     class="name-cell align-middle player-name clickable name-column"
                   >
                     {{ entry.name }}
@@ -351,11 +418,9 @@ export default {
   name: "Records",
   setup() {
     const pageTitle = ref("Tempus Plaza");
-
     useHead({
       title: pageTitle,
     });
-
     return {
       updateTitle: (mapName) => {
         pageTitle.value = `Tempus Plaza | ${mapName}`;
@@ -384,6 +449,11 @@ export default {
       selectedBonusIndex: "",
       soldierOffset: 0,
       demomanOffset: 0,
+      playerId: null,
+      userRecord: {
+        soldier: null,
+        demoman: null,
+      },
     };
   },
   computed: {
@@ -403,8 +473,9 @@ export default {
       );
     },
   },
-  mounted() {
-    this.fetchMapData();
+  async mounted() {
+    await this.fetchUser();
+    await this.fetchMapData();
   },
   watch: {
     mapId() {
@@ -413,6 +484,26 @@ export default {
     },
   },
   methods: {
+    async fetchUser() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          console.log("Response not ok:", response.status, response.statusText);
+          return null;
+        }
+        const result = await response.json();
+        this.playerId = result.data.playerid;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    },
     selectType(type) {
       this.selectedTypePill = type;
     },
@@ -435,6 +526,8 @@ export default {
     resetComponents() {
       this.selectedSoldierRecords = [];
       this.selectedDemomanRecords = [];
+      this.userRecord.soldier = null;
+      this.userRecord.demoman = null;
       this.soldierDisplayCount = 50;
       this.demomanDisplayCount = 50;
       this.soldierOffset = 0;
@@ -463,19 +556,15 @@ export default {
         );
         const { map, courses, bonuses } = response.data;
         this.updateTitle(response.data.map.name);
-
         this.courseCount = map.course_count || 0;
         this.bonusCount = map.bonus_count || 0;
-
         this.Map__soldier_tier = map.soldier_tier || 0;
         this.Map__soldier_rating = map.soldier_rating || 0;
         this.Map__demoman_tier = map.demoman_tier || 0;
         this.Map__demoman_rating = map.demoman_rating || 0;
-
         for (let i = 0; i < this.courseCount; i++) {
           const courseIndex = i + 1;
           const course = courses[i];
-
           this[`Course_${courseIndex}_soldier_tier`] = course.soldier_tier || 0;
           this[`Course_${courseIndex}_soldier_rating`] =
             course.soldier_rating || 0;
@@ -483,11 +572,9 @@ export default {
           this[`Course_${courseIndex}_demoman_rating`] =
             course.demoman_rating || 0;
         }
-
         for (let i = 0; i < this.bonusCount; i++) {
           const bonusIndex = i + 1;
           const bonus = bonuses[i];
-
           this[`Bonus_${bonusIndex}_soldier_tier`] = bonus.soldier_tier || 0;
           this[`Bonus_${bonusIndex}_soldier_rating`] =
             bonus.soldier_rating || 0;
@@ -495,7 +582,6 @@ export default {
           this[`Bonus_${bonusIndex}_demoman_rating`] =
             bonus.demoman_rating || 0;
         }
-
         this.fetchRecords("map", "soldier");
         this.fetchRecords("map", "demoman");
       } catch (error) {
@@ -518,34 +604,36 @@ export default {
         this.showMoreLoading = true;
       }
       this.error = null;
-
       try {
         let url;
+        let userurl;
         switch (type) {
           case "map":
-            url = `${API_BASE_URL}/maps/${this.mapId}/records/${classType}/${offset}/${limit}`;
+            url = `${API_BASE_URL}/maps/${this.mapId}/null/records/${classType}/${offset}/${limit}`;
+            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/records/${classType}/${offset}/${limit}`;
             break;
           case "course":
             if (index === null) {
               throw new Error("Course index is required for course records");
             }
-            url = `${API_BASE_URL}/maps/${this.mapId}/course/${classType}/${index}/records/${offset}/${limit}`;
+            url = `${API_BASE_URL}/maps/${this.mapId}/null/course/${classType}/${index}/records/${offset}/${limit}`;
+            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/course/${classType}/${index}/records/${offset}/${limit}`;
             break;
           case "bonus":
             if (index === null) {
               throw new Error("Bonus index is required for bonus records");
             }
-            url = `${API_BASE_URL}/maps/${this.mapId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
+            url = `${API_BASE_URL}/maps/${this.mapId}/null/bonus/${classType}/${index}/records/${offset}/${limit}`;
+            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
             break;
           default:
             throw new Error(
               `Invalid type: ${type}. Must be 'map', 'course', or 'bonus'`
             );
         }
-
         const response = await axios.get(url);
+        const userResponse = await axios.get(userurl);
         const capitalizedClassType = capitalizeFirstLetter(classType);
-
         if (offset === 0) {
           this[`selected${capitalizedClassType}Records`] = response.data;
         } else {
@@ -558,6 +646,8 @@ export default {
             ...response.data,
           ];
         }
+
+        this.checkUserRecord(userResponse.data);
       } catch (error) {
         this.error = `Error fetching ${type} records.`;
         console.error(`Error fetching ${type} records:`, error);
@@ -566,12 +656,30 @@ export default {
         this.showMoreLoading = false;
       }
     },
+
+    checkUserRecord(records) {
+      if (this.playerId && records && records.length > 0) {
+        records.forEach((record) => {
+          if (record.id === this.playerId) {
+            if (record.class === "soldier") {
+              this.userRecord.soldier = record;
+            } else if (record.class === "demoman") {
+              this.userRecord.demoman = record;
+            }
+          }
+        });
+      }
+    },
     selectRecords(type, index) {
+      this.userRecord = {
+        soldier: null,
+        demoman: null,
+      };
+
       this.selectedType = type.charAt(0).toUpperCase() + type.slice(1);
       this.selectedIndex = index !== undefined ? index : null;
       this.soldierOffset = 0;
       this.demomanOffset = 0;
-
       if (type === "map") {
         this.fetchRecords(type, "soldier");
         this.fetchRecords(type, "demoman");
@@ -586,7 +694,6 @@ export default {
         this.fetchRecords(type, "soldier", index);
         this.fetchRecords(type, "demoman", index);
       }
-
       this.soldierDisplayCount = 50;
       this.demomanDisplayCount = 50;
     },
@@ -638,7 +745,6 @@ export default {
       }
       this.soldierOffset += 50;
     },
-
     showMoreDemomanEntries() {
       if (this.selectedTypePill === "Map") {
         this.fetchRecords(
@@ -678,17 +784,14 @@ export default {
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
 .table-responsive {
   overflow: hidden;
   margin-bottom: 0px;
 }
-
 .table-dark {
   margin: 0px;
   border-collapse: collapse;
 }
-
 .table-dark th {
   background: var(--color-primary-dark);
   color: var(--color-text);
@@ -697,22 +800,18 @@ export default {
   padding-bottom: 7px;
   border-top: 1px solid var(--color-border-soft);
 }
-
 .table-dark td {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
   padding: 7px;
 }
-
 .table-dark tr:nth-child(odd) .name-cell:hover {
   background: rgba(74, 111, 165, 0.8);
 }
-
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
-
 .name-cell {
   max-width: 250px;
   white-space: normal;
@@ -720,37 +819,31 @@ export default {
   text-overflow: ellipsis;
   color: var(--color-text-clickable) !important;
 }
-
 .header-content {
   display: flex;
   align-items: center;
   padding: 10px;
 }
-
 .header-text {
   margin-left: 10px;
   text-align: left;
   font-weight: bold;
 }
-
 .header-type {
   margin: 0;
   font-size: 18px;
   font-weight: bold;
   color: var(--color-text);
 }
-
 .header-tier-rating {
   margin: 5px 0 0 0px;
   font-size: 16px;
   color: var(--color-text);
 }
-
 .maps-header {
   color: var(--color-text);
   border-radius: 10px 10px 0 0;
 }
-
 .tables-wrapper {
   min-height: 2113px;
   display: flex;
@@ -758,7 +851,6 @@ export default {
   width: 100%;
   align-items: flex-start;
 }
-
 .table-wrapper {
   min-height: 100%;
   width: 100%;
@@ -766,47 +858,38 @@ export default {
   border-radius: 12px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
-
 .rank-column {
   width: auto;
   white-space: nowrap;
   text-align: right;
 }
-
 .duration-column {
   width: auto;
   white-space: nowrap;
   text-align: right;
 }
-
 .points-column {
   width: auto;
   white-space: nowrap;
 }
-
 .name-column {
   width: 100%;
   white-space: nowrap;
 }
-
 .date-column {
   width: auto;
   white-space: nowrap;
   text-align: right;
 }
-
 .player-name:hover {
   background: rgba(74, 111, 165, 0.8);
 }
-
 .clickable {
   cursor: pointer;
 }
-
 .maps-footer {
   z-index: 10;
 }
-
 .update-button {
   position: relative;
   z-index: 10;
@@ -816,17 +899,14 @@ export default {
   border-bottom-right-radius: 12px;
   pointer-events: auto;
 }
-
 .update-button:hover {
   background: var(--color-row) !important;
 }
-
 .class-icon {
   width: 48px;
   height: 48px;
   margin: 8px;
 }
-
 .placement-gold {
   color: #ffd700 !important;
   font-weight: bold;
@@ -859,20 +939,17 @@ export default {
   color: #b3b3b3ce !important;
   font-weight: bold;
 }
-
 @media (max-width: 767.98px) {
   .tables-wrapper {
     flex-direction: column;
     align-items: center;
   }
 }
-
 .category-container {
   width: 100%;
   display: flex;
   justify-content: center;
 }
-
 .category-pills {
   display: flex;
   flex-direction: column;
@@ -881,13 +958,11 @@ export default {
   align-items: center;
   max-width: 100%;
 }
-
 .subcategory-container {
   width: 100%;
   display: flex;
   justify-content: center;
 }
-
 .subcategory-pills {
   display: flex;
   flex-direction: column;
@@ -896,7 +971,6 @@ export default {
   align-items: center;
   max-width: 100%;
 }
-
 .pill-row {
   display: flex;
   flex-wrap: wrap;
@@ -904,7 +978,6 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 .subcategory-pill {
   padding: 8px 16px;
   border: 1px solid var(--color-border-soft);
@@ -921,59 +994,49 @@ export default {
   gap: 6px;
   transition: transform 0.3s ease;
 }
-
 .subcategory-pill:hover {
   background: rgba(74, 111, 165, 0.8);
   transform: scale(1.03);
 }
-
 .subcategory-pill.active {
   background: rgba(74, 111, 165, 0.8);
   border-color: var(--color-primary);
   color: var(--color-text);
   box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
 }
-
 .map-pill {
   display: flex;
   min-width: 200px;
   justify-content: center;
   border-style: solid;
 }
-
 .course-pill {
   border-style: solid;
 }
-
 .bonus-pill {
   border-style: solid;
 }
-
 .category-pill:hover {
   background: rgba(74, 111, 165, 0.8);
   transform: translateY(-1px);
 }
-
 .category-pill.active {
   background: rgba(74, 111, 165, 0.8);
   border-color: var(--color-primary);
   color: var(--color-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
-
 @media (max-width: 767.98px) {
   .category-pill {
     padding: 6px 12px;
     font-size: 12px;
   }
 }
-
 .category-tabs-container {
   width: 100%;
   display: flex;
   justify-content: center;
 }
-
 .category-tabs {
   display: flex;
   background: rgba(255, 255, 255, 0.05);
@@ -983,7 +1046,6 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
   border: 1px solid var(--color-border-soft);
 }
-
 .category-tab {
   padding: 12px 24px;
   border: none;
@@ -997,18 +1059,15 @@ export default {
   white-space: nowrap;
   transition: transform 0.3s ease;
 }
-
 .category-tab:hover {
   background: rgba(74, 111, 165, 0.8);
   transform: scale(1.03);
 }
-
 .category-tab.active {
   background: rgba(74, 111, 165, 0.8);
   color: var(--color-text);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
-
 .row-divider {
   border: none;
   height: 2px;
