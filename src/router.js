@@ -7,6 +7,7 @@ import Maps from './components/Maps.vue';
 import Players from './components/Players.vue';
 import PlayerPage from './components/PlayerPage.vue';
 import MapPage from './components/MapPage.vue';
+import Compare from './components/Compare.vue';
 import Lookup from './components/Lookup.vue';
 import Donate from './components/Donate.vue';
 
@@ -50,6 +51,16 @@ const routes = [
     component: Lookup,
     props: route => ({
       playerId: Number(route.params.playerId)
+    })
+  },
+  {
+    path: '/compare/:playerId1?/:playerId2?/:mapId?',
+    name: 'Compare',
+    component: Compare,
+    props: route => ({
+      playerId1: route.params.playerId1 ? Number(route.params.playerId1) : null,
+      playerId2: route.params.playerId2 ? Number(route.params.playerId2) : null,
+      mapId: route.params.mapId ? Number(route.params.mapId) : null
     })
   },
   {

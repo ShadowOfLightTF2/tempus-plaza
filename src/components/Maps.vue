@@ -121,7 +121,7 @@
               <div class="column-toggles">
                 <button
                   @click="toggleColumns('soldier')"
-                  class="filter-button"
+                  class="global-btn"
                   :class="{ active: !showSoldierColumns }"
                 >
                   <span v-if="showSoldierColumns">Hide</span>
@@ -130,7 +130,7 @@
                 </button>
                 <button
                   @click="toggleColumns('demoman')"
-                  class="filter-button"
+                  class="global-btn"
                   :class="{ active: !showDemomanColumns }"
                 >
                   <span v-if="showDemomanColumns">Hide</span>
@@ -139,7 +139,7 @@
                 </button>
                 <button
                   @click="toggleColumns('completions')"
-                  class="filter-button"
+                  class="global-btn"
                   :class="{ active: !showCompletionColumns }"
                 >
                   <span v-if="showCompletionColumns">Hide</span>
@@ -1080,7 +1080,7 @@ export default {
 .column-toggles-section {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 30px 0;
 }
 
 .column-toggles {
@@ -1095,30 +1095,6 @@ export default {
   gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-.filter-button {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 2px solid rgba(68, 68, 68, 0.3);
-  border-radius: 8px;
-  padding: 8px 16px;
-  margin: 0 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  font-size: 13px;
-  text-transform: capitalize;
-  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.35);
-}
-
-.filter-button.active {
-  background: rgba(74, 111, 165, 0.8);
-  border-color: var(--color-border, #444);
-}
-
-.filter-button:hover:not(.active) {
-  background: rgba(74, 111, 165, 0.8);
 }
 
 .text-light {
@@ -1154,6 +1130,14 @@ export default {
 .button-group {
   border: none;
   border-radius: 0;
+}
+
+.toggle-btn,
+.toggle-btn:active,
+.toggle-btn:hover,
+.toggle-btn:first-child,
+.toggle-btn:last-child {
+  border-radius: 0 !important;
 }
 
 .table th {

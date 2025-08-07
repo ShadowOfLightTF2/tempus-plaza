@@ -52,6 +52,7 @@
                   :src="`${player.steam_avatar}`"
                   alt="Avatar"
                   class="rounded-circle avatar mb-3"
+                  :class="{ 'golden-avatar': player.donator }"
                   onerror="this.src='/avatars/golly.jpg'"
                 />
               </a>
@@ -63,13 +64,9 @@
                   {{ player.name }}
                 </h1>
                 <p class="rank-name mb-2">
-                  <span style="color: var(--color-text-soft)"></span>
-                  <span
-                    :class="getRankName(getHighestRank(), player.gender).color"
-                  >
-                    {{ getRankName(getHighestRank(), player.gender).title }}
+                  <span :class="playerRankInfo.color">
+                    {{ playerRankInfo.title }}
                   </span>
-                  <span style="color: var(--color-text-soft)"></span>
                 </p>
                 <p
                   class="country mb-3"
@@ -408,18 +405,37 @@
                 class="card-header tabs-header"
                 style="background: rgba(255, 255, 255, 0.05)"
               >
+                <!-- Tab Navigation -->
+                <div class="button-group">
+                  <button
+                    @click="switchRecordsTab('recent-runs')"
+                    class="toggle-btn btn btn-dark update-button"
+                    :class="{ active: activeRecordsTab === 'recent-runs' }"
+                  >
+                    Recent Runs
+                  </button>
+                  <button
+                    @click="switchRecordsTab('changed-placements')"
+                    class="toggle-btn btn btn-dark update-button"
+                    :class="{
+                      active: activeRecordsTab === 'changed-placements',
+                    }"
+                  >
+                    Changed Placements
+                  </button>
+                </div>
+
+                <!-- Filter and All Runs buttons -->
                 <div
-                  class="d-flex justify-content-between align-items-center button-container-wrapper"
+                  class="d-flex justify-content-between align-items-center button-container-wrapper mt-3"
                 >
                   <div class="allruns-button-container">
                     <SmartLink
                       :to="{ name: 'Lookup', params: { playerId: player.id } }"
                       tag="button"
-                      class="toggle-btn btn main-filter-button"
-                      :class="{ 'btn-dark': true }"
+                      class="btn 'btn-dark' global-btn"
                       :style="{
                         color: 'var(--color-text)',
-                        border: '1px solid var(--color-border-soft)',
                         'font-weight': 'bold',
                       }"
                     >
@@ -429,11 +445,9 @@
                   <div class="filter-button-container">
                     <button
                       @click="toggleFilterSection"
-                      class="toggle-btn btn main-filter-button"
-                      :class="{ 'btn-dark': true }"
+                      class="btn 'btn-dark' global-btn"
                       :style="{
                         color: 'var(--color-text)',
-                        border: '1px solid var(--color-border-soft)',
                         'font-weight': 'bold',
                       }"
                     >
@@ -443,6 +457,8 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Filter section -->
               <div
                 v-if="showFilterSection"
                 class="filter-section"
@@ -511,7 +527,10 @@
                       </div>
                     </div>
                   </div>
-                  <div class="filter-group">
+                  <div
+                    class="filter-group"
+                    style="margin-bottom: 20px; margin-top: 10px"
+                  >
                     <h6 class="filter-title text-light mb-2">Placement</h6>
                     <div class="group-filter-container">
                       <div class="group-filters">
@@ -555,14 +574,56 @@
                       </div>
                     </div>
                   </div>
-                  <div class="filter-actions">
-                    <button
-                      type="button"
-                      @click="clearAllFilters"
-                      class="btn btn-secondary"
+                  <div
+                    class="filter-columns"
+                    :class="{
+                      'no-padding-bottom':
+                        activeRecordsTab !== 'changed-placements',
+                    }"
+                  >
+                    <div
+                      v-if="activeRecordsTab === 'changed-placements'"
+                      class="filter-group"
                     >
-                      Clear filters
-                    </button>
+                      <h6 class="filter-title text-light mb-2">Change</h6>
+                      <div class="gain-loss-filter-container">
+                        <button
+                          @click="toggleGainLossFilter('lost')"
+                          :class="{
+                            active:
+                              filterOptions.selectedGainLoss.includes('lost'),
+                          }"
+                          class="filter-button"
+                        >
+                          Gained
+                        </button>
+                        <button
+                          @click="toggleGainLossFilter('gained')"
+                          :class="{
+                            active:
+                              filterOptions.selectedGainLoss.includes('gained'),
+                          }"
+                          class="filter-button"
+                        >
+                          Lost
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="filter-actions"
+                      :class="{
+                        'no-margin-top':
+                          activeRecordsTab !== 'changed-placements',
+                      }"
+                    >
+                      <button
+                        type="button"
+                        @click="clearAllFilters"
+                        class="btn btn-secondary"
+                      >
+                        Clear filters
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -571,101 +632,227 @@
                 style="background: rgba(255, 255, 255, 0.05)"
               >
                 <div class="records-section">
-                  <div v-if="loading['Latest runs']" class="text-center">
+                  <!-- Loading state -->
+                  <div v-if="currentLoadingState" class="text-center">
                     <div class="spinner-border text-light" role="status">
-                      <span class="visually-hidden">Loading records...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                   </div>
+
+                  <!-- Content based on active tab -->
                   <div v-else>
-                    <div
-                      v-for="(group, date) in filteredAndPaginatedRecords"
-                      :key="date"
-                      class="date-group fade-in"
-                    >
-                      <div class="date-header">
-                        <h5>{{ formatDateHeader(date) }}</h5>
-                      </div>
-                      <ul class="list-group">
-                        <SmartLink
-                          v-for="record in group"
-                          :key="record.id"
-                          :to="{
-                            name: 'MapPage',
-                            params: { mapId: record.map_id },
-                          }"
-                          tag="li"
-                          class="list-group-item record-item"
-                          style="background: rgba(255, 255, 255, 0.05)"
-                        >
-                          <div
-                            class="d-flex align-items-center record-class-map"
+                    <!-- Recent Runs Content -->
+                    <div v-if="activeRecordsTab === 'recent-runs'">
+                      <div
+                        v-for="(group, date) in filteredAndPaginatedRecords"
+                        :key="date"
+                        class="date-group fade-in"
+                      >
+                        <div class="date-header">
+                          <h5>{{ formatDateHeader(date) }}</h5>
+                        </div>
+                        <ul class="list-group">
+                          <SmartLink
+                            v-for="record in group"
+                            :key="record.id"
+                            :to="{
+                              name: 'MapPage',
+                              params: { mapId: record.map_id },
+                            }"
+                            tag="li"
+                            class="list-group-item record-item"
+                            style="background: rgba(255, 255, 255, 0.05)"
                           >
-                            <img
-                              :src="`/icons/${record.class}.png`"
-                              :alt="record.class"
-                              class="class-icon"
-                              loading="lazy"
-                            />
-                            <span class="ms-2 record-map">
-                              {{ record.map_name }}
-                              <span v-if="record.type !== 'map'">
-                                |
-                                <template v-if="record.type === 'course'"
-                                  >🚩</template
-                                >
-                                <template v-if="record.type === 'bonus'"
-                                  >⭐</template
-                                >
-                                {{ record.type.slice(0, 1).toUpperCase()
-                                }}{{ record.index }}
-                              </span>
-                            </span>
-                          </div>
-                          <div
-                            class="text-end align-items-center record-time-detail"
-                          >
-                            <div class="d-flex flex-column align-items-end">
-                              <div class="d-flex align-items-center gap-2">
-                                <span
-                                  class="record-detail record-duration"
-                                  :class="[
-                                    record.rank >= 1 && record.rank <= 3
-                                      ? getPlacementClass(record.rank)
-                                      : '',
-                                  ]"
-                                >
-                                  {{ formatDuration(record.duration) }}
+                            <div
+                              class="d-flex align-items-center record-class-map"
+                            >
+                              <img
+                                :src="`/icons/${record.class}.png`"
+                                :alt="record.class"
+                                class="class-icon"
+                                loading="lazy"
+                              />
+                              <span class="ms-2 record-map">
+                                {{ record.map_name }}
+                                <span v-if="record.type !== 'map'">
+                                  |
+                                  <template v-if="record.type === 'course'"
+                                    >🚩</template
+                                  >
+                                  <template v-if="record.type === 'bonus'"
+                                    >⭐</template
+                                  >
+                                  {{ record.type.slice(0, 1).toUpperCase()
+                                  }}{{ record.index }}
                                 </span>
-                                <span
-                                  class="record-rank"
-                                  :class="getPlacementClass(record.placement)"
-                                >
-                                  {{ getMedal(record.rank) }} #{{
-                                    record.rank
-                                  }}</span
-                                >
-                              </div>
-                              <span class="record-detail record-date">
-                                {{ formatDate(record.date) }}
                               </span>
                             </div>
-                          </div>
-                        </SmartLink>
-                      </ul>
+                            <div
+                              class="text-end align-items-center record-time-detail"
+                            >
+                              <div class="d-flex flex-column align-items-end">
+                                <div class="d-flex align-items-center gap-2">
+                                  <span
+                                    class="record-detail record-duration"
+                                    :class="[
+                                      record.rank >= 1 && record.rank <= 3
+                                        ? getPlacementClass(record.rank)
+                                        : '',
+                                    ]"
+                                  >
+                                    {{ formatDuration(record.duration) }}
+                                  </span>
+                                  <span
+                                    class="record-rank"
+                                    :class="getPlacementClass(record.placement)"
+                                  >
+                                    {{ getMedal(record.rank) }} #{{
+                                      record.rank
+                                    }}
+                                  </span>
+                                </div>
+                                <span class="record-detail record-date">
+                                  {{ formatDate(record.date) }}
+                                </span>
+                              </div>
+                            </div>
+                          </SmartLink>
+                        </ul>
+                      </div>
                     </div>
+
+                    <!-- Changed Placements Content -->
+                    <div v-else-if="activeRecordsTab === 'changed-placements'">
+                      <div
+                        v-for="(
+                          group, date
+                        ) in filteredAndPaginatedChangedPlacements"
+                        :key="date"
+                        class="date-group fade-in"
+                      >
+                        <div class="date-header">
+                          <h5>{{ formatDateHeader(date) }}</h5>
+                        </div>
+                        <ul class="list-group">
+                          <SmartLink
+                            v-for="placement in group"
+                            :key="placement.id"
+                            :to="{
+                              name: 'MapPage',
+                              params: { mapId: placement.map_id },
+                            }"
+                            tag="li"
+                            class="list-group-item record-item"
+                            :class="
+                              getRankChangeClass(placement.rank_change) ===
+                              'rank-loss'
+                                ? 'lost-placement'
+                                : 'gained-placement'
+                            "
+                            style="background: rgba(255, 255, 255, 0.05)"
+                          >
+                            <div
+                              class="d-flex align-items-center record-class-map"
+                            >
+                              <img
+                                :src="`/icons/${placement.class}.png`"
+                                :alt="placement.class"
+                                class="class-icon"
+                                loading="lazy"
+                              />
+                              <span class="ms-2 record-map">
+                                {{ placement.map_name }}
+                                <span v-if="placement.type !== 'map'">
+                                  |
+                                  <template v-if="placement.type === 'course'"
+                                    >🚩</template
+                                  >
+                                  <template v-if="placement.type === 'bonus'"
+                                    >⭐</template
+                                  >
+                                  {{ placement.type.slice(0, 1).toUpperCase()
+                                  }}{{ placement.index }}
+                                </span>
+                              </span>
+                            </div>
+                            <div
+                              class="text-end align-items-center record-time-detail"
+                              :class="
+                                getRankChangeClass(placement.rank_change) ===
+                                'rank-loss'
+                                  ? 'lost-placement'
+                                  : 'gained-placement'
+                              "
+                            >
+                              <div class="d-flex flex-column align-items-end">
+                                <!-- Rank change -->
+                                <div class="placement-change-indicator">
+                                  <span class="placement-arrows">
+                                    <span
+                                      class="old-rank"
+                                      :class="
+                                        getPlacementClass(placement.old_rank)
+                                      "
+                                    >
+                                      {{ getMedal(placement.old_rank)
+                                      }}{{
+                                        formatRankDisplay(placement.old_rank)
+                                      }}
+                                    </span>
+                                    <i
+                                      class="bi bi-arrow-right placement-arrow"
+                                    ></i>
+                                    <span
+                                      class="new-rank"
+                                      :class="
+                                        getPlacementClass(placement.new_rank)
+                                      "
+                                    >
+                                      {{ getMedal(placement.new_rank)
+                                      }}{{
+                                        formatRankDisplay(placement.new_rank)
+                                      }}
+                                    </span>
+                                  </span>
+                                  <span
+                                    class="points-change"
+                                    :class="
+                                      getPointsChangeClass(
+                                        placement.points_change
+                                      )
+                                    "
+                                  >
+                                    {{
+                                      formatPointsChange(
+                                        placement.points_change
+                                      )
+                                    }}
+                                  </span>
+                                </div>
+                                <span class="record-detail record-date">
+                                  {{ formatDate(placement.date) }}
+                                </span>
+                              </div>
+                            </div>
+                          </SmartLink>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- Pagination controls (shared between both tabs) -->
                     <div class="pagination-controls">
                       <button
                         v-if="currentPage > 1"
                         @click="prevPage"
-                        class="btn latest-runs-btn"
+                        class="btn btn-dark global-btn"
                       >
                         Previous
                       </button>
                       <div class="pagination-spacer"></div>
                       <button
-                        v-if="currentPage * pageSize < filteredRecords.length"
+                        v-if="shouldShowNextButton"
                         @click="nextPage"
-                        class="btn latest-runs-btn"
+                        class="btn btn-dark global-btn"
                       >
                         Next
                       </button>
@@ -874,10 +1061,10 @@
                     map.name
                       ? {
                           background: `
-        linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
-      `,
+                            linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                            radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                            url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+                          `,
                           backgroundBlendMode: 'multiply, normal, normal',
                           backgroundSize: 'cover, cover, cover',
                           backgroundPosition: 'center, center, center',
@@ -1064,6 +1251,9 @@ export default {
     debounceTimer: null,
     currentUser: null,
     selectedClass: null,
+    activeRecordsTab: "recent-runs",
+    _cachedRankInfo: null,
+    changedPlacements: [],
     showClassWarning: false,
     classWarningTimeout: null,
     favoriteMaps: [
@@ -1124,7 +1314,6 @@ export default {
       overall_points: null,
       soldier_points: null,
       demoman_points: null,
-      rank_name: null,
       gender: "male",
       launcher_pref: 1,
       rank_pref: "",
@@ -1152,6 +1341,7 @@ export default {
       ranks: true,
       stats: true,
       points: true,
+      "Lost placements": false,
     },
     currentPage: 1,
     pageSize: 8,
@@ -1241,14 +1431,22 @@ export default {
       },
       xaxis: {
         type: "datetime",
+        tooltip: {
+          enabled: false,
+        },
         labels: {
+          tooltip: false,
+          datetimeUTC: true,
           style: {
             colors: "#aaa",
           },
           formatter: function (value, timestamp) {
             const date = new Date(timestamp);
-            const day = date.getDate();
-            const month = date.toLocaleDateString("en-US", { month: "short" });
+            const day = date.getUTCDate();
+            const month = date.toLocaleDateString("en-US", {
+              month: "short",
+              timeZone: "UTC",
+            });
             return `${day} ${month}`;
           },
           maxHeight: undefined,
@@ -1275,6 +1473,7 @@ export default {
             day: "2-digit",
             month: "short",
             year: "numeric",
+            timeZone: "UTC",
           });
           const points = data.y;
           const rank = data.overall_rank;
@@ -1344,14 +1543,22 @@ export default {
       },
       xaxis: {
         type: "datetime",
+        tooltip: {
+          enabled: false,
+        },
         labels: {
+          tooltip: false,
+          datetimeUTC: true,
           style: {
             colors: "#aaa",
           },
           formatter: function (value, timestamp) {
             const date = new Date(timestamp);
-            const day = date.getDate();
-            const month = date.toLocaleDateString("en-US", { month: "short" });
+            const day = date.getUTCDate();
+            const month = date.toLocaleDateString("en-US", {
+              month: "short",
+              timeZone: "UTC",
+            });
             return `${day} ${month}`;
           },
           maxHeight: undefined,
@@ -1378,6 +1585,7 @@ export default {
             day: "2-digit",
             month: "short",
             year: "numeric",
+            timeZone: "UTC",
           });
           const points = data.y;
           const rank = data.soldier_rank;
@@ -1447,14 +1655,22 @@ export default {
       },
       xaxis: {
         type: "datetime",
+        tooltip: {
+          enabled: false,
+        },
         labels: {
+          tooltip: false,
+          datetimeUTC: true,
           style: {
             colors: "#aaa",
           },
           formatter: function (value, timestamp) {
             const date = new Date(timestamp);
-            const day = date.getDate();
-            const month = date.toLocaleDateString("en-US", { month: "short" });
+            const day = date.getUTCDate();
+            const month = date.toLocaleDateString("en-US", {
+              month: "short",
+              timeZone: "UTC",
+            });
             return `${day} ${month}`;
           },
           maxHeight: undefined,
@@ -1481,6 +1697,7 @@ export default {
             day: "2-digit",
             month: "short",
             year: "numeric",
+            timeZone: "UTC",
           });
           const points = data.y;
           const rank = data.demoman_rank;
@@ -1518,9 +1735,51 @@ export default {
       selectedClasses: [],
       selectedTypes: [],
       selectedPlacements: [],
+      selectedGainLoss: [],
     },
   }),
   computed: {
+    highestRank() {
+      if (this.player.rank_pref === "overall") return this.player.overall_rank;
+      else if (this.player.rank_pref === "soldier")
+        return this.player.soldier_rank;
+      else if (this.player.rank_pref === "demoman")
+        return this.player.demoman_rank;
+      return Math.min(
+        this.player.overall_rank,
+        this.player.soldier_rank,
+        this.player.demoman_rank
+      );
+    },
+    playerRankInfo() {
+      if (
+        !this._cachedRankInfo ||
+        this._lastRankCalculation !== this.highestRank
+      ) {
+        this._cachedRankInfo = this.getRankName(
+          this.highestRank,
+          this.player.gender
+        );
+        this._lastRankCalculation = this.highestRank;
+      }
+      return this._cachedRankInfo;
+    },
+    filteredAndPaginatedRecords() {
+      const grouped = this.groupRecords(this.filteredRecords);
+      return this.paginateGroupedData(grouped);
+    },
+
+    filteredAndPaginatedChangedPlacements() {
+      return this.paginateGroupedData(this.groupedChangedPlacements);
+    },
+    shouldShowNextButton() {
+      if (this.activeRecordsTab === "recent-runs") {
+        return this.currentPage * this.pageSize < this.filteredRecords.length;
+      } else {
+        const totalItems = this.filteredChangedPlacements.length;
+        return this.currentPage * this.pageSize < totalItems;
+      }
+    },
     hasFavoriteMaps() {
       return this.favoriteMaps.some(
         (map) => map.name && map.name.trim() !== ""
@@ -1596,52 +1855,95 @@ export default {
         return true;
       });
     },
-    filteredAndPaginatedRecords() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      const grouped = this.groupRecords(this.filteredRecords);
-      const dates = Object.keys(grouped);
-      const paginated = {};
-      let count = 0;
-      for (const date of dates) {
-        for (const record of grouped[date]) {
-          if (count >= start && count < end) {
-            if (!paginated[date]) {
-              paginated[date] = [];
-            }
-            paginated[date].push(record);
-          }
-          count++;
+    filteredChangedPlacements() {
+      if (!this.changedPlacements || !this.changedPlacements.length) return [];
+
+      let filtered = this.changedPlacements.filter((placement) => {
+        // Class filter
+        if (
+          this.filterOptions.selectedClasses.length > 0 &&
+          !this.filterOptions.selectedClasses.includes(placement.class)
+        ) {
+          return false;
         }
+
+        // Type filter
+        if (
+          this.filterOptions.selectedTypes.length > 0 &&
+          !this.filterOptions.selectedTypes.includes(placement.type)
+        ) {
+          return false;
+        }
+
+        // Placement filter
+        if (this.filterOptions.selectedPlacements.length > 0) {
+          const matchesPlacement = this.filterOptions.selectedPlacements.some(
+            (selectedPlacement) => {
+              // Check old_rank
+              const oldRankMatches = this.checkPlacementMatch(
+                placement.old_rank,
+                selectedPlacement
+              );
+              // Check new_rank
+              const newRankMatches = this.checkPlacementMatch(
+                placement.new_rank,
+                selectedPlacement
+              );
+
+              return oldRankMatches || newRankMatches;
+            }
+          );
+
+          if (!matchesPlacement) {
+            return false;
+          }
+        }
+        if (this.filterOptions.selectedGainLoss.length > 0) {
+          const isGain = placement.rank_change > 0;
+          const isLoss = placement.rank_change < 0;
+
+          const matchesGainLoss = this.filterOptions.selectedGainLoss.some(
+            (filter) => {
+              if (filter === "gained" && isGain) return true;
+              if (filter === "lost" && isLoss) return true;
+              return false;
+            }
+          );
+
+          if (!matchesGainLoss) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      return filtered;
+    },
+    groupedChangedPlacements() {
+      if (
+        !this.filteredChangedPlacements ||
+        !Array.isArray(this.filteredChangedPlacements) ||
+        this.filteredChangedPlacements.length === 0
+      ) {
+        return {};
       }
-      return paginated;
+      return this.groupRecords(this.filteredChangedPlacements);
+    },
+    currentRecordsData() {
+      return this.activeRecordsTab === "recent-runs"
+        ? this.filteredAndPaginatedRecords
+        : this.filteredChangedPlacements;
+    },
+
+    currentLoadingState() {
+      return this.activeRecordsTab === "recent-runs"
+        ? this.loading["Latest runs"]
+        : this.loading["Lost placements"];
     },
   },
   async mounted() {
-    try {
-      fetch(
-        `https://api.tempusplaza.xyz/players/${this.playerId}/update-player-last-seen`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      this.currentUser = await this.fetchUser();
-      await Promise.all([
-        this.fetchPlayerData(this.playerId),
-        this.fetchUserData(this.playerId),
-        this.fetchPlayerRanks(this.playerId),
-        this.fetchRecentRecords(this.playerId),
-        this.fetchPlayerPoints(this.playerId),
-        this.fetchFavoriteMaps(this.playerId),
-      ]);
-      await this.fetchPlayerStats(this.playerId);
-      await this.fetchSharedTimes(this.playerId);
-    } catch (error) {
-      console.error("Error during mounted operations:", error);
-    }
+    await this.loadPlayerPageData(this.playerId);
   },
   watch: {
     profileUpdateTracker: {
@@ -1670,14 +1972,14 @@ export default {
             shared: true,
             "Latest runs": true,
           };
-
+          this.activeRecordsTab = "recent-runs";
           this.currentPage = 1;
           this.filterOptions = {
             selectedClasses: [],
             selectedTypes: [],
             selectedPlacements: [],
+            selectedGainLoss: [],
           };
-          this.currentPage = 1;
           this.currentStatType.soldier = "total";
           this.currentStatType.demoman = "total";
           this.favoriteMaps = [
@@ -1721,34 +2023,111 @@ export default {
               record_placement: null,
             },
           ];
-          try {
-            fetch(
-              `https://api.tempusplaza.xyz/players/${newId}/update-player-last-seen`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            await Promise.all([
-              this.fetchPlayerData(newId),
-              this.fetchUserData(newId),
-              this.fetchPlayerRanks(newId),
-              this.fetchRecentRecords(newId),
-              this.fetchPlayerPoints(newId),
-              this.fetchFavoriteMaps(newId),
-            ]);
-            await this.fetchPlayerStats(newId);
-            await this.fetchSharedTimes(newId);
-          } catch (error) {
-            console.error("Error during watch operations:", error);
-          }
+          await this.loadPlayerPageData(newId);
         }
       },
     },
   },
   methods: {
+    async loadPlayerPageData(playerId) {
+      try {
+        fetch(
+          `https://api.tempusplaza.xyz/players/${playerId}/update-player-last-seen`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        this.currentUser = await this.fetchUser();
+        await Promise.all([
+          this.fetchPlayerData(playerId),
+          this.fetchUserData(playerId),
+          this.fetchPlayerRanks(playerId),
+          this.fetchRecentRecords(playerId),
+          this.fetchPlayerPoints(playerId),
+          this.fetchFavoriteMaps(playerId),
+          this.fetchChangedPlacements(playerId),
+        ]);
+        await this.fetchPlayerStats(playerId);
+        await this.fetchSharedTimes(playerId);
+      } catch (error) {
+        console.error("Error loading player page data:", error);
+      }
+    },
+    paginateGroupedData(groupedData) {
+      if (!groupedData || typeof groupedData !== "object") {
+        return {};
+      }
+
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      const dates = Object.keys(groupedData);
+      const paginated = {};
+      let count = 0;
+
+      for (const date of dates) {
+        if (!Array.isArray(groupedData[date])) {
+          continue;
+        }
+
+        for (const item of groupedData[date]) {
+          if (count >= start && count < end) {
+            if (!paginated[date]) {
+              paginated[date] = [];
+            }
+            paginated[date].push(item);
+          }
+          count++;
+        }
+      }
+
+      return paginated;
+    },
+    checkPlacementMatch(rank, selectedPlacement) {
+      if (selectedPlacement === 1) return rank === 1;
+      if (selectedPlacement === 2) return rank >= 2 && rank <= 10;
+      return rank === selectedPlacement;
+    },
+    switchRecordsTab(tab) {
+      this.activeRecordsTab = tab;
+      this.currentPage = 1;
+    },
+
+    async fetchChangedPlacements(playerId) {
+      this.loading["Lost placements"] = true;
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/players/${playerId}/lost-records`
+        );
+        const data = await response.json();
+        this.changedPlacements = data.map((placement) => ({
+          ...placement,
+          map_name: placement.map_name,
+          class: placement.record_type.split("_")[0], // 'soldier' or 'demoman'
+          type: placement.record_type.split("_")[1], // 'map', 'course', 'bonus'
+          index: placement.index,
+          old_rank: placement.old_placement,
+          new_rank: placement.new_placement,
+          rank_change: placement.placement_change,
+          date: placement.change_date,
+          points_change: placement.points_change,
+        }));
+      } catch (error) {
+        console.error("Error fetching lost placements:", error);
+      } finally {
+        this.loading["Lost placements"] = false;
+      }
+    },
+
+    formatRankChange(change) {
+      return change > 0 ? `+${change}` : change.toString();
+    },
+
+    getRankChangeClass(change) {
+      return change > 0 ? "rank-loss" : "rank-gain";
+    },
     convertSteamId(steamId) {
       if (!steamId) {
         return "#";
@@ -1834,7 +2213,7 @@ export default {
     async selectMap(mapData, classType) {
       this.cancelMapSearch();
       await this.updateMap(mapData.id, classType);
-      window.location.reload();
+      await this.fetchFavoriteMaps(this.playerId);
     },
     showClassWarningPopup() {
       this.showClassWarning = true;
@@ -1962,6 +2341,14 @@ export default {
         this.filterOptions.selectedPlacements.splice(index, 1);
       }
     },
+    toggleGainLossFilter(type) {
+      const index = this.filterOptions.selectedGainLoss.indexOf(type);
+      if (index === -1) {
+        this.filterOptions.selectedGainLoss.push(type);
+      } else {
+        this.filterOptions.selectedGainLoss.splice(index, 1);
+      }
+    },
     toggleFilterSection() {
       this.showFilterSection = !this.showFilterSection;
     },
@@ -1981,6 +2368,7 @@ export default {
         selectedClasses: [],
         selectedTypes: [],
         selectedPlacements: [],
+        selectedGainLoss: [],
       };
       this.currentPage = 1;
     },
@@ -2011,45 +2399,44 @@ export default {
     },
     updateChartData() {
       if (!this.pointsHistory.length) return;
+
       const sortedData = [...this.pointsHistory].sort(
         (a, b) => a.date - b.date
       );
-      const dailyDataMap = new Map();
-      sortedData.forEach((point) => {
-        const date = new Date(point.date * 1000).toDateString();
-        dailyDataMap.set(date, point);
-      });
-      const dailyData = Array.from(dailyDataMap.values());
+
       this.overallChartSeries = [
         {
           name: "Overall Points",
-          data: dailyData.map((point) => ({
+          data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.overall_points,
             overall_rank: point.overall_rank,
           })),
         },
       ];
+
       this.soldierChartSeries = [
         {
           name: "Soldier Points",
-          data: dailyData.map((point) => ({
+          data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.soldier_points,
             soldier_rank: point.soldier_rank,
           })),
         },
       ];
+
       this.demomanChartSeries = [
         {
           name: "Demoman Points",
-          data: dailyData.map((point) => ({
+          data: sortedData.map((point) => ({
             x: point.date * 1000,
             y: point.demoman_points,
             demoman_rank: point.demoman_rank,
           })),
         },
       ];
+
       this.loading.points = false;
     },
     goToRecords(mapId) {
@@ -2086,6 +2473,24 @@ export default {
     },
     getMedal(rank) {
       return ["🥇", "🥈", "🥉"][rank - 1] || "";
+    },
+    formatRankDisplay(rank) {
+      if (rank >= 11 && rank <= 15) {
+        return `G${rank - 10}`;
+      }
+      return `#${rank}`;
+    },
+    getPointsChangeClass(pointsChange) {
+      if (pointsChange > 0) return "points-gain";
+      if (pointsChange < 0) return "points-loss";
+      return "points-neutral";
+    },
+    formatPointsChange(pointsChange) {
+      const roundedPoints = Math.round(pointsChange * 100) / 100;
+
+      if (roundedPoints > 0) return `+${roundedPoints.toFixed(2)}pts`;
+      if (roundedPoints < 0) return `${roundedPoints.toFixed(2)}pts`;
+      return "0.00pts";
     },
     getRankName(rank, gender) {
       const titles = [
@@ -2167,18 +2572,6 @@ export default {
       }
       return { title: "Unranked", color: "--color-peon" };
     },
-    getHighestRank() {
-      if (this.player.rank_pref === "overall") return this.player.overall_rank;
-      else if (this.player.rank_pref === "soldier")
-        return this.player.soldier_rank;
-      else if (this.player.rank_pref === "demoman")
-        return this.player.demoman_rank;
-      return Math.min(
-        this.player.overall_rank,
-        this.player.soldier_rank,
-        this.player.demoman_rank
-      );
-    },
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
         ? countryCode.toLowerCase()
@@ -2204,7 +2597,6 @@ export default {
           };
           return;
         }
-        //console.log("Fetched user data:", data);
         this.player = {
           ...this.player,
           gender: data.gender,
@@ -2556,6 +2948,7 @@ export default {
   },
   beforeDestroy() {
     clearTimeout(this.debounceTimer);
+    this._cachedRankInfo = null;
   },
 };
 </script>
@@ -2604,6 +2997,11 @@ export default {
   width: 96px;
   height: 96px;
   border: 3px solid var(--color-primary);
+}
+.golden-avatar {
+  width: 96px;
+  height: 96px;
+  border: 3px solid gold;
 }
 .shared-avatar {
   width: 25px;
@@ -2721,13 +3119,12 @@ export default {
   width: 50%;
 }
 
-.main-filter-button {
+.global-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   border-radius: 8px;
-  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
   max-width: 150px;
 }
 
@@ -2758,11 +3155,18 @@ export default {
   padding-bottom: 15px;
 }
 
+.no-padding-bottom {
+  padding-bottom: 0;
+}
+
+.no-margin-top {
+  margin-top: 0 !important;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
 }
 
 .filter-title {
@@ -2803,6 +3207,12 @@ export default {
 
 .filter-button:hover:not(.active) {
   background: rgba(74, 111, 165, 0.8);
+}
+
+.gain-loss-filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .group-filter-container {
@@ -2886,7 +3296,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 12px;
+  margin-top: 25px;
 }
 
 .btn-secondary {
@@ -2911,6 +3321,9 @@ export default {
   display: flex;
   padding: 0;
   margin: 0;
+}
+.button-group {
+  border: none;
 }
 .card-header.tabs-header .btn {
   flex: 1;
@@ -3092,27 +3505,80 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 15px;
   padding-bottom: 10px;
 }
 .pagination-spacer {
   flex-grow: 1;
 }
-.latest-runs-btn {
-  color: var(--color-text);
-  border: 1px solid var(--color-border-soft);
-  font-weight: bold;
-  padding: 8px 16px;
-  border-radius: 8px;
-  box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
-}
-.latest-runs-btn:hover {
-  color: var(--color-text);
-  background: rgba(74, 111, 165, 0.8) !important;
-}
 .date-header {
   color: var(--color-text);
   padding-top: 5px;
+}
+
+/* Lost placement specific styles */
+.placement-change-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.points-change {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.points-gain {
+  color: #51cf66;
+  background: rgba(81, 207, 102, 0.1);
+}
+
+.points-loss {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.points-neutral {
+  color: #6c757d;
+  background: rgba(108, 117, 125, 0.1);
+}
+
+.placement-arrows {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-soft);
+}
+
+.placement-arrow {
+  font-size: 0.8rem;
+}
+
+.old-rank {
+  color: var(--color-text-soft);
+  text-decoration: line-through;
+}
+
+.new-rank {
+  font-weight: bold;
+}
+
+/* Adjust existing record item styles to accommodate both types */
+.record-item.gained-placement {
+  border-left: 3px solid #51cf66;
+}
+.record-item.lost-placement {
+  border-left: 3px solid #ff6b6b;
+}
+
+.record-time-detail.gained-placement,
+.record-time-detail.lost-placement {
+  flex-direction: column;
+  gap: 4px;
 }
 .placement-gold {
   color: #ffd700;
@@ -3221,63 +3687,6 @@ export default {
 .rank-option.selected {
   background: var(--color-primary);
   border-radius: 4px;
-}
-.rank-color-emperor {
-  color: var(--color-emperor);
-}
-.rank-color-empress {
-  color: var(--color-empress);
-}
-.rank-color-king {
-  color: var(--color-king);
-}
-.rank-color-queen {
-  color: var(--color-queen);
-}
-.rank-color-archduke {
-  color: var(--color-archduke);
-}
-.rank-color-lord {
-  color: var(--color-lord);
-}
-.rank-color-duke {
-  color: var(--color-duke);
-}
-.rank-color-prince {
-  color: var(--color-prince);
-}
-.rank-color-earl {
-  color: var(--color-earl);
-}
-.rank-color-sir {
-  color: var(--color-sir);
-}
-.rank-color-count {
-  color: var(--color-count);
-}
-.rank-color-baron {
-  color: var(--color-baron);
-}
-.rank-color-knight {
-  color: var(--color-knight);
-}
-.rank-color-noble {
-  color: var(--color-noble);
-}
-.rank-color-esquire {
-  color: var(--color-esquire);
-}
-.rank-color-jester {
-  color: var(--color-jester);
-}
-.rank-color-plebeian {
-  color: var(--color-plebeian);
-}
-.rank-color-peasant {
-  color: var(--color-peasant);
-}
-.rank-color-peon {
-  color: var(--color-peon);
 }
 .donator-badge {
   position: absolute;
@@ -3741,6 +4150,166 @@ export default {
 
   .right-nav-bar {
     right: 1px;
+  }
+  .record-time-detail {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .placement-change-indicator {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .placement-arrows {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .points-change {
+    font-size: 0.75rem;
+    padding: 1px 4px;
+  }
+
+  .record-detail.record-date {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .record-item .d-flex {
+    min-width: 0;
+  }
+
+  .record-class-map {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .record-map {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .record-time-detail .d-flex.flex-column {
+    align-items: flex-end;
+    min-width: 0;
+  }
+  .map-section {
+    padding: 15px 10px;
+  }
+
+  .map-container {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .map-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .map-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .map-card {
+    border-radius: 15px;
+    padding: 15px;
+    padding-bottom: 20px;
+    min-height: 280px;
+  }
+
+  .map-card:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+  }
+
+  .map-card-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .map-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .map-rating-pill {
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    min-width: 30px;
+  }
+
+  .map-rating-label {
+    font-size: 0.65rem;
+  }
+
+  .record-row {
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+
+  .map-class-icon {
+    height: 18px;
+    width: 18px;
+  }
+
+  .map-search-overlay {
+    padding: 20px;
+  }
+
+  .map-search-container {
+    padding: 15px;
+    margin: 10px;
+    max-height: 85vh;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .search-icon {
+    left: 10px;
+  }
+
+  .search-input {
+    padding: 10px 10px 10px 35px;
+    font-size: 16px;
+  }
+
+  .search-results-dropdown {
+    max-height: 150px;
+  }
+
+  .search-results-dropdown li {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .cancel-button {
+    padding: 8px 16px;
+    min-width: 70px;
+  }
+
+  .class-icons {
+    gap: 10px;
+  }
+
+  .class-option {
+    min-width: 70px;
+    padding: 8px;
+  }
+
+  .class-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .class-option span {
+    font-size: 11px;
   }
 }
 </style>

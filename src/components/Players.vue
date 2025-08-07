@@ -15,7 +15,7 @@
         </div>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <div class="category-tabs-container my-4">
+      <div class="category-tabs-container">
         <div class="category-tabs">
           <button
             v-for="cat in categoryNames"
@@ -28,7 +28,7 @@
           </button>
         </div>
       </div>
-      <div class="subcategory-container my-3">
+      <div class="subcategory-container">
         <div class="subcategory-pills">
           <template v-if="hasCountSubmenu(selectedCategory)">
             <div class="pill-row">
@@ -714,42 +714,40 @@ export default {
 }
 
 .category-tabs-container {
-  width: 100%;
   display: flex;
   justify-content: center;
 }
 
 .category-tabs {
   display: flex;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 4px;
-  gap: 2px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  border: 1px solid var(--color-border-soft);
+  padding: 5px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .category-tab {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
   background: transparent;
-  color: var(--color-text);
-  font-weight: bold;
-  font-size: 14px;
+  border: none;
+  color: var(--color-text-soft);
+  padding: 15px 25px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
   white-space: nowrap;
-  text-transform: uppercase;
-  transition: transform 0.3s ease;
-}
-
-.category-tab:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  font-size: 16px;
 }
 
 .category-tab.active {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.category-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
 
@@ -757,6 +755,7 @@ export default {
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 1.5rem;
 }
 
 .subcategory-pills {
@@ -766,6 +765,8 @@ export default {
   justify-content: center;
   align-items: center;
   max-width: 100%;
+  padding: 15px;
+  border-radius: 25px;
 }
 
 .pill-row {
@@ -777,36 +778,27 @@ export default {
 }
 
 .subcategory-pill {
-  padding: 8px 16px;
   border: 1px solid var(--color-border-soft);
+  color: var(--color-text-soft);
+  padding: 10px 20px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-weight: bold;
-  font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: transform 0.3s ease;
-}
-
-.subcategory-pill:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
-  transform: scale(1.03);
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .subcategory-pill.active {
-  background: rgba(74, 111, 165, 0.8) !important;
-  border-color: rgba(74, 111, 165, 0.8) !important;
-  color: var(--color-text);
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
-.count-pill {
-  border-style: dashed;
+.subcategory-pill:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
 }
 
 .count-badge {

@@ -92,14 +92,11 @@
           </div>
         </div>
         <hr class="divider" style="width: 100%; margin-top: 100px" />
-
-        <!-- Today's Top Players Section -->
         <div class="section">
           <div class="container">
             <h2 class="section-title">Most points gained</h2>
             <h5 class="section-title-subtitle">(past 3 days)</h5>
             <div class="top-players-grid">
-              <!-- Soldier Top Players -->
               <div class="class-section">
                 <h5 class="section-subtitle">Soldier</h5>
                 <div class="players-list">
@@ -139,7 +136,6 @@
                   </SmartLink>
                 </div>
               </div>
-              <!-- Demoman Top Players -->
               <div class="class-section">
                 <h5 class="section-subtitle">Demoman</h5>
                 <div class="players-list">
@@ -182,7 +178,6 @@
             </div>
           </div>
         </div>
-
         <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
@@ -388,7 +383,6 @@ export default {
         if (!response.ok) throw new Error("Failed to fetch top players");
         const data = await response.json();
 
-        // Separate soldiers and demomen, take top 3 of each
         this.topSoldiers = data
           .filter((player) => player.class_type === "soldier")
           .sort((a, b) => b.points_gained - a.points_gained)
@@ -770,7 +764,6 @@ export default {
   position: relative;
   z-index: 10;
 }
-/* Top Players Styles */
 .top-players-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -787,7 +780,7 @@ export default {
   );
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1169,7 +1162,6 @@ export default {
     font-size: 0.7rem;
   }
 
-  /* Mobile styles for top players */
   .top-players-grid {
     grid-template-columns: 1fr;
     gap: 30px;

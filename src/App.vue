@@ -175,6 +175,15 @@
             </li>
             <li class="nav-item me-3">
               <router-link
+                to="/compare"
+                class="nav-link nav-link-bold"
+                :class="{ active: isNavItemActive('Compare') }"
+              >
+                <i class="bi bi-bar-chart"></i> Compare
+              </router-link>
+            </li>
+            <li class="nav-item me-3">
+              <router-link
                 to="/lookup"
                 class="nav-link nav-link-bold"
                 :class="{ active: isNavItemActive('Lookup') }"
@@ -925,19 +934,20 @@ html {
   background: rgba(74, 111, 165, 0.8);
 }
 
-.navbar-dark .navbar-nav .nav-link:focus,
-.navbar-dark .navbar-nav .nav-link:hover {
-  background: rgba(74, 111, 165, 0.8);
+.nav-link-bold {
+  border-bottom: 3px solid transparent !important;
 }
 
-.navbar-dark .navbar-nav .router-link-exact-active {
-  background: rgba(74, 111, 165, 0.8);
-  font-weight: bold;
+.nav-link-bold:hover {
+  color: var(--color-text);
+  border-bottom-color: #363a3d !important;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-link-bold.active {
-  background: rgba(74, 111, 165, 0.8);
-  font-weight: bold;
+  color: var(--color-text);
+  border-bottom-color: var(--color-primary, #007bff) !important;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .navbar-dark {
@@ -1208,16 +1218,6 @@ html {
   border-color: var(--color-border) !important;
 }
 
-@media (max-width: 576px) {
-  .login-popup-content {
-    padding: 1.5rem;
-  }
-
-  .popup-header h3 {
-    font-size: 1.25rem;
-  }
-}
-
 @media (max-width: 768px) {
   .navbar-collapse {
     background: var(--color-dark);
@@ -1264,6 +1264,24 @@ html {
 
   .user-section {
     align-self: center;
+  }
+  .footer {
+    padding: 0.75rem 0;
+  }
+
+  .footer .container-fluid {
+    padding: 0 0.5rem;
+  }
+
+  .footer-content {
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .footer-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    min-width: auto;
   }
 }
 </style>
@@ -1360,18 +1378,12 @@ html {
 
 .navbar-nav {
   justify-content: center;
+  padding-top: 5px;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-}
-
-.dropdown-toggle {
-  border-radius: 8px;
-  border: 0;
-  background: var(--color-dark);
-  color: var(--color-text);
 }
 
 .login-button {
@@ -1386,9 +1398,16 @@ html {
   border-radius: 4px;
 }
 
-.dropdown-toggle:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+.dropdown-toggle {
+  border-radius: 8px;
+  border: 0;
+  background: var(--color-dark);
   color: var(--color-text);
+}
+
+.dropdown-toggle:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .dropdown-menu {

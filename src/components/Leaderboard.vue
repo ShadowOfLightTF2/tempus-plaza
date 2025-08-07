@@ -6,7 +6,7 @@
     <hr class="row-divider" style="width: 100%" />
     <div
       v-if="courseCount > 0 || bonusCount > 0"
-      class="category-tabs-container my-4"
+      class="category-tabs-container"
     >
       <div class="category-tabs">
         <button
@@ -41,10 +41,7 @@
         </button>
       </div>
     </div>
-    <div
-      v-if="courseCount > 0 || bonusCount > 0"
-      class="subcategory-container my-3"
-    >
+    <div v-if="courseCount > 0 || bonusCount > 0" class="subcategory-container">
       <div class="subcategory-pills">
         <div v-show="selectedTypePill === 'Map'">
           <div class="pill-row">
@@ -495,10 +492,11 @@ export default {
         });
         if (!response.ok) {
           console.log("Response not ok:", response.status, response.statusText);
+          this.playerId = null;
           return null;
         }
         const result = await response.json();
-        this.playerId = result.data.playerid;
+        this.playerId = result.data?.playerid || null;
       } catch (error) {
         console.error("Error fetching user data:", error);
         return null;
@@ -604,35 +602,56 @@ export default {
         this.showMoreLoading = true;
       }
       this.error = null;
+
       try {
         let url;
-        let userurl;
+        let userurl = null;
+
         switch (type) {
           case "map":
             url = `${API_BASE_URL}/maps/${this.mapId}/null/records/${classType}/${offset}/${limit}`;
-            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/records/${classType}/${offset}/${limit}`;
+            if (this.playerId) {
+              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/records/${classType}/${offset}/${limit}`;
+            }
             break;
           case "course":
             if (index === null) {
               throw new Error("Course index is required for course records");
             }
             url = `${API_BASE_URL}/maps/${this.mapId}/null/course/${classType}/${index}/records/${offset}/${limit}`;
-            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/course/${classType}/${index}/records/${offset}/${limit}`;
+            if (this.playerId) {
+              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/course/${classType}/${index}/records/${offset}/${limit}`;
+            }
             break;
           case "bonus":
             if (index === null) {
               throw new Error("Bonus index is required for bonus records");
             }
             url = `${API_BASE_URL}/maps/${this.mapId}/null/bonus/${classType}/${index}/records/${offset}/${limit}`;
-            userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
+            if (this.playerId) {
+              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
+            }
             break;
           default:
             throw new Error(
               `Invalid type: ${type}. Must be 'map', 'course', or 'bonus'`
             );
         }
+
         const response = await axios.get(url);
-        const userResponse = await axios.get(userurl);
+
+        let userResponse = null;
+        if (userurl) {
+          try {
+            userResponse = await axios.get(userurl);
+          } catch (userError) {
+            console.warn(
+              "Error fetching user records (user may not have records):",
+              userError
+            );
+          }
+        }
+
         const capitalizedClassType = capitalizeFirstLetter(classType);
         if (offset === 0) {
           this[`selected${capitalizedClassType}Records`] = response.data;
@@ -647,7 +666,9 @@ export default {
           ];
         }
 
-        this.checkUserRecord(userResponse.data);
+        if (userResponse && userResponse.data) {
+          this.checkUserRecord(userResponse.data);
+        }
       } catch (error) {
         this.error = `Error fetching ${type} records.`;
         console.error(`Error fetching ${type} records:`, error);
@@ -656,7 +677,6 @@ export default {
         this.showMoreLoading = false;
       }
     },
-
     checkUserRecord(records) {
       if (this.playerId && records && records.length > 0) {
         records.forEach((record) => {
@@ -785,12 +805,14 @@ export default {
   flex-wrap: wrap;
 }
 .table-responsive {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-bottom: 0px;
 }
 .table-dark {
   margin: 0px;
   border-collapse: collapse;
+  min-width: 500px;
 }
 .table-dark th {
   background: var(--color-primary-dark);
@@ -962,6 +984,7 @@ export default {
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 1.5rem;
 }
 .subcategory-pills {
   display: flex;
@@ -978,42 +1001,59 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.subcategory-pill {
-  padding: 8px 16px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-weight: bold;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.subcategory-container {
+  width: 100%;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: transform 0.3s ease;
-}
-.subcategory-pill:hover {
-  background: rgba(74, 111, 165, 0.8);
-  transform: scale(1.03);
-}
-.subcategory-pill.active {
-  background: rgba(74, 111, 165, 0.8);
-  border-color: var(--color-primary);
-  color: var(--color-text);
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
-}
-.map-pill {
-  display: flex;
-  min-width: 200px;
   justify-content: center;
-  border-style: solid;
 }
-.course-pill {
-  border-style: solid;
+
+.subcategory-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  border-radius: 25px;
 }
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.subcategory-pill {
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-soft);
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  white-space: nowrap;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.subcategory-pill.active {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.subcategory-pill:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+}
+
+.map-pill,
+.course-pill,
 .bonus-pill {
+  display: flex;
+  justify-content: center;
   border-style: solid;
 }
 .category-pill:hover {
@@ -1033,40 +1073,41 @@ export default {
   }
 }
 .category-tabs-container {
-  width: 100%;
   display: flex;
   justify-content: center;
 }
+
 .category-tabs {
   display: flex;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 4px;
-  gap: 2px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
-  border: 1px solid var(--color-border-soft);
+  padding: 5px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .category-tab {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
   background: transparent;
-  color: var(--color-text);
-  font-weight: bold;
-  font-size: 14px;
+  border: none;
+  color: var(--color-text-soft);
+  padding: 10px 20px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
   white-space: nowrap;
-  transition: transform 0.3s ease;
+  font-size: 16px;
 }
-.category-tab:hover {
-  background: rgba(74, 111, 165, 0.8);
-  transform: scale(1.03);
-}
+
 .category-tab.active {
-  background: rgba(74, 111, 165, 0.8);
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.category-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 .row-divider {
   border: none;

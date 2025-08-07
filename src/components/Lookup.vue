@@ -214,6 +214,15 @@
                     >G{{ group }}</span
                   >
                 </label>
+                <label class="group-checkbox">
+                  <input
+                    type="checkbox"
+                    value="BT"
+                    v-model="selectedGroups"
+                    @change="onFilterChange"
+                  />
+                  <span class="group-badge group-bt">BT</span>
+                </label>
               </div>
             </div>
           </div>
@@ -252,30 +261,6 @@
                   />
                   <span>{{ typeOption }}</span>
                 </label>
-              </div>
-            </div>
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Sort by</h6>
-              <div class="dropdown">
-                <button
-                  class="btn btn-secondary dropdown-toggle"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {{ selectedSortOption }}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li v-for="option in dropdownOptions" :key="option.value">
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      @click.prevent="selectSortOption(option.value)"
-                      >{{ option.label }}</a
-                    >
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
@@ -352,16 +337,104 @@
               <table class="table table-dark">
                 <thead>
                   <tr>
-                    <th>Map</th>
+                    <th @click="setSortColumn('map')" class="sortable-header">
+                      Map
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'map'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
                     <th>Type</th>
                     <th>Class</th>
-                    <th></th>
-                    <th></th>
-                    <th>Time</th>
-                    <th>Rank</th>
-                    <th>Completion</th>
-                    <th>Points</th>
-                    <th>Date</th>
+                    <th @click="setSortColumn('tier')" class="sortable-header">
+                      T
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'tier'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th
+                      @click="setSortColumn('rating')"
+                      class="sortable-header"
+                    >
+                      R
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'rating'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th
+                      @click="setSortColumn('duration')"
+                      class="sortable-header"
+                    >
+                      Time
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'duration'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th @click="setSortColumn('rank')" class="sortable-header">
+                      Rank
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'rank'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th
+                      @click="setSortColumn('completion')"
+                      class="sortable-header"
+                    >
+                      Completion
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'completion'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th
+                      @click="setSortColumn('percentage')"
+                      class="sortable-header"
+                    >
+                      Percentile
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'percentage'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th
+                      @click="setSortColumn('points')"
+                      class="sortable-header"
+                    >
+                      Points
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'points'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
+                    <th @click="setSortColumn('time')" class="sortable-header">
+                      Date
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'time'"
+                      >
+                        {{ sortDirection === "desc" ? "↓" : "↑" }}
+                      </span>
+                    </th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -409,6 +482,16 @@
                       }}
                     </td>
                     <td>{{ record.completion_count }}</td>
+                    <td>
+                      {{
+                        record.rank && record.completion_count
+                          ? (
+                              (record.rank / record.completion_count) *
+                              100
+                            ).toFixed(1) + "%"
+                          : ""
+                      }}
+                    </td>
                     <td>{{ record.points !== null ? record.points : "" }}</td>
                     <td class="text-small">
                       {{
@@ -472,7 +555,8 @@ export default {
     availableRatings: [1, 2, 3, 4],
     availableGroups: [1, 2, 3, 4, 5],
     selectedGroups: [],
-    sortByDate: "newest",
+    sortByCategory: "time",
+    sortDirection: "asc",
     recordSearchQuery: "",
     searchQuery: "",
     searchResults: null,
@@ -483,20 +567,6 @@ export default {
       courseRecords: [],
       bonusRecords: [],
     },
-    dropdownOptions: [
-      { value: "newest", label: "Newest" },
-      { value: "oldest", label: "Oldest" },
-      { value: "highestRank", label: "Highest Rank" },
-      { value: "lowestRank", label: "Lowest Rank" },
-      { value: "pointsAscending", label: "Points Ascending" },
-      { value: "pointsDescending", label: "Points Descending" },
-      { value: "highestPercentage", label: "Highest %" },
-      { value: "lowestPercentage", label: "Lowest %" },
-      { value: "shortestDuration", label: "Shortest Duration" },
-      { value: "longestDuration", label: "Longest Duration" },
-      { value: "tierAscending", label: "Tier Ascending" },
-      { value: "tierDescending", label: "Tier Descending" },
-    ],
     validPlacements: [],
     displayCount: 300,
   }),
@@ -573,7 +643,21 @@ export default {
         }
 
         if (this.selectedGroups.length > 0) {
-          if (!this.validPlacements.includes(record.placement)) {
+          let shouldInclude = false;
+          if (
+            this.selectedGroups.includes("BT") &&
+            record.rank === record.completion_count
+          ) {
+            shouldInclude = true;
+          }
+          if (
+            this.validPlacements.length > 0 &&
+            this.validPlacements.includes(record.placement)
+          ) {
+            shouldInclude = true;
+          }
+
+          if (!shouldInclude) {
             return false;
           }
         }
@@ -588,42 +672,46 @@ export default {
       });
 
       return filtered.sort((a, b) => {
-        if (this.sortByDate === "newest") {
-          return b.date - a.date;
-        } else if (this.sortByDate === "oldest") {
-          return a.date - b.date;
-        } else if (this.sortByDate === "highestRank") {
-          return a.rank - b.rank;
-        } else if (this.sortByDate === "lowestRank") {
-          return b.rank - a.rank;
-        } else if (this.sortByDate === "pointsAscending") {
-          return a.points - b.points;
-        } else if (this.sortByDate === "pointsDescending") {
-          return b.points - a.points;
-        } else if (this.sortByDate === "highestPercentage") {
-          return b.completion_count / b.rank - a.completion_count / a.rank;
-        } else if (this.sortByDate === "lowestPercentage") {
-          return a.completion_count / a.rank - b.completion_count / b.rank;
-        } else if (this.sortByDate === "shortestDuration") {
-          return a.duration - b.duration;
-        } else if (this.sortByDate === "longestDuration") {
-          return b.duration - a.duration;
-        } else if (this.sortByDate === "tierAscending") {
-          return a.tier - b.tier;
-        } else if (this.sortByDate === "tierDescending") {
-          return b.tier - a.tier;
+        let comparison = 0;
+
+        switch (this.sortByCategory) {
+          case "time":
+            comparison = b.date - a.date;
+            break;
+          case "rank":
+            comparison = a.rank - b.rank;
+            break;
+          case "points":
+            comparison = b.points - a.points;
+            break;
+          case "percentage":
+            comparison =
+              a.rank / a.completion_count - b.rank / b.completion_count;
+            break;
+          case "duration":
+            comparison = a.duration - b.duration;
+            break;
+          case "tier":
+            comparison = a.tier - b.tier;
+            break;
+          case "rating":
+            comparison = a.rating - b.rating;
+            break;
+          case "completion":
+            comparison = a.completion_count - b.completion_count;
+            break;
+          case "map":
+            comparison = a.map_name.localeCompare(b.map_name);
+            break;
+          default:
+            comparison = b.date - a.date;
         }
-        return 0;
+
+        return this.sortDirection === "desc" ? -comparison : comparison;
       });
     },
     filteredRecords() {
       return this.filteredSortedItems.slice(0, this.displayCount);
-    },
-    selectedSortOption() {
-      const option = this.dropdownOptions.find(
-        (opt) => opt.value === this.sortByDate
-      );
-      return option ? option.label : "Newest";
     },
   },
   watch: {
@@ -664,21 +752,28 @@ export default {
         },
       });
 
-      if (!response.ok) {
-        console.log("Response not ok:", response.status, response.statusText);
-        return null;
+      if (response.ok) {
+        const user = await response.json();
+        this.playerId = user.data?.playerid || null;
+        this.playerName = user.data?.name || null;
+      } else {
+        console.log(
+          "User not logged in or auth failed:",
+          response.status,
+          response.statusText
+        );
+        this.playerId = null;
+        this.playerName = null;
       }
-
-      const user = await response.json();
-      console.log("User data response in lookup:", user);
-      this.playerId = user.data.playerid;
-      this.playerName = user.data.name;
     } catch (error) {
       console.error("Error fetching user data:", error);
+      this.playerId = null;
+      this.playerName = null;
     }
+
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
-      this.findPlayerName(this.playerId);
+      await this.findPlayerName(this.playerId);
     } else if (this.playerId) {
       console.log("playerId:", this.playerId);
       this.selectedPlayerName = this.playerName;
@@ -687,11 +782,20 @@ export default {
         params: { playerId: this.playerId },
       });
     }
+
     if (this.playerId) {
-      this.fetchRecords();
+      await this.fetchRecords();
     }
   },
   methods: {
+    setSortColumn(column) {
+      if (this.sortByCategory === column) {
+        this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
+      } else {
+        this.sortByCategory = column;
+        this.sortDirection = "asc";
+      }
+    },
     onFilterChange() {
       // This method can be used to trigger any additional filter change logic
     },
@@ -811,11 +915,15 @@ export default {
       });
     },
     selectSortOption(value) {
-      this.sortByDate = value;
+      this.sortByCategory = value;
+    },
+    toggleSortDirection() {
+      this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
     },
     async fetchRecords() {
       this.loading = true;
       this.error = null;
+
       const playerId = this.playerId;
       if (!playerId) {
         this.error = "Please select a player first.";
@@ -829,10 +937,21 @@ export default {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch records");
+          if (response.status === 404) {
+            throw new Error("Player not found");
+          } else if (response.status === 403) {
+            throw new Error("Access denied");
+          } else {
+            throw new Error(`Failed to fetch records (${response.status})`);
+          }
         }
 
         const allRecords = await response.json();
+
+        if (!Array.isArray(allRecords)) {
+          console.warn("Expected array but got:", typeof allRecords);
+          throw new Error("Invalid data format received");
+        }
 
         this.cachedRecords = {
           records: allRecords.filter((record) => record.type === "map"),
@@ -845,8 +964,16 @@ export default {
 
         this.records = allRecords;
       } catch (error) {
-        this.error = "Error fetching records.";
+        this.error = error.message || "Error fetching records.";
         console.error("Error fetching records:", error);
+
+        this.cachedRecords = {
+          records: [],
+          courseRecords: [],
+          bonusRecords: [],
+          allRecords: [],
+        };
+        this.records = [];
       } finally {
         this.loading = false;
       }
@@ -859,6 +986,9 @@ export default {
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
+      this.selectedGroups = [];
+      this.sortByCategory = "time";
+      this.sortDirection = "desc";
     },
     formatDuration(unixTimestamp) {
       return formatDuration(unixTimestamp);
@@ -871,6 +1001,26 @@ export default {
 </script>
 
 <style scoped>
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.sortable-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sort-indicator {
+  margin-left: 5px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.sortable-header:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 .clickable {
   cursor: pointer;
   color: var(--color-text-clickable) !important;
@@ -971,6 +1121,7 @@ export default {
   align-items: center;
   gap: 8px;
 }
+
 .clear-filter {
   padding-left: 50px;
 }
@@ -1036,6 +1187,33 @@ export default {
 
 .clear-filters-btn {
   margin-right: 10px;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-toggle-btn {
+  padding: 6px 10px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.sort-toggle-btn:hover {
+  background-color: rgba(74, 111, 165, 0.8);
+  transform: scale(1.05);
+}
+
+.sort-toggle-btn span {
+  line-height: 1;
 }
 
 .search-results-dropdown {
@@ -1318,6 +1496,11 @@ export default {
   color: var(--color-dark) !important;
 }
 
+.group-badge.group-bt {
+  background: #383838 !important;
+  color: var(--color-text) !important;
+}
+
 .group-badge.group-1 {
   background: #ff9797af !important;
   color: var(--color-dark) !important;
@@ -1593,6 +1776,7 @@ export default {
     padding: none;
     margin: none;
     margin-top: 10px;
+    padding-left: 0px;
   }
   .filter-section {
     padding: 15px;
