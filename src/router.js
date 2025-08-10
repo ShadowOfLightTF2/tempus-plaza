@@ -16,6 +16,7 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: { preserveScroll: false },
   },
   {
     path: '/servers/:view?',
@@ -82,7 +83,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   strict: false,
-  scrollBehavior() { return { top: 0 }; },
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.meta.preserveScroll === false) {
+      return { left: 0, top: 0, behavior: 'auto' }
+    }
+    return false
+  },
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active'
 });

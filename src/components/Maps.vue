@@ -19,104 +19,142 @@
         <hr class="row-divider" style="width: 75%" />
         <div class="filter-section">
           <div class="filter-content">
-            <div class="filter-columns">
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title text-light mb-2">Soldier tiers</h6>
-                  <div class="tier-filter-container">
-                    <div class="tier-filters">
-                      <label
-                        v-for="tier in availableTiers"
-                        :key="'soldier-tier-' + tier"
-                        class="tier-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="tier"
-                          v-model="selectedSoldierTiers"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`tier-badge tier-${tier}`">{{
-                          tier
-                        }}</span>
-                      </label>
+            <div
+              class="filter-columns"
+              style="flex-direction: column; gap: 20px"
+            >
+              <div
+                class="filter-row"
+                style="display: flex; gap: 40px; justify-content: center"
+              >
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Soldier tiers</h6>
+                    <div class="tier-filter-container">
+                      <div class="tier-filters">
+                        <label
+                          v-for="tier in availableTiers"
+                          :key="'soldier-tier-' + tier"
+                          class="tier-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="tier"
+                            v-model="selectedSoldierTiers"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`tier-badge tier-${tier}`">{{
+                            tier
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="filter-group mt-3">
-                  <h6 class="filter-title text-light mb-2">Soldier ratings</h6>
-                  <div class="rating-filter-container">
-                    <div class="rating-filters">
-                      <label
-                        v-for="rating in availableRatings"
-                        :key="'soldier-rating-' + rating"
-                        class="rating-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="rating"
-                          v-model="selectedSoldierRatings"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`rating-badge rating-${rating}`">{{
-                          rating
-                        }}</span>
-                      </label>
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Demoman tiers</h6>
+                    <div class="tier-filter-container">
+                      <div class="tier-filters">
+                        <label
+                          v-for="tier in availableTiers"
+                          :key="'demo-tier-' + tier"
+                          class="tier-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="tier"
+                            v-model="selectedDemomanTiers"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`tier-badge tier-${tier}`">{{
+                            tier
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title text-light mb-2">Demoman tiers</h6>
-                  <div class="tier-filter-container">
-                    <div class="tier-filters">
-                      <label
-                        v-for="tier in availableTiers"
-                        :key="'demo-tier-' + tier"
-                        class="tier-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="tier"
-                          v-model="selectedDemomanTiers"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`tier-badge tier-${tier}`">{{
-                          tier
-                        }}</span>
-                      </label>
+              <div
+                class="filter-row responsive-ratings-row"
+                style="
+                  display: flex;
+                  gap: 40px;
+                  justify-content: center;
+                  align-items: flex-start;
+                  width: 100%;
+                "
+              >
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Soldier ratings</h6>
+                    <div class="rating-filter-container">
+                      <div class="rating-filters">
+                        <label
+                          v-for="rating in availableRatings"
+                          :key="'soldier-rating-' + rating"
+                          class="rating-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="rating"
+                            v-model="selectedSoldierRatings"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`rating-badge rating-${rating}`">{{
+                            rating
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <div class="filter-group mt-3">
-                  <h6 class="filter-title text-light mb-2">Demoman ratings</h6>
-                  <div class="rating-filter-container">
-                    <div class="rating-filters">
-                      <label
-                        v-for="rating in availableRatings"
-                        :key="'demo-rating-' + rating"
-                        class="rating-checkbox"
+                <div class="filter-column intended-class-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Intended Class</h6>
+                    <div class="intended-class-buttons">
+                      <button
+                        v-for="cls in availableIntendedClasses"
+                        :key="cls.id"
+                        @click="toggleIntendedClass(cls.id)"
+                        :class="{
+                          active: selectedIntendedClasses.includes(cls.id),
+                        }"
+                        class="intended-class-btn"
                       >
-                        <input
-                          type="checkbox"
-                          :value="rating"
-                          v-model="selectedDemomanRatings"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`rating-badge rating-${rating}`">{{
-                          rating
-                        }}</span>
-                      </label>
+                        <img :src="cls.icon" :alt="cls.label" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Demoman ratings</h6>
+                    <div class="rating-filter-container">
+                      <div class="rating-filters">
+                        <label
+                          v-for="rating in availableRatings"
+                          :key="'demo-rating-' + rating"
+                          class="rating-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="rating"
+                            v-model="selectedDemomanRatings"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`rating-badge rating-${rating}`">{{
+                            rating
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
             <div class="column-toggles-section">
               <div class="column-toggles">
                 <button
@@ -148,12 +186,11 @@
                 </button>
               </div>
             </div>
-
             <div class="filter-actions">
               <button @click="clearAllFilters" class="btn btn-secondary">
                 Clear filters
               </button>
-              <span class="text-light"
+              <span class="filter-count"
                 >Showing {{ filteredAndSortedItems.length }} of
                 {{ currentItems.length }} items</span
               >
@@ -182,7 +219,7 @@
         </div>
         <hr class="row-divider" style="width: 75%" />
         <div v-if="loading" class="text-center">
-          <div class="spinner-border text-light" role="status">
+          <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading {{ currentView }}...</span>
           </div>
         </div>
@@ -450,6 +487,11 @@ export default {
       selectedDemomanRatings: [],
       availableTiers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
       availableRatings: [1, 2, 3, 4],
+      selectedIntendedClasses: [],
+      availableIntendedClasses: [
+        { id: 3, label: "Soldier", icon: "/icons/soldier.png" },
+        { id: 4, label: "Demoman", icon: "/icons/demoman.png" },
+      ],
       eliminatedRows: new Set(),
       isPickerActive: false,
       pickerComplete: false,
@@ -509,6 +551,20 @@ export default {
           return false;
         return true;
       });
+      if (this.selectedIntendedClasses.length > 0) {
+        filtered = filtered.filter((item) => {
+          if (
+            this.selectedIntendedClasses.includes(3) &&
+            this.selectedIntendedClasses.includes(4)
+          ) {
+            return item.intended_class === 5;
+          }
+          return (
+            this.selectedIntendedClasses.includes(item.intended_class) ||
+            item.intended_class === 5
+          );
+        });
+      }
 
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
@@ -625,6 +681,16 @@ export default {
         this.showCompletionColumns = !this.showCompletionColumns;
       }
     },
+    toggleIntendedClass(clsId) {
+      if (this.selectedIntendedClasses.includes(clsId)) {
+        this.selectedIntendedClasses = this.selectedIntendedClasses.filter(
+          (id) => id !== clsId
+        );
+      } else {
+        this.selectedIntendedClasses.push(clsId);
+      }
+      this.onFilterChange();
+    },
     getMapRoute(item) {
       const itemId = this.currentView === "maps" ? item.id : item.map_id;
       return { name: "MapPage", params: { mapId: itemId } };
@@ -712,6 +778,7 @@ export default {
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
+      this.selectedIntendedClasses = [];
       this.showSoldierColumns = true;
       this.showDemomanColumns = true;
       this.showCompletionColumns = false;
@@ -995,6 +1062,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .filter-columns {
@@ -1017,7 +1085,7 @@ export default {
 
 .filter-title {
   color: #ffffff;
-  font-weight: 600;
+  font-weight: bold;
   margin-bottom: 10px;
   text-align: center;
   text-transform: uppercase;
@@ -1097,8 +1165,8 @@ export default {
   justify-content: center;
 }
 
-.text-light {
-  color: #ffffff;
+.filter-count {
+  color: white;
   font-weight: bold;
 }
 
@@ -1341,6 +1409,56 @@ export default {
   opacity: 0.6;
 }
 
+.intended-class-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.intended-class-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.intended-class-btn img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.intended-class-btn.active {
+  background: rgba(165, 165, 165, 0.5);
+  border-color: var(--color-border);
+  color: white;
+}
+
+.intended-class-btn:hover {
+  background: rgba(165, 165, 165, 0.3);
+  border-color: var(--color-border);
+}
+
+.spinner-border {
+  color: white;
+  font-weight: bold;
+  width: 3rem;
+  height: 3rem;
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 8px;
+  color: #ff6b6b;
+}
+
 @media (max-width: 767.98px) {
   .button-group {
     flex-direction: row;
@@ -1424,6 +1542,32 @@ export default {
   .picker-controls {
     flex-direction: column;
     align-items: center;
+  }
+}
+@media (max-width: 767.98px) {
+  .responsive-ratings-row {
+    flex-direction: column !important;
+    gap: 20px !important;
+    align-items: center !important;
+  }
+
+  .responsive-ratings-row .filter-column {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .intended-class-buttons {
+    gap: 10px;
+  }
+
+  .intended-class-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .intended-class-btn img {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>

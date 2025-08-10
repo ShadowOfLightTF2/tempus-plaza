@@ -215,7 +215,6 @@
         </div>
         <div class="row main-content-wrapper">
           <div class="col-md-3 stats-boxes">
-            <!-- Soldier stats on the left -->
             <div class="stats-container">
               <div class="class-section">
                 <div class="card stat-block mb-3">
@@ -367,7 +366,6 @@
                           tag="div"
                           class="d-flex align-items-center justify-content-between px-2 py-2 mb-2 shared-row"
                         >
-                          <!-- Avatar + Name -->
                           <div
                             class="d-flex align-items-center shared-row-name"
                           >
@@ -383,7 +381,6 @@
                               {{ sharedPlayer.playerName }}
                             </span>
                           </div>
-                          <!-- Count -->
                           <div
                             class="text-end fw-bold shared-count"
                             style="min-width: 24px"
@@ -399,13 +396,11 @@
             </div>
           </div>
           <div class="col-md-6 tabs-container">
-            <!-- Recent runs in the middle -->
             <div class="records-card">
               <div
                 class="card-header tabs-header"
                 style="background: rgba(255, 255, 255, 0.05)"
               >
-                <!-- Tab Navigation -->
                 <div class="button-group">
                   <button
                     @click="switchRecordsTab('recent-runs')"
@@ -424,8 +419,6 @@
                     Changed Placements
                   </button>
                 </div>
-
-                <!-- Filter and All Runs buttons -->
                 <div
                   class="d-flex justify-content-between align-items-center button-container-wrapper mt-3"
                 >
@@ -457,8 +450,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Filter section -->
               <div
                 v-if="showFilterSection"
                 class="filter-section"
@@ -632,16 +623,12 @@
                 style="background: rgba(255, 255, 255, 0.05)"
               >
                 <div class="records-section">
-                  <!-- Loading state -->
                   <div v-if="currentLoadingState" class="text-center">
                     <div class="spinner-border text-light" role="status">
                       <span class="visually-hidden">Loading...</span>
                     </div>
                   </div>
-
-                  <!-- Content based on active tab -->
                   <div v-else>
-                    <!-- Recent Runs Content -->
                     <div v-if="activeRecordsTab === 'recent-runs'">
                       <div
                         v-for="(group, date) in filteredAndPaginatedRecords"
@@ -720,8 +707,6 @@
                         </ul>
                       </div>
                     </div>
-
-                    <!-- Changed Placements Content -->
                     <div v-else-if="activeRecordsTab === 'changed-placements'">
                       <div
                         v-for="(
@@ -785,7 +770,6 @@
                               "
                             >
                               <div class="d-flex flex-column align-items-end">
-                                <!-- Rank change -->
                                 <div class="placement-change-indicator">
                                   <span class="placement-arrows">
                                     <span
@@ -838,8 +822,6 @@
                         </ul>
                       </div>
                     </div>
-
-                    <!-- Pagination controls (shared between both tabs) -->
                     <div class="pagination-controls">
                       <button
                         v-if="currentPage > 1"
@@ -863,7 +845,6 @@
             </div>
           </div>
           <div class="col-md-3 stats-boxes">
-            <!-- Demoman stats on the right -->
             <div class="stats-container">
               <div class="class-section">
                 <div class="card stat-block mb-3">
@@ -990,7 +971,6 @@
                         </div>
                       </div>
                       <div v-else class="shared-body">
-                        <!-- Header Row -->
                         <div
                           class="d-flex align-items-center justify-content-between px-2 mb-2"
                           style="
@@ -1006,14 +986,12 @@
                           </div>
                           <div class="text-end">Count</div>
                         </div>
-                        <!-- Player Rows -->
                         <div
                           v-for="(sharedPlayer, index) in sharedTimesDemoman"
                           :key="index"
                           class="d-flex align-items-center justify-content-between px-2 py-2 mb-2 shared-row"
                           @click="goToPlayer(sharedPlayer.playerId)"
                         >
-                          <!-- Avatar + Name -->
                           <div
                             class="d-flex align-items-center shared-row-name"
                           >
@@ -1029,7 +1007,6 @@
                               {{ sharedPlayer.playerName }}
                             </span>
                           </div>
-                          <!-- Count -->
                           <div
                             class="text-end fw-bold shared-count"
                             style="min-width: 24px"
@@ -1948,14 +1925,6 @@ export default {
   watch: {
     profileUpdateTracker: {
       handler(newTracker) {
-        // console.log(
-        //   "Profile updated! New rank:",
-        //   newTracker.rank,
-        //   "New color:",
-        //   newTracker.color
-        // );
-        //this.refreshPlayerData();
-        //this.$router.go(0);
         this.fetchUserData(this.playerId);
       },
       deep: true,
@@ -3335,6 +3304,7 @@ export default {
 .card-map-body {
   width: 100%;
   padding: 0;
+  min-height: 500px;
 }
 
 .nav-bar {
@@ -3515,8 +3485,6 @@ export default {
   color: var(--color-text);
   padding-top: 5px;
 }
-
-/* Lost placement specific styles */
 .placement-change-indicator {
   display: flex;
   align-items: center;
@@ -3567,7 +3535,6 @@ export default {
   font-weight: bold;
 }
 
-/* Adjust existing record item styles to accommodate both types */
 .record-item.gained-placement {
   border-left: 3px solid #51cf66;
 }

@@ -38,7 +38,6 @@
               (loadingMaps || loadingPlayers || searchResults)
             "
           >
-            <!-- Maps Section -->
             <div class="search-section">
               <h6>Maps</h6>
               <div v-if="loadingMaps" class="loading-container">
@@ -60,8 +59,6 @@
                 No maps found
               </div>
             </div>
-
-            <!-- Players Section -->
             <div class="search-section">
               <h6>Players</h6>
               <div v-if="loadingPlayers" class="loading-container">
@@ -538,7 +535,7 @@ export default {
 }
 
 .hero {
-  padding: 80px 0;
+  padding: 50px 0 100px 0;
   text-align: center;
   position: relative;
 }
@@ -1031,43 +1028,43 @@ export default {
   color: var(--color-text);
 }
 .tier-color.tier-1 {
-  background: rgba(110, 208, 246, 0.5); /* Cold Blue */
+  background: rgba(110, 208, 246, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-2 {
-  background: rgba(86, 179, 233, 0.5); /* Sky Blue */
+  background: rgba(86, 179, 233, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-3 {
-  background: rgba(69, 184, 173, 0.5); /* Teal */
+  background: rgba(69, 184, 173, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-4 {
-  background: rgba(101, 193, 139, 0.5); /* Mint */
+  background: rgba(101, 193, 139, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-5 {
-  background: rgba(163, 217, 119, 0.5); /* Lime Green */
+  background: rgba(163, 217, 119, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-6 {
-  background: rgba(243, 230, 131, 0.5); /* Yellow */
+  background: rgba(243, 230, 131, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-7 {
-  background: rgba(246, 194, 103, 0.5); /* Orange-Yellow */
+  background: rgba(246, 194, 103, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-8 {
-  background: rgba(240, 141, 91, 0.5); /* Orange */
+  background: rgba(240, 141, 91, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-9 {
-  background: rgba(230, 105, 94, 0.5); /* Coral */
+  background: rgba(230, 105, 94, 0.5);
   color: var(--color-text);
 }
 .tier-color.tier-10 {
-  background: rgba(214, 69, 69, 0.5); /* Red */
+  background: rgba(214, 69, 69, 0.5);
   color: var(--color-text);
 }
 

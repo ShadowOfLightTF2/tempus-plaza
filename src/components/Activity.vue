@@ -706,7 +706,7 @@ export default {
   width: 100%;
   border-radius: 0 0 8px 8px;
   border-top: none;
-  border: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-header-content {
@@ -719,6 +719,7 @@ export default {
     rgba(74, 111, 165, 0.3),
     rgba(37, 55, 82, 0.3)
   );
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table-header-icon {
@@ -771,6 +772,18 @@ export default {
   font-weight: bold;
   padding: 6px;
   border: 2px solid var(--color-border-soft);
+}
+
+.table-dark td:first-child {
+  border-left: none !important;
+}
+
+.table-dark td:last-child {
+  border-right: none !important;
+}
+
+.table-dark tr:last-child td {
+  border-bottom: none !important;
 }
 
 .table-dark tr:nth-child(odd) td {

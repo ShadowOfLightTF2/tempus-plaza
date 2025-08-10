@@ -89,96 +89,141 @@
       <hr class="row-divider" style="width: 75%" />
       <div class="filter-section">
         <div class="filter-content">
-          <div class="filter-columns">
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Soldier Tiers</h6>
-              <div class="tier-filter-container">
-                <div class="tier-filters">
-                  <label
-                    v-for="tier in availableTiers"
-                    :key="'soldier-tier-' + tier"
-                    class="tier-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="tier"
-                      v-model="selectedSoldierTiers"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                  </label>
+          <div class="filter-columns" style="flex-direction: column; gap: 20px">
+            <div
+              class="filter-row"
+              style="display: flex; gap: 40px; justify-content: center"
+            >
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title mb-2">Soldier tiers</h6>
+                  <div class="tier-filter-container">
+                    <div class="tier-filters">
+                      <label
+                        v-for="tier in availableTiers"
+                        :key="'soldier-tier-' + tier"
+                        class="tier-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="tier"
+                          v-model="selectedSoldierTiers"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`tier-badge tier-${tier}`">{{
+                          tier
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title mb-2">Demoman tiers</h6>
+                  <div class="tier-filter-container">
+                    <div class="tier-filters">
+                      <label
+                        v-for="tier in availableTiers"
+                        :key="'demo-tier-' + tier"
+                        class="tier-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="tier"
+                          v-model="selectedDemomanTiers"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`tier-badge tier-${tier}`">{{
+                          tier
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Demoman Tiers</h6>
-              <div class="tier-filter-container">
-                <div class="tier-filters">
-                  <label
-                    v-for="tier in availableTiers"
-                    :key="'demo-tier-' + tier"
-                    class="tier-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="tier"
-                      v-model="selectedDemomanTiers"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`tier-badge tier-${tier}`">{{ tier }}</span>
-                  </label>
+            <div
+              class="filter-row responsive-ratings-row"
+              style="
+                display: flex;
+                gap: 40px;
+                justify-content: center;
+                align-items: flex-start;
+                width: 100%;
+              "
+            >
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title mb-2">Soldier ratings</h6>
+                  <div class="rating-filter-container">
+                    <div class="rating-filters">
+                      <label
+                        v-for="rating in availableRatings"
+                        :key="'soldier-rating-' + rating"
+                        class="rating-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="rating"
+                          v-model="selectedSoldierRatings"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`rating-badge rating-${rating}`">{{
+                          rating
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="filter-columns">
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Soldier Ratings</h6>
-              <div class="rating-filter-container">
-                <div class="rating-filters">
-                  <label
-                    v-for="rating in availableRatings"
-                    :key="'soldier-rating-' + rating"
-                    class="rating-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="rating"
-                      v-model="selectedSoldierRatings"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`rating-badge rating-${rating}`">{{
-                      rating
-                    }}</span>
-                  </label>
+              <div class="filter-column intended-class-column">
+                <div class="filter-group">
+                  <h6 class="filter-title mb-2">Intended Class</h6>
+                  <div class="intended-class-buttons">
+                    <button
+                      v-for="cls in availableIntendedClasses"
+                      :key="cls.id"
+                      @click="toggleIntendedClass(cls.id)"
+                      :class="{
+                        active: selectedIntendedClasses.includes(cls.id),
+                      }"
+                      class="intended-class-btn"
+                    >
+                      <img :src="cls.icon" :alt="cls.label" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Demoman Ratings</h6>
-              <div class="rating-filter-container">
-                <div class="rating-filters">
-                  <label
-                    v-for="rating in availableRatings"
-                    :key="'demo-rating-' + rating"
-                    class="rating-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="rating"
-                      v-model="selectedDemomanRatings"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`rating-badge rating-${rating}`">{{
-                      rating
-                    }}</span>
-                  </label>
+              <div class="filter-column">
+                <div class="filter-group">
+                  <h6 class="filter-title mb-2">Demoman ratings</h6>
+                  <div class="rating-filter-container">
+                    <div class="rating-filters">
+                      <label
+                        v-for="rating in availableRatings"
+                        :key="'demo-rating-' + rating"
+                        class="rating-checkbox"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="rating"
+                          v-model="selectedDemomanRatings"
+                          @change="onFilterChange"
+                        />
+                        <span :class="`rating-badge rating-${rating}`">{{
+                          rating
+                        }}</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="filter-group">
-            <h6 class="filter-title text-light mb-2">Placement</h6>
+            <h6 class="filter-title mb-2">Placement</h6>
             <div class="group-filter-container">
               <div class="group-filters">
                 <label class="group-checkbox">
@@ -228,7 +273,7 @@
           </div>
           <div class="filter-columns">
             <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Class</h6>
+              <h6 class="filter-title mb-2">Class</h6>
               <div class="class-filter-container">
                 <label
                   v-for="classOption in ['soldier', 'demoman']"
@@ -246,7 +291,7 @@
               </div>
             </div>
             <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Type</h6>
+              <h6 class="filter-title mb-2">Type</h6>
               <div class="type-filter-container">
                 <label
                   v-for="typeOption in ['map', 'course', 'bonus']"
@@ -266,7 +311,7 @@
           </div>
           <div class="filter-actions">
             <div class="filter-group">
-              <h6 class="filter-title text-light mb-2">Status</h6>
+              <h6 class="filter-title mb-2">Status</h6>
               <div class="status-filter-container">
                 <label
                   v-for="statusOption in ['completed', 'incomplete']"
@@ -291,7 +336,7 @@
               >
                 Clear filters
               </button>
-              <span class="text-light"
+              <span class="filter-count"
                 >Displaying {{ filteredSortedItems.length }} of
                 {{ totalRecordsLength() }} records</span
               >
@@ -301,7 +346,7 @@
       </div>
       <hr class="row-divider" style="width: 75%" />
       <div v-if="loading" class="text-center">
-        <div class="spinner-border text-light" role="status">
+        <div class="spinner-border" role="status">
           <span class="visually-hidden">Loading records...</span>
         </div>
       </div>
@@ -551,8 +596,13 @@ export default {
     selectedSoldierRatings: [],
     selectedDemomanTiers: [],
     selectedDemomanRatings: [],
-    availableTiers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    availableTiers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
     availableRatings: [1, 2, 3, 4],
+    selectedIntendedClasses: [],
+    availableIntendedClasses: [
+      { id: 3, label: "Soldier", icon: "/icons/soldier.png" },
+      { id: 4, label: "Demoman", icon: "/icons/demoman.png" },
+    ],
     availableGroups: [1, 2, 3, 4, 5],
     selectedGroups: [],
     sortByCategory: "time",
@@ -659,6 +709,24 @@ export default {
 
           if (!shouldInclude) {
             return false;
+          }
+        }
+
+        if (this.selectedIntendedClasses.length > 0) {
+          if (
+            this.selectedIntendedClasses.includes(3) &&
+            this.selectedIntendedClasses.includes(4)
+          ) {
+            if (record.intended_class !== 5) {
+              return false;
+            }
+          } else {
+            if (
+              !this.selectedIntendedClasses.includes(record.intended_class) &&
+              record.intended_class !== 5
+            ) {
+              return false;
+            }
           }
         }
 
@@ -798,6 +866,16 @@ export default {
     },
     onFilterChange() {
       // This method can be used to trigger any additional filter change logic
+    },
+    toggleIntendedClass(clsId) {
+      if (this.selectedIntendedClasses.includes(clsId)) {
+        this.selectedIntendedClasses = this.selectedIntendedClasses.filter(
+          (id) => id !== clsId
+        );
+      } else {
+        this.selectedIntendedClasses.push(clsId);
+      }
+      this.onFilterChange();
     },
     formatPlacement(placement) {
       if (placement <= 10) {
@@ -986,6 +1064,7 @@ export default {
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
+      this.selectedIntendedClasses = [];
       this.selectedGroups = [];
       this.sortByCategory = "time";
       this.sortDirection = "desc";
@@ -1119,19 +1198,23 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
 }
 
 .clear-filter {
   padding-left: 50px;
 }
 
-.filter-title {
+.filter-count {
+  color: white;
   font-weight: bold;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+}
+
+.filter-title {
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 10px;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .class-filter-container,
@@ -1733,6 +1816,8 @@ export default {
 }
 
 .spinner-border {
+  color: white;
+  font-weight: bold;
   width: 3rem;
   height: 3rem;
 }
@@ -1850,6 +1935,153 @@ export default {
 
   .player-name-display h2 {
     font-size: 1.5rem;
+  }
+}
+.intended-class-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.intended-class-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.intended-class-btn img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.intended-class-btn.active {
+  background: rgba(165, 165, 165, 0.5);
+  border-color: var(--color-border);
+  color: white;
+}
+
+.intended-class-btn:hover {
+  background: rgba(165, 165, 165, 0.3);
+  border-color: var(--color-border);
+}
+
+@media (max-width: 767.98px) {
+  .button-group {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .toggle-btn {
+    justify-content: center;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .table-container {
+    width: 95vw;
+    overflow-x: auto;
+    border-radius: 0;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .table-dark td {
+    white-space: nowrap;
+  }
+
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .table-header-icon {
+    font-size: 1.5rem;
+  }
+
+  .filter-section {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .filter-columns {
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .filter-column {
+    width: 100%;
+  }
+
+  .tier-filters,
+  .rating-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .picker-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+@media (max-width: 767.98px) {
+  .responsive-ratings-row {
+    flex-direction: column !important;
+    gap: 20px !important;
+    align-items: center !important;
+  }
+
+  .responsive-ratings-row .filter-column {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .intended-class-buttons {
+    gap: 10px;
+  }
+
+  .intended-class-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .intended-class-btn img {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>

@@ -90,7 +90,6 @@
     <div
       class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
     >
-      <!-- Soldier Table -->
       <div class="soldier-table-container">
         <div class="table-wrapper">
           <div
@@ -242,7 +241,6 @@
           </div>
         </div>
       </div>
-      <!-- Demoman Table -->
       <div class="demoman-table-container">
         <div class="table-wrapper">
           <div

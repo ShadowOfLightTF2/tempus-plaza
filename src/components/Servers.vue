@@ -123,7 +123,6 @@
                   </div>
                 </div>
                 <div class="table-header-filters">
-                  <!-- Region Filters -->
                   <div class="region-buttons">
                     <button
                       :class="{ active: selectedRegion === 'all' }"
@@ -142,7 +141,6 @@
                       {{ region.name }}
                     </button>
                   </div>
-                  <!-- Server Type Filters -->
                   <div class="server-type-buttons">
                     <button
                       v-for="serverType in availableServerTypes"
@@ -314,8 +312,6 @@
                   </tbody>
                 </table>
               </div>
-
-              <!-- No servers message when filtered -->
               <div
                 v-if="filteredServersData.length === 0 && !loading"
                 class="no-servers-message"
@@ -763,7 +759,6 @@ export default {
   border: none;
 }
 
-/* Region Filter Styles */
 .region-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -811,7 +806,6 @@ export default {
   background: rgba(239, 68, 68, 0.8);
 }
 
-/* Rank Selector Styles */
 .rank-selector-container {
   margin-top: 1rem;
   padding: 1rem;
@@ -838,7 +832,6 @@ export default {
   align-self: flex-start;
 }
 
-/* Rank Picker Styles */
 .rank-picker {
   display: flex;
   flex-direction: column;
@@ -977,6 +970,10 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
+.table-container {
+  border-radius: 0 0 8px 8px;
+}
+
 .table-header-content {
   display: flex;
   flex-direction: column;
@@ -1065,6 +1062,18 @@ export default {
   font-weight: bold;
   padding: 6px;
   border: 2px solid var(--color-border-soft);
+}
+
+.table-dark td:first-child {
+  border-left: none !important;
+}
+
+.table-dark td:last-child {
+  border-right: none !important;
+}
+
+.table-dark tr:last-child td {
+  border-bottom: none !important;
 }
 
 .table-dark tr:nth-child(odd) td {

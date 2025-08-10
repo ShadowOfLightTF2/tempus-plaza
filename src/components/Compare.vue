@@ -332,8 +332,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Summary Cards -->
         <div class="summary-cards">
           <div class="summary-card">
             <div class="card-icon">🏆</div>
@@ -395,8 +393,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Detailed Comparison Tables -->
         <div class="tables-section">
           <div class="table-container">
             <h3>🏆 World Records</h3>
@@ -564,7 +560,6 @@
         style="width: 75%"
         margin-top="50px"
       />
-      <!-- Map Record Comparison Section -->
       <div
         v-if="
           playerOne &&
@@ -580,8 +575,6 @@
             Compare specific map records between the players
           </p>
         </div>
-
-        <!-- Map Search -->
         <div class="map-search-container">
           <div class="search-input-wrapper">
             <svg
@@ -628,8 +621,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Selected Map and Class Selector -->
         <div v-if="selectedMap" class="map-selection-info">
           <div
             class="selected-map-card"
@@ -664,8 +655,6 @@
             </button>
           </div>
         </div>
-
-        <!-- Map Records Comparison -->
         <div
           v-if="selectedMap && selectedMapClass"
           class="map-records-comparison"
@@ -1687,7 +1676,7 @@ export default {
 
 .class-btn {
   background: transparent;
-  border: none;
+  border: 2px solid transparent;
   color: var(--color-text-soft);
   padding: 10px 20px;
   border-radius: 20px;
@@ -1697,13 +1686,15 @@ export default {
 }
 
 .class-btn.active {
-  background: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .class-btn:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
 

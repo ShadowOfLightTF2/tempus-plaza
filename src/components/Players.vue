@@ -738,16 +738,19 @@ export default {
   font-weight: 500;
   white-space: nowrap;
   font-size: 16px;
+  border: 2px solid transparent;
 }
 
 .category-tab.active {
-  background: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .category-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
 
@@ -767,18 +770,10 @@ export default {
   max-width: 100%;
   padding: 15px;
   border-radius: 25px;
-}
-
-.pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
+  background: transparent;
 }
 
 .subcategory-pill {
-  border: 1px solid var(--color-border-soft);
   color: var(--color-text-soft);
   padding: 10px 20px;
   border-radius: 20px;
@@ -787,18 +782,29 @@ export default {
   font-weight: 500;
   white-space: nowrap;
   font-size: 14px;
+  border: 2px solid transparent;
   background: rgba(255, 255, 255, 0.05);
 }
 
 .subcategory-pill.active {
-  background: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .subcategory-pill:hover:not(.active) {
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 .count-badge {

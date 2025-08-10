@@ -62,7 +62,6 @@
         </div>
       </div>
     </div>
-    <!-- Update Banner -->
     <div v-if="isUpdating" class="update-banner">
       <div class="update-banner-content">
         <div class="update-icon">
@@ -110,9 +109,8 @@
         ></div>
       </div>
     </div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-custom">
+    <nav class="navbar navbar-expand-lg bg-custom">
       <div class="container-fluid">
-        <!-- Mobile navbar toggler -->
         <button
           class="navbar-toggler"
           type="button"
@@ -124,14 +122,12 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <!-- Collapsible navbar content -->
         <div class="collapse navbar-collapse" id="navbarNav">
-          <!-- Main navigation links - centered -->
           <ul class="navbar-nav mx-auto">
             <li class="nav-item me-3">
               <router-link
                 to="/"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Home') }"
               >
                 <i class="bi bi-house"></i> Home
@@ -140,7 +136,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/servers"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Servers') }"
               >
                 <i class="bi bi-globe"></i> Servers
@@ -149,7 +145,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/activity"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Activity') }"
               >
                 <i class="bi bi-graph-up"></i> Activity
@@ -158,7 +154,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/maps"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Maps') }"
               >
                 <i class="bi bi-map"></i> Maps
@@ -167,7 +163,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/players"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Players') }"
               >
                 <i class="bi bi-trophy"></i> Players
@@ -176,7 +172,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/compare"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Compare') }"
               >
                 <i class="bi bi-bar-chart"></i> Compare
@@ -185,7 +181,7 @@
             <li class="nav-item me-3">
               <router-link
                 to="/lookup"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Lookup') }"
               >
                 <i class="bi bi-search"></i> Lookup
@@ -194,13 +190,12 @@
             <li class="nav-item me-3">
               <router-link
                 to="/donate"
-                class="nav-link nav-link-bold"
+                class="nav-link"
                 :class="{ active: isNavItemActive('Donate') }"
               >
                 <i class="bi bi-heart"></i> Donate
               </router-link>
             </li>
-            <!-- Search container -->
             <div class="navbar-right" v-if="!isHomePage">
               <div class="search-container me-3" @click.stop>
                 <div class="search-input-wrapper">
@@ -286,7 +281,6 @@
                 </div>
               </div>
             </div>
-            <!-- User authentication section -->
             <div class="user-section">
               <button
                 v-if="!user || !user.steamid"
@@ -340,14 +334,7 @@
                           value="overall"
                           @change="updateUserPreferences"
                         />
-                        <label
-                          class="form-check-label"
-                          for="preferenceOverall"
-                          style="
-                            color: var(--color-text-clickable);
-                            cursor: pointer;
-                          "
-                        >
+                        <label class="form-check-label" for="preferenceOverall">
                           Overall
                         </label>
                       </div>
@@ -361,14 +348,7 @@
                           value="soldier"
                           @change="updateUserPreferences"
                         />
-                        <label
-                          class="form-check-label"
-                          for="preferenceSoldier"
-                          style="
-                            color: var(--color-text-clickable);
-                            cursor: pointer;
-                          "
-                        >
+                        <label class="form-check-label" for="preferenceSoldier">
                           Soldier
                         </label>
                       </div>
@@ -382,14 +362,7 @@
                           value="demoman"
                           @change="updateUserPreferences"
                         />
-                        <label
-                          class="form-check-label"
-                          for="preferenceDemoman"
-                          style="
-                            color: var(--color-text-clickable);
-                            cursor: pointer;
-                          "
-                        >
+                        <label class="form-check-label" for="preferenceDemoman">
                           Demoman
                         </label>
                       </div>
@@ -408,14 +381,7 @@
                           value="male"
                           @change="updateUserPreferences"
                         />
-                        <label
-                          class="form-check-label"
-                          for="genderMale"
-                          style="
-                            color: var(--color-text-clickable);
-                            cursor: pointer;
-                          "
-                        >
+                        <label class="form-check-label" for="genderMale">
                           Male
                         </label>
                       </div>
@@ -429,14 +395,7 @@
                           value="female"
                           @change="updateUserPreferences"
                         />
-                        <label
-                          class="form-check-label"
-                          for="genderFemale"
-                          style="
-                            color: var(--color-text-clickable);
-                            cursor: pointer;
-                          "
-                        >
+                        <label class="form-check-label" for="genderFemale">
                           Female
                         </label>
                       </div>
@@ -491,9 +450,6 @@
                         </div>
                       </div>
                     </div>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
                   </li>
                   <li>
                     <a class="dropdown-item clickable" @click="logout" href="#">
@@ -584,6 +540,7 @@ export default {
       profileUpdateTracker: reactive({
         rank: "overall",
         color: "blue",
+        gender: "male",
         updateCount: 0,
       }),
     };
@@ -751,6 +708,7 @@ export default {
 
         this.profileUpdateTracker.rank = this.rankPreference;
         this.profileUpdateTracker.color = this.colorPreference;
+        this.profileUpdateTracker.gender = this.gender;
         this.profileUpdateTracker.updateCount++;
       } catch (error) {
         console.error("Failed to update user preferences:", error);
@@ -873,6 +831,7 @@ export default {
           // Initialize the reactive tracker
           this.profileUpdateTracker.rank = this.rankPreference;
           this.profileUpdateTracker.color = this.colorPreference;
+          this.profileUpdateTracker.gender = this.gender;
         }
       } else {
         console.log("User is not authenticated");
@@ -903,12 +862,30 @@ html {
   background: var(--color-background-new) !important;
 }
 
+body {
+  padding-top: 73px !important;
+}
+
 #app {
   font-family: "Segoe UI";
   background: var(--color-background-new);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(
+    90deg,
+    rgba(17, 20, 24, 0.95) 0%,
+    rgba(37, 55, 82, 0.95) 50%,
+    rgba(17, 20, 24, 0.95) 100%
+  ) !important;
 }
 
 .background-container {
@@ -934,29 +911,46 @@ html {
   background: rgba(74, 111, 165, 0.8);
 }
 
-.nav-link-bold {
-  border-bottom: 3px solid transparent !important;
+.nav-link {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  border-radius: 30px;
+  padding: 10px 15px !important;
+  border: 2px solid transparent !important;
 }
 
-.nav-link-bold:hover {
+.nav-link:hover {
   color: var(--color-text);
-  border-bottom-color: #363a3d !important;
-  background: rgba(255, 255, 255, 0.05);
+  border-color: #363a3d !important;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.nav-link-bold.active {
+.nav-link.active {
   color: var(--color-text);
-  border-bottom-color: var(--color-primary, #007bff) !important;
+  border-color: var(--color-primary, #007bff) !important;
   background: rgba(255, 255, 255, 0.1);
 }
-
-.navbar-dark {
-  font-size: large;
+.bg-custom {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: none !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
-.bg-custom {
-  background: var(--color-dark);
-  border: 1px solid var(--color-border-soft);
+.bg-custom::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .bg-dark-custom {
@@ -974,24 +968,26 @@ html {
 }
 
 .login-button {
-  color: var(--color-text) !important;
+  color: #ffffff !important;
   font-weight: bold !important;
-  border-radius: 0;
+  border-radius: 30px !important;
+  padding: 10px 15px !important;
+  border: 2px solid transparent !important;
 }
 
 .login-button:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
-  border-radius: 0;
+  color: var(--color-text);
+  border-color: #363a3d !important;
+  background: rgba(255, 255, 255, 0.05);
+}
+.login-button.active {
+  color: var(--color-text);
+  border-color: var(--color-primary, #007bff) !important;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .bi-steam {
   color: var(--color-text);
-}
-
-.nav-link-bold {
-  color: #ffffff !important;
-  font-weight: bold !important;
-  border-radius: 8px;
 }
 
 .page-header {
@@ -1224,10 +1220,22 @@ html {
     padding: 1rem;
     border-radius: 8px;
     margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbar-nav {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .navbar-nav .nav-item {
     margin-bottom: 0.5rem;
+    width: 100%;
+    text-align: center;
   }
 
   .navbar-nav .nav-item:last-child {
@@ -1235,11 +1243,15 @@ html {
   }
 
   .search-container {
+    width: 100%;
     margin: 1rem 0;
+    display: flex;
+    justify-content: center;
   }
 
   .search-input {
     width: 100%;
+    max-width: 300px;
   }
 
   .search-results-dropdown {
@@ -1248,23 +1260,29 @@ html {
     right: 0;
   }
 
-  .navbar-dark {
+  .navbar {
     font-size: medium;
   }
 
   .navbar-right {
     flex-direction: column;
-    align-items: stretch !important;
+    align-items: center;
+    width: 100%;
   }
 
   .search-container {
     margin-right: 0 !important;
     margin-bottom: 1rem;
+    width: 100%;
   }
 
   .user-section {
     align-self: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
+
   .footer {
     padding: 0.75rem 0;
   }
@@ -1377,13 +1395,15 @@ html {
 }
 
 .navbar-nav {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  padding-top: 5px;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 .login-button {
@@ -1399,47 +1419,54 @@ html {
 }
 
 .dropdown-toggle {
-  border-radius: 8px;
-  border: 0;
-  background: var(--color-dark);
-  color: var(--color-text);
+  color: #ffffff !important;
+  font-weight: bold !important;
+  border-radius: 30px !important;
+  padding: 10px 15px !important;
+  border: 2px solid transparent !important;
+  background: transparent !important;
 }
 
-.dropdown-toggle:hover {
-  color: var(--color-text);
-  background: rgba(255, 255, 255, 0.05);
+.dropdown-toggle:hover,
+.dropdown-toggle:focus {
+  color: var(--color-text) !important;
+  border-color: #363a3d !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dropdown-toggle:active {
+  border-color: var(--color-primary, #007bff) !important;
 }
 
 .dropdown-menu {
-  background: var(--color-box);
-  border: 1px solid var(--color-border);
-  min-width: 174px;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px solid #363a3d !important;
+  border-radius: 12px !important;
+  padding: 0.25rem 0;
+  backdrop-filter: blur(6px);
 }
 
 .dropdown-item {
-  color: var(--color-text);
-  font-weight: bold;
+  color: #ffffff !important;
+  font-weight: bold !important;
+  padding: 10px 15px !important;
+  border-radius: 8px !important;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-  background: rgba(74, 111, 165, 0.8);
-}
-
-.dropdown-menu .dropdown-item:hover,
-.dropdown-menu .dropdown-item:focus {
-  background: rgba(74, 111, 165, 0.8);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .dropdown-item.clickable {
   cursor: pointer;
-  color: var(--color-text-clickable);
+  transform: none !important;
 }
 
 .dropdown-item.clickable:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: rgba(74, 111, 165, 0.4) !important;
   color: var(--color-text);
+  transform: none !important;
 }
 
 .dropdown-item.non-clickable {
@@ -1551,8 +1578,13 @@ html {
   }
 }
 
+.user-section {
+  display: flex;
+  align-items: center;
+}
+
 .search-container {
-  position: relative;
+  margin-right: 15px;
 }
 
 .search-input-wrapper {
@@ -1571,8 +1603,8 @@ html {
 .search-input {
   width: 200px;
   padding: 8px 8px 8px 40px;
-  background: var(--color-box);
-  border: 2px solid var(--color-border-soft);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent !important;
   border-radius: 12px;
   color: #ffffff;
   font-size: 16px;
@@ -1580,9 +1612,9 @@ html {
 }
 
 .search-input:focus {
-  background: rgba(74, 111, 165, 0.8);
   outline: none;
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
+  border-color: var(--color-primary, #007bff) !important;
 }
 
 .search-input::placeholder {

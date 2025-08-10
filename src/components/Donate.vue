@@ -18,7 +18,6 @@
         </div>
         <hr class="row-divider" style="width: 75%" />
         <div class="donation-section">
-          <!-- Main Donation Panel -->
           <div class="donation-panel">
             <div class="donation-header">
               <h2 class="donation-title">Make a Donation</h2>
@@ -61,8 +60,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Perks Section -->
           <div class="perks-panel">
             <h2 class="perks-title">
               <span class="perks-icon"></span>
@@ -113,7 +110,6 @@
             </div>
           </div>
         </div>
-        <!-- Preview Banner -->
         <div class="preview-section">
           <h2 class="preview-title">{{ previewTitle }}</h2>
           <div v-if="loading" class="loading-message">
