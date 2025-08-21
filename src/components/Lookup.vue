@@ -118,7 +118,6 @@
                   </div>
                 </div>
               </div>
-
               <div class="filter-column">
                 <div class="filter-group">
                   <h6 class="filter-title mb-2">Demoman tiers</h6>
@@ -275,37 +274,29 @@
             <div class="filter-group">
               <h6 class="filter-title mb-2">Class</h6>
               <div class="class-filter-container">
-                <label
+                <div
                   v-for="classOption in ['soldier', 'demoman']"
                   :key="classOption"
                   class="class-checkbox"
+                  :class="{ selected: selectedClasses.includes(classOption) }"
+                  @click="toggleClass(classOption)"
                 >
-                  <input
-                    type="checkbox"
-                    :value="classOption"
-                    v-model="selectedClasses"
-                    @change="onFilterChange"
-                  />
                   <span>{{ classOption }}</span>
-                </label>
+                </div>
               </div>
             </div>
             <div class="filter-group">
               <h6 class="filter-title mb-2">Type</h6>
               <div class="type-filter-container">
-                <label
+                <div
                   v-for="typeOption in ['map', 'course', 'bonus']"
                   :key="typeOption"
                   class="type-checkbox"
+                  :class="{ selected: selectedTypes.includes(typeOption) }"
+                  @click="toggleType(typeOption)"
                 >
-                  <input
-                    type="checkbox"
-                    :value="typeOption"
-                    v-model="selectedTypes"
-                    @change="onFilterChange"
-                  />
                   <span>{{ typeOption }}</span>
-                </label>
+                </div>
               </div>
             </div>
           </div>
@@ -313,19 +304,15 @@
             <div class="filter-group">
               <h6 class="filter-title mb-2">Status</h6>
               <div class="status-filter-container">
-                <label
+                <div
                   v-for="statusOption in ['completed', 'incomplete']"
                   :key="statusOption"
-                  class="class-checkbox"
+                  class="status-checkbox"
+                  :class="{ selected: selectedStatus.includes(statusOption) }"
+                  @click="toggleStatus(statusOption)"
                 >
-                  <input
-                    type="checkbox"
-                    :value="statusOption"
-                    v-model="selectedStatus"
-                    @change="onFilterChange"
-                  />
                   <span>{{ statusOption }}</span>
-                </label>
+                </div>
               </div>
             </div>
             <div class="filter-group clear-filter">
@@ -374,192 +361,182 @@
             />
           </div>
         </div>
-        <div
-          class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-        >
-          <div v-if="playerId != null" class="table-wrapper">
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th @click="setSortColumn('map')" class="sortable-header">
-                      Map
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'map'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th>Type</th>
-                    <th>Class</th>
-                    <th @click="setSortColumn('tier')" class="sortable-header">
-                      T
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'tier'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th
-                      @click="setSortColumn('rating')"
-                      class="sortable-header"
+        <div v-if="playerId != null" class="table-container">
+          <div class="table-responsive">
+            <table class="table table-dark">
+              <thead>
+                <tr>
+                  <th @click="setSortColumn('map')" class="sortable-header">
+                    Map
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'map'"
                     >
-                      R
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'rating'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th
-                      @click="setSortColumn('duration')"
-                      class="sortable-header"
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th>Type</th>
+                  <th>Class</th>
+                  <th @click="setSortColumn('tier')" class="sortable-header">
+                    T
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'tier'"
                     >
-                      Time
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'duration'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th @click="setSortColumn('rank')" class="sortable-header">
-                      Rank
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'rank'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th
-                      @click="setSortColumn('completion')"
-                      class="sortable-header"
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th @click="setSortColumn('rating')" class="sortable-header">
+                    R
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'rating'"
                     >
-                      Completion
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'completion'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th
-                      @click="setSortColumn('percentage')"
-                      class="sortable-header"
-                    >
-                      Percentile
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'percentage'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th
-                      @click="setSortColumn('points')"
-                      class="sortable-header"
-                    >
-                      Points
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'points'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th @click="setSortColumn('time')" class="sortable-header">
-                      Date
-                      <span
-                        class="sort-indicator"
-                        v-if="sortByCategory === 'time'"
-                      >
-                        {{ sortDirection === "desc" ? "↓" : "↑" }}
-                      </span>
-                    </th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="record in filteredRecords"
-                    :key="record.id"
-                    class="fade-in"
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th
+                    @click="setSortColumn('duration')"
+                    class="sortable-header"
                   >
-                    <SmartLink
-                      tag="td"
-                      :to="{
-                        name: 'MapPage',
-                        params: { mapId: record.map_id },
-                      }"
-                      class="clickable"
+                    Time
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'duration'"
                     >
-                      {{ record.map_name }}
-                    </SmartLink>
-                    <td>
-                      {{ getRecordType(record.type) }}{{ formatIndex(record) }}
-                    </td>
-                    <td>
-                      <img
-                        :src="`/icons/${record.class}.png`"
-                        :alt="`${record.class}`"
-                        class="class-icon"
-                      />
-                    </td>
-                    <td>T{{ record.tier }}</td>
-                    <td>R{{ record.rating }}</td>
-                    <td>
-                      {{
-                        record.duration !== null
-                          ? formatDuration(record.duration)
-                          : ""
-                      }}
-                    </td>
-                    <td :class="getRankColorClass(record.placement)">
-                      {{ record.rank !== null ? record.rank : "" }}
-                      {{
-                        record.placement !== null
-                          ? formatPlacement(record.placement)
-                          : ""
-                      }}
-                    </td>
-                    <td>{{ record.completion_count }}</td>
-                    <td>
-                      {{
-                        record.rank && record.completion_count
-                          ? (
-                              (record.rank / record.completion_count) *
-                              100
-                            ).toFixed(1) + "%"
-                          : ""
-                      }}
-                    </td>
-                    <td>{{ record.points !== null ? record.points : "" }}</td>
-                    <td class="text-small">
-                      {{
-                        record.date !== null
-                          ? formatDate(new Date(record.date * 1000))
-                          : ""
-                      }}
-                    </td>
-                    <td class="text-center">
-                      {{ record.duration !== null ? "✓" : "X" }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="maps-footer">
-                <button
-                  v-if="displayCount < filteredSortedItems.length"
-                  @click="showMore"
-                  class="btn btn-dark update-button show-more-btn"
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th @click="setSortColumn('rank')" class="sortable-header">
+                    Rank
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'rank'"
+                    >
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th
+                    @click="setSortColumn('completion')"
+                    class="sortable-header"
+                  >
+                    Completion
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'completion'"
+                    >
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th
+                    @click="setSortColumn('percentage')"
+                    class="sortable-header"
+                  >
+                    Percentile
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'percentage'"
+                    >
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th @click="setSortColumn('points')" class="sortable-header">
+                    Points
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'points'"
+                    >
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th @click="setSortColumn('time')" class="sortable-header">
+                    Date
+                    <span
+                      class="sort-indicator"
+                      v-if="sortByCategory === 'time'"
+                    >
+                      {{ sortDirection === "desc" ? "↓" : "↑" }}
+                    </span>
+                  </th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="record in filteredRecords"
+                  :key="record.id"
+                  class="fade-in"
                 >
-                  Show more
-                </button>
-              </div>
+                  <SmartLink
+                    tag="td"
+                    :to="{
+                      name: 'MapPage',
+                      params: { mapId: record.map_id },
+                    }"
+                    class="clickable"
+                  >
+                    {{ record.map_name }}
+                  </SmartLink>
+                  <td>
+                    {{ getRecordType(record.type) }}{{ formatIndex(record) }}
+                  </td>
+                  <td>
+                    <img
+                      :src="`/icons/${record.class}.png`"
+                      :alt="`${record.class}`"
+                      class="class-icon"
+                    />
+                  </td>
+                  <td>T{{ record.tier }}</td>
+                  <td>R{{ record.rating }}</td>
+                  <td>
+                    {{
+                      record.duration !== null
+                        ? formatDuration(record.duration)
+                        : ""
+                    }}
+                  </td>
+                  <td :class="getRankColorClass(record.placement)">
+                    {{ record.rank !== null ? record.rank : "" }}
+                    {{
+                      record.placement !== null
+                        ? formatPlacement(record.placement)
+                        : ""
+                    }}
+                  </td>
+                  <td>{{ record.completion_count }}</td>
+                  <td>
+                    {{
+                      record.rank && record.completion_count
+                        ? (
+                            (record.rank / record.completion_count) *
+                            100
+                          ).toFixed(1) + "%"
+                        : ""
+                    }}
+                  </td>
+                  <td>{{ record.points !== null ? record.points : "" }}</td>
+                  <td class="text-small">
+                    {{
+                      record.date !== null
+                        ? formatDate(new Date(record.date * 1000))
+                        : ""
+                    }}
+                  </td>
+                  <td class="text-center">
+                    {{ record.duration !== null ? "✓" : "X" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="maps-footer">
+              <button
+                v-if="displayCount < filteredSortedItems.length"
+                @click="showMore"
+                class="btn btn-dark update-button show-more-btn"
+              >
+                Show more
+              </button>
             </div>
           </div>
         </div>
@@ -866,6 +843,34 @@ export default {
     },
     onFilterChange() {
       // This method can be used to trigger any additional filter change logic
+    },
+    toggleClass(classOption) {
+      if (this.selectedClasses.includes(classOption)) {
+        this.selectedClasses = this.selectedClasses.filter(
+          (c) => c !== classOption
+        );
+      } else {
+        this.selectedClasses.push(classOption);
+      }
+      this.onFilterChange();
+    },
+    toggleType(typeOption) {
+      if (this.selectedTypes.includes(typeOption)) {
+        this.selectedTypes = this.selectedTypes.filter((t) => t !== typeOption);
+      } else {
+        this.selectedTypes.push(typeOption);
+      }
+      this.onFilterChange();
+    },
+    toggleStatus(statusOption) {
+      if (this.selectedStatus.includes(statusOption)) {
+        this.selectedStatus = this.selectedStatus.filter(
+          (s) => s !== statusOption
+        );
+      } else {
+        this.selectedStatus.push(statusOption);
+      }
+      this.onFilterChange();
     },
     toggleIntendedClass(clsId) {
       if (this.selectedIntendedClasses.includes(clsId)) {
@@ -1185,7 +1190,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .filter-columns {
@@ -1227,45 +1232,39 @@ export default {
 }
 
 .class-checkbox,
-.type-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  margin: 0;
-  background-color: var(--color-border-soft);
-  border-radius: 8px;
-}
+.type-checkbox,
+.status-checkbox {
+  display: inline-block;
+  margin: 4px;
 
-.class-checkbox input,
-.type-checkbox input {
-  display: none;
-}
-
-.class-checkbox span,
-.type-checkbox span {
+  border: 2px solid var(--color-border-soft);
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
   padding: 8px 16px;
-  border-radius: 8px;
+  cursor: pointer;
   font-weight: bold;
   font-size: 13px;
-  border: 2px solid rgba(68, 68, 68, 0.3);
-  color: #ffffff;
+
   text-transform: capitalize;
   transition: all 0.3s ease;
   min-width: 80px;
   text-align: center;
 }
 
-.class-checkbox input:checked + span,
-.type-checkbox input:checked + span {
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
-  background: rgba(74, 111, 165, 0.8);
+.class-checkbox.selected,
+.type-checkbox.selected,
+.status-checkbox.selected {
+  background: rgba(74, 111, 165, 0.5);
+  border-color: var(--color-primary);
+  color: white;
 }
 
-.class-checkbox:hover input:not(:checked) + span,
-.type-checkbox:hover input:not(:checked) + span {
-  border-radius: 8px;
-  background: rgba(74, 111, 165, 0.8);
+.class-checkbox:hover,
+.type-checkbox:hover,
+.status-checkbox:hover {
+  background: rgba(74, 111, 165, 0.3);
+  border-color: var(--color-primary);
 }
 
 .clear-filters-btn {
@@ -1410,7 +1409,6 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 8px;
 }
 
 .btn-secondary {
@@ -1780,10 +1778,11 @@ export default {
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 0px;
+  width: 100%;
 }
 
 .table-dark {
-  margin: 0px;
+  margin: 0;
 }
 
 .table-dark thead {
@@ -1863,6 +1862,14 @@ export default {
     margin-top: 10px;
     padding-left: 0px;
   }
+
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .filter-section {
     padding: 15px;
     width: 100%;
@@ -1888,24 +1895,50 @@ export default {
     gap: 8px;
   }
 
-  .search-section,
+  /* Fix both search sections to center properly */
+  .search-section {
+    width: 100%;
+    max-width: 100%;
+    margin: 20px 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .search-container {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    min-width: 100%;
+    padding: 16px 16px 16px 50px;
+    box-sizing: border-box;
+  }
+
   .search-records-container {
     width: 100%;
     max-width: 100%;
     margin: 10px 0;
-    padding: 0 15px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
   }
 
-  .search-input,
+  .search-records-container .search-input-wrapper {
+    width: 100%;
+    max-width: 500px;
+  }
+
   .search-records-input {
     width: 100%;
-    padding: 12px;
-  }
-
-  .tables-wrapper {
-    flex-direction: column;
-    align-items: center;
-    padding: 0;
+    padding: 12px 12px 12px 50px;
+    box-sizing: border-box;
   }
 
   .table-responsive {
@@ -1913,10 +1946,14 @@ export default {
     overflow-x: auto;
   }
 
-  .table-dark th,
   .table-dark td {
-    padding: 8px;
-    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .maps-footer {
+    width: 100%;
+    min-width: 800px;
+    padding: 0;
   }
 
   .filter-actions {
@@ -1930,11 +1967,89 @@ export default {
   }
 
   .show-more-btn {
+    background: rgba(74, 111, 165, 0.8) !important;
+    font-weight: bold;
     width: 100%;
+    border-radius: 0 0 10px 10px;
   }
 
   .player-name-display h2 {
     font-size: 1.5rem;
+  }
+
+  .responsive-ratings-row {
+    flex-direction: column !important;
+    gap: 20px !important;
+    align-items: center !important;
+  }
+
+  .responsive-ratings-row .filter-column {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .intended-class-buttons {
+    gap: 10px;
+  }
+
+  .intended-class-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .intended-class-btn img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .toggle-btn {
+    justify-content: center;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .table-container {
+    width: 95vw;
+    overflow-x: auto;
+    border-radius: 0;
+  }
+
+  .table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .table-header-icon {
+    font-size: 1.5rem;
+  }
+
+  .filter-column {
+    width: 100%;
+  }
+
+  .picker-controls {
+    flex-direction: column;
+    align-items: center;
   }
 }
 .intended-class-buttons {
@@ -1974,91 +2089,6 @@ export default {
 }
 
 @media (max-width: 767.98px) {
-  .button-group {
-    flex-direction: row;
-    justify-content: center;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  .toggle-btn {
-    justify-content: center;
-    flex: 1;
-    min-width: 100px;
-  }
-
-  .table-header-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  .table-container {
-    width: 95vw;
-    overflow-x: auto;
-    border-radius: 0;
-  }
-
-  .table-responsive {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .table {
-    width: max-content;
-    min-width: 100%;
-  }
-
-  .table-dark td {
-    white-space: nowrap;
-  }
-
-  .avatar {
-    width: 20px;
-    height: 20px;
-  }
-
-  .table-header-icon {
-    font-size: 1.5rem;
-  }
-
-  .filter-section {
-    width: 100%;
-    padding: 15px;
-  }
-
-  .filter-columns {
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-  }
-
-  .filter-column {
-    width: 100%;
-  }
-
-  .tier-filters,
-  .rating-filters {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .filter-actions {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .picker-controls {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-@media (max-width: 767.98px) {
   .responsive-ratings-row {
     flex-direction: column !important;
     gap: 20px !important;
@@ -2082,6 +2112,9 @@ export default {
   .intended-class-btn img {
     width: 24px;
     height: 24px;
+  }
+  .search-results-dropdown {
+    margin-top: 65px !important;
   }
 }
 </style>

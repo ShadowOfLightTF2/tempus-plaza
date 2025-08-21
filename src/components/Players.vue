@@ -1,6 +1,7 @@
 <template>
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
+    @click="closeDropdown"
   >
     <div class="container py-4 d-flex flex-column align-items-center">
       <div class="content-container">
@@ -71,6 +72,60 @@
           </template>
         </div>
       </div>
+      <hr
+        v-if="selectedCategory === 'countries'"
+        class="row-divider"
+        style="width: 75%"
+      />
+      <div
+        v-if="selectedCategory === 'countries'"
+        class="search-container"
+        @click.stop
+      >
+        <div class="search-box">
+          <div class="search-icon-container">
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <input
+            v-model="searchQuery"
+            @input="filterCountries"
+            @focus="
+              showCountryDropdown = true;
+              resetCountryFilter();
+            "
+            type="text"
+            class="search-input"
+            placeholder="Search for a country..."
+          />
+        </div>
+        <div
+          v-if="showCountryDropdown && filteredCountries.length > 0"
+          class="search-results-dropdown"
+        >
+          <ul>
+            <li
+              v-for="country in filteredCountries.slice(0, 20)"
+              :key="country.code"
+              @click="selectCountryFromSearch(country)"
+              class="search-result-item"
+            >
+              <img :src="country.flag" :alt="country.name" class="flag-icon" />
+              {{ country.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
       <hr class="row-divider" style="width: 75%" />
       <div v-if="loading && initialLoad" class="text-center">
         <div
@@ -138,6 +193,43 @@
                   >
                     <td class="rank-column">#{{ index + 1 }}</td>
                     <SmartLink
+                      v-if="
+                        selectedCategory === 'countries' &&
+                        selectedItem !== 'Total'
+                      "
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.player_id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
+                    >
+                      <img
+                        :src="player.steam_avatar"
+                        alt="Steam Avatar"
+                        class="avatar"
+                        @error="handleError"
+                      />
+                      {{ player.name }}
+                    </SmartLink>
+                    <td
+                      v-else-if="
+                        selectedCategory === 'countries' &&
+                        selectedItem === 'Total'
+                      "
+                      class="country-cell align-middle name-column"
+                    >
+                      <img
+                        :src="player.flag"
+                        alt="Country Flag"
+                        class="flag"
+                        @error="handleError"
+                      />
+                      {{ player.name }}
+                    </td>
+
+                    <SmartLink
+                      v-else
                       tag="td"
                       :to="{
                         name: 'PlayerPage',
@@ -163,6 +255,8 @@
                         selectedCategory === "completion"
                           ? player.percentage + "%"
                           : player.amount
+                              .toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }}
                     </td>
                   </tr>
@@ -218,7 +312,11 @@
                     <th>
                       {{
                         points
-                          ? "Points"
+                          ? selectedCategory === "countries"
+                            ? selectedItem === "Player Count"
+                              ? "Players"
+                              : "Points"
+                            : "Points"
                           : selectedCategory === "completion"
                           ? "Percentage"
                           : "Count"
@@ -234,6 +332,42 @@
                   >
                     <td class="rank-column">#{{ index + 1 }}</td>
                     <SmartLink
+                      v-if="
+                        selectedCategory === 'countries' &&
+                        selectedItem !== 'Total'
+                      "
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.player_id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
+                    >
+                      <img
+                        :src="player.steam_avatar"
+                        alt="Steam Avatar"
+                        class="avatar"
+                        @error="handleError"
+                      />
+                      {{ player.name }}
+                    </SmartLink>
+                    <td
+                      v-else-if="
+                        selectedCategory === 'countries' &&
+                        selectedItem === 'Total'
+                      "
+                      class="country-cell align-middle name-column"
+                    >
+                      <img
+                        :src="player.flag"
+                        alt="Country Flag"
+                        class="flag"
+                        @error="handleError"
+                      />
+                      {{ player.name }}
+                    </td>
+                    <SmartLink
+                      v-else
                       tag="td"
                       :to="{
                         name: 'PlayerPage',
@@ -259,6 +393,8 @@
                         selectedCategory === "completion"
                           ? player.percentage + "%"
                           : player.amount
+                              .toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }}
                     </td>
                   </tr>
@@ -313,6 +449,11 @@ export default {
     initialLoad: true,
     error: null,
     points: true,
+    searchQuery: "",
+    filteredCountries: [],
+    allCountries: [],
+    selectedCountry: null,
+    showCountryDropdown: false,
     selectedCategory: "points",
     selectedItem: "Combined",
     dropdowns: {
@@ -331,6 +472,7 @@ export default {
       "ratings",
       "tiers",
       "completion",
+      "countries",
     ],
     categoryDisplayNames: {
       wrs: "World records",
@@ -340,16 +482,33 @@ export default {
       ratings: "Ratings (maps)",
       tiers: "Tiers",
       completion: "Completion",
+      countries: "Countries",
     },
     currentSoldierIndex: 50,
     currentDemomanIndex: 50,
   }),
-  mounted() {
+  async mounted() {
     this.fillDropdowns();
+    await this.loadCountriesList();
     const { category, item } = this.$route.params;
-    if (category && item) {
+    if (!category || !item) {
+      this.selectedCategory = "points";
+      this.selectedItem = "Total";
+      this.$router.push({
+        name: "Players",
+        params: { category: "points", item: "Total" },
+      });
+    } else {
       this.selectedCategory = category;
       this.selectedItem = item;
+      if (category === "countries" && item !== "Total") {
+        const foundCountry = this.allCountries.find(
+          (c) => c.name.toLowerCase() === item.toLowerCase()
+        );
+        if (foundCountry) {
+          this.selectedCountry = foundCountry;
+        }
+      }
     }
     this.fetchDataForCurrentSelection(0);
   },
@@ -368,6 +527,9 @@ export default {
     },
   },
   methods: {
+    closeDropdown() {
+      this.showCountryDropdown = false;
+    },
     goToPlayer(playerId) {
       this.$router.push({
         name: "PlayerPage",
@@ -398,6 +560,12 @@ export default {
         if (category === "completion") {
           this.points = false;
           await this.fetchCompletions(type, index);
+          return;
+        }
+
+        if (category === "countries") {
+          this.points = true;
+          await this.fetchCountries(index);
           return;
         }
 
@@ -462,7 +630,127 @@ export default {
         this.demomanPlayers = [...this.demomanPlayers, ...demomanPlayers];
       }
     },
+    async loadCountriesList() {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/players/get-countries-data`
+        );
+        this.allCountries = response.data
+          .map((country) => ({
+            code: country.country_code,
+            name: country.country,
+            flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
+            totalPoints:
+              country.soldier_total_points + country.demoman_total_points,
+          }))
+          .sort((a, b) => b.totalPoints - a.totalPoints);
+        this.filteredCountries = [...this.allCountries];
+      } catch (error) {
+        console.error("Error loading countries list:", error);
+      }
+    },
+    filterCountries() {
+      if (!this.searchQuery.trim()) {
+        this.filteredCountries = [...this.allCountries];
+        return;
+      }
 
+      const query = this.searchQuery.toLowerCase();
+      this.filteredCountries = this.allCountries.filter(
+        (country) =>
+          country.name.toLowerCase().includes(query) ||
+          country.code.toLowerCase().includes(query)
+      );
+    },
+
+    selectCountryFromSearch(country) {
+      this.selectedCountry = country;
+      this.showCountryDropdown = false;
+      this.resetCountryFilter();
+      this.selectItem("countries", country.name);
+    },
+    resetCountryFilter() {
+      this.filteredCountries = [...this.allCountries];
+      this.searchQuery = "";
+    },
+    async fetchCountries(index) {
+      try {
+        if (this.selectedItem === "Total") {
+          if (index === 0) {
+            const response = await axios.get(
+              `${API_BASE_URL}/players/get-countries-data`
+            );
+            const countriesData = response.data;
+
+            const soldierData = countriesData
+              .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
+              .map((country) => ({
+                id: country.country_code,
+                player_id: country.country_code,
+                name: country.country,
+                flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
+                amount: country.soldier_total_points,
+              }));
+
+            const demomanData = countriesData
+              .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
+              .map((country) => ({
+                id: country.country_code,
+                player_id: country.country_code,
+                name: country.country,
+                flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
+                amount: country.demoman_total_points,
+              }));
+
+            this.soldierPlayers = soldierData;
+            this.demomanPlayers = demomanData;
+          }
+        } else if (this.selectedCountry) {
+          let indexFix = 0;
+          if (index > 0) indexFix = 50;
+
+          const response = await axios.get(
+            `${API_BASE_URL}/players/country-top-players/${
+              this.selectedCountry.code
+            }/${index - indexFix}`
+          );
+
+          const players = response.data;
+          const normalizePlayers = (playerList, pointsKey) => {
+            return (playerList || []).map((player) => ({
+              ...player,
+              amount: player[pointsKey] || 0,
+              steam_avatar:
+                player.steam_avatar ||
+                `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`,
+              player_id: player.id,
+            }));
+          };
+
+          if (index === 0) {
+            this.soldierPlayers = normalizePlayers(
+              players.topSoldiers,
+              "soldier_total_points"
+            );
+            this.demomanPlayers = normalizePlayers(
+              players.topDemomen,
+              "demoman_total_points"
+            );
+          } else {
+            this.soldierPlayers = [
+              ...this.soldierPlayers,
+              ...normalizePlayers(players.topSoldiers, "soldier_total_points"),
+            ];
+            this.demomanPlayers = [
+              ...this.demomanPlayers,
+              ...normalizePlayers(players.topDemomen, "demoman_total_points"),
+            ];
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching countries data:", error);
+      }
+    },
     fillDropdowns() {
       this.dropdowns.points = ["Total", "Maps", "Courses", "Bonuses"];
       this.dropdowns.wrs = ["Total", "Maps", "Courses", "Bonuses"];
@@ -488,6 +776,7 @@ export default {
         "Tier 10",
       ];
       this.dropdowns.completion = ["Total", "Maps", "Courses", "Bonuses"];
+      this.dropdowns.countries = ["Total"];
     },
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
@@ -512,6 +801,11 @@ export default {
       this.points = !item.includes("(count)");
       this.selectedCategory = category;
       this.selectedItem = item;
+
+      if (category !== "countries" || item === "Total") {
+        this.selectedCountry = null;
+        this.searchQuery = "";
+      }
 
       this.currentSoldierIndex = 50;
       this.currentDemomanIndex = 50;
@@ -566,6 +860,14 @@ export default {
         if (params.category && params.item) {
           this.selectedCategory = params.category;
           this.selectedItem = params.item;
+          if (params.category === "countries" && params.item !== "Total") {
+            const foundCountry = this.allCountries.find(
+              (c) => c.name.toLowerCase() === params.item.toLowerCase()
+            );
+            if (foundCountry) {
+              this.selectedCountry = foundCountry;
+            }
+          }
           this.fetchDataForCurrentSelection(0);
         }
       },
@@ -628,7 +930,7 @@ export default {
   color: var(--color-text);
   text-align: left;
   font-weight: 600;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   border-top: 1px solid var(--color-border-soft);
 }
 
@@ -636,7 +938,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
-  padding: 6px;
+  padding: 4px 6px;
 }
 
 .table-dark tr:nth-child(odd) td {
@@ -652,6 +954,13 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--color-text-clickable) !important;
+}
+
+.country-cell {
+  max-width: 250px;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rank-column {
@@ -698,6 +1007,12 @@ export default {
   margin-right: 1px;
   border: 1px solid var(--color-primary);
   border-radius: 2px;
+}
+
+.flag {
+  width: 28px;
+  height: 20px;
+  margin-right: 1px;
 }
 
 @media (max-width: 767.98px) {
@@ -848,6 +1163,110 @@ export default {
   .subcategory-pill {
     padding: 6px 12px;
     font-size: 12px;
+  }
+}
+
+.search-container {
+  margin: 20px 0;
+  position: relative;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-box {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+}
+
+.search-box:hover,
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.search-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 15px;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-input {
+  flex: 1;
+  padding: 18px 10px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-results-dropdown {
+  position: absolute;
+  background: var(--color-box);
+  border: 1px solid rgba(68, 68, 68, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  min-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.search-results-dropdown ul {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+}
+
+.search-result-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--color-box);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.search-result-item:hover {
+  background: rgba(74, 111, 165, 0.8);
+  transform: translateX(4px);
+}
+
+.flag-icon {
+  margin-right: 10px;
+  width: 24px;
+  height: 18px;
+}
+
+@media (max-width: 767.98px) {
+  .search-results-dropdown {
+    min-width: 150px;
+    max-width: 300px;
   }
 }
 </style>

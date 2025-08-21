@@ -1729,17 +1729,7 @@ export default {
       );
     },
     playerRankInfo() {
-      if (
-        !this._cachedRankInfo ||
-        this._lastRankCalculation !== this.highestRank
-      ) {
-        this._cachedRankInfo = this.getRankName(
-          this.highestRank,
-          this.player.gender
-        );
-        this._lastRankCalculation = this.highestRank;
-      }
-      return this._cachedRankInfo;
+      return this.getRankName(this.highestRank, this.player.gender);
     },
     filteredAndPaginatedRecords() {
       const grouped = this.groupRecords(this.filteredRecords);
@@ -2367,7 +2357,10 @@ export default {
       }
     },
     updateChartData() {
-      if (!this.pointsHistory.length) return;
+      if (!this.pointsHistory.length) {
+        this.loading.points = false;
+        return;
+      }
 
       const sortedData = [...this.pointsHistory].sort(
         (a, b) => a.date - b.date

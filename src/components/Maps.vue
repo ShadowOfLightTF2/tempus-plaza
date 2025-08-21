@@ -1236,7 +1236,7 @@ export default {
   color: var(--color-text);
   border: 1px solid var(--color-border-soft);
   font-weight: bold;
-  padding: 8px;
+  padding: 6px 8px;
 }
 
 .table-dark tr:nth-child(odd) .map-name:hover {

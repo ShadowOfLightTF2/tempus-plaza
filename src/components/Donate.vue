@@ -392,7 +392,6 @@ export default {
     };
   },
   async mounted() {
-    // Use Promise.allSettled for better error handling
     const [userResult, donatorsResult] = await Promise.allSettled([
       this.initializeUserData(),
       this.fetchDonators(),

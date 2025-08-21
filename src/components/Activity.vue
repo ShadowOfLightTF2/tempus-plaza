@@ -50,7 +50,7 @@
                 <div class="table-header-icon">🏆</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest World Records</h3>
-                  <p class="table-header-subtitle">Updates every 5 minutes</p>
+                  <p class="table-header-subtitle">Updates every minute</p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -189,7 +189,7 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Top Times</h3>
-                  <p class="table-header-subtitle">Updates every 6 hours</p>
+                  <p class="table-header-subtitle">Updates every 2 hours</p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -330,7 +330,7 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Group 1s</h3>
-                  <p class="table-header-subtitle">Updates every 6 hours</p>
+                  <p class="table-header-subtitle">Updates every 2 hours</p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -770,7 +770,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
-  padding: 6px;
+  padding: 4px 6px;
   border: 2px solid var(--color-border-soft);
 }
 

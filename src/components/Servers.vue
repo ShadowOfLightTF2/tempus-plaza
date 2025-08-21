@@ -44,7 +44,7 @@
                 <div class="table-header-icon">🏆</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Top Players Online</h3>
-                  <p class="table-header-subtitle">Updates every 5 minutes</p>
+                  <p class="table-header-subtitle">Updates every minute</p>
                 </div>
               </div>
               <div class="table-responsive">
@@ -119,7 +119,7 @@
                   <div class="table-header-icon">🌍</div>
                   <div class="table-header-title-section">
                     <h3 class="table-header-title">Server Status</h3>
-                    <p class="table-header-subtitle">Updates every 5 minutes</p>
+                    <p class="table-header-subtitle">Updates every minute</p>
                   </div>
                 </div>
                 <div class="table-header-filters">
@@ -1060,7 +1060,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
-  padding: 6px;
+  padding: 4px 6px;
   border: 2px solid var(--color-border-soft);
 }
 

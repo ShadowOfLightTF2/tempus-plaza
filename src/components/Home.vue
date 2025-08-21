@@ -88,7 +88,219 @@
             </div>
           </div>
         </div>
-        <hr class="divider" style="width: 100%; margin-top: 100px" />
+        <hr class="divider" style="width: 100%" />
+        <h2 class="section-title">Jump World Cup</h2>
+        <div class="tournament-section-wrapper">
+          <div class="container">
+            <div class="tournament-teams">
+              <!-- YouTube Video -->
+              <div class="tournament-video-section">
+                <div class="youtube-embed-container">
+                  <iframe
+                    width="560"
+                    height="315"
+                    src="https://www.youtube.com/embed/P2-6PDkE7Ls"
+                    title="Jump World Cup"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                  >
+                  </iframe>
+                </div>
+                <div class="tournament-info">
+                  <h4 class="tournament-info-title">Tournament Information</h4>
+                  <div class="tournament-info-item">
+                    <div class="tournament-info-label">📅 Date & Time:</div>
+                    <div class="tournament-info-value">
+                      September 27th at 1:00 PM CET
+                    </div>
+                  </div>
+                  <div class="tournament-info-item">
+                    <div class="tournament-info-label">📺 Stream:</div>
+                    <div class="tournament-info-value">
+                      <a
+                        href="https://twitch.tv/essentialstf"
+                        target="_blank"
+                        class="stream-link"
+                      >
+                        twitch.tv/essentialstf
+                      </a>
+                    </div>
+                  </div>
+                  <div class="tournament-info-item">
+                    <div class="tournament-info-label">
+                      💬 More information:
+                    </div>
+                    <div class="tournament-info-value">
+                      <a
+                        href="https://discord.gg/fNuYx7gHqT"
+                        target="_blank"
+                        class="stream-link"
+                        rel="noopener noreferrer"
+                      >
+                        Join the Discord
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Tournament Teams -->
+              <h4 class="tournament-section-title">Teams</h4>
+              <div class="teams-grid">
+                <div
+                  class="team-card"
+                  v-for="team in worldCupTeams"
+                  :key="team.name"
+                >
+                  <div class="team-header">
+                    <h5 class="team-name">{{ team.name }}</h5>
+                  </div>
+                  <div class="team-players">
+                    <SmartLink
+                      v-for="player in team.players"
+                      :key="player.id"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.id },
+                      }"
+                      class="tournament-player-card"
+                    >
+                      <img
+                        :src="getPlayerAvatar(player.id)"
+                        alt="Avatar"
+                        class="tournament-player-avatar"
+                      />
+                      <div class="tournament-player-info">
+                        <div class="tournament-player-name-rank">
+                          <div class="tournament-player-name">
+                            {{ player.displayName }}
+                          </div>
+                          <div class="tournament-class-rank">
+                            <span class="tournament-rank" :class="player.class">
+                              #{{
+                                getPlayerRankForClass(player.id, player.class)
+                              }}
+                            </span>
+                            <img
+                              :src="getClassIcon(player.class)"
+                              alt="class"
+                              class="tournament-class-icon"
+                            />
+                          </div>
+                        </div>
+                        <div class="tournament-player-details">
+                          <img
+                            :src="
+                              getFlagImageUrl(getPlayerCountryCode(player.id))
+                            "
+                            alt="flag"
+                            class="tournament-flag-icon"
+                            @error="handleImageError"
+                          />
+                          <span class="tournament-country">{{
+                            getPlayerCountry(player.id)
+                          }}</span>
+                        </div>
+                      </div>
+                    </SmartLink>
+                  </div>
+                </div>
+              </div>
+              <!-- Tournament Maps -->
+              <div class="maps-dropdown-header" @click="showMaps = !showMaps">
+                <h4 class="tournament-section-title">
+                  Maps
+                  <svg
+                    class="dropdown-arrow"
+                    :class="{ rotated: showMaps }"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                  </svg>
+                </h4>
+              </div>
+              <transition name="maps-dropdown">
+                <div v-if="showMaps" class="tournament-maps">
+                  <div class="maps-content">
+                    <div class="maps-subsection">
+                      <h5 class="map-class-title">Soldier Maps</h5>
+                      <div class="tournament-maps-grid soldier-grid">
+                        <div class="soldier-row-1">
+                          <SmartLink
+                            v-for="map in soldierMaps.slice(0, 5)"
+                            :key="'soldier-' + map.name"
+                            :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                            class="tournament-map-card-row-1"
+                            :style="{
+                              background: `
+        linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+      `,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }"
+                            ><span class="tournament-map-name">{{
+                              cleanMapName(map.name)
+                            }}</span>
+                          </SmartLink>
+                        </div>
+                        <div class="soldier-row-2">
+                          <SmartLink
+                            v-for="map in soldierMaps.slice(5)"
+                            :key="'soldier-' + map.name"
+                            :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                            class="tournament-map-card-row-2"
+                            :style="{
+                              background: `
+        linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+      `,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }"
+                          >
+                            <span class="tournament-map-name">{{
+                              cleanMapName(map.name)
+                            }}</span>
+                          </SmartLink>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="maps-subsection">
+                      <h5 class="map-class-title">Demoman Maps</h5>
+                      <div class="tournament-maps-grid demo-grid">
+                        <SmartLink
+                          v-for="map in demoMaps"
+                          :key="'demo-' + map.name"
+                          :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                          class="tournament-map-card"
+                          :style="{
+                            background: `
+          linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+          url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+        `,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }"
+                        >
+                          <span class="tournament-map-name">{{
+                            cleanMapName(map.name)
+                          }}</span>
+                        </SmartLink>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </transition>
+            </div>
+          </div>
+        </div>
+        <hr class="divider" style="width: 100%" />
         <div class="section">
           <div class="container">
             <h2 class="section-title">Most points gained</h2>
@@ -336,8 +548,8 @@
 
 <script>
 import { useHead } from "@vueuse/head";
-import debounce from "debounce";
 import DOMPurify from "dompurify";
+import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -350,6 +562,160 @@ export default {
   },
   data() {
     return {
+      showMaps: false,
+      soldierMaps: [
+        { id: 289, name: "jump_negative_b5" },
+        { id: 788, name: "jump_cellulose_rc5" },
+        { id: 456, name: "jump_elite" },
+        { id: 187, name: "jump_sitood_zip" },
+        { id: 415, name: "jump_fifth" },
+        { id: 147, name: "jump_torii_v3" },
+        { id: 271, name: "jump_dahl" },
+        { id: 32, name: "jump_collab" },
+        { id: 780, name: "jump_biolab" },
+      ],
+      demoMaps: [
+        { id: 655, name: "jump_yes_b4" },
+        { id: 438, name: "jump_tensor_a2_zip" },
+        { id: 369, name: "jump_shelter_b1" },
+        { id: 160, name: "jump_volcanic_zip" },
+        { id: 154, name: "jump_ugly_b4" },
+      ],
+      worldCupTeams: [
+        {
+          name: "ASIA",
+          players: [
+            {
+              displayName: "Cander",
+              id: 243670,
+              class: "demoman",
+              country: "Indonesia",
+              countryCode: "id",
+            },
+            {
+              displayName: "Vice",
+              id: 10736,
+              class: "soldier",
+              country: "Singapore",
+              countryCode: "sg",
+            },
+            {
+              displayName: "Rubidus",
+              id: 392512,
+              class: "soldier",
+              country: "South Korea",
+              countryCode: "kr",
+            },
+            {
+              displayName: "Song",
+              id: 370388,
+              class: "soldier",
+              country: "South Korea",
+              countryCode: "kr",
+            },
+          ],
+        },
+        {
+          name: "OCEANIA",
+          players: [
+            {
+              displayName: "Matty",
+              id: 1320,
+              class: "demoman",
+              country: "Australia",
+              countryCode: "au",
+            },
+            {
+              displayName: "Diller",
+              id: 16145,
+              class: "soldier",
+              country: "New Zealand",
+              countryCode: "nz",
+            },
+            {
+              displayName: "Rintincan",
+              id: 5916,
+              class: "soldier",
+              country: "New Zealand",
+              countryCode: "nz",
+            },
+            {
+              displayName: "Newjuls",
+              id: 281915,
+              class: "soldier",
+              country: "New Zealand",
+              countryCode: "nz",
+            },
+          ],
+        },
+        {
+          name: "EUROPE",
+          players: [
+            {
+              displayName: "Phancy",
+              id: 15063,
+              class: "demoman",
+              country: "Norway",
+              countryCode: "no",
+            },
+            {
+              displayName: "Bunny",
+              id: 357942,
+              class: "soldier",
+              country: "Finland",
+              countryCode: "fi",
+            },
+            {
+              displayName: "Nikita",
+              id: 602086,
+              class: "soldier",
+              country: "Sweden",
+              countryCode: "se",
+            },
+            {
+              displayName: "Boshy",
+              id: 39902,
+              class: "soldier",
+              country: "Ukraine",
+              countryCode: "ua",
+            },
+          ],
+        },
+        {
+          name: "NORTH AMERICA",
+          players: [
+            {
+              displayName: "kjr",
+              id: 107009,
+              class: "demoman",
+              country: "United States",
+              countryCode: "us",
+            },
+            {
+              displayName: "Rellort",
+              id: 168648,
+              class: "soldier",
+              country: "Canada",
+              countryCode: "ca",
+            },
+            {
+              displayName: "Sammy",
+              id: 503501,
+              class: "soldier",
+              country: "Canada",
+              countryCode: "ca",
+            },
+            {
+              displayName: "Spidda",
+              id: 24856,
+              class: "soldier",
+              country: "United States",
+              countryCode: "us",
+            },
+          ],
+        },
+      ],
+      playerData: {},
       searchQuery: "",
       searchResults: null,
       loadingMaps: false,
@@ -362,7 +728,122 @@ export default {
       topDemomen: [],
     };
   },
+  computed: {
+    cleanMapName() {
+      return (mapName) => {
+        return mapName.replace(/^jump_/, "").replace(/_[a-zA-Z0-9_]*$/, "");
+      };
+    },
+
+    getClassIcon() {
+      return (playerClass) => {
+        return `/icons/${playerClass}.png`;
+      };
+    },
+
+    getPlayerAvatar() {
+      return (playerId) => {
+        return this.playerData[playerId]?.steam_avatar || "";
+      };
+    },
+
+    getPlayerCountryCode() {
+      return (playerId) => {
+        for (const team of this.worldCupTeams) {
+          const tournamentPlayer = team.players.find((p) => p.id === playerId);
+          if (tournamentPlayer && tournamentPlayer.countryCode) {
+            return tournamentPlayer.countryCode;
+          }
+        }
+        return this.playerData[playerId]?.country_code || "us";
+      };
+    },
+
+    getPlayerCountry() {
+      return (playerId) => {
+        for (const team of this.worldCupTeams) {
+          const tournamentPlayer = team.players.find((p) => p.id === playerId);
+          if (tournamentPlayer && tournamentPlayer.country) {
+            return tournamentPlayer.country;
+          }
+        }
+        return this.playerData[playerId]?.country || "Unknown";
+      };
+    },
+
+    getPlayerRankForClass() {
+      return (playerId, playerClass) => {
+        const playerData = this.playerData[playerId];
+        if (!playerData) return "N/A";
+
+        return playerClass === "soldier"
+          ? playerData.soldier_rank || "N/A"
+          : playerData.demoman_rank || "N/A";
+      };
+    },
+
+    getPlayerSoldierRank() {
+      return (playerId) => {
+        return this.playerData[playerId]?.soldier_rank || "N/A";
+      };
+    },
+
+    getPlayerDemoRank() {
+      return (playerId) => {
+        return this.playerData[playerId]?.demoman_rank || "N/A";
+      };
+    },
+
+    getFlagImageUrl() {
+      return (countryCode) => {
+        const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
+          ? countryCode.toLowerCase()
+          : "unknown";
+        return `https://flagcdn.com/24x18/${validCode}.png`;
+      };
+    },
+
+    sanitize() {
+      return (text) => {
+        return DOMPurify.sanitize(text);
+      };
+    },
+
+    formatDate() {
+      return (dateString) => {
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+      };
+    },
+  },
   methods: {
+    async fetchPlayerData(playerId) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/players/${playerId}`);
+        const data = response.data;
+        const playerInfo = data[0];
+
+        const ranksResponse = await axios.get(
+          `${API_BASE_URL}/players/${playerId}/ranks`
+        );
+        const ranksData = ranksResponse.data;
+        playerInfo.soldier_rank = ranksData[0].soldier_rank;
+        playerInfo.demoman_rank = ranksData[0].demoman_rank;
+        this.playerData[playerId] = playerInfo;
+        console.log("Player data:", playerInfo);
+        return playerInfo;
+      } catch (error) {
+        console.error("Error fetching player data:", error);
+        return this.playerData[playerId];
+      }
+    },
+    async loadTournamentData() {
+      const allPlayerIds = this.worldCupTeams.flatMap((team) =>
+        team.players.map((player) => player.id)
+      );
+
+      await Promise.all(allPlayerIds.map((id) => this.fetchPlayerData(id)));
+    },
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
         ? countryCode.toLowerCase()
@@ -376,9 +857,10 @@ export default {
     },
     async fetchTopPlayers() {
       try {
-        const response = await fetch(`${API_BASE_URL}/players/get-top-gainers`);
-        if (!response.ok) throw new Error("Failed to fetch top players");
-        const data = await response.json();
+        const response = await axios.get(
+          `${API_BASE_URL}/players/get-top-gainers`
+        );
+        const data = response.data;
 
         this.topSoldiers = data
           .filter((player) => player.class_type === "soldier")
@@ -395,9 +877,10 @@ export default {
     },
     async fetchPopularMaps() {
       try {
-        const response = await fetch(`${API_BASE_URL}/maps/get-popular-maps`);
-        if (!response.ok) throw new Error("Failed to fetch popular maps");
-        const data = await response.json();
+        const response = await axios.get(
+          `${API_BASE_URL}/maps/get-popular-maps`
+        );
+        const data = response.data;
         this.popularSoldierMaps = data
           .filter((map) => map.class_type === "soldier")
           .sort((a, b) => b.run_count - a.run_count);
@@ -411,17 +894,12 @@ export default {
     },
     async fetchTF2RJWeeklyVideos() {
       try {
-        const response = await fetch(`${API_BASE_URL}/news/get-videos`);
-        if (!response.ok) throw new Error("Failed to fetch TF2RJWeekly videos");
-        const data = await response.json();
+        const response = await axios.get(`${API_BASE_URL}/news/get-videos`);
+        const data = response.data;
         this.tf2rjweeklyVideos = data;
       } catch (error) {
         console.error("Error fetching TF2RJWeekly videos:", error);
       }
-    },
-    formatDate(dateString) {
-      const options = { year: "numeric", month: "short", day: "numeric" };
-      return new Date(dateString).toLocaleDateString(undefined, options);
     },
     openYoutubeVideo(youtubeId) {
       if (youtubeId) {
@@ -429,27 +907,18 @@ export default {
       }
     },
     async fetchMaps(query) {
-      const response = await fetch(`${API_BASE_URL}/search/maps`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+      const response = await axios.post(`${API_BASE_URL}/search/maps`, {
+        query,
       });
-
-      if (!response.ok) throw new Error("Failed to fetch maps");
-      return await response.json();
+      return response.data;
     },
 
     async fetchPlayers(query) {
-      const response = await fetch(`${API_BASE_URL}/search/players`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+      const response = await axios.post(`${API_BASE_URL}/search/players`, {
+        query,
       });
-
-      if (!response.ok) throw new Error("Failed to fetch players");
-      return await response.json();
+      return response.data;
     },
-
     async fetchSearchResults() {
       const query = this.searchQuery.trim();
 
@@ -499,19 +968,25 @@ export default {
         this.fetchSearchResults();
       }, 500);
     },
-    sanitize(text) {
-      return DOMPurify.sanitize(text);
-    },
   },
-  created() {
-    this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
+  mounted() {
+    if (!this.updateInterval) {
+      this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
+    }
     this.fetchTopPlayers();
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
+    this.loadTournamentData();
   },
   beforeDestroy() {
-    clearInterval(this.updateInterval);
-    clearTimeout(this.debounceTimer);
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
   },
   watch: {
     searchQuery() {
@@ -890,6 +1365,10 @@ export default {
   color: #ffffff;
   margin-bottom: 5px;
   align-self: flex-start;
+  max-width: 210px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .country {
@@ -1189,5 +1668,536 @@ export default {
   .points-value {
     font-size: 1rem;
   }
+}
+.tournament-maps {
+  margin-top: 25px;
+  border-radius: 15px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  padding: 20px;
+  padding-bottom: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tournament-section-wrapper {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-radius: 20px;
+  padding: 0px 40px 20px 20px;
+  margin: 40px 0;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tournament-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 30px;
+}
+
+.maps-subsection {
+  margin-bottom: 30px;
+}
+
+.map-class-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tournament-video-section {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 30px;
+  margin: 30px 0 30px 0;
+  align-items: start;
+}
+
+.youtube-embed-container {
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 415px;
+}
+
+.youtube-embed-container:hover {
+  background: none;
+  border-radius: 15px;
+  box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+}
+
+.youtube-embed-container iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.tournament-info {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  border-radius: 20px;
+  padding: 15px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.tournament-info-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 15px;
+  text-align: center;
+  position: relative;
+}
+
+.tournament-info-item {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 15px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  border-radius: 12px;
+  border-left: 3px solid var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.tournament-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.tournament-info-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tournament-info-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-left: 8px;
+}
+
+.stream-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  margin-top: 5px;
+  width: fit-content;
+}
+.stream-link:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: var(--color-primary);
+  text-shadow: 0 0 10px var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tournament-maps-grid {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.soldier-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.soldier-grid .soldier-row-1 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+}
+
+.soldier-grid .soldier-row-2 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.demo-grid {
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+}
+
+.tournament-map-card,
+.tournament-map-card-row-1 {
+  height: 140px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tournament-map-card-row-2 {
+  height: 140px;
+  width: 211.15px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tournament-map-card:hover,
+.tournament-map-card-row-1:hover,
+.tournament-map-card-row-2:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+}
+
+.tournament-map-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tournament-teams {
+  margin-top: 40px;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.team-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0px 15px rgb(0, 0, 0);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.team-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.team-players {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tournament-player-card {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tournament-player-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+}
+
+.tournament-player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  border: 2px solid var(--color-primary);
+}
+
+.tournament-player-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.tournament-player-name-rank {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.tournament-player-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.tournament-player-details {
+  display: flex;
+  align-items: center;
+}
+
+.tournament-flag-icon {
+  width: 14px;
+  height: auto;
+  margin-right: 5px;
+}
+
+.tournament-country {
+  font-size: 0.8rem;
+  color: #d5d5d5;
+  font-weight: 500;
+}
+
+.tournament-class-rank {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.tournament-class-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.tournament-rank {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ffffff;
+  min-width: 30px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+  .team-card {
+    padding: 15px;
+  }
+  .team-name {
+    font-size: 1.3rem;
+  }
+  .tournament-player-card {
+    padding: 10px;
+  }
+  .tournament-player-name {
+    font-size: 0.9rem;
+  }
+  .soldier-grid .soldier-row-1,
+  .soldier-grid .soldier-row-2,
+  .demo-grid {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .soldier-grid .soldier-row-1 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .soldier-grid .soldier-row-2 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .tournament-map-card,
+  .tournament-map-card-row-1,
+  .tournament-map-card-row-2 {
+    height: 100px;
+    width: 100%;
+  }
+  .tournament-map-name {
+    font-size: 1rem;
+  }
+
+  .tournament-section-wrapper {
+    padding: 20px 10px;
+  }
+
+  .maps-subsection {
+    margin-bottom: 20px;
+  }
+  .tournament-video-section {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .youtube-embed-container {
+    height: auto;
+  }
+
+  .youtube-embed-container iframe {
+    height: 250px;
+  }
+
+  .tournament-info {
+    padding: 20px;
+  }
+
+  .tournament-info-title {
+    font-size: 1.2rem;
+  }
+  .search-results-dropdown {
+    min-width: 100%;
+    max-width: 100%;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+.maps-dropdown-header {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  margin-top: 25px;
+}
+
+.maps-dropdown-header:hover {
+  transform: translateY(-2px);
+}
+
+.maps-dropdown-header h4 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0;
+  transition: all 0.3s ease;
+}
+
+.dropdown-arrow {
+  color: var(--color-primary);
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.maps-dropdown-enter-active,
+.maps-dropdown-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
+}
+
+.maps-dropdown-enter-from {
+  opacity: 0;
+  transform: scaleY(0) translateY(-20px);
+  max-height: 0;
+}
+
+.maps-dropdown-leave-to {
+  opacity: 0;
+  transform: scaleY(0) translateY(-20px);
+  max-height: 0;
+}
+
+.maps-dropdown-enter-to,
+.maps-dropdown-leave-from {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+  max-height: 1000px;
 }
 </style>

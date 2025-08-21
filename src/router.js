@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from './components/Home.vue';
 import Servers from './components/Servers.vue';
 import Activity from './components/Activity.vue';
-import Leaderboard from './components/Leaderboard.vue';
 import Maps from './components/Maps.vue';
 import Players from './components/Players.vue';
 import PlayerPage from './components/PlayerPage.vue';
@@ -16,7 +15,6 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-    meta: { preserveScroll: false },
   },
   {
     path: '/servers/:view?',
@@ -84,11 +82,13 @@ const router = createRouter({
   routes,
   strict: false,
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) return savedPosition
-    if (to.meta.preserveScroll === false) {
-      return { left: 0, top: 0, behavior: 'auto' }
+    if (savedPosition) return savedPosition;
+
+    if (to.name === from.name) {
+      return false;
     }
-    return false
+
+    return { left: 0, top: 0, behavior: 'auto' };
   },
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active'

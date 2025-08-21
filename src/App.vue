@@ -129,6 +129,7 @@
                 to="/"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Home') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-house"></i> Home
               </router-link>
@@ -138,6 +139,7 @@
                 to="/servers"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Servers') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-globe"></i> Servers
               </router-link>
@@ -147,6 +149,7 @@
                 to="/activity"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Activity') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-graph-up"></i> Activity
               </router-link>
@@ -156,6 +159,7 @@
                 to="/maps"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Maps') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-map"></i> Maps
               </router-link>
@@ -165,6 +169,7 @@
                 to="/players"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Players') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-trophy"></i> Players
               </router-link>
@@ -174,6 +179,7 @@
                 to="/compare"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Compare') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-bar-chart"></i> Compare
               </router-link>
@@ -183,6 +189,7 @@
                 to="/lookup"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Lookup') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-search"></i> Lookup
               </router-link>
@@ -192,6 +199,7 @@
                 to="/donate"
                 class="nav-link"
                 :class="{ active: isNavItemActive('Donate') }"
+                @click="closeNavbar"
               >
                 <i class="bi bi-heart"></i> Donate
               </router-link>
@@ -559,6 +567,13 @@ export default {
     };
   },
   methods: {
+    closeNavbar() {
+      const navbarCollapse = document.getElementById("navbarNav");
+      const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+        toggle: false,
+      });
+      bsCollapse.hide();
+    },
     closeLoginPopup() {
       this.showLoginPopup = false;
       localStorage.setItem("tempus_popup_shown", "true");
@@ -812,13 +827,10 @@ export default {
   },
   async mounted() {
     try {
-      //console.log("Document cookies:", document.cookie);
-
       const isAuthenticated = await this.checkAuthStatus();
       console.log("Auth check result:", isAuthenticated);
 
       if (isAuthenticated) {
-        //console.log("User is authenticated, fetching user data...");
         const userData = await this.fetchUserData();
 
         if (userData) {
@@ -828,7 +840,6 @@ export default {
           this.donator = userData.donator || 0;
           this.colorPreference = userData.color || "blue";
 
-          // Initialize the reactive tracker
           this.profileUpdateTracker.rank = this.rankPreference;
           this.profileUpdateTracker.color = this.colorPreference;
           this.profileUpdateTracker.gender = this.gender;
@@ -841,13 +852,16 @@ export default {
       this.currentUser = null;
     }
     if (!this.currentUser && this.checkFirstVisit()) {
-      setTimeout(() => {
+      this.debounceTimer = setTimeout(() => {
         this.showLoginPopup = true;
       }, 1000);
     }
   },
   beforeDestroy() {
-    clearTimeout(this.debounceTimer);
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
   },
 };
 </script>
@@ -879,6 +893,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
+  height: 75px;
   z-index: 9999;
   background: linear-gradient(
     90deg,
@@ -908,7 +923,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: rgba(37, 55, 82, 0.8);
 }
 
 .nav-link {
@@ -1255,9 +1270,11 @@ body {
   }
 
   .search-results-dropdown {
-    width: 100%;
-    left: 0;
-    right: 0;
+    width: 90vw;
+    max-width: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 50px !important;
   }
 
   .navbar {

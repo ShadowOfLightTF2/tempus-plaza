@@ -817,14 +817,14 @@ export default {
   color: var(--color-text);
   text-align: left;
   font-weight: 600;
-  padding-bottom: 7px;
+  padding-bottom: 5px;
   border-top: 1px solid var(--color-border-soft);
 }
 .table-dark td {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
-  padding: 7px;
+  padding: 5px 7px;
 }
 .table-dark tr:nth-child(odd) .name-cell:hover {
   background: rgba(74, 111, 165, 0.8);
@@ -851,13 +851,14 @@ export default {
 }
 .header-type {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   color: var(--color-text);
 }
 .header-tier-rating {
   margin: 5px 0 0 0px;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: bold;
   color: var(--color-text);
 }
 .maps-header {
@@ -923,8 +924,8 @@ export default {
   background: var(--color-row) !important;
 }
 .class-icon {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   margin: 8px;
 }
 .placement-gold {
@@ -1024,7 +1025,6 @@ export default {
 }
 
 .subcategory-pill {
-  border: 1px solid var(--color-border-soft);
   color: var(--color-text-soft);
   padding: 10px 20px;
   border-radius: 20px;
@@ -1033,17 +1033,20 @@ export default {
   font-weight: 500;
   white-space: nowrap;
   font-size: 14px;
+  border: 2px solid transparent;
   background: rgba(255, 255, 255, 0.05);
 }
 
 .subcategory-pill.active {
-  background: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .subcategory-pill:hover:not(.active) {
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
 
@@ -1089,22 +1092,25 @@ export default {
   border: none;
   color: var(--color-text-soft);
   padding: 10px 20px;
-  border-radius: 20px;
+  border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
   white-space: nowrap;
   font-size: 16px;
+  border: 2px solid transparent;
 }
 
 .category-tab.active {
-  background: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .category-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
 .row-divider {
