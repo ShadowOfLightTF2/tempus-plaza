@@ -681,25 +681,20 @@
                                 <div class="d-flex align-items-center gap-2">
                                   <span
                                     class="record-detail record-duration"
-                                    :class="[
-                                      record.rank >= 1 && record.rank <= 3
-                                        ? getPlacementClass(record.rank)
-                                        : '',
-                                    ]"
+                                    :class="record.rankClass"
                                   >
-                                    {{ formatDuration(record.duration) }}
+                                    {{ record.durationFormatted }}
                                   </span>
                                   <span
                                     class="record-rank"
-                                    :class="getPlacementClass(record.placement)"
+                                    :class="record.placementClass"
                                   >
-                                    {{ getMedal(record.rank) }} #{{
-                                      record.rank
-                                    }}
+                                    {{ record.medal }} #{{ record.rank }}
                                   </span>
                                 </div>
+
                                 <span class="record-detail record-date">
-                                  {{ formatDate(record.date) }}
+                                  {{ record.formattedDate }}
                                 </span>
                               </div>
                             </div>
@@ -774,47 +769,31 @@
                                   <span class="placement-arrows">
                                     <span
                                       class="old-rank"
-                                      :class="
-                                        getPlacementClass(placement.old_rank)
-                                      "
+                                      :class="placement.oldRankClass"
                                     >
-                                      {{ getMedal(placement.old_rank)
-                                      }}{{
-                                        formatRankDisplay(placement.old_rank)
-                                      }}
+                                      {{ placement.oldRankDisplay }}
                                     </span>
                                     <i
                                       class="bi bi-arrow-right placement-arrow"
                                     ></i>
                                     <span
                                       class="new-rank"
-                                      :class="
-                                        getPlacementClass(placement.new_rank)
-                                      "
+                                      :class="placement.newRankClass"
                                     >
-                                      {{ getMedal(placement.new_rank)
-                                      }}{{
-                                        formatRankDisplay(placement.new_rank)
-                                      }}
+                                      {{ placement.newRankDisplay }}
                                     </span>
                                   </span>
+
                                   <span
                                     class="points-change"
-                                    :class="
-                                      getPointsChangeClass(
-                                        placement.points_change
-                                      )
-                                    "
+                                    :class="placement.pointsChangeClass"
                                   >
-                                    {{
-                                      formatPointsChange(
-                                        placement.points_change
-                                      )
-                                    }}
+                                    {{ placement.pointsChangeText }}
                                   </span>
                                 </div>
+
                                 <span class="record-detail record-date">
-                                  {{ formatDate(placement.date) }}
+                                  {{ placement.formattedDate }}
                                 </span>
                               </div>
                             </div>
@@ -823,21 +802,32 @@
                       </div>
                     </div>
                     <div class="pagination-controls">
-                      <button
-                        v-if="currentPage > 1"
-                        @click="prevPage"
-                        class="btn btn-dark global-btn"
+                      <div class="pagination-side">
+                        <button
+                          v-if="currentPage > 1"
+                          @click="prevPage"
+                          class="btn btn-dark global-btn"
+                        >
+                          Previous
+                        </button>
+                      </div>
+
+                      <div
+                        class="pagination-info"
+                        v-if="activeRecordsTab === 'changed-placements'"
                       >
-                        Previous
-                      </button>
-                      <div class="pagination-spacer"></div>
-                      <button
-                        v-if="shouldShowNextButton"
-                        @click="nextPage"
-                        class="btn btn-dark global-btn"
-                      >
-                        Next
-                      </button>
+                        Next update in {{ nextUpdateCountdown }}
+                      </div>
+
+                      <div class="pagination-side">
+                        <button
+                          v-if="shouldShowNextButton"
+                          @click="nextPage"
+                          class="btn btn-dark global-btn"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1225,6 +1215,8 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
+    currentTime: new Date(),
+    updateTimer: null,
     debounceTimer: null,
     currentUser: null,
     selectedClass: null,
@@ -1716,6 +1708,33 @@ export default {
     },
   }),
   computed: {
+    nextUpdateCountdown() {
+      const now = this.currentTime;
+      const nextUpdate = new Date(now);
+
+      const nextHour = Math.ceil((now.getHours() + 1) / 2) * 2;
+      nextUpdate.setHours(nextHour, 0, 0, 0);
+
+      const diff = nextUpdate - now;
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+      }
+      return `${seconds}s`;
+    },
+    currentTimeString() {
+      return this.currentTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    },
     highestRank() {
       if (this.player.rank_pref === "overall") return this.player.overall_rank;
       else if (this.player.rank_pref === "soldier")
@@ -1911,6 +1930,12 @@ export default {
   },
   async mounted() {
     await this.loadPlayerPageData(this.playerId);
+    this.startUpdateTimer();
+  },
+  beforeUnmount() {
+    if (this.updateTimer) {
+      clearInterval(this.updateTimer);
+    }
   },
   watch: {
     profileUpdateTracker: {
@@ -1988,6 +2013,11 @@ export default {
     },
   },
   methods: {
+    startUpdateTimer() {
+      this.updateTimer = setInterval(() => {
+        this.currentTime = new Date();
+      }, 1000);
+    },
     async loadPlayerPageData(playerId) {
       try {
         fetch(
@@ -2053,7 +2083,6 @@ export default {
       this.activeRecordsTab = tab;
       this.currentPage = 1;
     },
-
     async fetchChangedPlacements(playerId) {
       this.loading["Lost placements"] = true;
       try {
@@ -2061,29 +2090,49 @@ export default {
           `${API_BASE_URL}/players/${playerId}/lost-records`
         );
         const data = await response.json();
-        this.changedPlacements = data.map((placement) => ({
-          ...placement,
-          map_name: placement.map_name,
-          class: placement.record_type.split("_")[0], // 'soldier' or 'demoman'
-          type: placement.record_type.split("_")[1], // 'map', 'course', 'bonus'
-          index: placement.index,
-          old_rank: placement.old_placement,
-          new_rank: placement.new_placement,
-          rank_change: placement.placement_change,
-          date: placement.change_date,
-          points_change: placement.points_change,
-        }));
+
+        this.changedPlacements = data.map((p) => {
+          const old_rank = p.old_placement;
+          const new_rank = p.new_placement;
+          const points_change = p.points_change;
+          const date = p.change_date;
+
+          return {
+            // keep the original/raw fields you rely on elsewhere
+            ...p,
+            class: p.record_type.split("_")[0], // 'soldier' | 'demoman'
+            type: p.record_type.split("_")[1], // 'map' | 'course' | 'bonus'
+            old_rank,
+            new_rank,
+            rank_change: p.placement_change,
+            date,
+            points_change,
+
+            // precomputed display fields (using your helpers)
+            oldRankDisplay: `${this.getMedal(old_rank)}${this.formatRankDisplay(
+              old_rank
+            )}`,
+            newRankDisplay: `${this.getMedal(new_rank)}${this.formatRankDisplay(
+              new_rank
+            )}`,
+            oldRankClass: this.getPlacementClass(old_rank),
+            newRankClass: this.getPlacementClass(new_rank),
+
+            pointsChangeClass: this.getPointsChangeClass(points_change),
+            pointsChangeText: this.formatPointsChange(points_change), // includes +/-, fixed(2), "pts"
+
+            formattedDate: this.formatDate(date),
+          };
+        });
       } catch (error) {
         console.error("Error fetching lost placements:", error);
       } finally {
         this.loading["Lost placements"] = false;
       }
     },
-
     formatRankChange(change) {
       return change > 0 ? `+${change}` : change.toString();
     },
-
     getRankChangeClass(change) {
       return change > 0 ? "rank-loss" : "rank-gain";
     },
@@ -2667,7 +2716,16 @@ export default {
         const response = await axios.get(
           `${API_BASE_URL}/players/${playerId}/recent-records`
         );
-        this.records.recentRecords = response.data;
+
+        this.records.recentRecords = response.data.map((r) => ({
+          ...r,
+          durationFormatted: this.formatDuration(r.duration),
+          rankClass:
+            r.rank >= 1 && r.rank <= 3 ? this.getPlacementClass(r.rank) : "",
+          placementClass: this.getPlacementClass(r.placement),
+          medal: this.getMedal(r.rank),
+          formattedDate: this.formatDate(r.date),
+        }));
       } catch (error) {
         this.error =
           "Failed to fetch player recent records. Please try again later.";
@@ -3293,11 +3351,14 @@ export default {
   padding: 10px;
   text-align: center;
 }
-.card-body.tabs-content .records-section,
+.card-body,
+.tabs-content,
+.records-section,
 .card-map-body {
   width: 100%;
   padding: 0;
-  min-height: 500px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .nav-bar {
@@ -3471,8 +3532,38 @@ export default {
   margin-top: 15px;
   padding-bottom: 10px;
 }
-.pagination-spacer {
-  flex-grow: 1;
+
+.pagination-info {
+  color: var(--color-text-soft);
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.pagination-side {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pagination-side:last-child {
+  justify-content: flex-end;
+}
+
+.records-section {
+  position: relative;
+  min-height: 630px !important;
+  padding-bottom: 80px !important;
+}
+
+.records-section .pagination-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 .date-header {
   color: var(--color-text);

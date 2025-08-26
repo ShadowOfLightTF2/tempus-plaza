@@ -180,6 +180,14 @@
                   <td colspan="4" class="alert alert-danger">{{ error }}</td>
                 </tr>
                 <tr
+                  v-else-if="!loading && displayedSoldierEntries.length === 0"
+                  class="text-center"
+                >
+                  <td colspan="4" style="color: var(--color-text-soft)">
+                    No one has completed this.
+                  </td>
+                </tr>
+                <tr
                   v-else
                   v-for="(entry, index) in displayedSoldierEntries"
                   :key="'soldier-' + index"
@@ -331,6 +339,14 @@
                   <td colspan="4" class="alert alert-danger">{{ error }}</td>
                 </tr>
                 <tr
+                  v-else-if="displayedDemomanEntries.length === 0"
+                  class="text-center"
+                >
+                  <td colspan="4" style="color: var(--color-text-soft)">
+                    No one has completed this.
+                  </td>
+                </tr>
+                <tr
                   v-else
                   v-for="(entry, index) in displayedDemomanEntries"
                   :key="'demoman-' + index"
@@ -426,7 +442,7 @@ export default {
     return {
       selectedSoldierRecords: [],
       selectedDemomanRecords: [],
-      loading: false,
+      loading: true,
       showMoreLoading: false,
       error: null,
       soldierDisplayCount: 50,
@@ -924,8 +940,8 @@ export default {
   background: var(--color-row) !important;
 }
 .class-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   margin: 8px;
 }
 .placement-gold {

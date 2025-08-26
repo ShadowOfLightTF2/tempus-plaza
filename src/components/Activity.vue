@@ -189,7 +189,10 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Top Times</h3>
-                  <p class="table-header-subtitle">Updates every 2 hours</p>
+                  <p class="table-header-subtitle">
+                    Updates every 2 hours • Next update in
+                    {{ nextUpdateCountdown }}
+                  </p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -330,7 +333,10 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Group 1s</h3>
-                  <p class="table-header-subtitle">Updates every 2 hours</p>
+                  <p class="table-header-subtitle">
+                    Updates every 2 hours • Next update in
+                    {{ nextUpdateCountdown }}
+                  </p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -503,6 +509,8 @@ export default {
         selectedClasses: [],
         selectedTypes: [],
       },
+      currentTime: new Date(),
+      updateTimer: null,
     };
   },
   computed: {
@@ -514,6 +522,33 @@ export default {
     },
     filteredGroup1sData() {
       return this.filterData(this.group1sData);
+    },
+    nextUpdateCountdown() {
+      const now = this.currentTime;
+      const nextUpdate = new Date(now);
+
+      const nextHour = Math.ceil((now.getHours() + 1) / 2) * 2;
+      nextUpdate.setHours(nextHour, 0, 0, 0);
+
+      const diff = nextUpdate - now;
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+      }
+      return `${seconds}s`;
+    },
+    currentTimeString() {
+      return this.currentTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
     },
   },
   watch: {
@@ -530,7 +565,20 @@ export default {
       this.currentView = view;
     }
   },
+  mounted() {
+    this.startUpdateTimer();
+  },
+  beforeUnmount() {
+    if (this.updateTimer) {
+      clearInterval(this.updateTimer);
+    }
+  },
   methods: {
+    startUpdateTimer() {
+      this.updateTimer = setInterval(() => {
+        this.currentTime = new Date();
+      }, 1000);
+    },
     toggleClassFilter(classType) {
       const index = this.filterOptions.selectedClasses.indexOf(classType);
       if (index === -1) {

@@ -452,7 +452,6 @@
                     </div>
                   </div>
                 </div>
-
                 <!-- Course WR Videos -->
                 <div v-if="courses.length > 0" class="video-section mb-3">
                   <div class="collapsible-header" @click="toggleCourseVideos">
@@ -573,7 +572,6 @@
                     </div>
                   </div>
                 </div>
-
                 <!-- Bonus WR Videos -->
                 <div v-if="bonuses.length > 0" class="video-section">
                   <div class="collapsible-header" @click="toggleBonusVideos">
@@ -693,114 +691,110 @@
                       </div>
                     </div>
                   </div>
-
-                  <!-- ROTW Videos -->
-                  <div v-if="rotwVideos.length > 0" class="video-section">
-                    <div class="collapsible-header" @click="toggleRotwVideos">
-                      <h5 class="video-section-title mb-0">
-                        🏆 ROTW Video(s)
-                        <i
-                          class="bi"
-                          :class="
-                            showRotwVideos ? 'bi-chevron-up' : 'bi-chevron-down'
-                          "
-                          style="margin-left: auto"
-                        ></i>
-                      </h5>
-                    </div>
+                </div>
+                <!-- ROTW Videos -->
+                <div v-if="rotwVideos.length > 0" class="video-section">
+                  <div class="collapsible-header" @click="toggleRotwVideos">
+                    <h5 class="video-section-title mb-0">
+                      🏆 ROTW Video(s)
+                      <i
+                        class="bi"
+                        :class="
+                          showRotwVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                        "
+                        style="margin-left: auto"
+                      ></i>
+                    </h5>
+                  </div>
+                  <div
+                    v-if="showRotwVideos"
+                    class="collapsible-content"
+                    @click.self="clearActive"
+                  >
                     <div
-                      v-if="showRotwVideos"
-                      class="collapsible-content"
-                      @click.self="clearActive"
+                      class="row g-4 justify-content-center align-items-center"
                     >
                       <div
-                        class="row g-4 justify-content-center align-items-center"
+                        v-for="rotwVideo in displayedRotwVideos"
+                        :key="rotwVideo.video_id"
+                        class="col-lg-8 col-md-10 col-12"
                       >
                         <div
-                          v-for="rotwVideo in displayedRotwVideos"
-                          :key="rotwVideo.video_id"
-                          class="col-lg-8 col-md-10 col-12"
+                          class="video-card video-card-rotw"
+                          :class="{
+                            active:
+                              activeVideo === 'rotw-' + rotwVideo.video_id,
+                          }"
+                          @click.stop="toggleCard('rotw-' + rotwVideo.video_id)"
                         >
-                          <div
-                            class="video-card video-card-rotw"
-                            :class="{
-                              active:
-                                activeVideo === 'rotw-' + rotwVideo.video_id,
-                            }"
-                            @click.stop="
-                              toggleCard('rotw-' + rotwVideo.video_id)
-                            "
-                          >
-                            <h6 class="video-title">
-                              {{ rotwVideo.player_name || "Unknown Player" }}
-                            </h6>
-                            <div class="video-container">
-                              <div
-                                v-if="rotwVideo.video_id"
-                                class="video-scale-wrapper"
-                                @click.stop="
-                                  toggleCard('rotw-' + rotwVideo.video_id)
+                          <h6 class="video-title">
+                            {{ rotwVideo.player_name || "Unknown Player" }}
+                          </h6>
+                          <div class="video-container">
+                            <div
+                              v-if="rotwVideo.video_id"
+                              class="video-scale-wrapper-rotw"
+                              @click.stop="
+                                toggleCard('rotw-' + rotwVideo.video_id)
+                              "
+                            >
+                              <iframe
+                                :src="
+                                  'https://www.youtube.com/embed/' +
+                                  rotwVideo.video_id
                                 "
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    rotwVideo.video_id
-                                  "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
-                              </div>
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                              ></iframe>
                             </div>
-                            <div class="rotw-info mt-2">
-                              <small class="rotw-text">
-                                <i class="bi bi-calendar me-1"></i>
-                                {{
-                                  formatDate(
-                                    new Date(rotwVideo.uploaded_at).getTime() /
-                                      1000
-                                  )
-                                }}
-                              </small>
+                            <div v-else class="no-video-placeholder">
+                              <i class="bi bi-camera-video-off"></i>
+                              <span>No video available</span>
                             </div>
                           </div>
+                          <div class="rotw-info mt-2">
+                            <small class="rotw-text">
+                              <i class="bi bi-calendar me-1"></i>
+                              {{
+                                formatDate(
+                                  new Date(rotwVideo.uploaded_at).getTime() /
+                                    1000
+                                )
+                              }}
+                            </small>
+                          </div>
                         </div>
-                        <div
-                          v-if="hasMoreRotwVideos && !showAllRotwVideos"
-                          class="text-center mt-3"
+                      </div>
+                      <div
+                        v-if="hasMoreRotwVideos && !showAllRotwVideos"
+                        class="text-center mt-3"
+                      >
+                        <button
+                          @click="toggleShowAllRotwVideos"
+                          class="btn load-more-btn"
                         >
-                          <button
-                            @click="toggleShowAllRotwVideos"
-                            class="btn load-more-btn"
-                          >
-                            <i class="bi bi-chevron-down me-2"></i>
-                            Load {{ rotwVideos.length - 1 }} older ROTW video{{
-                              rotwVideos.length - 1 > 1 ? "s" : ""
-                            }}
-                          </button>
-                        </div>
-                        <div
-                          v-if="showAllRotwVideos && hasMoreRotwVideos"
-                          class="text-center mt-3"
+                          <i class="bi bi-chevron-down me-2"></i>
+                          Load {{ rotwVideos.length - 1 }} older ROTW video{{
+                            rotwVideos.length - 1 > 1 ? "s" : ""
+                          }}
+                        </button>
+                      </div>
+                      <div
+                        v-if="showAllRotwVideos && hasMoreRotwVideos"
+                        class="text-center mt-3"
+                      >
+                        <button
+                          @click="toggleShowAllRotwVideos"
+                          class="btn load-more-btn"
                         >
-                          <button
-                            @click="toggleShowAllRotwVideos"
-                            class="btn load-more-btn"
-                          >
-                            <i class="bi bi-chevron-up me-2"></i>
-                            Show only most recent
-                          </button>
-                        </div>
+                          <i class="bi bi-chevron-up me-2"></i>
+                          Show only most recent
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-
                 <Leaderboard :mapId="mapId" v-if="mapId" />
               </div>
             </div>
@@ -1389,11 +1383,27 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  transform: scale(1);
+  transform: scale(0.5);
   transform-origin: top left;
 }
 
 .video-scale-wrapper iframe {
+  width: 200%;
+  height: 200%;
+  border-radius: 8px;
+}
+
+.video-scale-wrapper-rotw {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1);
+  transform-origin: top left;
+}
+
+.video-scale-wrapper-rotw iframe {
   width: 100%;
   height: 100%;
   border-radius: 8px;
@@ -1781,8 +1791,11 @@ export default {
     gap: 16px;
   }
 
-  .video-card:hover {
+  .video-card.active {
     transform: none;
+  }
+  .video-card-rotw.active {
+    transform: none !important;
   }
 }
 .video-card-rotw {
@@ -1829,11 +1842,13 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.video-scale-wrapper iframe {
+.video-scale-wrapper iframe,
+.video-scale-wrapper-rotw iframe {
   pointer-events: none;
 }
 
-.video-card.active .video-scale-wrapper iframe {
+.video-card.active .video-scale-wrapper iframe,
+.video-card.active .video-scale-wrapper-rotw iframe {
   pointer-events: auto;
 }
 </style>

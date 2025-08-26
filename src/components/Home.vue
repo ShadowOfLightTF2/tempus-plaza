@@ -830,7 +830,7 @@ export default {
         playerInfo.soldier_rank = ranksData[0].soldier_rank;
         playerInfo.demoman_rank = ranksData[0].demoman_rank;
         this.playerData[playerId] = playerInfo;
-        console.log("Player data:", playerInfo);
+        //console.log("Player data:", playerInfo);
         return playerInfo;
       } catch (error) {
         console.error("Error fetching player data:", error);

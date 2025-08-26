@@ -1212,6 +1212,7 @@ export default {
 .filter-count {
   color: white;
   font-weight: bold;
+  margin-top: 5px;
 }
 
 .filter-title {

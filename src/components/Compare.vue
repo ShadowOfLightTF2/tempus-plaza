@@ -2075,7 +2075,6 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
   box-shadow: 0 0px 20px rgb(0, 0, 0, 0.25);
 }
 
@@ -2199,10 +2198,6 @@ export default {
   .player-selection {
     flex-direction: column;
     gap: 20px;
-  }
-
-  .vs-indicator {
-    order: 2;
   }
 
   .results-header {
