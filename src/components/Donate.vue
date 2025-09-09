@@ -387,7 +387,6 @@ export default {
         rank_pref: "overall",
       },
       donators: [],
-      carouselPosition: 0,
       animationId: null,
     };
   },
@@ -412,6 +411,23 @@ export default {
     this.stopCarousel();
   },
   computed: {
+    formatNumber() {
+      return (num) => {
+        return num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
+      };
+    },
+    getFlagUrl() {
+      return (countryCode) => {
+        return `https://flagcdn.com/24x18/${(
+          countryCode || "us"
+        ).toLowerCase()}.png`;
+      };
+    },
+    previewTitle() {
+      return this.isLoggedIn
+        ? "Your Profile with Donator Perks"
+        : "Preview: Profile with Donator Perks";
+    },
     highestRank() {
       if (!this.isLoggedIn || !this.player.overall_rank) return 10;
 
@@ -609,7 +625,6 @@ export default {
         console.error("Error fetching player ranks:", error);
       }
     },
-
     async fetchDonators() {
       try {
         const data = await cachedFetch(`${API_BASE_URL}/users/get-donators`);
@@ -618,7 +633,6 @@ export default {
         console.error("Error fetching donators:", error);
       }
     },
-
     startCarousel() {
       if (!this.$refs.carouselTrack || !this.donators.length) return;
 
@@ -627,33 +641,24 @@ export default {
       const resetPosition = -(cardWidth * this.donators.length);
       const speed = 50 / 60;
 
+      let carouselPosition = 0;
+
       const animate = () => {
-        this.carouselPosition -= speed;
-        if (this.carouselPosition <= resetPosition) {
-          this.carouselPosition = 0;
+        carouselPosition -= speed;
+        if (carouselPosition <= resetPosition) {
+          carouselPosition = 0;
         }
-        track.style.transform = `translateX(${this.carouselPosition}px)`;
+        track.style.transform = `translateX(${carouselPosition}px)`;
         this.animationId = requestAnimationFrame(animate);
       };
 
       this.animationId = requestAnimationFrame(animate);
     },
-
     stopCarousel() {
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
         this.animationId = null;
       }
-    },
-
-    formatNumber(num) {
-      return num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
-    },
-
-    getFlagUrl(countryCode) {
-      return `https://flagcdn.com/24x18/${(
-        countryCode || "us"
-      ).toLowerCase()}.png`;
     },
   },
 };

@@ -217,7 +217,8 @@
                         selectedCategory === 'countries' &&
                         selectedItem === 'Total'
                       "
-                      class="country-cell align-middle name-column"
+                      class="country-cell align-middle player-name clickable name-column"
+                      @click="selectCountryFromSearch(player)"
                     >
                       <img
                         :src="player.flag"
@@ -227,7 +228,6 @@
                       />
                       {{ player.name }}
                     </td>
-
                     <SmartLink
                       v-else
                       tag="td"
@@ -356,7 +356,8 @@
                         selectedCategory === 'countries' &&
                         selectedItem === 'Total'
                       "
-                      class="country-cell align-middle name-column"
+                      class="country-cell align-middle player-name clickable name-column"
+                      @click="selectCountryFromSearch(player)"
                     >
                       <img
                         :src="player.flag"
@@ -948,19 +949,13 @@ export default {
   background: rgba(74, 111, 165, 0.8);
 }
 
-.name-cell {
-  max-width: 250px;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--color-text-clickable) !important;
-}
-
+.name-cell,
 .country-cell {
   max-width: 250px;
   white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--color-text-clickable) !important;
 }
 
 .rank-column {

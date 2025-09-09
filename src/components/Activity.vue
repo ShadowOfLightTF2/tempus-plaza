@@ -50,7 +50,6 @@
                 <div class="table-header-icon">🏆</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest World Records</h3>
-                  <p class="table-header-subtitle">Updates every minute</p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -189,10 +188,6 @@
                 <div class="table-header-icon">🥇</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Top Times</h3>
-                  <p class="table-header-subtitle">
-                    Updates every 2 hours • Next update in
-                    {{ nextUpdateCountdown }}
-                  </p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -333,10 +328,6 @@
                 <div class="table-header-icon">⏱️</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Latest Group 1s</h3>
-                  <p class="table-header-subtitle">
-                    Updates every 2 hours • Next update in
-                    {{ nextUpdateCountdown }}
-                  </p>
                 </div>
                 <div class="filter-container">
                   <div class="filter-group">
@@ -523,33 +514,6 @@ export default {
     filteredGroup1sData() {
       return this.filterData(this.group1sData);
     },
-    nextUpdateCountdown() {
-      const now = this.currentTime;
-      const nextUpdate = new Date(now);
-
-      const nextHour = Math.ceil((now.getHours() + 1) / 2) * 2;
-      nextUpdate.setHours(nextHour, 0, 0, 0);
-
-      const diff = nextUpdate - now;
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      if (hours > 0) {
-        return `${hours}h ${minutes}m ${seconds}s`;
-      } else if (minutes > 0) {
-        return `${minutes}m ${seconds}s`;
-      }
-      return `${seconds}s`;
-    },
-    currentTimeString() {
-      return this.currentTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-    },
   },
   watch: {
     $route(to) {
@@ -621,60 +585,58 @@ export default {
     },
     async fetchRecordsData() {
       try {
-        const [worldRecordsResponse, topTimesResponse, group1sResponse] =
-          await Promise.all([
-            fetch(`${API_BASE_URL}/maps/activity`),
-            fetch(`${API_BASE_URL}/maps/recent-top-times`),
-            fetch(`${API_BASE_URL}/maps/recent-g1s`),
-          ]);
-        const [worldRecordsData, topTimesData, group1sData] = await Promise.all(
-          [
-            worldRecordsResponse.json(),
-            topTimesResponse.json(),
-            group1sResponse.json(),
-          ]
-        );
-        this.worldRecordsData = worldRecordsData.map((item) => ({
-          id: item.id,
-          player: item.player_name,
-          player_id: item.player_id,
-          avatar: item.steam_avatar,
-          map: item.map_name,
-          map_id: item.map_id,
-          time: formatDuration(item.duration),
-          class: item.class,
-          recordType: item.map_type,
-          index: item.type_index,
-          timestamp: formatDate(item.record_date),
-        }));
-        this.topTimesData = topTimesData.map((record) => ({
-          id: record.id,
-          player: record.player_name,
-          player_id: record.player_id,
-          avatar: record.steam_avatar,
-          map: record.map_name,
-          map_id: record.map_id,
-          time: formatDuration(record.duration),
-          rank: record.rank,
-          class: record.class,
-          recordType: record.record_type,
-          index: record.index,
-          timestamp: formatDate(record.date),
-        }));
-        this.group1sData = group1sData.map((record) => ({
-          id: record.id,
-          player: record.player_name,
-          player_id: record.player_id,
-          avatar: record.steam_avatar,
-          map: record.map_name,
-          map_id: record.map_id,
-          time: formatDuration(record.duration),
-          rank: record.rank,
-          class: record.class,
-          recordType: record.record_type,
-          index: record.index,
-          timestamp: formatDate(record.date),
-        }));
+        const response = await fetch(`${API_BASE_URL}/maps/activity`);
+        const activityData = await response.json();
+
+        this.worldRecordsData = activityData
+          .filter((item) => item.activity_type === "wr")
+          .map((item) => ({
+            id: item.id,
+            player: item.player_name,
+            player_id: item.player_id,
+            avatar: item.steam_avatar,
+            map: item.map_name,
+            map_id: item.map_id,
+            time: formatDuration(item.duration),
+            class: item.class,
+            recordType: item.record_type,
+            index: item.index,
+            timestamp: formatDate(item.date),
+          }));
+
+        this.topTimesData = activityData
+          .filter((item) => item.activity_type === "tt")
+          .map((record) => ({
+            id: record.id,
+            player: record.player_name,
+            player_id: record.player_id,
+            avatar: record.steam_avatar,
+            map: record.map_name,
+            map_id: record.map_id,
+            time: formatDuration(record.duration),
+            rank: record.rank,
+            class: record.class,
+            recordType: record.record_type,
+            index: record.index,
+            timestamp: formatDate(record.date),
+          }));
+
+        this.group1sData = activityData
+          .filter((item) => item.activity_type === "g1")
+          .map((record) => ({
+            id: record.id,
+            player: record.player_name,
+            player_id: record.player_id,
+            avatar: record.steam_avatar,
+            map: record.map_name,
+            map_id: record.map_id,
+            time: formatDuration(record.duration),
+            rank: record.rank,
+            class: record.class,
+            recordType: record.record_type,
+            index: record.index,
+            timestamp: formatDate(record.date),
+          }));
       } catch (error) {
         console.error("There was an error fetching the records data:", error);
       }

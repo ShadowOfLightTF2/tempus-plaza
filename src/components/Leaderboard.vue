@@ -43,38 +43,42 @@
     </div>
     <div v-if="courseCount > 0 || bonusCount > 0" class="subcategory-container">
       <div class="subcategory-pills">
+        <!-- Map -->
         <div v-show="selectedTypePill === 'Map'">
           <div class="pill-row">
             <button
               class="subcategory-pill map-pill"
-              :class="{ active: selectedIndex === '' }"
-              @click="selectRecords('map', '')"
+              :class="{ active: type === 'map' }"
+              @click="goTo('map', null)"
             >
               Map
             </button>
           </div>
         </div>
+        <!-- Courses -->
         <div v-show="selectedTypePill === 'Course' && courseCount > 0">
           <div class="pill-row">
             <button
               v-for="courseIndex in courseCount"
               :key="'course-' + courseIndex"
               class="subcategory-pill course-pill"
-              :class="{ active: selectedCourseIndex === courseIndex }"
-              @click="selectRecords('course', courseIndex)"
+              :class="{ active: type === 'course' && index === courseIndex }"
+              @click="goTo('course', courseIndex)"
             >
               Course {{ courseIndex }}
             </button>
           </div>
         </div>
+
+        <!-- Bonuses -->
         <div v-show="selectedTypePill === 'Bonus' && bonusCount > 0">
           <div class="pill-row">
             <button
               v-for="bonusIndex in bonusCount"
               :key="'bonus-' + bonusIndex"
               class="subcategory-pill bonus-pill"
-              :class="{ active: selectedBonusIndex === bonusIndex }"
-              @click="selectRecords('bonus', bonusIndex)"
+              :class="{ active: type === 'bonus' && index === bonusIndex }"
+              @click="goTo('bonus', bonusIndex)"
             >
               Bonus {{ bonusIndex }}
             </button>
@@ -114,9 +118,7 @@
                   {{ selectedIndex !== null ? selectedIndex : "" }}
                 </p>
                 <p class="header-tier-rating">
-                  T{{ selectedTier("soldier") }} - R{{
-                    selectedRating("soldier")
-                  }}
+                  T{{ currentSoldierTier }} - R{{ currentSoldierRating }}
                 </p>
               </div>
             </div>
@@ -273,9 +275,7 @@
                   {{ selectedIndex !== null ? selectedIndex : "" }}
                 </p>
                 <p class="header-tier-rating">
-                  T{{ selectedTier("demoman") }} - R{{
-                    selectedRating("demoman")
-                  }}
+                  T{{ currentDemomanTier }} - R{{ currentDemomanRating }}
                 </p>
               </div>
             </div>
@@ -414,24 +414,28 @@
 
 <script>
 import axios from "axios";
-import { formatDuration } from "@/utils/calculations.js";
-import { formatDate } from "@/utils/calculations.js";
+import { formatDuration, formatDate } from "@/utils/calculations.js";
 import { ref } from "vue";
 import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
+const capitalizeFirstLetter = (str) =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
 export default {
-  name: "Records",
+  name: "Leaderboard",
+  props: {
+    mapId: { type: Number, required: true },
+    type: {
+      type: String,
+      default: "map",
+      validator: (val) => ["map", "course", "bonus"].includes(val),
+    },
+    index: { type: Number, default: null },
+  },
   setup() {
     const pageTitle = ref("Tempus Plaza");
-    useHead({
-      title: pageTitle,
-    });
+    useHead({ title: pageTitle });
     return {
       updateTitle: (mapName) => {
         pageTitle.value = `Tempus Plaza | ${mapName}`;
@@ -440,36 +444,67 @@ export default {
   },
   data() {
     return {
+      map: null,
+      courseCount: 0,
+      bonusCount: 0,
+      mapTiers: {
+        soldier: { tier: 0, rating: 0 },
+        demoman: { tier: 0, rating: 0 },
+      },
+      courses: [],
+      bonuses: [],
+      selectedType: "map",
+      selectedIndex: null,
       selectedSoldierRecords: [],
       selectedDemomanRecords: [],
+      selectedTypePill: this.type
+        ? this.type.charAt(0).toUpperCase() + this.type.slice(1)
+        : "Map",
+      selectedCourseIndex: this.type === "course" ? this.index : null,
+      selectedBonusIndex: this.type === "bonus" ? this.index : null,
+      soldierDisplayCount: 50,
+      demomanDisplayCount: 50,
+      soldierOffset: 0,
+      demomanOffset: 0,
       loading: true,
       showMoreLoading: false,
       error: null,
-      soldierDisplayCount: 50,
-      demomanDisplayCount: 50,
-      courseCount: 0,
-      bonusCount: 0,
-      Map__soldier_tier: 0,
-      Map__soldier_rating: 0,
-      Map__demoman_tier: 0,
-      Map__demoman_rating: 0,
-      selectedType: "Map",
-      selectedTypePill: "Map",
-      selectedIndex: "",
-      selectedCourseIndex: "",
-      selectedBonusIndex: "",
-      soldierOffset: 0,
-      demomanOffset: 0,
       playerId: null,
-      userRecord: {
-        soldier: null,
-        demoman: null,
-      },
+      userRecord: { soldier: null, demoman: null },
     };
   },
   computed: {
-    mapId() {
-      return Number(this.$route.params.mapId);
+    currentSoldierTier() {
+      if (this.type === "map") return this.mapTiers.soldier.tier;
+      if (this.type === "course" && this.index != null)
+        return this.courses[this.index - 1]?.soldier.tier || 0;
+      if (this.type === "bonus" && this.index != null)
+        return this.bonuses[this.index - 1]?.soldier.tier || 0;
+      return 0;
+    },
+    currentSoldierRating() {
+      if (this.type === "map") return this.mapTiers.soldier.rating;
+      if (this.type === "course" && this.index != null)
+        return this.courses[this.index - 1]?.soldier.rating || 0;
+      if (this.type === "bonus" && this.index != null)
+        return this.bonuses[this.index - 1]?.soldier.rating || 0;
+      return 0;
+    },
+    currentDemomanTier() {
+      if (this.type === "map") return this.mapTiers.demoman.tier;
+      if (this.type === "course" && this.index != null)
+        return this.courses[this.index - 1]?.demoman.tier || 0;
+      if (this.type === "bonus" && this.index != null)
+        return this.bonuses[this.index - 1]?.demoman.tier || 0;
+      return 0;
+    },
+    currentDemomanRating() {
+      if (this.type === "map") return this.mapTiers.demoman.rating;
+      if (this.type === "course" && this.index != null)
+        return this.courses[this.index - 1]?.demoman.rating || 0;
+      if (this.type === "bonus" && this.index != null)
+        return this.bonuses[this.index - 1]?.demoman.rating || 0;
+      return 0;
     },
     displayedSoldierEntries() {
       return this.selectedSoldierRecords.slice(
@@ -485,120 +520,77 @@ export default {
     },
   },
   async mounted() {
+    this.selectedType = capitalizeFirstLetter(this.type);
+    this.selectedIndex = this.index;
     await this.fetchUser();
     await this.fetchMapData();
+    await this.loadRecords(this.type, this.index);
   },
   watch: {
     mapId() {
       this.resetComponents();
-      this.fetchMapData();
+      this.fetchMapData().then(() => this.loadRecords(this.type, this.index));
+    },
+    type(newType) {
+      this.selectedTypePill =
+        newType.charAt(0).toUpperCase() + newType.slice(1);
+      this.resetRecordsAndUserRecord();
+      this.loadRecords(newType, this.index);
+    },
+    index(newIndex) {
+      if (this.selectedTypePill === "Course")
+        this.selectedCourseIndex = newIndex;
+      if (this.selectedTypePill === "Bonus") this.selectedBonusIndex = newIndex;
+      this.resetRecordsAndUserRecord();
+      this.loadRecords(this.type, newIndex);
     },
   },
   methods: {
     async fetchUser() {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+        const res = await fetch(`${API_BASE_URL}/api/get-user`, {
           credentials: "include",
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
         });
-        if (!response.ok) {
-          console.log("Response not ok:", response.status, response.statusText);
-          this.playerId = null;
-          return null;
-        }
-        const result = await response.json();
-        this.playerId = result.data?.playerid || null;
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        return null;
+        const data = await res.json();
+        this.playerId = data.data?.playerid || null;
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        this.playerId = null;
       }
-    },
-    selectType(type) {
-      this.selectedTypePill = type;
-    },
-    selectedTier(className) {
-      if (this.selectedType && this.selectedIndex !== null) {
-        const type = this.selectedType;
-        const tier = `${type}_${this.selectedIndex}_${className}_tier`;
-        return this[tier] || 0;
-      }
-      return 0;
-    },
-    selectedRating(className) {
-      if (this.selectedType && this.selectedIndex !== null) {
-        const type = this.selectedType;
-        const rating = `${type}_${this.selectedIndex}_${className}_rating`;
-        return this[rating] || 0;
-      }
-      return 0;
-    },
-    resetComponents() {
-      this.selectedSoldierRecords = [];
-      this.selectedDemomanRecords = [];
-      this.userRecord.soldier = null;
-      this.userRecord.demoman = null;
-      this.soldierDisplayCount = 50;
-      this.demomanDisplayCount = 50;
-      this.soldierOffset = 0;
-      this.demomanOffset = 0;
-      this.loading = false;
-      this.showMoreLoading = false;
-      this.error = null;
-      this.courseCount = 0;
-      this.bonusCount = 0;
-      this.Map__soldier_tier = 0;
-      this.Map__soldier_rating = 0;
-      this.Map__demoman_tier = 0;
-      this.Map__demoman_rating = 0;
-      this.selectedType = "Map";
-      this.selectedTypePill = "Map";
-      this.selectedIndex = "";
-      this.selectedCourseIndex = "";
-      this.selectedBonusIndex = "";
     },
     async fetchMapData() {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get(
+        const { data } = await axios.get(
           `${API_BASE_URL}/maps/${this.mapId}/all-info`
         );
-        const { map, courses, bonuses } = response.data;
-        this.updateTitle(response.data.map.name);
+        const { map, courses, bonuses } = data;
+
+        this.map = map;
+        this.updateTitle(map.name);
+
         this.courseCount = map.course_count || 0;
         this.bonusCount = map.bonus_count || 0;
-        this.Map__soldier_tier = map.soldier_tier || 0;
-        this.Map__soldier_rating = map.soldier_rating || 0;
-        this.Map__demoman_tier = map.demoman_tier || 0;
-        this.Map__demoman_rating = map.demoman_rating || 0;
-        for (let i = 0; i < this.courseCount; i++) {
-          const courseIndex = i + 1;
-          const course = courses[i];
-          this[`Course_${courseIndex}_soldier_tier`] = course.soldier_tier || 0;
-          this[`Course_${courseIndex}_soldier_rating`] =
-            course.soldier_rating || 0;
-          this[`Course_${courseIndex}_demoman_tier`] = course.demoman_tier || 0;
-          this[`Course_${courseIndex}_demoman_rating`] =
-            course.demoman_rating || 0;
-        }
-        for (let i = 0; i < this.bonusCount; i++) {
-          const bonusIndex = i + 1;
-          const bonus = bonuses[i];
-          this[`Bonus_${bonusIndex}_soldier_tier`] = bonus.soldier_tier || 0;
-          this[`Bonus_${bonusIndex}_soldier_rating`] =
-            bonus.soldier_rating || 0;
-          this[`Bonus_${bonusIndex}_demoman_tier`] = bonus.demoman_tier || 0;
-          this[`Bonus_${bonusIndex}_demoman_rating`] =
-            bonus.demoman_rating || 0;
-        }
-        this.fetchRecords("map", "soldier");
-        this.fetchRecords("map", "demoman");
-      } catch (error) {
-        this.error = "Error fetching map data.";
-        console.error("Error fetching map data:", error);
+
+        this.mapTiers.soldier.tier = map.soldier_tier || 0;
+        this.mapTiers.soldier.rating = map.soldier_rating || 0;
+
+        this.mapTiers.demoman.tier = map.demoman_tier || 0;
+        this.mapTiers.demoman.rating = map.demoman_rating || 0;
+
+        this.courses = courses.map((c) => ({
+          soldier: { tier: c.soldier_tier || 0, rating: c.soldier_rating || 0 },
+          demoman: { tier: c.demoman_tier || 0, rating: c.demoman_rating || 0 },
+        }));
+
+        this.bonuses = bonuses.map((b) => ({
+          soldier: { tier: b.soldier_tier || 0, rating: b.soldier_rating || 0 },
+          demoman: { tier: b.demoman_tier || 0, rating: b.demoman_rating || 0 },
+        }));
+      } catch (err) {
+        console.error("Error fetching map data:", err);
+        this.error = "Failed to fetch map data.";
       } finally {
         this.loading = false;
       }
@@ -610,132 +602,78 @@ export default {
       offset = 0,
       limit = 51
     ) {
-      if (offset === 0) {
-        this.loading = true;
-      } else {
-        this.showMoreLoading = true;
-      }
+      if (offset === 0) this.loading = true;
+      else this.showMoreLoading = true;
       this.error = null;
 
       try {
-        let url;
-        let userurl = null;
-
+        let url = "",
+          userUrl = "";
         switch (type) {
           case "map":
             url = `${API_BASE_URL}/maps/${this.mapId}/null/records/${classType}/${offset}/${limit}`;
-            if (this.playerId) {
-              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/records/${classType}/${offset}/${limit}`;
-            }
+            if (this.playerId)
+              userUrl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/records/${classType}/${offset}/${limit}`;
             break;
           case "course":
-            if (index === null) {
-              throw new Error("Course index is required for course records");
-            }
+            if (index == null) throw new Error("Course index required");
             url = `${API_BASE_URL}/maps/${this.mapId}/null/course/${classType}/${index}/records/${offset}/${limit}`;
-            if (this.playerId) {
-              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/course/${classType}/${index}/records/${offset}/${limit}`;
-            }
+            if (this.playerId)
+              userUrl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/course/${classType}/${index}/records/${offset}/${limit}`;
             break;
           case "bonus":
-            if (index === null) {
-              throw new Error("Bonus index is required for bonus records");
-            }
+            if (index == null) throw new Error("Bonus index required");
             url = `${API_BASE_URL}/maps/${this.mapId}/null/bonus/${classType}/${index}/records/${offset}/${limit}`;
-            if (this.playerId) {
-              userurl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
-            }
+            if (this.playerId)
+              userUrl = `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/bonus/${classType}/${index}/records/${offset}/${limit}`;
             break;
-          default:
-            throw new Error(
-              `Invalid type: ${type}. Must be 'map', 'course', or 'bonus'`
-            );
         }
 
-        const response = await axios.get(url);
-
-        let userResponse = null;
-        if (userurl) {
+        const res = await axios.get(url);
+        let userRes = null;
+        if (userUrl) {
           try {
-            userResponse = await axios.get(userurl);
-          } catch (userError) {
-            console.warn(
-              "Error fetching user records (user may not have records):",
-              userError
-            );
+            userRes = await axios.get(userUrl);
+          } catch (e) {
+            console.warn("No user records:", e);
           }
         }
 
-        const capitalizedClassType = capitalizeFirstLetter(classType);
-        if (offset === 0) {
-          this[`selected${capitalizedClassType}Records`] = response.data;
-        } else {
-          this[`selected${capitalizedClassType}Records`].splice(
-            offset,
-            offset + 50
-          );
-          this[`selected${capitalizedClassType}Records`] = [
-            ...this[`selected${capitalizedClassType}Records`],
-            ...response.data,
+        const capClass = capitalizeFirstLetter(classType);
+        if (offset === 0) this[`selected${capClass}Records`] = res.data;
+        else {
+          this[`selected${capClass}Records`].splice(offset, offset + 50);
+          this[`selected${capClass}Records`] = [
+            ...this[`selected${capClass}Records`],
+            ...res.data,
           ];
         }
-
-        if (userResponse && userResponse.data) {
-          this.checkUserRecord(userResponse.data);
-        }
-      } catch (error) {
+        if (userRes?.data) this.checkUserRecord(userRes.data);
+      } catch (err) {
+        console.error(`Error fetching ${type} records:`, err);
         this.error = `Error fetching ${type} records.`;
-        console.error(`Error fetching ${type} records:`, error);
       } finally {
         this.loading = false;
         this.showMoreLoading = false;
       }
     },
     checkUserRecord(records) {
-      if (this.playerId && records && records.length > 0) {
-        records.forEach((record) => {
-          if (record.id === this.playerId) {
-            if (record.class === "soldier") {
-              this.userRecord.soldier = record;
-            } else if (record.class === "demoman") {
-              this.userRecord.demoman = record;
-            }
-          }
-        });
-      }
+      if (!this.playerId || !records) return;
+      records.forEach((r) => {
+        if (r.id === this.playerId) {
+          if (r.class === "soldier") this.userRecord.soldier = r;
+          else if (r.class === "demoman") this.userRecord.demoman = r;
+        }
+      });
     },
-    selectRecords(type, index) {
-      this.userRecord = {
-        soldier: null,
-        demoman: null,
-      };
-
-      this.selectedType = type.charAt(0).toUpperCase() + type.slice(1);
-      this.selectedIndex = index !== undefined ? index : null;
-      this.soldierOffset = 0;
-      this.demomanOffset = 0;
+    async loadRecords(type, index) {
       if (type === "map") {
-        this.fetchRecords(type, "soldier");
-        this.fetchRecords(type, "demoman");
-      } else if (type === "course") {
-        this.selectedCourseIndex = index;
-        this.selectedBonusIndex = null;
-        this.fetchRecords(type, "soldier", index);
-        this.fetchRecords(type, "demoman", index);
-      } else if (type === "bonus") {
-        this.selectedCourseIndex = null;
-        this.selectedBonusIndex = index;
+        this.fetchRecords("map", "soldier");
+        this.fetchRecords("map", "demoman");
+      } else {
         this.fetchRecords(type, "soldier", index);
         this.fetchRecords(type, "demoman", index);
       }
-      this.soldierDisplayCount = 50;
-      this.demomanDisplayCount = 50;
-    },
-    formatDuration(totalSeconds) {
-      return formatDuration(totalSeconds);
-    },
-    formatDate(unixTimestamp) {
-      return formatDate(unixTimestamp);
     },
     getPlacementClass(placement) {
       const placementClasses = {
@@ -752,60 +690,77 @@ export default {
       return placementClasses[placement] || "";
     },
     showMoreSoldierEntries() {
-      if (this.selectedTypePill === "Map") {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "soldier",
-          null,
-          this.soldierDisplayCount + this.soldierOffset
-        );
-      } else if (
-        this.selectedTypePill === "Course" &&
-        this.selectedCourseIndex
-      ) {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "soldier",
-          this.selectedCourseIndex,
-          this.soldierDisplayCount + this.soldierOffset
-        );
-      } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "soldier",
-          this.selectedBonusIndex,
-          this.soldierDisplayCount + this.soldierOffset
-        );
-      }
+      let type = this.selectedTypePill.toLowerCase();
+      let index = null;
+
+      if (type === "course") index = this.selectedCourseIndex;
+      else if (type === "bonus") index = this.selectedBonusIndex;
+
+      this.fetchRecords(
+        type,
+        "soldier",
+        index,
+        this.soldierDisplayCount + this.soldierOffset
+      );
       this.soldierOffset += 50;
     },
     showMoreDemomanEntries() {
-      if (this.selectedTypePill === "Map") {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "demoman",
-          null,
-          this.demomanDisplayCount + this.demomanOffset
-        );
-      } else if (
-        this.selectedTypePill === "Course" &&
-        this.selectedCourseIndex
-      ) {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "demoman",
-          this.selectedCourseIndex,
-          this.demomanDisplayCount + this.demomanOffset
-        );
-      } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
-        this.fetchRecords(
-          this.selectedTypePill.toLowerCase(),
-          "demoman",
-          this.selectedBonusIndex,
-          this.demomanDisplayCount + this.demomanOffset
-        );
-      }
+      let type = this.selectedTypePill.toLowerCase();
+      let index = null;
+
+      if (type === "course") index = this.selectedCourseIndex;
+      else if (type === "bonus") index = this.selectedBonusIndex;
+
+      this.fetchRecords(
+        type,
+        "demoman",
+        index,
+        this.demomanDisplayCount + this.demomanOffset
+      );
       this.demomanOffset += 50;
+    },
+    goTo(type, index) {
+      this.$router.push({
+        name: "MapPage",
+        params: { mapId: this.mapId, type, index },
+      });
+      this.selectedType = capitalizeFirstLetter(type);
+      this.selectedIndex = index;
+    },
+    resetRecordsAndUserRecord() {
+      this.userRecord = { soldier: null, demoman: null };
+      this.soldierDisplayCount = 50;
+      this.demomanDisplayCount = 50;
+      this.soldierOffset = 0;
+      this.demomanOffset = 0;
+      this.selectedSoldierRecords = [];
+      this.selectedDemomanRecords = [];
+    },
+    resetComponents() {
+      this.resetRecordsAndUserRecord();
+      this.loading = false;
+      this.showMoreLoading = false;
+      this.error = null;
+      this.courseCount = 0;
+      this.bonusCount = 0;
+      this.Map__soldier_tier = 0;
+      this.Map__soldier_rating = 0;
+      this.Map__demoman_tier = 0;
+      this.Map__demoman_rating = 0;
+      this.selectedTypePill = "Map";
+      this.selectedType = "Map";
+      this.selectedIndex = null;
+      this.selectedCourseIndex = null;
+      this.selectedBonusIndex = null;
+    },
+    selectType(type) {
+      this.selectedTypePill = type;
+    },
+    formatDuration(totalSeconds) {
+      return formatDuration(totalSeconds);
+    },
+    formatDate(unixTimestamp) {
+      return formatDate(unixTimestamp);
     },
   },
 };
@@ -980,20 +935,13 @@ export default {
   .tables-wrapper {
     flex-direction: column;
     align-items: center;
+    width: 115%;
   }
 }
 .category-container {
   width: 100%;
   display: flex;
   justify-content: center;
-}
-.category-pills {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  justify-content: center;
-  align-items: center;
-  max-width: 100%;
 }
 .subcategory-container {
   width: 100%;

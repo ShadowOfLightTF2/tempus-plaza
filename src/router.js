@@ -32,11 +32,13 @@ const routes = [
     component: Maps,
   },
   {
-    path: '/maps/:mapId',
-    name: 'MapPage',
+    path: "/maps/:mapId/:type?/:index?",
+    name: "MapPage",
     component: MapPage,
     props: route => ({
-      mapId: Number(route.params.mapId)
+      mapId: Number(route.params.mapId),
+      type: route.params.type || "map",
+      index: route.params.index ? Number(route.params.index) : null,
     }),
   },
   {
@@ -82,12 +84,26 @@ const router = createRouter({
   routes,
   strict: false,
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) return savedPosition;
+    // Handle hash fragments first
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+        block: 'start'
+      }
+    }
 
+    // Return to saved position (browser back/forward)
+    if (savedPosition) {
+      return savedPosition;
+    }
+
+    // Don't scroll if staying on the same route
     if (to.name === from.name) {
       return false;
     }
 
+    // Default: scroll to top
     return { left: 0, top: 0, behavior: 'auto' };
   },
   linkActiveClass: 'active',

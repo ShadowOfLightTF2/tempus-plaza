@@ -311,36 +311,108 @@
                             class="author-card"
                           >
                             <div class="author-avatar-wrapper">
+                              <SmartLink
+                                v-if="author.player && author.player.id"
+                                :to="{
+                                  name: 'PlayerPage',
+                                  params: { playerId: author.player.id },
+                                  hash: '#authored-maps',
+                                }"
+                              >
+                                <img
+                                  :src="
+                                    author &&
+                                    author.player &&
+                                    author.player.steam_avatar
+                                      ? `${author.player.steam_avatar}`
+                                      : '/avatars/default-avatar.jpg'
+                                  "
+                                  alt="Author Avatar"
+                                  class="author-avatar"
+                                />
+                              </SmartLink>
                               <img
-                                :src="
-                                  author &&
-                                  author.player &&
-                                  author.player.steam_avatar
-                                    ? `${author.player.steam_avatar}`
-                                    : '/avatars/default-avatar.jpg'
-                                "
-                                alt="Author Avatar"
+                                v-else
+                                src="/avatars/default-avatar.jpg"
+                                alt="Default Author Avatar"
                                 class="author-avatar"
                               />
                             </div>
                             <h6 class="author-name mt-2">
-                              {{
-                                author.author_name
-                                  ? author.author_name
-                                  : "Unknown Author"
-                              }}
+                              <SmartLink
+                                v-if="author.player && author.player.id"
+                                :to="{
+                                  name: 'PlayerPage',
+                                  params: { playerId: author.player.id },
+                                  hash: '#authored-maps',
+                                }"
+                              >
+                                {{
+                                  author.author_name
+                                    ? author.author_name
+                                    : "Unknown Author"
+                                }}
+                              </SmartLink>
+                              <span v-else>
+                                {{
+                                  author.author_name
+                                    ? author.author_name
+                                    : "Unknown Author"
+                                }}
+                              </span>
                             </h6>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-
                   <div class="map-date-wrapper">
                     <p class="map-date-added">
                       <i class="bi bi-calendar-plus me-2"></i>
                       Added on: {{ formatDate(map.date_added) }}
                     </p>
+                  </div>
+                  <hr class="row-divider" style="width: 85%" />
+                  <!-- <div class="row w-100" v-if="mapTags && mapTags.length > 0"> -->
+                  <div class="row w-100">
+                    <div class="col-md-12">
+                      <h2 class="section-header mb-4">
+                        <i class="bi bi-tags-fill me-2"></i>Tags
+                      </h2>
+                      <div class="tags-wrapper">
+                        <div class="tags-block">
+                          <div
+                            v-for="tag in mapTags"
+                            :key="tag.id"
+                            class="tag-chip"
+                            :style="{
+                              backgroundColor: tag.color + '20',
+                              borderColor: tag.color,
+                            }"
+                          >
+                            <i
+                              class="bi bi-tag-fill me-1"
+                              :style="{ color: tag.color }"
+                            ></i>
+                            {{ tag.name }}
+                          </div>
+                          <div
+                            class="tag-chip-default"
+                            @click="showTagModal = true"
+                            :style="{
+                              backgroundColor: '#ffffff20',
+                              borderColor: 'white',
+                            }"
+                          >
+                            <i
+                              class="bi bi-tag-fill me-1"
+                              :style="{ color: 'white' }"
+                              >Vote for tag(s)</i
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -795,12 +867,229 @@
                     </div>
                   </div>
                 </div>
-                <Leaderboard :mapId="mapId" v-if="mapId" />
+                <Leaderboard :map-id="mapId" :type="type" :index="index" />
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div v-if="showTagModal" class="tag-modal-backdrop" @click="closeTagModal">
+    <div class="tag-modal" @click.stop>
+      <div class="tag-modal-header">
+        <h3><i class="bi bi-tags-fill me-2"></i>Vote for Map Tags</h3>
+        <button @click="closeTagModal" class="close-btn">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="tag-modal-body">
+        <!-- Description Section -->
+        <div class="tag-description">
+          <div class="beta-notice">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>This is a beta test for the tagging system</strong>
+          </div>
+          <p class="description-text">
+            Vote for tags that describe the majority of this map's gameplay. A
+            tag needs at least
+            <strong>1 vote (eventually it will be more)</strong> to be applied
+            to the map. You can vote for multiple tags, but only the
+            <strong>top most voted</strong> tags will be displayed on the map.
+            Currently only maps can have tags (courses/bonuses might come later)
+          </p>
+          <div class="warning-notice">
+            <i class="bi bi-eye me-2"></i>
+            <em
+              >Note: All votes are tracked and monitored. Please vote
+              responsibly and don't abuse the system.</em
+            >
+          </div>
+        </div>
+
+        <!-- Map Tags Section -->
+        <div class="tag-section">
+          <h4><i class="bi bi-map me-2"></i>Map Tags</h4>
+
+          <!-- Soldier Tags -->
+          <div
+            class="tag-class-group"
+            v-if="getTagsByClass('soldier').length > 0"
+          >
+            <h5>
+              <img
+                src="/icons/soldier.png"
+                alt="Soldier"
+                class="class-icon me-1"
+              />
+              Soldier
+            </h5>
+            <div class="tag-selector">
+              <div class="available-tags">
+                <div
+                  v-for="tag in getTagsByClass('soldier')"
+                  :key="'map-soldier-' + tag.id"
+                  class="tag-option"
+                  :class="{ active: isMapTagSelected(tag.id) }"
+                  @click="toggleMapTag(tag.id)"
+                  :style="{
+                    backgroundColor: isMapTagSelected(tag.id)
+                      ? tag.color + '40'
+                      : 'transparent',
+                    borderColor: tag.color,
+                  }"
+                >
+                  <i
+                    class="bi bi-tag-fill me-1"
+                    :style="{ color: tag.color }"
+                  ></i>
+                  {{ tag.name }}
+                  <span class="vote-count" v-if="tag.votes > 0">
+                    ({{ tag.votes }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Demoman Tags -->
+          <div
+            class="tag-class-group"
+            v-if="getTagsByClass('demoman').length > 0"
+          >
+            <h5>
+              <img
+                src="/icons/demoman.png"
+                alt="Demoman"
+                class="class-icon me-1"
+              />
+              Demoman
+            </h5>
+            <div class="tag-selector">
+              <div class="available-tags">
+                <div
+                  v-for="tag in getTagsByClass('demoman')"
+                  :key="'map-demoman-' + tag.id"
+                  class="tag-option"
+                  :class="{ active: isMapTagSelected(tag.id) }"
+                  @click="toggleMapTag(tag.id)"
+                  :style="{
+                    backgroundColor: isMapTagSelected(tag.id)
+                      ? tag.color + '40'
+                      : 'transparent',
+                    borderColor: tag.color,
+                  }"
+                >
+                  <i
+                    class="bi bi-tag-fill me-1"
+                    :style="{ color: tag.color }"
+                  ></i>
+                  {{ tag.name }}
+                  <span class="vote-count" v-if="tag.votes > 0">
+                    ({{ tag.votes }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Both Classes Tags -->
+          <div class="tag-class-group" v-if="getTagsByClass('both').length > 0">
+            <h5><i class="bi bi-people me-1"></i>Both Classes</h5>
+            <div class="tag-selector">
+              <div class="available-tags">
+                <div
+                  v-for="tag in getTagsByClass('both')"
+                  :key="'map-both-' + tag.id"
+                  class="tag-option"
+                  :class="{ active: isMapTagSelected(tag.id) }"
+                  @click="toggleMapTag(tag.id)"
+                  :style="{
+                    backgroundColor: isMapTagSelected(tag.id)
+                      ? tag.color + '40'
+                      : 'transparent',
+                    borderColor: tag.color,
+                  }"
+                >
+                  <i
+                    class="bi bi-tag-fill me-1"
+                    :style="{ color: tag.color }"
+                  ></i>
+                  {{ tag.name }}
+                  <span class="vote-count" v-if="tag.votes > 0">
+                    ({{ tag.votes }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Tags -->
+          <div
+            class="tag-class-group"
+            v-if="getTagsByClass('extra').length > 0"
+          >
+            <h5><i class="bi bi-gear me-1"></i>Extra</h5>
+            <div class="tag-selector">
+              <div class="available-tags">
+                <div
+                  v-for="tag in getTagsByClass('extra')"
+                  :key="'map-extra-' + tag.id"
+                  class="tag-option"
+                  :class="{ active: isMapTagSelected(tag.id) }"
+                  @click="toggleMapTag(tag.id)"
+                  :style="{
+                    backgroundColor: isMapTagSelected(tag.id)
+                      ? tag.color + '40'
+                      : 'transparent',
+                    borderColor: tag.color,
+                  }"
+                >
+                  <i
+                    class="bi bi-tag-fill me-1"
+                    :style="{ color: tag.color }"
+                  ></i>
+                  {{ tag.name }}
+                  <span class="vote-count" v-if="tag.votes > 0">
+                    ({{ tag.votes }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tag-modal-footer">
+        <button @click="saveAllTags" class="save-tags-btn">
+          <i class="bi bi-check-lg me-2"></i>Save Changes
+        </button>
+        <button @click="closeTagModal" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div
+    v-if="showLoginRequiredMessage"
+    class="login-popup-backdrop"
+    @click="closeLoginPopup"
+  >
+    <div class="login-popup" @click.stop>
+      <div class="login-popup-content">
+        <h4>Login Required</h4>
+        <p>You need to be logged in to vote on map tags</p>
+        <div class="login-popup-actions">
+          <button @click="loginWithSteam" class="btn-login">
+            <i class="bi bi-steam"></i> Login with Steam
+          </button>
+          <button @click="closeLoginPopup" class="btn-cancel">
+            Maybe Later
+          </button>
+        </div>
+      </div>
+      <button @click="closeLoginPopup" class="login-popup-close">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
   </div>
 </template>
@@ -821,6 +1110,15 @@ export default {
       type: Number,
       required: true,
     },
+    type: {
+      type: String,
+      default: "map",
+      validator: (val) => ["map", "course", "bonus"].includes(val),
+    },
+    index: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
@@ -829,6 +1127,13 @@ export default {
       authors: [],
       courses: [],
       bonuses: [],
+      showTagModal: false,
+      showLoginRequiredMessage: false,
+      availableTags: [],
+      mapTags: [],
+      selectedMapTags: [],
+      selectedCourseTags: {},
+      selectedBonusTags: {},
       rotwVideos: [],
       showAllRotwVideos: false,
       showRotwVideos: false,
@@ -836,12 +1141,16 @@ export default {
       showCourseVideos: false,
       showBonusVideos: false,
       showMapVideos: false,
-      showMapBanner: false,
+      showMapBanner: true,
       activeVideo: null,
+      playerId: null,
     };
   },
   async mounted() {
+    await this.fetchUser();
     await this.fetchAllMapData(this.mapId);
+    await this.loadTags(this.mapId);
+    await this.loadMapTags(this.mapId);
     document.addEventListener("click", this.handleClickOutside);
   },
   beforeUnmount() {
@@ -853,6 +1162,8 @@ export default {
       async handler(newMapId, oldMapId) {
         if (newMapId !== oldMapId) {
           this.resetComponentState();
+          await this.loadTags(this.mapId);
+          await this.loadMapTags(this.mapId);
           await this.fetchAllMapData(newMapId);
         }
       },
@@ -870,6 +1181,207 @@ export default {
     },
   },
   methods: {
+    closeLoginPopup() {
+      this.showLoginRequiredMessage = false;
+    },
+    loginWithSteam() {
+      window.location.href = `${API_BASE_URL}/auth/steam`;
+    },
+    async loadTags(mapId = null) {
+      try {
+        const tagsResponse = await fetch(`${API_BASE_URL}/maps/tags`);
+        const tagsData = await tagsResponse.json();
+
+        let voteCountsByName = {};
+        let playerVotedTags = [];
+
+        if (mapId) {
+          try {
+            const votesResponse = await fetch(
+              `${API_BASE_URL}/maps/${mapId}/map-tag-votes`
+            );
+            const votesData = await votesResponse.json();
+
+            if (votesData && votesData[0]) {
+              votesData[0].forEach((tagVote) => {
+                voteCountsByName[tagVote.name] = tagVote.votes;
+
+                if (this.playerId && tagVote.player_ids) {
+                  const playerIds = JSON.parse(tagVote.player_ids);
+                  if (playerIds.includes(this.playerId)) {
+                    playerVotedTags.push(tagVote.name);
+                  }
+                }
+              });
+            }
+          } catch (voteError) {
+            console.log("Could not load vote counts:", voteError);
+          }
+        }
+
+        if (Array.isArray(tagsData)) {
+          this.availableTags = tagsData.map((tag) => ({
+            ...tag,
+            votes: voteCountsByName[tag.name] || 0,
+            playerVoted: playerVotedTags.includes(tag.name),
+          }));
+
+          this.selectedMapTags = this.availableTags
+            .filter((tag) => tag.playerVoted)
+            .map((tag) => tag.id);
+        } else {
+          console.error("Expected tags data to be an array:", tagsData);
+          this.availableTags = [];
+        }
+      } catch (error) {
+        console.error("Error loading tags:", error);
+      }
+    },
+    async loadMapTags(mapId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/maps/${mapId}/tags`);
+        const data = await response.json();
+
+        this.mapTags = [...data.tags].sort((a, b) => a.id - b.id);
+        //this.selectedMapTags = this.mapTags.map((tag) => tag.id);
+
+        // Set course tags
+        // this.courses.forEach((course) => {
+        //   if (data.courseTags[course.id]) {
+        //     course.tags = data.courseTags[course.id];
+        //     this.selectedCourseTags[course.id] = data.courseTags[course.id].map(
+        //       (tag) => tag.id
+        //     );
+        //   } else {
+        //     course.tags = [];
+        //     this.selectedCourseTags[course.id] = [];
+        //   }
+        // });
+
+        // Set bonus tags
+        // this.bonuses.forEach((bonus) => {
+        //   if (data.bonusTags[bonus.id]) {
+        //     bonus.tags = data.bonusTags[bonus.id];
+        //     this.selectedBonusTags[bonus.id] = data.bonusTags[bonus.id].map(
+        //       (tag) => tag.id
+        //     );
+        //   } else {
+        //     bonus.tags = [];
+        //     this.selectedBonusTags[bonus.id] = [];
+        //   }
+        // });
+      } catch (error) {
+        console.error("Error loading map tags:", error);
+      }
+    },
+    async saveAllTags() {
+      try {
+        let response;
+        const plainTagIds = [...this.selectedMapTags];
+
+        if (this.playerId) {
+          response = await fetch(
+            `${API_BASE_URL}/maps/${this.map.id}/${this.playerId}/vote-tags`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ mapTags: plainTagIds }),
+            }
+          );
+        } else {
+          this.showLoginRequiredMessage = true;
+          return;
+        }
+
+        if (response && response.ok) {
+          await this.loadTags(this.map.id);
+          await this.loadMapTags(this.map.id);
+          this.showTagModal = false;
+        } else {
+          const errorText = await response.text();
+          console.error("Failed to save tags:", response.status, errorText);
+        }
+      } catch (error) {
+        console.error("Error saving tags:", error);
+      }
+    },
+    isMapTagSelected(tagId) {
+      return this.selectedMapTags.includes(tagId);
+    },
+
+    isCourseTagSelected(courseId, tagId) {
+      return (
+        this.selectedCourseTags[courseId] &&
+        this.selectedCourseTags[courseId].includes(tagId)
+      );
+    },
+
+    isBonusTagSelected(bonusId, tagId) {
+      return (
+        this.selectedBonusTags[bonusId] &&
+        this.selectedBonusTags[bonusId].includes(tagId)
+      );
+    },
+
+    toggleMapTag(tagId) {
+      const index = this.selectedMapTags.indexOf(tagId);
+      if (index > -1) {
+        this.selectedMapTags.splice(index, 1);
+      } else {
+        this.selectedMapTags.push(tagId);
+      }
+    },
+
+    toggleCourseTag(courseId, tagId) {
+      if (!this.selectedCourseTags[courseId]) {
+        this.$set(this.selectedCourseTags, courseId, []);
+      }
+
+      const tags = this.selectedCourseTags[courseId];
+      const index = tags.indexOf(tagId);
+
+      if (index > -1) {
+        tags.splice(index, 1);
+      } else {
+        tags.push(tagId);
+      }
+    },
+
+    toggleBonusTag(bonusId, tagId) {
+      if (!this.selectedBonusTags[bonusId]) {
+        this.$set(this.selectedBonusTags, bonusId, []);
+      }
+
+      const tags = this.selectedBonusTags[bonusId];
+      const index = tags.indexOf(tagId);
+
+      if (index > -1) {
+        tags.splice(index, 1);
+      } else {
+        tags.push(tagId);
+      }
+    },
+    getTagsByClass(className) {
+      return this.availableTags.filter((tag) => tag.class === className);
+    },
+    async fetchUser() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/get-user`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        this.playerId = data.data?.playerid || null;
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        this.playerId = null;
+      }
+    },
+    closeTagModal() {
+      this.showTagModal = false;
+      this.loadMapTags(this.mapId);
+    },
     toggleCard(cardId) {
       this.activeVideo = this.activeVideo === cardId ? null : cardId;
     },
@@ -912,7 +1424,7 @@ export default {
       this.showCourseVideos = false;
       this.showBonusVideos = false;
       this.showMapVideos = false;
-      this.showMapBanner = false;
+      this.showMapBanner = true;
     },
     toggleRotwVideos() {
       this.showRotwVideos = !this.showRotwVideos;
@@ -1312,6 +1824,7 @@ export default {
   align-items: center;
   text-align: center;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .author-avatar-wrapper {
@@ -1815,7 +2328,6 @@ export default {
   padding: 8px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
-  border-top: 1px solid rgba(250, 220, 53, 0.2);
 }
 
 .rotw-info small {
@@ -1850,5 +2362,484 @@ export default {
 .video-card.active .video-scale-wrapper iframe,
 .video-card.active .video-scale-wrapper-rotw iframe {
   pointer-events: auto;
+}
+
+.tag-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
+}
+
+.tag-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tags-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.tags-block {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 800px;
+}
+
+.tag-chip,
+.tag-chip-default {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 2px solid;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+.tag-chip-default:hover {
+  cursor: pointer;
+}
+
+.tag-chip:hover,
+.tag-chip-default:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tag-chip-small {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-right: 4px;
+  margin-bottom: 2px;
+}
+
+.course-tags,
+.bonus-tags {
+  /* Removed - course and bonus tags no longer used */
+}
+
+.tag-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.tag-modal {
+  background: var(--color-box);
+  border-radius: 16px;
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  max-height: 80vh;
+  width: 90%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-primary-dark);
+}
+
+.tag-modal-header h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tag-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tag-section {
+  margin-bottom: 24px;
+}
+
+.tag-section h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.tag-class-group {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.class-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.tag-class-group h5 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.course-tag-section,
+.bonus-tag-section {
+}
+
+.available-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-option {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 2px solid;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.tag-option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tag-option.active {
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+.tag-modal-footer {
+  padding: 20px;
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--color-row);
+}
+
+.save-tags-btn {
+  background: var(--color-primary);
+  color: var(--color-text);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.save-tags-btn:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cancel-btn {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.vote-count {
+  color: #666;
+  font-size: 0.9em;
+  margin-left: 0.25rem;
+  opacity: 0.8;
+}
+
+.tag-option.active .vote-count {
+  color: inherit;
+  font-weight: 500;
+}
+
+.tag-description {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.description-text {
+  margin: 0;
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.description-text strong {
+  color: #212529;
+  font-weight: 600;
+}
+
+.description-text i {
+  color: #6c757d;
+}
+
+.beta-notice {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.beta-notice i {
+  color: #f39c12;
+}
+
+.warning-notice {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  color: #721c24;
+  font-size: 0.85rem;
+}
+
+.warning-notice i {
+  color: #dc3545;
+}
+
+@media (max-width: 768px) {
+  .tag-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .tag-btn {
+    right: 48px;
+  }
+
+  .tags-block {
+    gap: 6px;
+  }
+
+  .tag-chip {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+}
+/* Login Required Popup Styles - Dark Mode Default */
+.login-popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  backdrop-filter: blur(3px);
+}
+
+.login-popup {
+  background: #343a40;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  margin: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  text-align: center;
+  animation: popupSlideIn 0.3s ease-out;
+  border: 1px solid #495057;
+}
+
+.login-popup-content h4 {
+  color: #f8f9fa;
+  margin-bottom: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.login-popup-content p {
+  color: #adb5bd;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.login-popup-actions {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.btn-login {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: #adb5bd;
+  border: 1px solid #495057;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-cancel:hover {
+  background: #495057;
+  color: #f8f9fa;
+  border-color: #6c757d;
+}
+
+.login-popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #adb5bd;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.login-popup-close:hover {
+  background: #495057;
+  color: #f8f9fa;
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 576px) {
+  .login-popup {
+    padding: 1.5rem;
+    margin: 0.5rem;
+  }
+
+  .login-popup-actions {
+    gap: 0.75rem;
+  }
+
+  .btn-login,
+  .btn-cancel {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
 }
 </style>

@@ -2,7 +2,7 @@
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="container py-4">
+    <div class="container py-4 d-flex" style="margin-bottom: 10rem !important">
       <div
         v-if="playerNotFound"
         class="alert alert-warning player-not-found text-center"
@@ -38,13 +38,14 @@
               </div>
               <a
                 :href="
-                  player.steamid
-                    ? `https://steamcommunity.com/profiles/${convertSteamId(
-                        player.steamid
-                      )}`
+                  player.steamidconverted && player.steamidconverted !== '#'
+                    ? `https://steamcommunity.com/profiles/${player.steamidconverted}`
                     : '#'
                 "
-                :class="{ 'pointer-events-none': !player.steamid }"
+                :class="{
+                  'pointer-events-none':
+                    !player.steamidconverted || player.steamidconverted === '#',
+                }"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -416,7 +417,7 @@
                       active: activeRecordsTab === 'changed-placements',
                     }"
                   >
-                    Changed Placements
+                    Point Changes
                   </button>
                 </div>
                 <div
@@ -466,7 +467,7 @@
                             active:
                               filterOptions.selectedClasses.includes('soldier'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Soldier
                         </button>
@@ -476,7 +477,7 @@
                             active:
                               filterOptions.selectedClasses.includes('demoman'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Demoman
                         </button>
@@ -491,7 +492,7 @@
                           :class="{
                             active: filterOptions.selectedTypes.includes('map'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Map
                         </button>
@@ -501,7 +502,7 @@
                             active:
                               filterOptions.selectedTypes.includes('course'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Course
                         </button>
@@ -511,7 +512,7 @@
                             active:
                               filterOptions.selectedTypes.includes('bonus'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Bonus
                         </button>
@@ -584,7 +585,7 @@
                             active:
                               filterOptions.selectedGainLoss.includes('lost'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Gained
                         </button>
@@ -594,7 +595,7 @@
                             active:
                               filterOptions.selectedGainLoss.includes('gained'),
                           }"
-                          class="filter-button"
+                          class="global-btn"
                         >
                           Lost
                         </button>
@@ -636,7 +637,7 @@
                         class="date-group fade-in"
                       >
                         <div class="date-header">
-                          <h5>{{ formatDateHeader(date) }}</h5>
+                          <h5>{{ precomputedHeaders[date] }}</h5>
                         </div>
                         <ul class="list-group">
                           <SmartLink
@@ -704,14 +705,12 @@
                     </div>
                     <div v-else-if="activeRecordsTab === 'changed-placements'">
                       <div
-                        v-for="(
-                          group, date
-                        ) in filteredAndPaginatedChangedPlacements"
+                        v-for="(group, date) in processedChangedPlacements"
                         :key="date"
                         class="date-group fade-in"
                       >
                         <div class="date-header">
-                          <h5>{{ formatDateHeader(date) }}</h5>
+                          <h5>{{ precomputedHeaders[date] }}</h5>
                         </div>
                         <ul class="list-group">
                           <SmartLink
@@ -723,12 +722,7 @@
                             }"
                             tag="li"
                             class="list-group-item record-item"
-                            :class="
-                              getRankChangeClass(placement.rank_change) ===
-                              'rank-loss'
-                                ? 'lost-placement'
-                                : 'gained-placement'
-                            "
+                            :class="placement.placementClass"
                             style="background: rgba(255, 255, 255, 0.05)"
                           >
                             <div
@@ -757,12 +751,7 @@
                             </div>
                             <div
                               class="text-end align-items-center record-time-detail"
-                              :class="
-                                getRankChangeClass(placement.rank_change) ===
-                                'rank-loss'
-                                  ? 'lost-placement'
-                                  : 'gained-placement'
-                              "
+                              :class="placement.placementClass"
                             >
                               <div class="d-flex flex-column align-items-end">
                                 <div class="placement-change-indicator">
@@ -1028,10 +1017,10 @@
                     map.name
                       ? {
                           background: `
-                            linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-                            radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                            url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
-                          `,
+                  linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                  radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                  url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
+                `,
                           backgroundBlendMode: 'multiply, normal, normal',
                           backgroundSize: 'cover, cover, cover',
                           backgroundPosition: 'center, center, center',
@@ -1042,9 +1031,16 @@
                   <h5 class="map-card-subtitle" v-if="map.name">
                     {{ map.class_type }}
                   </h5>
-                  <h3>{{ map.name || "Click to add a map" }}</h3>
+                  <div class="map-header-nonmargin">
+                    <h3 class="map-name">
+                      {{ map.name || "Click to add a map" }}
+                    </h3>
+                  </div>
                   <div class="map-compact-ratings-grid" v-if="map.name">
-                    <div class="map-rating-section">
+                    <div
+                      v-if="map.class_type === 'soldier'"
+                      class="map-rating-section intended-class-section"
+                    >
                       <div class="map-rating-label">Soldier</div>
                       <div class="map-rating-pills">
                         <span
@@ -1061,7 +1057,10 @@
                         </span>
                       </div>
                     </div>
-                    <div class="map-rating-section">
+                    <div
+                      v-else
+                      class="map-rating-section intended-class-section"
+                    >
                       <div class="map-rating-label">Demoman</div>
                       <div class="map-rating-pills">
                         <span
@@ -1075,6 +1074,43 @@
                           :class="'rating-' + map.map_demoman_rating"
                         >
                           R{{ map.map_demoman_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      v-if="map.class_type === 'soldier'"
+                      class="map-rating-section"
+                    >
+                      <div class="map-rating-label">Demoman</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.map_demoman_tier"
+                        >
+                          T{{ map.map_demoman_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.map_demoman_rating"
+                        >
+                          R{{ map.map_demoman_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-else class="map-rating-section">
+                      <div class="map-rating-label">Soldier</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.map_soldier_tier"
+                        >
+                          T{{ map.map_soldier_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.map_soldier_rating"
+                        >
+                          R{{ map.map_soldier_rating }}
                         </span>
                       </div>
                     </div>
@@ -1095,6 +1131,227 @@
               </div>
             </div>
           </div>
+          <div v-if="visibleRotwVideos.length > 0" class="rotw-section">
+            <div class="rotw-container">
+              <h4 class="rotw-section-title">
+                Runs of the Week
+                <span class="rotw-count">({{ rotwVideos.length }})</span>
+              </h4>
+              <div class="rotw-grid">
+                <div
+                  v-for="(video, index) in visibleRotwVideos"
+                  :key="index"
+                  class="rotw-card"
+                  :class="{
+                    'rotw-card-active': activeRotwVideo === video.video_id,
+                    'rotw-card-left': index % 2 === 0,
+                    'rotw-card-right': index % 2 !== 0,
+                  }"
+                  @click.stop="
+                    toggleRotwVideo(
+                      video.video_id,
+                      index % 2 === 0 ? 'left' : 'right'
+                    )
+                  "
+                >
+                  <div class="rotw-video-embed">
+                    <div class="video-scale-wrapper">
+                      <iframe
+                        :src="`https://www.youtube.com/embed/${video.video_id}`"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        :style="{
+                          pointerEvents:
+                            activeRotwVideo === video.video_id
+                              ? 'auto'
+                              : 'none',
+                        }"
+                      ></iframe>
+                    </div>
+                  </div>
+                  <div class="rotw-video-info">
+                    <h5>{{ video.map_name }}</h5>
+                    <p>{{ video.formatted_upload_date }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="load-more-container">
+                <button
+                  v-if="visibleRotwVideos.length < rotwVideos.length"
+                  @click="loadMoreRotwVideos"
+                  class="global-btn"
+                >
+                  Load More
+                </button>
+                <button
+                  v-if="visibleRotwVideos.length < rotwVideos.length"
+                  @click="showAllRotwVideos"
+                  class="global-btn"
+                >
+                  Show All
+                </button>
+                <button
+                  v-if="visibleRotwVideos.length > 2"
+                  @click="closeAllRotwVideos"
+                  class="global-btn"
+                >
+                  Close All
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="authoredMaps.length > 0"
+            id="authored-maps"
+            class="map-section"
+          >
+            <div class="map-container">
+              <h4 class="map-section-title">
+                Authored maps
+                <span class="rotw-count">({{ authoredMaps.length }})</span>
+              </h4>
+              <div class="author-map-grid">
+                <SmartLink
+                  v-for="(map, index) in visibleAuthoredMaps"
+                  :key="index"
+                  :to="{
+                    name: 'MapPage',
+                    params: { mapId: map.map_id },
+                  }"
+                  tag="div"
+                  class="map-card author-card"
+                  :style="{
+                    background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/thumbnails/${map.map_name}.jpg') center/cover no-repeat
+    `,
+                  }"
+                >
+                  <div class="class-icon-container">
+                    <img
+                      v-for="icon in map.classIcons"
+                      :key="icon.alt"
+                      :src="icon.src"
+                      :class="icon.class"
+                      :alt="icon.alt"
+                    />
+                  </div>
+                  <div class="map-header">
+                    <h3 class="map-name">{{ map.map_name }}</h3>
+                  </div>
+                  <div class="map-compact-ratings-grid">
+                    <div
+                      v-if="map.intended_class === 4"
+                      class="map-rating-section intended-class-section"
+                    >
+                      <div class="map-rating-label">Demoman</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.demoman_tier"
+                        >
+                          T{{ map.demoman_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.demoman_rating"
+                        >
+                          R{{ map.demoman_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      v-else
+                      class="map-rating-section intended-class-section"
+                    >
+                      <div class="map-rating-label">Soldier</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.soldier_tier"
+                        >
+                          T{{ map.soldier_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.soldier_rating"
+                        >
+                          R{{ map.soldier_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      v-if="map.intended_class === 4"
+                      class="map-rating-section"
+                    >
+                      <div class="map-rating-label">Soldier</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.soldier_tier"
+                        >
+                          T{{ map.soldier_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.soldier_rating"
+                        >
+                          R{{ map.soldier_rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-else class="map-rating-section">
+                      <div class="map-rating-label">Demoman</div>
+                      <div class="map-rating-pills">
+                        <span
+                          class="map-rating-pill map-tier-color"
+                          :class="'tier-' + map.demoman_tier"
+                        >
+                          T{{ map.demoman_tier }}
+                        </span>
+                        <span
+                          class="map-rating-pill map-rating-color"
+                          :class="'rating-' + map.demoman_rating"
+                        >
+                          R{{ map.demoman_rating }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="map-date-added">
+                    Date Added:
+                    {{ map.date_added }}
+                  </div>
+                </SmartLink>
+              </div>
+              <div class="load-more-container">
+                <button
+                  v-if="visibleAuthoredMaps.length < authoredMaps.length"
+                  @click="loadMoreAuthoredMaps"
+                  class="global-btn"
+                >
+                  Load More
+                </button>
+                <button
+                  v-if="visibleAuthoredMaps.length < authoredMaps.length"
+                  @click="showAllAuthoredMaps"
+                  class="global-btn"
+                >
+                  Show All
+                </button>
+                <button
+                  v-if="visibleAuthoredMaps.length > authoredMapsPerPage"
+                  @click="closeAllAuthoredMaps"
+                  class="global-btn"
+                >
+                  Close All
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div v-if="showMapSearch" class="map-search-overlay">
             <div class="map-search-container">
               <div class="class-selection">
@@ -1215,6 +1472,16 @@ export default {
     apexchart: VueApexCharts,
   },
   data: () => ({
+    authoredMaps: [],
+    visibleAuthoredMaps: [],
+    authoredMapsPage: 1,
+    authoredMapsPerPage: 3,
+    rotwVideos: [],
+    visibleRotwVideos: [],
+    activeRotwVideo: null,
+    activeRotwSide: null,
+    rotwVideosPage: 1,
+    rotwVideosPerPage: 2,
     currentTime: new Date(),
     updateTimer: null,
     debounceTimer: null,
@@ -1273,6 +1540,7 @@ export default {
     player: {
       id: null,
       steamid: null,
+      steamidconverted: null,
       avatar: null,
       name: null,
       country: "unknown",
@@ -1708,6 +1976,48 @@ export default {
     },
   }),
   computed: {
+    precomputedHeaders() {
+      const headers = {};
+
+      Object.keys(this.filteredAndPaginatedRecords || {}).forEach((date) => {
+        headers[date] = this.formatDateHeader(date);
+      });
+
+      Object.keys(this.filteredAndPaginatedChangedPlacements || {}).forEach(
+        (date) => {
+          headers[date] = this.formatDateHeader(date);
+        }
+      );
+
+      return headers;
+    },
+    processedChangedPlacements() {
+      const processed = {};
+
+      for (const [date, placements] of Object.entries(
+        this.filteredAndPaginatedChangedPlacements
+      )) {
+        processed[date] = placements.map((placement) => {
+          const rankChangeClass =
+            placement.points_change > 0 ? "rank-gain" : "rank-loss";
+          const placementClass =
+            placement.points_change > 0 ? "gained-placement" : "lost-placement";
+
+          return {
+            ...placement,
+            rankChangeClass: rankChangeClass,
+            placementClass: placementClass,
+          };
+        });
+      }
+
+      return processed;
+    },
+    visibleAuthoredMaps() {
+      const start = 0;
+      const end = this.authoredMapsPage * this.authoredMapsPerPage;
+      return this.authoredMaps.slice(start, end);
+    },
     nextUpdateCountdown() {
       const now = this.currentTime;
       const nextUpdate = new Date(now);
@@ -1754,7 +2064,6 @@ export default {
       const grouped = this.groupRecords(this.filteredRecords);
       return this.paginateGroupedData(grouped);
     },
-
     filteredAndPaginatedChangedPlacements() {
       return this.paginateGroupedData(this.groupedChangedPlacements);
     },
@@ -1929,15 +2238,22 @@ export default {
     },
   },
   async mounted() {
+    document.addEventListener("click", this.handleClickOutside);
     await this.loadPlayerPageData(this.playerId);
     this.startUpdateTimer();
   },
   beforeUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
     if (this.updateTimer) {
       clearInterval(this.updateTimer);
     }
   },
   watch: {
+    authoredMaps(newMaps) {
+      if (newMaps.length > 0 && this.$route.hash === "#authored-maps") {
+        this.scrollToAuthoredMaps();
+      }
+    },
     profileUpdateTracker: {
       handler(newTracker) {
         this.fetchUserData(this.playerId);
@@ -1964,6 +2280,7 @@ export default {
             selectedPlacements: [],
             selectedGainLoss: [],
           };
+          this.closeAllRotwVideos();
           this.currentStatType.soldier = "total";
           this.currentStatType.demoman = "total";
           this.favoriteMaps = [
@@ -2007,12 +2324,195 @@ export default {
               record_placement: null,
             },
           ];
+          this.rotwVideos = [];
+          this.visibleRotwVideos = [];
+          this.rotwVideosPage = 1;
           await this.loadPlayerPageData(newId);
         }
       },
     },
   },
   methods: {
+    scrollToAuthoredMaps() {
+      const attemptScroll = () => {
+        const element = document.getElementById("authored-maps");
+        if (element) {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      };
+
+      // Initial scroll
+      this.$nextTick(attemptScroll);
+
+      // Retry scrolling after potential layout shifts
+      setTimeout(attemptScroll, 500);
+    },
+    formatUploadDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    },
+    getClassIcons(intendedClass) {
+      if (intendedClass === 3) {
+        return [
+          {
+            src: "/icons/soldier.png",
+            alt: "Soldier class icon",
+            class: "author-class-icon",
+          },
+        ];
+      }
+
+      if (intendedClass === 4) {
+        return [
+          {
+            src: "/icons/demoman.png",
+            alt: "Demoman class icon",
+            class: "author-class-icon",
+          },
+        ];
+      }
+
+      if (intendedClass === 5) {
+        return [
+          {
+            src: "/icons/soldier.png",
+            alt: "Soldier class icon",
+            class: "author-class-icon dual-icon",
+          },
+          {
+            src: "/icons/demoman.png",
+            alt: "Demoman class icon",
+            class: "author-class-icon dual-icon",
+          },
+        ];
+      }
+
+      return [];
+    },
+    async fetchAuthoredMaps(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/players/${playerId}/maps-from-author`
+        );
+        this.authoredMaps = response.data
+          .map((map) => ({
+            map_id: map.map_id,
+            map_name: map.name,
+            soldier_tier: map.soldier_tier,
+            soldier_rating: map.soldier_rating,
+            demoman_tier: map.demoman_tier,
+            demoman_rating: map.demoman_rating,
+            intended_class: map.intended_class,
+            classIcons: this.getClassIcons(map.intended_class),
+            date_added: this.formatDate2(map.date_added),
+          }))
+          .sort((a, b) => b.map_id - a.map_id);
+      } catch (error) {
+        console.error("Error fetching authored maps:", error);
+      }
+    },
+    formatDate2(unixTimestamp) {
+      const date = new Date(unixTimestamp * 1000);
+      const day = String(date.getDate()).padStart(2, "0");
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const monthName = monthNames[date.getMonth()];
+      const year = date.getFullYear();
+      return `${day} ${monthName} ${year}`;
+    },
+    async fetchRotwVideos(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/players/${playerId}/rotw-videos`
+        );
+
+        const uniqueVideos = response.data.filter(
+          (video, index, self) =>
+            index === self.findIndex((v) => v.video_id === video.video_id)
+        );
+
+        this.rotwVideos = uniqueVideos.map((video) => ({
+          ...video,
+          formatted_upload_date: this.formatUploadDate(video.uploaded_at),
+        }));
+
+        this.visibleRotwVideos = this.rotwVideos.slice(
+          0,
+          this.rotwVideosPerPage
+        );
+      } catch (error) {
+        console.error("Error fetching ROTW videos:", error);
+      }
+    },
+
+    loadMoreRotwVideos() {
+      const start = this.rotwVideosPage * this.rotwVideosPerPage;
+      const end = start + this.rotwVideosPerPage;
+      this.visibleRotwVideos = [
+        ...this.visibleRotwVideos,
+        ...this.rotwVideos.slice(start, end),
+      ];
+      this.rotwVideosPage++;
+    },
+    showAllRotwVideos() {
+      this.visibleRotwVideos = [...this.rotwVideos];
+    },
+    closeAllRotwVideos() {
+      this.visibleRotwVideos = this.rotwVideos.slice(0, 2);
+      this.rotwVideosPage = 1;
+      this.activeRotwVideo = null;
+      this.activeRotwSide = null;
+    },
+    toggleRotwVideo(videoId, side) {
+      this.activeRotwVideo = this.activeRotwVideo === videoId ? null : videoId;
+      this.activeRotwSide = side;
+    },
+    loadMoreAuthoredMaps() {
+      const start = this.authoredMapsPage * this.authoredMapsPerPage;
+      const end = start + this.authoredMapsPerPage;
+      this.visibleAuthoredMaps = [
+        ...this.visibleAuthoredMaps,
+        ...this.authoredMaps.slice(start, end),
+      ];
+      this.authoredMapsPage++;
+    },
+    showAllAuthoredMaps() {
+      this.visibleAuthoredMaps = [...this.authoredMaps];
+      this.authoredMapsPage = Math.ceil(
+        this.authoredMaps.length / this.authoredMapsPerPage
+      );
+    },
+    closeAllAuthoredMaps() {
+      this.visibleAuthoredMaps = this.authoredMaps.slice(
+        0,
+        this.authoredMapsPerPage
+      );
+      this.authoredMapsPage = 1;
+    },
+    handleClickOutside(e) {
+      if (!e.target.closest(".rotw-card")) {
+        this.activeRotwVideo = null;
+      }
+    },
     startUpdateTimer() {
       this.updateTimer = setInterval(() => {
         this.currentTime = new Date();
@@ -2038,6 +2538,8 @@ export default {
           this.fetchPlayerPoints(playerId),
           this.fetchFavoriteMaps(playerId),
           this.fetchChangedPlacements(playerId),
+          this.fetchRotwVideos(playerId),
+          this.fetchAuthoredMaps(playerId),
         ]);
         await this.fetchPlayerStats(playerId);
         await this.fetchSharedTimes(playerId);
@@ -2098,7 +2600,6 @@ export default {
           const date = p.change_date;
 
           return {
-            // keep the original/raw fields you rely on elsewhere
             ...p,
             class: p.record_type.split("_")[0], // 'soldier' | 'demoman'
             type: p.record_type.split("_")[1], // 'map' | 'course' | 'bonus'
@@ -2108,7 +2609,6 @@ export default {
             date,
             points_change,
 
-            // precomputed display fields (using your helpers)
             oldRankDisplay: `${this.getMedal(old_rank)}${this.formatRankDisplay(
               old_rank
             )}`,
@@ -2119,7 +2619,7 @@ export default {
             newRankClass: this.getPlacementClass(new_rank),
 
             pointsChangeClass: this.getPointsChangeClass(points_change),
-            pointsChangeText: this.formatPointsChange(points_change), // includes +/-, fixed(2), "pts"
+            pointsChangeText: this.formatPointsChange(points_change),
 
             formattedDate: this.formatDate(date),
           };
@@ -2129,12 +2629,6 @@ export default {
       } finally {
         this.loading["Lost placements"] = false;
       }
-    },
-    formatRankChange(change) {
-      return change > 0 ? `+${change}` : change.toString();
-    },
-    getRankChangeClass(change) {
-      return change > 0 ? "rank-loss" : "rank-gain";
     },
     convertSteamId(steamId) {
       if (!steamId) {
@@ -2210,7 +2704,6 @@ export default {
       this.selectedClass = className;
       this.hideClassWarning();
     },
-
     handleMapClick(map) {
       if (!this.selectedClass) {
         this.showClassWarningPopup();
@@ -2232,7 +2725,6 @@ export default {
         this.hideClassWarning();
       }, 2000);
     },
-
     hideClassWarning() {
       this.showClassWarning = false;
       if (this.classWarningTimeout) {
@@ -2318,7 +2810,6 @@ export default {
         (currentIndex - 1 + statTypes.length) % statTypes.length;
       this.currentStatType[classType] = statTypes[prevIndex];
     },
-
     nextStatType(classType) {
       const statTypes = ["total", "map", "course", "bonus"];
       const currentIndex = statTypes.indexOf(this.currentStatType[classType]);
@@ -2415,10 +2906,38 @@ export default {
         (a, b) => a.date - b.date
       );
 
+      const filterDuplicates = (data, pointsKey, rankKey) => {
+        return data.filter((point, index) => {
+          if (index === 0) return true;
+
+          const prev = data[index - 1];
+          return (
+            point[pointsKey] !== prev[pointsKey] ||
+            point[rankKey] !== prev[rankKey]
+          );
+        });
+      };
+
+      const filteredOverallData = filterDuplicates(
+        sortedData,
+        "overall_points",
+        "overall_rank"
+      );
+      const filteredSoldierData = filterDuplicates(
+        sortedData,
+        "soldier_points",
+        "soldier_rank"
+      );
+      const filteredDemomanData = filterDuplicates(
+        sortedData,
+        "demoman_points",
+        "demoman_rank"
+      );
+
       this.overallChartSeries = [
         {
           name: "Overall Points",
-          data: sortedData.map((point) => ({
+          data: filteredOverallData.map((point) => ({
             x: point.date * 1000,
             y: point.overall_points,
             overall_rank: point.overall_rank,
@@ -2429,7 +2948,7 @@ export default {
       this.soldierChartSeries = [
         {
           name: "Soldier Points",
-          data: sortedData.map((point) => ({
+          data: filteredSoldierData.map((point) => ({
             x: point.date * 1000,
             y: point.soldier_points,
             soldier_rank: point.soldier_rank,
@@ -2440,7 +2959,7 @@ export default {
       this.demomanChartSeries = [
         {
           name: "Demoman Points",
-          data: sortedData.map((point) => ({
+          data: filteredDemomanData.map((point) => ({
             x: point.date * 1000,
             y: point.demoman_points,
             demoman_rank: point.demoman_rank,
@@ -2510,11 +3029,11 @@ export default {
         { range: [3, 3], male: "Archduke", female: "Archduchess" },
         { range: [4, 4], male: "Lord", female: "Lady" },
         { range: [5, 5], male: "Duke", female: "Duchess" },
-        { range: [6, 10], male: "Prince V", female: "Princess V" },
-        { range: [6, 10], male: "Prince IV", female: "Princess IV" },
-        { range: [6, 10], male: "Prince III", female: "Princess III" },
-        { range: [6, 10], male: "Prince II", female: "Princess II" },
-        { range: [6, 10], male: "Prince I", female: "Princess I" },
+        { range: [6, 6], male: "Prince V", female: "Princess V" },
+        { range: [7, 7], male: "Prince IV", female: "Princess IV" },
+        { range: [8, 8], male: "Prince III", female: "Princess III" },
+        { range: [9, 9], male: "Prince II", female: "Princess II" },
+        { range: [10, 10], male: "Prince I", female: "Princess I" },
         { range: [11, 11], male: "Earl V", female: "Gearl V" },
         { range: [12, 12], male: "Earl IV", female: "Gearl IV" },
         { range: [13, 13], male: "Earl III", female: "Gearl III" },
@@ -2681,6 +3200,7 @@ export default {
           avatar: playerData.steam_avatar || "golly.jpg",
           country: playerData.country || "unknown",
           country_code: playerData.country_code || "unknown",
+          steamidconverted: this.convertSteamId(playerData.steamid),
         };
         this.updateTitle(this.player.name);
       } catch (error) {
@@ -3716,6 +4236,7 @@ export default {
   font-weight: bold;
   font-size: large;
   margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 .rank-dropdown {
   position: absolute;
@@ -3777,7 +4298,7 @@ export default {
 }
 
 .map-section-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 30px;
@@ -3803,11 +4324,72 @@ export default {
   width: 800px;
 }
 
-.map-grid:has(.map-card:nth-child(3):last-child) {
+.map-grid:has(.map-card:nth-child(3)) {
   grid-template-columns: repeat(3, minmax(300px, 1fr));
   width: 1200px;
 }
 
+.author-map-grid {
+  display: grid;
+  gap: 30px;
+  margin: 20px auto;
+  justify-content: center;
+  max-width: 1200px;
+}
+
+.author-map-grid:has(.map-card:nth-child(1):last-child) {
+  grid-template-columns: 1fr;
+  width: 500px;
+}
+
+.author-map-grid:has(.map-card:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+  width: 800px;
+}
+
+.author-map-grid:has(.map-card:nth-child(3)) {
+  grid-template-columns: repeat(3, 1fr);
+  width: 1200px;
+}
+
+.author-card {
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.class-icon-container {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.author-class-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  padding: 8px;
+  border: 2px solid rgba(74, 111, 165, 0.3);
+}
+
+.author-class-icon.dual-icon {
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+}
+
+.author-class-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  padding: 8px;
+  border: 2px solid rgba(74, 111, 165, 0.3);
+}
 .map-card {
   box-shadow: 0 0 20px rgba(0, 0, 0);
   background: linear-gradient(
@@ -3837,11 +4419,11 @@ export default {
 }
 
 .map-card-subtitle {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
   color: #ffffff;
-  margin-bottom: 50px;
+  margin-bottom: 35px;
   background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -3856,6 +4438,30 @@ export default {
   margin-bottom: 15px;
   color: #ffffff;
   text-align: center;
+}
+
+.map-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 50px;
+}
+
+.map-header-nonmargin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.map-name {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
 }
 
 .map-compact-ratings-grid {
@@ -3895,6 +4501,15 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.8;
+}
+
+.map-date-added {
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  color: var(--color-text-soft);
+  font-style: italic;
+  margin-top: auto;
 }
 
 .record-row {
@@ -4188,7 +4803,164 @@ export default {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
+.rotw-section {
+  padding: 15px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.rotw-container {
+  width: fit-content;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+}
+
+.rotw-section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--color-text);
+}
+.rotw-count {
+  font-size: 1.5rem;
+  color: var(--color-text-soft);
+  font-weight: normal;
+}
+.rotw-grid {
+  display: grid;
+  gap: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  justify-content: center;
+  max-width: 1250px;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(590px, 1fr));
+}
+
+.rotw-grid:has(.rotw-card:nth-child(1):last-child) {
+  grid-template-columns: minmax(750px, 1fr);
+}
+
+.rotw-grid:has(.rotw-card:nth-child(1):last-child) .rotw-card-active {
+  transform: scale(1.416);
+}
+
+.rotw-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+  transition: all 0.3s ease;
+  min-width: 300px;
+  max-width: 750px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.rotw-card-active {
+  z-index: 100;
+  position: relative;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  background: var(--color-primary-dark);
+}
+
+.rotw-card-active.rotw-card-left {
+  transform: translateX(52%) scale(1.8);
+}
+
+.rotw-card-active.rotw-card-right {
+  transform: translateX(-52%) scale(1.8);
+}
+
+.rotw-card-active .video-scale-wrapper iframe {
+  pointer-events: auto;
+}
+
+.rotw-video-embed {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.rotw-video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.video-scale-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.75);
+  transform-origin: top left;
+}
+
+.video-scale-wrapper iframe {
+  width: calc(100% / 0.75);
+  height: calc(100% / 0.75);
+  border-radius: 8px;
+}
+
+.rotw-video-info {
+  padding-top: 10px;
+  text-align: center;
+}
+
+.rotw-video-info h5 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+.rotw-video-info p {
+  margin: 5px 0 0;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 @media (max-width: 768px) {
+  .rotw-grid,
+  .map-grid,
+  .author-map-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow-x: hidden;
+    gap: 15px;
+  }
+  .rotw-section-title {
+    font-size: 1.5rem;
+  }
+  .rotw-count {
+    font-size: 1rem;
+  }
+  .rotw-card-active,
+  .map-card {
+    transform: none !important;
+    width: 100%;
+    max-width: 100%;
+  }
   .nav-bar {
     height: 50px;
     width: 30px;
@@ -4251,21 +5023,16 @@ export default {
     padding: 15px 10px;
   }
 
-  .map-container {
+  .map-container,
+  .rotw-container {
+    padding: 10px;
     width: 100%;
-    padding: 15px;
+    box-sizing: border-box;
   }
 
   .map-section-title {
     font-size: 1.5rem;
     margin-bottom: 20px;
-  }
-
-  .map-grid {
-    grid-template-columns: 1fr !important;
-    gap: 15px;
-    width: 100% !important;
-    max-width: none !important;
   }
 
   .map-card {

@@ -239,7 +239,7 @@
                             :style="{
                               background: `
         linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+        url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
       `,
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
@@ -258,7 +258,7 @@
                             :style="{
                               background: `
         linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-        url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+        url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
       `,
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
@@ -282,7 +282,7 @@
                           :style="{
                             background: `
           linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-          url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+          url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
         `,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
@@ -402,7 +402,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -464,7 +464,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -2131,10 +2131,14 @@ export default {
     font-size: 1.2rem;
   }
   .search-results-dropdown {
-    min-width: 100%;
-    max-width: 100%;
-    left: 0 !important;
+    position: absolute;
     right: 0 !important;
+    max-width: 90% !important;
+    margin: 0 !important;
+    top: 100% !important;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 12px !important;
   }
 }
 

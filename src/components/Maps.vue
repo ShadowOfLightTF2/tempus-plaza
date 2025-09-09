@@ -7,6 +7,174 @@
         class="content-container mx-auto py-4 d-flex flex-column align-items-center"
         style="z-index: 1"
       >
+        <div
+          v-if="showTagFilterModal"
+          class="tag-modal-backdrop"
+          @click="closeTagFilterModal"
+        >
+          <div class="tag-modal" @click.stop>
+            <div class="tag-modal-header">
+              <h3><i class="bi bi-funnel-fill me-2"></i>Filter by Tags</h3>
+              <button @click="closeTagFilterModal" class="close-btn">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <div class="tag-modal-description">
+              <p class="description-text">
+                <i class="bi bi-info-circle me-2"></i>
+                Filter maps by their gameplay characteristics and features. Note
+                that not every map has tags yet, you can help by voting for tags
+                on the individual map pages to improve the filtering system for
+                everyone!
+              </p>
+            </div>
+
+            <div class="tag-modal-body">
+              <div class="tag-section">
+                <!-- Soldier Tags -->
+                <div
+                  class="tag-class-group"
+                  v-if="getTagsByClass('soldier').length > 0"
+                >
+                  <h5>
+                    <img
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="class-icon me-1"
+                    />
+                    Soldier
+                  </h5>
+                  <div class="tag-selector">
+                    <div class="available-tags">
+                      <div
+                        v-for="tag in getTagsByClass('soldier')"
+                        :key="'filter-soldier-' + tag.id"
+                        class="tag-option"
+                        :class="{ active: isTagSelected(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                        :style="{
+                          backgroundColor: isTagSelected(tag.id)
+                            ? tag.color + '40'
+                            : 'transparent',
+                          borderColor: tag.color,
+                        }"
+                      >
+                        <i
+                          class="bi bi-tag-fill me-1"
+                          :style="{ color: tag.color }"
+                        ></i>
+                        {{ tag.name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Demoman Tags -->
+                <div
+                  class="tag-class-group"
+                  v-if="getTagsByClass('demoman').length > 0"
+                >
+                  <h5>
+                    <img
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="class-icon me-1"
+                    />
+                    Demoman
+                  </h5>
+                  <div class="tag-selector">
+                    <div class="available-tags">
+                      <div
+                        v-for="tag in getTagsByClass('demoman')"
+                        :key="'filter-demoman-' + tag.id"
+                        class="tag-option"
+                        :class="{ active: isTagSelected(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                        :style="{
+                          backgroundColor: isTagSelected(tag.id)
+                            ? tag.color + '40'
+                            : 'transparent',
+                          borderColor: tag.color,
+                        }"
+                      >
+                        <i
+                          class="bi bi-tag-fill me-1"
+                          :style="{ color: tag.color }"
+                        ></i>
+                        {{ tag.name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Both Classes Tags -->
+                <div
+                  class="tag-class-group"
+                  v-if="getTagsByClass('both').length > 0"
+                >
+                  <h5><i class="bi bi-people me-1"></i>Both Classes</h5>
+                  <div class="tag-selector">
+                    <div class="available-tags">
+                      <div
+                        v-for="tag in getTagsByClass('both')"
+                        :key="'filter-both-' + tag.id"
+                        class="tag-option"
+                        :class="{ active: isTagSelected(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                        :style="{
+                          backgroundColor: isTagSelected(tag.id)
+                            ? tag.color + '40'
+                            : 'transparent',
+                          borderColor: tag.color,
+                        }"
+                      >
+                        <i
+                          class="bi bi-tag-fill me-1"
+                          :style="{ color: tag.color }"
+                        ></i>
+                        {{ tag.name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Extra Tags -->
+                <div
+                  class="tag-class-group"
+                  v-if="getTagsByClass('extra').length > 0"
+                >
+                  <h5><i class="bi bi-gear me-1"></i>Extra</h5>
+                  <div class="tag-selector">
+                    <div class="available-tags">
+                      <div
+                        v-for="tag in getTagsByClass('extra')"
+                        :key="'filter-extra-' + tag.id"
+                        class="tag-option"
+                        :class="{ active: isTagSelected(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                        :style="{
+                          backgroundColor: isTagSelected(tag.id)
+                            ? tag.color + '40'
+                            : 'transparent',
+                          borderColor: tag.color,
+                        }"
+                      >
+                        <i
+                          class="bi bi-tag-fill me-1"
+                          :style="{ color: tag.color }"
+                        ></i>
+                        {{ tag.name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tag-modal-footer"></div>
+          </div>
+        </div>
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">🗺️</span>
@@ -156,7 +324,7 @@
               </div>
             </div>
             <div class="column-toggles-section">
-              <div class="column-toggles">
+              <div class="column-toggles" v-if="currentLayout === 'table'">
                 <button
                   @click="toggleColumns('soldier')"
                   class="global-btn"
@@ -183,6 +351,14 @@
                   <span v-if="showCompletionColumns">Hide</span>
                   <span v-else>Show</span>
                   Completions
+                </button>
+                <button @click="openTagFilterModal" class="global-btn">
+                  <i class="bi bi-tags me-2"></i>Filter by Tags
+                </button>
+              </div>
+              <div class="column-toggles" v-else>
+                <button @click="openTagFilterModal" class="global-btn">
+                  <i class="bi bi-tags me-2"></i>Filter by Tags
                 </button>
               </div>
             </div>
@@ -215,6 +391,41 @@
                 />
               </div>
             </div>
+            <div class="filter-actions">
+              <div
+                class="picker-section"
+                v-if="filteredAndSortedItems.length > 0"
+              >
+                <div class="picker-controls">
+                  <button
+                    @click="startRandomPicker"
+                    :disabled="
+                      isPickerActive || filteredAndSortedItems.length <= 1
+                    "
+                    class="btn picker-btn"
+                    :class="{ 'picker-btn-active': isPickerActive }"
+                  >
+                    <span v-if="!isPickerActive">Random map picker</span>
+                    <span v-else>Eliminating...</span>
+                  </button>
+                  <button
+                    @click="resetPicker"
+                    v-if="eliminatedRows.size > 0"
+                    class="btn btn-secondary ml-2"
+                  >
+                    Reset
+                  </button>
+                  <div
+                    class="picker-status"
+                    v-if="isPickerActive || eliminatedRows.size > 0"
+                  >
+                    <span class="remaining-count"
+                      >{{ remainingCount }} remaining</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <hr class="row-divider" style="width: 75%" />
@@ -226,39 +437,6 @@
         <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
         <div v-else class="table-container">
           <div class="table-header-section">
-            <div
-              class="picker-section"
-              v-if="filteredAndSortedItems.length > 0"
-            >
-              <div class="picker-controls">
-                <button
-                  @click="startRandomPicker"
-                  :disabled="
-                    isPickerActive || filteredAndSortedItems.length <= 1
-                  "
-                  class="btn picker-btn"
-                  :class="{ 'picker-btn-active': isPickerActive }"
-                >
-                  <span v-if="!isPickerActive">Random map picker</span>
-                  <span v-else>Eliminating...</span>
-                </button>
-                <button
-                  @click="resetPicker"
-                  v-if="eliminatedRows.size > 0"
-                  class="btn btn-secondary ml-2"
-                >
-                  Reset
-                </button>
-                <div
-                  class="picker-status"
-                  v-if="isPickerActive || eliminatedRows.size > 0"
-                >
-                  <span class="remaining-count"
-                    >{{ remainingCount }} remaining</span
-                  >
-                </div>
-              </div>
-            </div>
             <div class="button-group">
               <button
                 :class="{ active: currentView === 'maps' }"
@@ -281,9 +459,26 @@
               >
                 Bonuses
               </button>
+              <div class="layout-divider"></div>
+              <button
+                @click="switchLayout('table')"
+                :class="{ active: currentLayout === 'table' }"
+                class="toggle-btn btn btn-dark update-button layout-toggle"
+                title="Table View"
+              >
+                ⊟
+              </button>
+              <button
+                @click="switchLayout('grid')"
+                :class="{ active: currentLayout === 'grid' }"
+                class="toggle-btn btn btn-dark update-button layout-toggle"
+                title="Grid View"
+              >
+                ⊞
+              </button>
             </div>
           </div>
-          <div class="table-responsive">
+          <div v-if="currentLayout === 'table'" class="table-responsive">
             <table class="table table-dark">
               <thead class="table-header">
                 <tr>
@@ -323,7 +518,7 @@
                     class="fixed-width"
                   >
                     [D] tier
-                    <span v-if="sortField === 'demoman_tier'">{{
+                    <span v-if="effectiveSortField === 'demoman_tier'">{{
                       getSortArrowSymbol("demoman_tier")
                     }}</span>
                   </th>
@@ -333,7 +528,7 @@
                     class="fixed-width"
                   >
                     [D] rating
-                    <span v-if="sortField === 'demoman_rating'">{{
+                    <span v-if="effectiveSortField === 'demoman_rating'">{{
                       getSortArrowSymbol("demoman_rating")
                     }}</span>
                   </th>
@@ -399,14 +594,14 @@
                   <td
                     v-if="showSoldierColumns"
                     class="align-middle text-center"
-                    :class="`tier-color tier-${item.soldier_tier}`"
+                    :class="`tier-color-tier-${item.soldier_tier}`"
                   >
                     T{{ item.soldier_tier }}
                   </td>
                   <td
                     v-if="showSoldierColumns"
                     class="align-middle text-center"
-                    :class="`rating-color rating-${item.soldier_rating}`"
+                    :class="`rating-color-rating-${item.soldier_rating}`"
                   >
                     R{{ item.soldier_rating }}
                   </td>
@@ -417,14 +612,14 @@
                   <td
                     v-if="showDemomanColumns"
                     class="align-middle text-center"
-                    :class="`tier-color tier-${item.demoman_tier}`"
+                    :class="`tier-color-tier-${item.demoman_tier}`"
                   >
                     T{{ item.demoman_tier }}
                   </td>
                   <td
                     v-if="showDemomanColumns"
                     class="align-middle text-center"
-                    :class="`rating-color rating-${item.demoman_rating}`"
+                    :class="`rating-color-rating-${item.demoman_rating}`"
                   >
                     R{{ item.demoman_rating }}
                   </td>
@@ -451,6 +646,28 @@
               </tbody>
             </table>
           </div>
+          <div v-else class="grid-container">
+            <div class="maps-grid">
+              <div
+                ref="gridCards"
+                v-for="(item, index) in filteredAndSortedItems"
+                :key="currentView + '-grid-' + index"
+                :class="{
+                  'card-eliminated': eliminatedRows.has(getRowId(item, index)),
+                  'card-winner':
+                    pickerComplete &&
+                    !eliminatedRows.has(getRowId(item, index)),
+                  'card-eliminating':
+                    eliminatingRowId === getRowId(item, index),
+                }"
+                class="map-card fade-in"
+              >
+                <SmartLink :to="getMapRoute(item)" class="card-link">
+                  <MapCard :item="item" :current-view="currentView" />
+                </SmartLink>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -460,16 +677,24 @@
 <script>
 import axios from "axios";
 import { useHead } from "@vueuse/head";
+import { useRoute, useRouter } from "vue-router";
+import MapCard from "./MapCard.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 
 export default {
+  components: {
+    MapCard,
+  },
   name: "Maps",
   setup() {
+    const route = useRoute();
+    const router = useRouter();
     useHead({
       title: "Tempus Plaza | Maps",
     });
+    return { route, router };
   },
   data() {
     return {
@@ -477,10 +702,14 @@ export default {
       courses: [],
       bonuses: [],
       currentView: "maps",
+      currentLayout: "grid",
       loading: false,
       error: null,
       sortField: "soldier_tier",
       sortDirection: 1,
+      availableTags: [],
+      selectedTags: [],
+      showTagFilterModal: false,
       selectedSoldierTiers: [],
       selectedSoldierRatings: [],
       selectedDemomanTiers: [],
@@ -503,10 +732,24 @@ export default {
       showCompletionColumns: false,
     };
   },
-  mounted() {
+  async mounted() {
+    await this.fetchAvailableTags();
+    this.parseUrlFilters();
     this.fetchData();
   },
   computed: {
+    effectiveSortField() {
+      if (
+        (this.selectedDemomanTiers.length > 0 ||
+          this.selectedDemomanRatings.length > 0) &&
+        this.sortField === "soldier_tier" &&
+        this.selectedSoldierTiers.length === 0 &&
+        this.selectedSoldierRatings.length === 0
+      ) {
+        return "demoman_tier";
+      }
+      return this.sortField;
+    },
     currentItems() {
       switch (this.currentView) {
         case "courses":
@@ -566,6 +809,14 @@ export default {
         });
       }
 
+      if (this.selectedTags.length > 0) {
+        filtered = filtered.filter((item) => {
+          if (!item.tags || item.tags.length === 0) return false;
+          const itemTagIds = item.tags.map((tag) => tag.id);
+          return this.selectedTags.some((tagId) => itemTagIds.includes(tagId));
+        });
+      }
+
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter((item) => {
@@ -582,8 +833,59 @@ export default {
       return filtered;
     },
     filteredAndSortedItems() {
-      return this.filteredItems.slice().sort((a, b) => {
-        if (this.sortField === "name") {
+      let items = this.filteredItems.slice();
+
+      // if (this.currentLayout === "grid") {
+      //   return items.sort((a, b) => {
+      //     const nameA =
+      //       this.currentView === "maps"
+      //         ? a.name
+      //         : `${a.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
+      //             a.index
+      //           })`;
+      //     const nameB =
+      //       this.currentView === "maps"
+      //         ? b.name
+      //         : `${b.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
+      //             b.index
+      //           })`;
+      //     return nameA.localeCompare(nameB);
+      //   });
+      // }
+
+      if (this.currentLayout === "grid") {
+        return items.sort((a, b) => {
+          if (this.currentView === "maps") {
+            const dateA = a.date_added * 1000;
+            const dateB = b.date_added * 1000;
+            return dateB - dateA;
+          } else {
+            const nameA = `${a.map_name} (${this.currentView
+              .slice(0, 1)
+              .toUpperCase()}${a.index})`;
+            const nameB = `${b.map_name} (${this.currentView
+              .slice(0, 1)
+              .toUpperCase()}${b.index})`;
+            return nameA.localeCompare(nameB);
+          }
+        });
+      }
+
+      return items.sort((a, b) => {
+        let effectiveSortField = this.sortField;
+        let effectiveSortDirection = this.sortDirection;
+
+        if (
+          (this.selectedDemomanTiers.length > 0 ||
+            this.selectedDemomanRatings.length > 0) &&
+          this.sortField === "soldier_tier" &&
+          this.selectedSoldierTiers.length === 0 &&
+          this.selectedSoldierRatings.length === 0
+        ) {
+          effectiveSortField = "demoman_tier";
+        }
+
+        if (effectiveSortField === "name") {
           const nameA =
             this.currentView === "maps"
               ? a.name
@@ -596,42 +898,42 @@ export default {
               : `${b.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
                   b.index
                 })`;
-          return nameA.localeCompare(nameB) * this.sortDirection;
+          return nameA.localeCompare(nameB) * effectiveSortDirection;
         }
 
-        const fieldA = a[this.sortField];
-        const fieldB = b[this.sortField];
+        const fieldA = a[effectiveSortField];
+        const fieldB = b[effectiveSortField];
 
-        if (["soldier_tier", "demoman_tier"].includes(this.sortField)) {
+        if (["soldier_tier", "demoman_tier"].includes(effectiveSortField)) {
           const indexA = TIER_ORDER.indexOf(fieldA);
           const indexB = TIER_ORDER.indexOf(fieldB);
-          const primaryComparison = (indexA - indexB) * this.sortDirection;
+          const primaryComparison = (indexA - indexB) * effectiveSortDirection;
 
           if (primaryComparison !== 0) return primaryComparison;
         }
 
         if (
           ["soldier_completion_count", "demoman_completion_count"].includes(
-            this.sortField
+            effectiveSortField
           )
         ) {
-          return (fieldB - fieldA) * this.sortDirection;
+          return (fieldB - fieldA) * effectiveSortDirection;
         }
 
-        if (fieldA < fieldB) return -1 * this.sortDirection;
-        if (fieldA > fieldB) return 1 * this.sortDirection;
+        if (fieldA < fieldB) return -1 * effectiveSortDirection;
+        if (fieldA > fieldB) return 1 * effectiveSortDirection;
 
-        if (this.sortField === "demoman_tier") {
+        if (effectiveSortField === "demoman_tier") {
           const ratingA = a.demoman_rating;
           const ratingB = b.demoman_rating;
           if (ratingA !== ratingB) {
-            return (ratingA - ratingB) * this.sortDirection;
+            return (ratingA - ratingB) * effectiveSortDirection;
           }
-        } else if (this.sortField === "soldier_tier") {
+        } else if (effectiveSortField === "soldier_tier") {
           const ratingA = a.soldier_rating;
           const ratingB = b.soldier_rating;
           if (ratingA !== ratingB) {
-            return (ratingA - ratingB) * this.sortDirection;
+            return (ratingA - ratingB) * effectiveSortDirection;
           }
         }
 
@@ -641,10 +943,10 @@ export default {
           "demoman_tier",
           "demoman_rating",
         ].filter((field) => {
-          const sortFieldClass = this.sortField.includes("soldier")
+          const sortFieldClass = effectiveSortField.includes("soldier")
             ? "soldier"
             : "demoman";
-          return field.includes(sortFieldClass) && field !== this.sortField;
+          return field.includes(sortFieldClass) && field !== effectiveSortField;
         });
 
         for (const field of otherFields) {
@@ -672,6 +974,148 @@ export default {
   },
 
   methods: {
+    switchLayout(layout) {
+      if (this.currentLayout === layout) return;
+
+      this.currentLayout = layout;
+      this.updateUrl();
+    },
+    async fetchAvailableTags() {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/maps/tags`);
+        this.availableTags = response.data;
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    },
+    openTagFilterModal() {
+      this.showTagFilterModal = true;
+    },
+    closeTagFilterModal() {
+      this.showTagFilterModal = false;
+    },
+    toggleTag(tagId) {
+      if (this.selectedTags.includes(tagId)) {
+        this.selectedTags = this.selectedTags.filter((id) => id !== tagId);
+      } else {
+        this.selectedTags.push(tagId);
+      }
+      this.onFilterChange();
+    },
+    isTagSelected(tagId) {
+      return this.selectedTags.includes(tagId);
+    },
+    getTagsByClass(className) {
+      return this.availableTags.filter((tag) => tag.class === className);
+    },
+    getMapRoute(item) {
+      return `/maps/${item.name}`;
+    },
+    parseUrlFilters() {
+      const query = this.$route.query;
+
+      // Parse view
+      if (query.view && ["maps", "courses", "bonuses"].includes(query.view)) {
+        this.currentView = query.view;
+      }
+
+      // Parse tiers and ratings
+      this.selectedSoldierTiers = this.parseArrayParam(
+        query.st,
+        this.availableTiers
+      );
+      this.selectedSoldierRatings = this.parseArrayParam(
+        query.sr,
+        this.availableRatings
+      );
+      this.selectedDemomanTiers = this.parseArrayParam(
+        query.dt,
+        this.availableTiers
+      );
+      this.selectedDemomanRatings = this.parseArrayParam(
+        query.dr,
+        this.availableRatings
+      );
+
+      // Parse intended classes
+      this.selectedIntendedClasses = this.parseArrayParam(query.ic, [3, 4]);
+
+      // Parse selected tags
+      const availableTagIds = this.availableTags.map((tag) => tag.id);
+      this.selectedTags = this.parseArrayParam(query.tags, availableTagIds);
+
+      // Parse layout
+      if (query.layout && ["table", "grid"].includes(query.layout)) {
+        this.currentLayout = query.layout;
+      }
+
+      // Parse column visibility
+      this.showSoldierColumns = query.sc !== "0";
+      this.showDemomanColumns = query.dc !== "0";
+      this.showCompletionColumns = query.cc === "1";
+    },
+    parseTagsParam(param) {
+      if (!param) return [];
+      const values = Array.isArray(param) ? param : param.split(",");
+      return values.map((v) => parseInt(v)).filter((v) => !isNaN(v));
+    },
+    updateUrl() {
+      const query = {};
+
+      // Add view if not default
+      if (this.currentView !== "maps") {
+        query.view = this.currentView;
+      }
+
+      // Add filters only if they have values
+      if (this.selectedSoldierTiers.length > 0) {
+        query.st = this.selectedSoldierTiers.join(",");
+      }
+      if (this.selectedSoldierRatings.length > 0) {
+        query.sr = this.selectedSoldierRatings.join(",");
+      }
+      if (this.selectedDemomanTiers.length > 0) {
+        query.dt = this.selectedDemomanTiers.join(",");
+      }
+      if (this.selectedDemomanRatings.length > 0) {
+        query.dr = this.selectedDemomanRatings.join(",");
+      }
+      if (this.selectedIntendedClasses.length > 0) {
+        query.ic = this.selectedIntendedClasses.join(",");
+      }
+
+      // Add column visibility if not default
+      if (!this.showSoldierColumns) {
+        query.sc = "0";
+      }
+      if (!this.showDemomanColumns) {
+        query.dc = "0";
+      }
+      if (this.showCompletionColumns) {
+        query.cc = "1";
+      }
+
+      // Add selected tags to URL
+      if (this.selectedTags.length > 0) {
+        query.tags = this.selectedTags.join(",");
+      }
+
+      // Add layout if not default
+      if (this.currentLayout !== "grid") {
+        query.layout = this.currentLayout;
+      }
+
+      if (JSON.stringify(this.$route.query) !== JSON.stringify(query)) {
+        this.$router.replace({ query });
+      }
+    },
+    parseArrayParam(param, availableValues) {
+      if (!param) return [];
+      const values = Array.isArray(param) ? param : param.split(",");
+      return values
+        .map((v) => parseInt(v))
+        .filter((v) => !isNaN(v) && availableValues.includes(v));
+    },
     toggleColumns(type) {
       if (type === "soldier") {
         this.showSoldierColumns = !this.showSoldierColumns;
@@ -680,6 +1124,7 @@ export default {
       } else if (type === "completions") {
         this.showCompletionColumns = !this.showCompletionColumns;
       }
+      this.updateUrl();
     },
     toggleIntendedClass(clsId) {
       if (this.selectedIntendedClasses.includes(clsId)) {
@@ -699,14 +1144,13 @@ export default {
       if (this.currentView === view) return;
 
       this.currentView = view;
-
       this.sortField = "soldier_tier";
       this.sortDirection = 1;
       this.resetPicker();
 
+      this.updateUrl();
       await this.fetchData();
     },
-
     async fetchData() {
       if (this.currentView === "maps" && this.maps.length === 0) {
         await this.fetchMapsData();
@@ -716,13 +1160,46 @@ export default {
         await this.fetchBonusesData();
       }
     },
-
     async fetchMapsData() {
       this.loading = true;
       this.error = null;
       try {
         const response = await axios.get(`${API_BASE_URL}/maps`);
-        this.maps = response.data;
+
+        const mapsWithTags = await Promise.all(
+          response.data.map(async (map) => {
+            try {
+              const mapInfoResponse = await axios.get(
+                `${API_BASE_URL}/maps/${map.id}/all-info`
+              );
+
+              return {
+                ...map,
+                class:
+                  map.intended_class === 3
+                    ? "soldier"
+                    : map.intended_class === 4
+                    ? "demoman"
+                    : "soldier",
+                tags: mapInfoResponse.data.tags || [],
+              };
+            } catch (error) {
+              console.error(`Error loading map info for ${map.id}:`, error);
+              return {
+                ...map,
+                class:
+                  map.intended_class === 3
+                    ? "soldier"
+                    : map.intended_class === 4
+                    ? "demoman"
+                    : "soldier",
+                tags: [],
+              };
+            }
+          })
+        );
+
+        this.maps = mapsWithTags;
       } catch (error) {
         this.error = "Error fetching maps data.";
         console.error("Error fetching maps data:", error);
@@ -730,13 +1207,20 @@ export default {
         this.loading = false;
       }
     },
-
     async fetchCoursesData() {
       this.loading = true;
       this.error = null;
       try {
         const response = await axios.get(`${API_BASE_URL}/maps/courses`);
-        this.courses = response.data;
+        this.courses = response.data.map((map) => ({
+          ...map,
+          class:
+            map.intended_class === 3
+              ? "soldier"
+              : map.intended_class === 4
+              ? "demoman"
+              : "soldier",
+        }));
       } catch (error) {
         this.error = "Error fetching courses data.";
         console.error("Error fetching courses data:", error);
@@ -750,7 +1234,15 @@ export default {
       this.error = null;
       try {
         const response = await axios.get(`${API_BASE_URL}/maps/bonuses`);
-        this.bonuses = response.data;
+        this.bonuses = response.data.map((map) => ({
+          ...map,
+          class:
+            map.intended_class === 3
+              ? "soldier"
+              : map.intended_class === 4
+              ? "demoman"
+              : "soldier",
+        }));
       } catch (error) {
         this.error = "Error fetching bonuses data.";
         console.error("Error fetching bonuses data:", error);
@@ -758,7 +1250,6 @@ export default {
         this.loading = false;
       }
     },
-
     sortBy(field) {
       if (this.sortField === field) {
         this.sortDirection *= -1;
@@ -767,26 +1258,27 @@ export default {
         this.sortDirection = 1;
       }
     },
-
     getSortArrowSymbol(field) {
-      if (this.sortField !== field) return "";
+      if (this.effectiveSortField !== field) return "";
       return this.sortDirection === 1 ? "↑" : "↓";
     },
-
     clearAllFilters() {
       this.selectedSoldierTiers = [];
       this.selectedSoldierRatings = [];
       this.selectedDemomanTiers = [];
       this.selectedDemomanRatings = [];
       this.selectedIntendedClasses = [];
+      this.selectedTags = [];
       this.showSoldierColumns = true;
       this.showDemomanColumns = true;
       this.showCompletionColumns = false;
       this.resetPicker();
+      this.$router.replace({ query: {} });
     },
 
     onFilterChange() {
       this.resetPicker();
+      this.updateUrl();
     },
 
     getRowId(item, index) {
@@ -809,7 +1301,6 @@ export default {
 
       await this.eliminateRandomly(stepInterval, itemsPerStep);
     },
-
     async eliminateRandomly(stepInterval, itemsPerStep) {
       if (!this.shouldContinuePicker) return;
 
@@ -824,10 +1315,18 @@ export default {
         if (availableRows.length === 1) {
           await this.$nextTick();
           const rowIndex = availableRows[0].index;
-          this.$refs.tableRows[rowIndex].scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
+
+          if (this.currentLayout === "table" && this.$refs.tableRows) {
+            this.$refs.tableRows[rowIndex]?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          } else if (this.currentLayout === "grid" && this.$refs.gridCards) {
+            this.$refs.gridCards[rowIndex]?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
         }
         return;
       }
@@ -912,8 +1411,9 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid var(--color-border);
   border: 1px solid var(--color-border-soft);
-  border-radius: 12px 12px 0px 0px !important;
+  border-radius: 12px;
   padding: 20px;
+  margin-top: 20px;
 }
 
 .picker-controls {
@@ -984,7 +1484,8 @@ export default {
   position: relative;
 }
 
-.row-eliminated {
+.row-eliminated,
+.map-card.card-eliminated {
   opacity: 0.3;
   transform: scale(0.95);
   filter: grayscale(100%);
@@ -996,7 +1497,8 @@ export default {
   text-decoration: line-through;
 }
 
-.row-eliminating {
+.row-eliminating,
+.map-card.card-eliminating {
   animation: eliminate 0.8s ease-in-out;
   background: linear-gradient(90deg, #ff4757, #ff6b6b, #ff4757);
   background-size: 200% 100%;
@@ -1019,14 +1521,16 @@ export default {
   }
 }
 
-.row-winner {
+.row-winner,
+.map-card.card-winner {
   background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
   background-size: 200% 100%;
   position: relative;
   overflow: hidden;
 }
 
-.row-winner::before {
+.row-winner::before,
+.map-card.card-winner::before {
   position: absolute;
   top: 0;
   width: 100%;
@@ -1050,7 +1554,7 @@ export default {
   border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin: 20px;
   display: flex;
   justify-content: center;
   width: fit-content;
@@ -1115,6 +1619,7 @@ export default {
   cursor: pointer;
   margin: 0;
 }
+
 .tier-checkbox:hover,
 .rating-checkbox:hover {
   border-radius: 4px;
@@ -1193,6 +1698,7 @@ export default {
   border-radius: 8px !important;
   border-top: none;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
+  margin-top: 20px;
 }
 
 .button-group {
@@ -1273,129 +1779,6 @@ export default {
   width: 120px;
 }
 
-.tier-color.tier-0 {
-  background: var(--color-dark);
-  color: var(--color-text);
-}
-.tier-color.tier-1 {
-  background: #6ed0f681;
-  color: var(--color-text);
-}
-.tier-color.tier-2 {
-  background: #56b3e977;
-  color: var(--color-text);
-}
-.tier-color.tier-3 {
-  background: #45b8ad6e;
-  color: var(--color-text);
-}
-.tier-color.tier-4 {
-  background: #65c18b75;
-  color: var(--color-text);
-}
-.tier-color.tier-5 {
-  background: #a3d97775;
-  color: var(--color-text);
-}
-.tier-color.tier-6 {
-  background: #f3e68370;
-  color: var(--color-text);
-}
-.tier-color.tier-7 {
-  background: #f6c26767;
-  color: var(--color-text);
-}
-.tier-color.tier-8 {
-  background: #f08d5b65;
-  color: var(--color-text);
-}
-.tier-color.tier-9 {
-  background: #e6695e6b;
-  color: var(--color-text);
-}
-.tier-color.tier-10 {
-  background: #d6454569;
-  color: var(--color-text);
-}
-
-.rating-color.rating-1 {
-  background: #94c47d69;
-  color: var(--color-text);
-}
-.rating-color.rating-2 {
-  background: #abd0996b;
-  color: var(--color-text);
-}
-.rating-color.rating-3 {
-  background: #c3b29365;
-  color: var(--color-text);
-}
-.rating-color.rating-4 {
-  background: #e0666669;
-  color: var(--color-text);
-}
-
-.tier-badge.tier-0 {
-  background: var(--color-dark);
-  color: var(--color-text);
-}
-.tier-badge.tier-1 {
-  background: #6ed0f681;
-  color: var(--color-text);
-}
-.tier-badge.tier-2 {
-  background: #56b3e977;
-  color: var(--color-text);
-}
-.tier-badge.tier-3 {
-  background: #45b8ad6e;
-  color: var(--color-text);
-}
-.tier-badge.tier-4 {
-  background: #65c18b75;
-  color: var(--color-text);
-}
-.tier-badge.tier-5 {
-  background: #a3d97775;
-  color: var(--color-text);
-}
-.tier-badge.tier-6 {
-  background: #f3e68370;
-  color: var(--color-text);
-}
-.tier-badge.tier-7 {
-  background: #f6c26767;
-  color: var(--color-text);
-}
-.tier-badge.tier-8 {
-  background: #f08d5b65;
-  color: var(--color-text);
-}
-.tier-badge.tier-9 {
-  background: #e6695e6b;
-  color: var(--color-text);
-}
-.tier-badge.tier-10 {
-  background: #d6454569;
-  color: var(--color-text);
-}
-
-.rating-badge.rating-1 {
-  background: #94c47d69;
-  color: var(--color-text);
-}
-.rating-badge.rating-2 {
-  background: #abd0996b;
-  color: var(--color-text);
-}
-.rating-badge.rating-3 {
-  background: #c3b29365;
-  color: var(--color-text);
-}
-.rating-badge.rating-4 {
-  background: #e0666669;
-  color: var(--color-text);
-}
 .row-divider {
   border: none;
   height: 2px;
@@ -1459,115 +1842,284 @@ export default {
   color: #ff6b6b;
 }
 
-@media (max-width: 767.98px) {
-  .button-group {
-    flex-direction: row;
-    justify-content: center;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
+.layout-divider {
+  width: 1px;
+  background: var(--color-border-soft);
+  margin: 0 10px;
+}
+
+.layout-toggle {
+  font-size: 18px !important;
+  min-width: 45px;
+  padding: 8px 12px !important;
+}
+
+.grid-container {
+  width: 100%;
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
+  border-radius: 0 0 8px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px;
+}
+
+.maps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
+  gap: 20px;
+  width: 100%;
+  justify-items: center;
+}
+
+.map-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 275px;
+  width: 100%;
+  transition: all 0.5s ease;
+  border: 1px solid var(--color-border-soft);
+}
+
+.map-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  cursor: pointer;
+}
+
+.card-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tag-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.tag-modal {
+  background: var(--color-box);
+  border-radius: 16px;
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  max-height: 80vh;
+  width: 90%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-primary-dark);
+}
+
+.tag-modal-header h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tag-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tag-section {
+  margin-bottom: 24px;
+}
+
+.tag-section h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.tag-class-group {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.class-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.tag-class-group h5 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.course-tag-section,
+.bonus-tag-section {
+}
+
+.available-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-option {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 2px solid;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.tag-option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tag-option.active {
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+.tag-modal-footer {
+  padding: 20px;
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--color-row);
+}
+
+.cancel-btn {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.tag-option.active .vote-count {
+  color: inherit;
+  font-weight: 500;
+}
+
+.tag-description {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.description-text {
+  margin: 0;
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.description-text strong {
+  color: #212529;
+  font-weight: 600;
+}
+
+.description-text i {
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .tag-modal {
+    width: 95%;
+    max-height: 90vh;
   }
 
-  .toggle-btn {
-    justify-content: center;
-    flex: 1;
-    min-width: 100px;
+  .tag-btn {
+    right: 48px;
   }
 
-  .table-header-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
+  .tags-block {
+    gap: 6px;
   }
 
-  .table-container {
-    width: 95vw;
-    overflow-x: auto;
-    border-radius: 0;
-  }
-
-  .table-responsive {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .table {
-    width: max-content;
-    min-width: 100%;
-  }
-
-  .table-dark td {
-    white-space: nowrap;
-  }
-
-  .avatar {
-    width: 20px;
-    height: 20px;
-  }
-
-  .table-header-icon {
-    font-size: 1.5rem;
-  }
-
-  .filter-section {
-    width: 100%;
-    padding: 15px;
-  }
-
-  .filter-columns {
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-  }
-
-  .filter-column {
-    width: 100%;
-  }
-
-  .tier-filters,
-  .rating-filters {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .filter-actions {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .picker-controls {
-    flex-direction: column;
-    align-items: center;
+  .tag-chip {
+    font-size: 0.8rem;
+    padding: 4px 10px;
   }
 }
-@media (max-width: 767.98px) {
-  .responsive-ratings-row {
-    flex-direction: column !important;
-    gap: 20px !important;
-    align-items: center !important;
-  }
 
-  .responsive-ratings-row .filter-column {
-    width: 100%;
-    max-width: 300px;
-  }
+.tag-modal-description {
+  padding: 1.5rem 1rem;
+}
 
-  .intended-class-buttons {
-    gap: 10px;
-  }
+.description-text {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
 
-  .intended-class-btn {
-    width: 28px;
-    height: 28px;
-  }
-
-  .intended-class-btn img {
-    width: 24px;
-    height: 24px;
-  }
+.description-text i {
+  color: #17a2b8;
+  opacity: 0.8;
 }
 </style>

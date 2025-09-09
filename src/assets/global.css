@@ -134,7 +134,6 @@ body, html {
   color: white;
 }
 
-
 .clickable,
 .tier-checkbox,
 .rating-checkbox,
@@ -247,4 +246,81 @@ body, html {
 }
 .rank-color-peon {
   color: var(--color-peon);
+}
+
+.tier-badge.tier-0,
+.tier-color-tier-0 {
+  background: var(--color-dark) !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-1,
+.tier-color-tier-1 {
+  background: #6ed0f681 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-2,
+.tier-color-tier-2 {
+  background: #56b3e977 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-3,
+.tier-color-tier-3 {
+  background: #45b8ad6e !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-4,
+.tier-color-tier-4 {
+  background: #65c18b75 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-5,
+.tier-color-tier-5 {
+  background: #a3d97775 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-6,
+.tier-color-tier-6 {
+  background: #f3e68370 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-7,
+.tier-color-tier-7 {
+  background: #f6c26767 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-8,
+.tier-color-tier-8 {
+  background: #f08d5b65 !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-9,
+.tier-color-tier-9 {
+  background: #e6695e6b !important;
+  color: var(--color-text);
+}
+.tier-badge.tier-10,
+.tier-color-tier-10 {
+  background: #d6454569 !important;
+  color: var(--color-text);
+}
+
+.rating-badge.rating-1,
+.rating-color-rating-1 {
+  background: #94c47d69 !important;
+  color: var(--color-text);
+}
+.rating-badge.rating-2,
+.rating-color-rating-2 {
+  background: #abd0996b !important;
+  color: var(--color-text);
+}
+.rating-badge.rating-3,
+.rating-color-rating-3 {
+  background: #c3b29365 !important;
+  color: var(--color-text);
+}
+.rating-badge.rating-4,
+.rating-color-rating-4 {
+  background: #e0666669 !important;
+  color: var(--color-text);
 }

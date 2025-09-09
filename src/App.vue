@@ -102,12 +102,12 @@
           </svg>
         </button>
       </div>
-      <div class="progress-bar-container">
+      <!-- <div class="progress-bar-container">
         <div
           class="progress-bar"
           :style="{ width: updatingPercentage + '%' }"
         ></div>
-      </div>
+      </div> -->
     </div>
     <nav class="navbar navbar-expand-lg bg-custom">
       <div class="container-fluid">
@@ -246,6 +246,7 @@
                         :to="{ name: 'MapPage', params: { mapId: map.id } }"
                         tag="li"
                         class="search-result-item"
+                        @click.native="handleSearchResultClick"
                       >
                         {{ map.name || `Map ID: ${map.id}` }}
                       </SmartLink>
@@ -275,6 +276,7 @@
                         }"
                         tag="li"
                         class="search-result-item"
+                        @click.native="handleSearchResultClick"
                       >
                         {{ player.name || `Player ID: ${player.id}` }}
                       </SmartLink>
@@ -574,6 +576,11 @@ export default {
       });
       bsCollapse.hide();
     },
+    handleSearchResultClick() {
+      this.closeNavbar();
+      this.searchQuery = "";
+      this.searchResults = { maps: [], players: [] };
+    },
     closeLoginPopup() {
       this.showLoginPopup = false;
       localStorage.setItem("tempus_popup_shown", "true");
@@ -828,7 +835,7 @@ export default {
   async mounted() {
     try {
       const isAuthenticated = await this.checkAuthStatus();
-      console.log("Auth check result:", isAuthenticated);
+      //console.log("Auth check result:", isAuthenticated);
 
       if (isAuthenticated) {
         const userData = await this.fetchUserData();
@@ -872,7 +879,6 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: "Segoe UI";
   background: var(--color-background-new) !important;
 }
 
@@ -881,7 +887,6 @@ body {
 }
 
 #app {
-  font-family: "Segoe UI";
   background: var(--color-background-new);
   min-height: 100vh;
   display: flex;

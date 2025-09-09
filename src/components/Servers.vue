@@ -170,7 +170,16 @@
                           >↓</span
                         >
                       </th>
-                      <th>Server</th>
+                      <th @click="sortServersByName" style="cursor: pointer">
+                        Server
+                        <span v-if="sortBy === 'name' && sortDirection === 1"
+                          >↑</span
+                        >
+                        <span
+                          v-else-if="sortBy === 'name' && sortDirection === -1"
+                          >↓</span
+                        >
+                      </th>
                       <th @click="sortServersByMap" style="cursor: pointer">
                         Map
                         <span v-if="sortBy === 'map' && sortDirection === 1"
@@ -580,7 +589,6 @@ export default {
         this.loading = false;
       }
     },
-
     sortServersByPlayers() {
       if (this.sortBy === "players") {
         this.sortDirection *= -1;
@@ -593,7 +601,6 @@ export default {
         return (a.playerCount - b.playerCount) * this.sortDirection;
       });
     },
-
     sortServersByMap() {
       if (this.sortBy === "map") {
         this.sortDirection *= -1;
@@ -608,7 +615,6 @@ export default {
         return mapA.localeCompare(mapB) * this.sortDirection;
       });
     },
-
     sortServersByRegion() {
       if (this.sortBy === "region") {
         this.sortDirection *= -1;
@@ -638,7 +644,18 @@ export default {
         return a.country.localeCompare(b.country) * this.sortDirection;
       });
     },
+    sortServersByName() {
+      if (this.sortBy === "name") {
+        this.sortDirection *= -1;
+      } else {
+        this.sortBy = "name";
+        this.sortDirection = 1;
+      }
 
+      this.serversData.sort((a, b) => {
+        return a.name.localeCompare(b.name) * this.sortDirection;
+      });
+    },
     async fetchTopPlayersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers/top-players`);
