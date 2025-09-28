@@ -6,9 +6,11 @@
       <div class="page-header">
         <h1 class="page-title">
           <span class="title-icon">🔍</span>
-          Lookup Players
+          Lookup Players and Maps
         </h1>
-        <p class="page-subtitle">Search and filter through player records</p>
+        <p class="page-subtitle">
+          Search and filter through player or map records
+        </p>
       </div>
       <hr class="row-divider" style="width: 75%" />
       <SmartLink
@@ -18,8 +20,19 @@
         class="player-name-display"
       >
         <h2
-          class="clickable"
+          class="fancy-hover"
           v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+        ></h2>
+      </SmartLink>
+      <SmartLink
+        v-else-if="mapId"
+        tag="div"
+        :to="{ name: 'MapPage', params: { mapId: mapId } }"
+        class="map-name-display"
+      >
+        <h2
+          class="fancy-hover"
+          v-html="sanitize(selectedMapName) || 'Selected Map'"
         ></h2>
       </SmartLink>
       <div class="search-section">
@@ -41,7 +54,7 @@
               type="text"
               v-model="searchQuery"
               @input="onSearch"
-              placeholder="Search for players..."
+              placeholder="Search for players or maps..."
               class="search-input"
             />
           </div>
@@ -49,7 +62,9 @@
             class="search-results-dropdown"
             v-if="
               searchQuery.trim() &&
-              (showLoading || (searchResults && searchResults.players.length))
+              (showLoading ||
+                (searchResults &&
+                  (searchResults.players.length || searchResults.maps.length)))
             "
           >
             <div v-if="showLoading" class="loading-container">
@@ -57,12 +72,23 @@
               <span>Searching...</span>
             </div>
             <div v-else>
-              <div>
+              <div v-if="searchResults.maps && searchResults.maps.length">
+                <h6>Maps</h6>
+                <ul>
+                  <li
+                    v-for="map in searchResults.maps"
+                    :key="'map-' + map.id"
+                    @click="selectMap(map.id, map.name)"
+                    v-html="sanitize(map.name) || `Map ID: ${map.id}`"
+                  ></li>
+                </ul>
+              </div>
+              <div v-if="searchResults.players && searchResults.players.length">
                 <h6>Players</h6>
                 <ul>
                   <li
                     v-for="player in searchResults.players"
-                    :key="player.id"
+                    :key="'player-' + player.id"
                     @click="selectPlayer(player.id)"
                     v-html="sanitize(player.name) || `Player ID: ${player.id}`"
                   ></li>
@@ -339,7 +365,10 @@
       </div>
       <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
       <div v-else>
-        <div v-if="playerId != null" class="search-records-container">
+        <div
+          v-if="playerId != null || mapId != null"
+          class="search-records-container"
+        >
           <div class="search-input-wrapper">
             <svg
               class="search-icon"
@@ -356,18 +385,18 @@
             <input
               type="text"
               v-model="recordSearchQuery"
-              placeholder="Search map..."
+              :placeholder="playerId ? 'Search map...' : 'Search player...'"
               class="search-records-input"
             />
           </div>
         </div>
-        <div v-if="playerId != null" class="table-container">
+        <div v-if="playerId != null || mapId != null" class="table-container">
           <div class="table-responsive">
             <table class="table table-dark">
               <thead>
                 <tr>
                   <th @click="setSortColumn('map')" class="sortable-header">
-                    Map
+                    {{ playerId ? "Map" : "Player" }}
                     <span
                       class="sort-indicator"
                       v-if="sortByCategory === 'map'"
@@ -468,14 +497,26 @@
                   class="fade-in"
                 >
                   <SmartLink
+                    v-if="playerId"
                     tag="td"
                     :to="{
                       name: 'MapPage',
                       params: { mapId: record.map_id },
                     }"
-                    class="clickable"
+                    class="fancy-hover"
                   >
                     {{ record.map_name }}
+                  </SmartLink>
+                  <SmartLink
+                    v-else-if="mapId"
+                    tag="td"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: record.player_id },
+                    }"
+                    class="fancy-hover"
+                  >
+                    {{ record.name || "Unknown Player" }}
                   </SmartLink>
                   <td>
                     {{ getRecordType(record.type) }}{{ formatIndex(record) }}
@@ -554,6 +595,16 @@ const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerRecords",
+  props: {
+    playerId: {
+      type: Number,
+      default: null,
+    },
+    mapId: {
+      type: Number,
+      default: null,
+    },
+  },
   setup() {
     useHead({
       title: "Tempus Plaza | Lookup",
@@ -587,6 +638,18 @@ export default {
     recordSearchQuery: "",
     searchQuery: "",
     searchResults: null,
+    mapId: null,
+    mapInfo: null,
+    selectedMapName: null,
+    searchMode: "both",
+    cachedMapRecords: {
+      soldier_map: [],
+      demoman_map: [],
+      soldier_course: [],
+      demoman_course: [],
+      soldier_bonus: [],
+      demoman_bonus: [],
+    },
     showLoading: false,
     debounceTimer: null,
     cachedRecords: {
@@ -709,8 +772,14 @@ export default {
 
         if (this.recordSearchQuery) {
           const query = this.recordSearchQuery.toLowerCase();
-          if (!record.map_name.toLowerCase().includes(query)) {
-            return false;
+          if (this.playerId) {
+            if (!record.map_name.toLowerCase().includes(query)) {
+              return false;
+            }
+          } else if (this.mapId) {
+            if (!record.name || !record.name.toLowerCase().includes(query)) {
+              return false;
+            }
           }
         }
         return true;
@@ -765,6 +834,11 @@ export default {
         this.fetchRecords();
       }
     },
+    mapId(newMapId) {
+      if (newMapId) {
+        this.fetchMapRecords();
+      }
+    },
     selectedGroups: {
       handler() {
         const placements = [];
@@ -815,24 +889,206 @@ export default {
       this.playerId = null;
       this.playerName = null;
     }
-
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
+      this.mapId = null;
+      this.selectedMapName = null;
       await this.findPlayerName(this.playerId);
-    } else if (this.playerId) {
-      console.log("playerId:", this.playerId);
+      await this.fetchRecords();
+    } else if (this.$route.params.mapId) {
+      this.mapId = this.$route.params.mapId;
+      this.playerId = null;
+      this.selectedPlayerName = null;
+      await this.findMapName(this.mapId);
+      await this.fetchMapRecords();
+    } else if (
+      this.playerId &&
+      !this.$route.params.playerId &&
+      !this.$route.params.mapId
+    ) {
       this.selectedPlayerName = this.playerName;
       this.$router.push({
-        name: "Lookup",
+        name: "LookupPlayer",
         params: { playerId: this.playerId },
       });
     }
 
-    if (this.playerId) {
+    if (this.playerId && !this.$route.params.mapId) {
       await this.fetchRecords();
     }
   },
   methods: {
+    async fetchMapRecords() {
+      this.loading = true;
+      this.error = null;
+
+      const mapId = this.mapId;
+      if (!mapId) {
+        this.error = "Please select a map first.";
+        this.loading = false;
+        return;
+      }
+
+      try {
+        // Fetch both records and map info
+        const [recordsResponse, infoResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/maps/${mapId}/all-records`),
+          fetch(`${API_BASE_URL}/maps/${mapId}/all-info`),
+        ]);
+
+        if (!recordsResponse.ok) {
+          if (recordsResponse.status === 404) {
+            throw new Error("Map not found");
+          } else if (recordsResponse.status === 403) {
+            throw new Error("Access denied");
+          } else {
+            throw new Error(
+              `Failed to fetch records (${recordsResponse.status})`
+            );
+          }
+        }
+
+        if (!infoResponse.ok) {
+          throw new Error(`Failed to fetch map info (${infoResponse.status})`);
+        }
+
+        const [mapRecords, mapInfoData] = await Promise.all([
+          recordsResponse.json(),
+          infoResponse.json(),
+        ]);
+
+        this.cachedMapRecords = mapRecords;
+        this.mapInfo = mapInfoData;
+
+        // Convert to consistent format with proper map info
+        this.cachedRecords = {
+          records: [
+            ...(mapRecords.soldier_map || []).map((r) =>
+              this.convertMapRecord(r, "soldier", "map")
+            ),
+            ...(mapRecords.demoman_map || []).map((r) =>
+              this.convertMapRecord(r, "demoman", "map")
+            ),
+          ],
+          courseRecords: [
+            ...(mapRecords.soldier_course || []).map((r) =>
+              this.convertMapRecord(r, "soldier", "course")
+            ),
+            ...(mapRecords.demoman_course || []).map((r) =>
+              this.convertMapRecord(r, "demoman", "course")
+            ),
+          ],
+          bonusRecords: [
+            ...(mapRecords.soldier_bonus || []).map((r) =>
+              this.convertMapRecord(r, "soldier", "bonus")
+            ),
+            ...(mapRecords.demoman_bonus || []).map((r) =>
+              this.convertMapRecord(r, "demoman", "bonus")
+            ),
+          ],
+        };
+      } catch (error) {
+        this.error = error.message || "Error fetching map records.";
+        console.error("Error fetching map records:", error);
+
+        this.cachedMapRecords = {
+          soldier_map: [],
+          demoman_map: [],
+          soldier_course: [],
+          demoman_course: [],
+          soldier_bonus: [],
+          demoman_bonus: [],
+        };
+        this.cachedRecords = {
+          records: [],
+          courseRecords: [],
+          bonusRecords: [],
+        };
+        this.mapInfo = null;
+      } finally {
+        this.loading = false;
+      }
+    },
+    convertMapRecord(record, className, type) {
+      let tierInfo, ratingInfo, completionCount, intendedClass;
+
+      if (this.mapInfo) {
+        if (type === "map") {
+          tierInfo =
+            className === "soldier"
+              ? this.mapInfo.map.soldier_tier
+              : this.mapInfo.map.demoman_tier;
+          ratingInfo =
+            className === "soldier"
+              ? this.mapInfo.map.soldier_rating
+              : this.mapInfo.map.demoman_rating;
+          completionCount =
+            className === "soldier"
+              ? this.mapInfo.map.soldier_completion_count
+              : this.mapInfo.map.demoman_completion_count;
+          intendedClass = this.mapInfo.map.intended_class;
+        } else if (type === "course") {
+          const course = this.mapInfo.courses?.find(
+            (c) => c.index === record.index
+          );
+          if (course) {
+            tierInfo =
+              className === "soldier"
+                ? course.soldier_tier
+                : course.demoman_tier;
+            ratingInfo =
+              className === "soldier"
+                ? course.soldier_rating
+                : course.demoman_rating;
+            completionCount =
+              className === "soldier"
+                ? course.soldier_completion_count
+                : course.demoman_completion_count;
+          }
+        } else if (type === "bonus") {
+          const bonus = this.mapInfo.bonuses?.find(
+            (b) => b.index === record.index
+          );
+          if (bonus) {
+            tierInfo =
+              className === "soldier" ? bonus.soldier_tier : bonus.demoman_tier;
+            ratingInfo =
+              className === "soldier"
+                ? bonus.soldier_rating
+                : bonus.demoman_rating;
+            completionCount =
+              className === "soldier"
+                ? bonus.soldier_completion_count
+                : bonus.demoman_completion_count;
+          }
+        }
+      }
+
+      return {
+        ...record,
+        class: className,
+        type: type,
+        map_name: this.selectedMapName,
+        map_id: this.mapId,
+        tier: tierInfo || null,
+        rating: ratingInfo || null,
+        completion_count: completionCount || null,
+        intended_class: intendedClass || null,
+        name: record.name || null,
+      };
+    },
+    async findMapName(mapId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/maps/${mapId}/all-info`);
+        const data = await response.json();
+        this.selectedMapName = data.map?.name || "Unknown Map";
+        this.mapInfo = data;
+      } catch (error) {
+        console.error("Error fetching map name:", error);
+        this.selectedMapName = "Unknown Map";
+        this.mapInfo = null;
+      }
+    },
     setSortColumn(column) {
       if (this.sortByCategory === column) {
         this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
@@ -932,11 +1188,14 @@ export default {
       return "";
     },
     totalRecordsLength() {
-      return (
-        this.cachedRecords.records.length +
-        this.cachedRecords.courseRecords.length +
-        this.cachedRecords.bonusRecords.length
-      );
+      if (this.playerId || this.mapId) {
+        return (
+          this.cachedRecords.records.length +
+          this.cachedRecords.courseRecords.length +
+          this.cachedRecords.bonusRecords.length
+        );
+      }
+      return 0;
     },
     formatDate(date) {
       const day = String(date.getDate()).padStart(2, "0");
@@ -958,22 +1217,38 @@ export default {
       this.debounceTimer = setTimeout(async () => {
         if (this.searchQuery.trim()) {
           try {
-            const response = await fetch(`${API_BASE_URL}/search/players`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ query: this.searchQuery }),
-            });
+            const [playersResponse, mapsResponse] = await Promise.all([
+              fetch(`${API_BASE_URL}/search/players`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: this.searchQuery }),
+              }),
+              fetch(`${API_BASE_URL}/search/maps`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: this.searchQuery }),
+              }),
+            ]);
 
-            if (!response.ok) throw new Error("Failed to search results");
-            const data = await response.json();
-
-            if (data.players && data.players.length > 20) {
-              data.players = data.players.slice(0, 20);
+            if (!playersResponse.ok || !mapsResponse.ok) {
+              throw new Error("Failed to search results");
             }
 
-            this.searchResults = { players: data.players };
+            const [playersData, mapsData] = await Promise.all([
+              playersResponse.json(),
+              mapsResponse.json(),
+            ]);
+
+            const players =
+              playersData.players && playersData.players.length > 10
+                ? playersData.players.slice(0, 10)
+                : playersData.players || [];
+            const maps =
+              mapsData.maps && mapsData.maps.length > 3
+                ? mapsData.maps.slice(0, 3)
+                : mapsData.maps || [];
+
+            this.searchResults = { players, maps };
           } catch (error) {
             console.error("Error fetching search results:", error);
           } finally {
@@ -987,14 +1262,28 @@ export default {
     },
     selectPlayer(playerId) {
       this.playerId = playerId;
+      this.mapId = null;
+      this.selectedMapName = null;
       this.selectedPlayerName = this.searchResults.players.find(
         (player) => player.id === playerId
       ).name;
       this.searchQuery = "";
       this.searchResults = null;
       this.$router.push({
-        name: "Lookup",
+        name: "LookupPlayer",
         params: { playerId: playerId },
+      });
+    },
+    selectMap(mapId, mapName) {
+      this.mapId = mapId;
+      this.playerId = null;
+      this.selectedPlayerName = null;
+      this.selectedMapName = mapName;
+      this.searchQuery = "";
+      this.searchResults = null;
+      this.$router.push({
+        name: "LookupMap",
+        params: { mapId: mapId },
       });
     },
     selectSortOption(value) {
@@ -1073,6 +1362,7 @@ export default {
       this.selectedGroups = [];
       this.sortByCategory = "time";
       this.sortDirection = "desc";
+      this.recordSearchQuery = "";
     },
     formatDuration(unixTimestamp) {
       return formatDuration(unixTimestamp);
@@ -1108,10 +1398,6 @@ export default {
 .clickable {
   cursor: pointer;
   color: var(--color-text-clickable) !important;
-}
-
-.clickable:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .text-small {
@@ -1829,11 +2115,13 @@ export default {
   color: #ff6b6b;
 }
 
-.player-name-display {
+.player-name-display,
+.map-name-display {
   text-align: center;
 }
 
-.player-name-display h2 {
+.player-name-display h2,
+.map-name-display h2 {
   color: var(--color-text);
   font-size: 2.5rem;
   white-space: nowrap;

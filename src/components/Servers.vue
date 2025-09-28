@@ -1096,9 +1096,6 @@ export default {
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
-}
 
 .name-cell,
 .map-cell {

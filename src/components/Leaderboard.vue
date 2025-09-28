@@ -14,8 +14,14 @@
           v-for="type in ['Map']"
           :key="type"
           class="category-tab"
-          :class="{ active: selectedTypePill === type }"
-          @click="selectType(type)"
+          :class="{
+            active: selectedTypePill === type,
+            'map-pill': type === 'map',
+          }"
+          @click="
+            selectType(type);
+            goTo('map', null);
+          "
         >
           {{ type }}
         </button>
@@ -41,9 +47,9 @@
         </button>
       </div>
     </div>
-    <div v-if="courseCount > 0 || bonusCount > 0" class="subcategory-container">
+    <div v-if="selectedTypePill !== 'Map'" class="subcategory-container">
       <div class="subcategory-pills">
-        <!-- Map -->
+        <!-- Map 
         <div v-show="selectedTypePill === 'Map'">
           <div class="pill-row">
             <button
@@ -54,7 +60,7 @@
               Map
             </button>
           </div>
-        </div>
+        </div>-->
         <!-- Courses -->
         <div v-show="selectedTypePill === 'Course' && courseCount > 0">
           <div class="pill-row">

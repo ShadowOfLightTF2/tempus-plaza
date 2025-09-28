@@ -134,7 +134,7 @@
                           name: 'PlayerPage',
                           params: { playerId: record.player_id },
                         }"
-                        class="name-cell align-middle player-name clickable name-column"
+                        class="name-cell align-middle fancy-hover clickable name-column"
                       >
                         <img
                           :src="record.avatar"
@@ -150,7 +150,7 @@
                           name: 'MapPage',
                           params: { mapId: record.map_id },
                         }"
-                        class="name-cell align-middle map-name clickable"
+                        class="name-cell align-middle fancy-hover clickable"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -273,7 +273,7 @@
                           name: 'PlayerPage',
                           params: { playerId: record.player_id },
                         }"
-                        class="name-cell align-middle player-name clickable name-column"
+                        class="name-cell align-middle fancy-hover clickable name-column"
                       >
                         <img
                           :src="record.avatar"
@@ -289,7 +289,7 @@
                           name: 'MapPage',
                           params: { mapId: record.map_id },
                         }"
-                        class="name-cell align-middle map-name clickable"
+                        class="name-cell align-middle fancy-hover clickable"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -413,7 +413,7 @@
                           name: 'PlayerPage',
                           params: { playerId: record.player_id },
                         }"
-                        class="name-cell align-middle player-name clickable name-column"
+                        class="name-cell align-middle fancy-hover clickable name-column"
                       >
                         <img
                           :src="record.avatar"
@@ -429,7 +429,7 @@
                           name: 'MapPage',
                           params: { mapId: record.map_id },
                         }"
-                        class="name-cell align-middle map-name clickable"
+                        class="name-cell align-middle fancy-hover clickable"
                       >
                         <img
                           :src="`/icons/${record.class}.png`"
@@ -800,10 +800,6 @@ export default {
   background: rgba(119, 119, 119, 0.05);
 }
 
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
-}
-
 .name-cell {
   max-width: 200px;
   white-space: normal;
@@ -815,12 +811,6 @@ export default {
 .name-column {
   width: auto;
   white-space: nowrap;
-}
-
-.player-name:hover,
-.map-name:hover,
-.map-cell:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .clickable {

@@ -860,13 +860,13 @@ export default {
             const dateB = b.date_added * 1000;
             return dateB - dateA;
           } else {
-            const nameA = `${a.map_name} (${this.currentView
-              .slice(0, 1)
-              .toUpperCase()}${a.index})`;
-            const nameB = `${b.map_name} (${this.currentView
-              .slice(0, 1)
-              .toUpperCase()}${b.index})`;
-            return nameA.localeCompare(nameB);
+            const nameComparison = a.map_name.localeCompare(b.map_name);
+            if (nameComparison !== 0) {
+              return nameComparison;
+            }
+
+            // If map names are the same, sort by index
+            return a.index - b.index;
           }
         });
       }
@@ -1169,10 +1169,6 @@ export default {
         const mapsWithTags = await Promise.all(
           response.data.map(async (map) => {
             try {
-              const mapInfoResponse = await axios.get(
-                `${API_BASE_URL}/maps/${map.id}/all-info`
-              );
-
               return {
                 ...map,
                 class:
@@ -1181,7 +1177,7 @@ export default {
                     : map.intended_class === 4
                     ? "demoman"
                     : "soldier",
-                tags: mapInfoResponse.data.tags || [],
+                tags: map.tags || [],
               };
             } catch (error) {
               console.error(`Error loading map info for ${map.id}:`, error);
@@ -1228,7 +1224,6 @@ export default {
         this.loading = false;
       }
     },
-
     async fetchBonusesData() {
       this.loading = true;
       this.error = null;
@@ -1412,7 +1407,7 @@ export default {
   border-bottom: 1px solid var(--color-border);
   border: 1px solid var(--color-border-soft);
   border-radius: 12px;
-  padding: 20px;
+  padding: 10px;
   margin-top: 20px;
 }
 
@@ -1872,6 +1867,24 @@ export default {
   justify-items: center;
 }
 
+@media (max-width: 1400px) {
+  .maps-grid {
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .maps-grid {
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 708px) {
+  .maps-grid {
+    grid-template-columns: repeat(1, minmax(300px, 1fr));
+  }
+}
+
 .map-card {
   position: relative;
   border-radius: 12px;
@@ -2100,6 +2113,19 @@ export default {
   .tag-chip {
     font-size: 0.8rem;
     padding: 4px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .column-toggles {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
   }
 }
 

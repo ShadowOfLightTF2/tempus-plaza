@@ -894,7 +894,7 @@
           <p class="description-text">
             Vote for tags that describe the majority of this map's gameplay. A
             tag needs at least
-            <strong>1 vote (eventually it will be more)</strong> to be applied
+            <strong>2 votes (eventually it will be more)</strong> to be applied
             to the map. You can vote for multiple tags, but only the
             <strong>top most voted</strong> tags will be displayed on the map.
             Currently only maps can have tags (courses/bonuses might come later)
@@ -1447,8 +1447,12 @@ export default {
         this.map = response.data.map;
         this.mapName = response.data.map.name;
         this.authors = response.data.authors;
-        this.courses = response.data.courses;
-        this.bonuses = response.data.bonuses;
+        this.courses = (response.data.courses || []).sort(
+          (a, b) => a.index - b.index
+        );
+        this.bonuses = (response.data.bonuses || []).sort(
+          (a, b) => a.index - b.index
+        );
         this.rotwVideos = response.data.rotw_videos || [];
       } catch (error) {
         this.error = "Failed to fetch map data. Please try again later.";

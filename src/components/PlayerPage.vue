@@ -425,7 +425,10 @@
                 >
                   <div class="allruns-button-container">
                     <SmartLink
-                      :to="{ name: 'Lookup', params: { playerId: player.id } }"
+                      :to="{
+                        name: 'LookupPlayer',
+                        params: { playerId: player.id },
+                      }"
                       tag="button"
                       class="btn 'btn-dark' global-btn"
                       :style="{
@@ -1351,7 +1354,6 @@
               </div>
             </div>
           </div>
-
           <div v-if="showMapSearch" class="map-search-overlay">
             <div class="map-search-container">
               <div class="class-selection">
@@ -1427,6 +1429,13 @@
                 Select a class first
               </div>
               <div class="search-buttons">
+                <button
+                  v-if="hasMapAtCurrentIndex"
+                  @click="removeMap"
+                  class="btn remove-button"
+                >
+                  Remove Map
+                </button>
                 <button @click="cancelMapSearch" class="btn cancel-button">
                   Cancel
                 </button>
@@ -1976,6 +1985,12 @@ export default {
     },
   }),
   computed: {
+    hasMapAtCurrentIndex() {
+      const currentMap = this.favoriteMaps.find(
+        (map) => map.index === this.currentMapIndex
+      );
+      return currentMap && currentMap.id !== null;
+    },
     precomputedHeaders() {
       const headers = {};
 
@@ -1998,14 +2013,18 @@ export default {
         this.filteredAndPaginatedChangedPlacements
       )) {
         processed[date] = placements.map((placement) => {
-          const rankChangeClass =
-            placement.points_change > 0 ? "rank-gain" : "rank-loss";
-          const placementClass =
-            placement.points_change > 0 ? "gained-placement" : "lost-placement";
+          let placementClass;
+
+          if (placement.points_change > 0) {
+            placementClass = "gained-placement";
+          } else if (placement.points_change < 0) {
+            placementClass = "lost-placement";
+          } else {
+            placementClass = "tied-placement";
+          }
 
           return {
             ...placement,
-            rankChangeClass: rankChangeClass,
             placementClass: placementClass,
           };
         });
@@ -2771,29 +2790,24 @@ export default {
         console.error("Failed to update favorite map:", error);
       }
     },
-    async clearFavoriteMaps() {
+    async removeMap() {
       const currentUser = await this.fetchUser();
+      const index = this.currentMapIndex;
       try {
         const response = await fetch(
-          `${API_BASE_URL}/users/update-user/${currentUser.playerid}`,
+          `${API_BASE_URL}/users/${currentUser.playerid}/remove-favorite-map/${index}`,
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              favorite_maps: [],
-            }),
+            method: "DELETE",
           }
         );
 
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
 
-        console.log("Favorite maps cleared successfully");
+        await this.fetchFavoriteMaps(this.playerId);
+        this.cancelMapSearch();
       } catch (error) {
-        console.error("Failed to clear favorite maps:", error);
+        console.error("Failed to remove favorite map:", error);
       }
     },
     cancelMapSearch() {
@@ -2981,12 +2995,6 @@ export default {
         params: { playerId: playerId },
       });
     },
-    goToLookup() {
-      this.$router.push({
-        name: "Lookup",
-        params: { playerId: this.player.id },
-      });
-    },
     getPlacementClass(placement) {
       const placementClasses = {
         1: "placement-gold",
@@ -3013,7 +3021,7 @@ export default {
     getPointsChangeClass(pointsChange) {
       if (pointsChange > 0) return "points-gain";
       if (pointsChange < 0) return "points-loss";
-      return "points-neutral";
+      return "points-tied";
     },
     formatPointsChange(pointsChange) {
       const roundedPoints = Math.round(pointsChange * 100) / 100;
@@ -3149,6 +3157,23 @@ export default {
       }
     },
     populateFavoriteMaps(favoriteMapData) {
+      this.favoriteMaps.forEach((map, index) => {
+        this.favoriteMaps[index] = {
+          id: null,
+          name: "",
+          index: index,
+          class_type: null,
+          map_soldier_tier: null,
+          map_soldier_rating: null,
+          map_demoman_tier: null,
+          map_demoman_rating: null,
+          player_record_duration: null,
+          record_rank: null,
+          record_placement: null,
+        };
+      });
+
+      // Then populate with data from API
       if (!favoriteMapData) {
         return;
       }
@@ -4114,7 +4139,7 @@ export default {
   background: rgba(255, 107, 107, 0.1);
 }
 
-.points-neutral {
+.points-tied {
   color: #6c757d;
   background: rgba(108, 117, 125, 0.1);
 }
@@ -4144,6 +4169,10 @@ export default {
 }
 .record-item.lost-placement {
   border-left: 3px solid #ff6b6b;
+}
+
+.record-item.tied-placement {
+  border-left: 3px solid #6c757d;
 }
 
 .record-time-detail.gained-placement,
@@ -4722,7 +4751,8 @@ export default {
   justify-content: center;
 }
 
-.cancel-button {
+.cancel-button,
+.remove-button {
   background: var(--color-box);
   color: var(--color-text);
   border: 1px solid var(--color-border-soft);
@@ -4735,6 +4765,11 @@ export default {
 .cancel-button:hover {
   color: var(--color-text);
   background: var(--color-primary);
+}
+
+.remove-button:hover {
+  color: var(--color-text);
+  background: #a54a4a;
 }
 
 .class-selection {

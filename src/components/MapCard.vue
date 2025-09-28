@@ -2,10 +2,14 @@
   <div
     ref="cardElement"
     class="card-image"
-    :class="{ loaded: imageLoaded, loading: isLoading }"
+    :class="{
+      loaded: imageLoaded,
+      loading: isLoading,
+      'image-failed': imageFailed,
+    }"
     :style="backgroundImageStyle"
   >
-    <div v-if="!imageLoaded" class="loading-placeholder">
+    <div v-if="!imageLoaded && !imageFailed" class="loading-placeholder">
       <div class="spinner"></div>
     </div>
     <div class="card-overlay">
@@ -140,11 +144,20 @@ export default {
   data() {
     return {
       imageLoaded: false,
+      imageFailed: false,
       isLoading: false,
       observer: null,
     };
   },
   computed: {
+    backgroundImageStyle() {
+      if (this.imageFailed) {
+        return "background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%)";
+      }
+      return this.imageLoaded
+        ? `background-image: url('${this.imagePath}')`
+        : "";
+    },
     imagePath() {
       return `/map-backgrounds/thumbnails/${
         this.currentView === "maps" ? this.item.name : this.item.map_name
@@ -195,10 +208,13 @@ export default {
       const img = new Image();
       img.onload = () => {
         this.imageLoaded = true;
+        this.imageFailed = false;
         this.isLoading = false;
       };
       img.onerror = () => {
         console.error("Failed to load image:", this.imagePath);
+        this.imageFailed = true;
+        this.imageLoaded = false;
         this.isLoading = false;
       };
       img.src = this.imagePath;
@@ -226,6 +242,9 @@ export default {
 
 .card-image.loading {
   /* Add any loading state styles if needed */
+}
+.card-image.image-failed {
+  opacity: 1;
 }
 
 .loading-placeholder {

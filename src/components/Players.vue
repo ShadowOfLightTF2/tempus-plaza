@@ -202,7 +202,7 @@
                         name: 'PlayerPage',
                         params: { playerId: player.player_id },
                       }"
-                      class="name-cell align-middle player-name clickable name-column"
+                      class="name-cell align-middle fancy-hover clickable name-column"
                     >
                       <img
                         :src="player.steam_avatar"
@@ -217,7 +217,7 @@
                         selectedCategory === 'countries' &&
                         selectedItem === 'Total'
                       "
-                      class="country-cell align-middle player-name clickable name-column"
+                      class="country-cell align-middle fancy-hover clickable name-column"
                       @click="selectCountryFromSearch(player)"
                     >
                       <img
@@ -235,7 +235,7 @@
                         name: 'PlayerPage',
                         params: { playerId: player.player_id },
                       }"
-                      class="name-cell align-middle player-name clickable name-column"
+                      class="name-cell align-middle fancy-hover clickable name-column"
                     >
                       <img
                         :src="player.steam_avatar"
@@ -341,7 +341,7 @@
                         name: 'PlayerPage',
                         params: { playerId: player.player_id },
                       }"
-                      class="name-cell align-middle player-name clickable name-column"
+                      class="name-cell align-middle fancy-hover clickable name-column"
                     >
                       <img
                         :src="player.steam_avatar"
@@ -356,7 +356,7 @@
                         selectedCategory === 'countries' &&
                         selectedItem === 'Total'
                       "
-                      class="country-cell align-middle player-name clickable name-column"
+                      class="country-cell align-middle fancy-hover clickable name-column"
                       @click="selectCountryFromSearch(player)"
                     >
                       <img
@@ -374,7 +374,7 @@
                         name: 'PlayerPage',
                         params: { playerId: player.player_id },
                       }"
-                      class="name-cell align-middle player-name clickable name-column"
+                      class="name-cell align-middle fancy-hover clickable name-column"
                     >
                       <img
                         :src="player.steam_avatar"
@@ -945,9 +945,6 @@ export default {
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: rgba(74, 111, 165, 0.8);
-}
 
 .name-cell,
 .country-cell {
@@ -972,10 +969,6 @@ export default {
 .name-column {
   width: 100%;
   white-space: nowrap;
-}
-
-.player-name:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
 }
 
 .update-button {

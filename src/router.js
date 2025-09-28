@@ -47,12 +47,25 @@ const routes = [
     component: Players
   },
   {
-    path: '/lookup/:playerId?',
-    name: 'Lookup',
+    path: '/lookup/player/:playerId',
+    name: 'LookupPlayer',
     component: Lookup,
     props: route => ({
       playerId: Number(route.params.playerId)
     })
+  },
+  {
+    path: '/lookup/map/:mapId',
+    name: 'LookupMap',
+    component: Lookup,
+    props: route => ({
+      mapId: Number(route.params.mapId)
+    })
+  },
+  {
+    path: '/lookup',
+    name: 'Lookup',
+    component: Lookup,
   },
   {
     path: '/compare/:playerId1?/:playerId2?/:mapId?',
