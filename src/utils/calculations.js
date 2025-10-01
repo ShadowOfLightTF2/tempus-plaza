@@ -29,7 +29,7 @@ export function formatDate(unixTimestamp) {
     const secondsInHour = 3600;
     const secondsInDay = 86400;
     const secondsInWeek = 604800;
-    const secondsInMonth = 2592000;
+    const secondsInMonth = 2592000; // 30 days
     const secondsInYear = 31536000;
 
     const pluralize = (value, unit) => {
@@ -54,7 +54,8 @@ export function formatDate(unixTimestamp) {
         const months = Math.floor(secondsDifference / secondsInMonth);
         return pluralize(months, 'month');
     } else {
-        const years = Math.floor(secondsDifference / secondsInYear);
+        // Round to nearest year (rounds up at 18+ months)
+        const years = Math.round(secondsDifference / secondsInYear);
         return pluralize(years, 'year');
     }
 }

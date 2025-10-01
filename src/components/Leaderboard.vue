@@ -247,7 +247,11 @@
               @click="showMoreSoldierEntries"
               class="btn btn-dark update-button"
               style="
-                background: rgba(74, 111, 165, 0.8);
+                background: linear-gradient(
+                  to bottom,
+                  rgba(74, 111, 165, 0.5),
+                  rgba(74, 111, 165, 0.3)
+                );
                 font-weight: bold;
                 width: 100%;
               "
@@ -404,7 +408,11 @@
               @click="showMoreDemomanEntries"
               class="btn btn-dark update-button"
               style="
-                background: rgba(74, 111, 165, 0.8);
+                background: linear-gradient(
+                  to bottom,
+                  rgba(74, 111, 165, 0.5),
+                  rgba(74, 111, 165, 0.3)
+                );
                 font-weight: bold;
                 width: 100%;
               "
@@ -804,7 +812,11 @@ export default {
   padding: 5px 7px;
 }
 .table-dark tr:nth-child(odd) .name-cell:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
@@ -880,7 +892,11 @@ export default {
   text-align: right;
 }
 .player-name:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 .clickable {
   cursor: pointer;
@@ -1028,11 +1044,19 @@ export default {
   border-style: solid;
 }
 .category-pill:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateY(-1px);
 }
 .category-pill.active {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   border-color: var(--color-primary);
   color: var(--color-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);

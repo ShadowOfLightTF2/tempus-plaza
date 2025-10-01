@@ -808,7 +808,11 @@ export default {
 }
 
 .server-type-btn.active {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   border-color: var(--color-primary);
   color: white;
 }
@@ -1113,7 +1117,11 @@ export default {
 
 .player-name:hover,
 .map-name:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .clickable {

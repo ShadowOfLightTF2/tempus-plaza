@@ -2098,7 +2098,11 @@ export default {
 
 .search-input:focus {
   outline: none;
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
 }
 
@@ -2136,7 +2140,11 @@ export default {
 }
 
 .search-results-dropdown li:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateX(4px);
 }
 

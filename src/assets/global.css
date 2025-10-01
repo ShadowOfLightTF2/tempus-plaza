@@ -17,7 +17,7 @@
 
   --color-emperor: #630404;
   --color-empress: #525252;
-  --color-king: #844AC2;
+  --color-king: #FF3535;
   --color-queen: #844AC2;
   --color-archduke: #45AAF7;
   --color-lord: #009900;
@@ -151,11 +151,33 @@ body, html {
 .nav-item:hover {
 }
 
-.fancy-hover:hover {
+.fancy-hover {
+  position: relative;
+}
+
+.fancy-hover::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom,
+    rgba(74, 111, 165, 0),
+    rgba(74, 111, 165, 0)
+  );
+  transition: background 0.3s ease;
+  pointer-events: none;
+}
+
+.fancy-hover:hover::after {
   background: linear-gradient(to bottom,
     rgba(74, 111, 165, 0.5),
     rgba(74, 111, 165, 0.3)
-  ) !important;
+  );
+}
+
+.fancy-hover:hover {
   cursor: pointer;
 }
 

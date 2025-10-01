@@ -13,28 +13,192 @@
         </p>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <SmartLink
+      <div
         v-if="playerId"
-        tag="div"
-        :to="{ name: 'PlayerPage', params: { playerId: playerId } }"
-        class="player-name-display"
+        class="lookup-player-banner"
+        :style="{
+          background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
+        }"
       >
-        <h2
-          class="fancy-hover"
-          v-html="sanitize(selectedPlayerName) || 'Selected Player'"
-        ></h2>
-      </SmartLink>
-      <SmartLink
+        <SmartLink
+          tag="div"
+          :to="{ name: 'PlayerPage', params: { playerId: playerId } }"
+          class="lookup-banner-content fancy-hover"
+        >
+          <div class="lookup-banner-left">
+            <img
+              :src="playerAvatar || '/avatars/golly.jpg'"
+              alt="Avatar"
+              class="lookup-avatar"
+              onerror="this.src='/avatars/golly.jpg'"
+            />
+            <div class="lookup-player-info">
+              <h2
+                class="lookup-player-name"
+                v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+              ></h2>
+              <p v-if="playerCountry" class="lookup-country">
+                <img
+                  :src="getFlagImageUrl(playerCountryCode)"
+                  alt="flag"
+                  class="lookup-flag-icon"
+                />
+                {{ playerCountry }} ({{ playerCountryCode }})
+              </p>
+            </div>
+          </div>
+          <div v-if="playerRankInfo" class="lookup-banner-stats">
+            <div class="lookup-stat-card">
+              <span class="lookup-stat-label">Overall</span>
+              <span class="lookup-stat-value"
+                >#{{ playerRankInfo.overall_rank }}</span
+              >
+              <span class="lookup-stat-points">{{
+                playerRankInfo.overall_points.toLocaleString()
+              }}</span>
+            </div>
+            <div class="lookup-stat-card">
+              <span class="lookup-stat-label">Soldier</span>
+              <span class="lookup-stat-value"
+                >#{{ playerRankInfo.soldier_rank }}</span
+              >
+              <span class="lookup-stat-points">{{
+                playerRankInfo.soldier_points.toLocaleString()
+              }}</span>
+            </div>
+            <div class="lookup-stat-card">
+              <span class="lookup-stat-label">Demoman</span>
+              <span class="lookup-stat-value"
+                >#{{ playerRankInfo.demoman_rank }}</span
+              >
+              <span class="lookup-stat-points">{{
+                playerRankInfo.demoman_points.toLocaleString()
+              }}</span>
+            </div>
+          </div>
+          <div v-else-if="loadingRankInfo" class="loading-ranks">
+            <div class="loading-spinner"></div>
+            <span>Loading...</span>
+          </div>
+        </SmartLink>
+      </div>
+      <div
         v-else-if="mapId"
-        tag="div"
-        :to="{ name: 'MapPage', params: { mapId: mapId } }"
-        class="map-name-display"
+        class="lookup-map-banner"
+        :style="{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }"
       >
-        <h2
-          class="fancy-hover"
-          v-html="sanitize(selectedMapName) || 'Selected Map'"
-        ></h2>
-      </SmartLink>
+        <SmartLink
+          tag="div"
+          :to="{ name: 'MapPage', params: { mapId: mapId } }"
+          class="lookup-banner-content fancy-hover"
+        >
+          <div class="lookup-map-main">
+            <h2
+              class="lookup-map-name"
+              v-html="sanitize(selectedMapName) || 'Selected Map'"
+            ></h2>
+            <div class="map-primary-info">
+              <div class="map-tiers">
+                <div class="tier-group">
+                  <img
+                    src="/icons/soldier.png"
+                    alt="Soldier"
+                    class="tier-class-icon"
+                  />
+                  <span class="tier-text"
+                    >T{{ mapInfo?.map.soldier_tier }}</span
+                  >
+                  <span class="rating-text"
+                    >R{{ mapInfo?.map.soldier_rating }}</span
+                  >
+                </div>
+                <span class="tier-divider">•</span>
+                <div class="tier-group">
+                  <img
+                    src="/icons/demoman.png"
+                    alt="Demoman"
+                    class="tier-class-icon"
+                  />
+                  <span class="tier-text"
+                    >T{{ mapInfo?.map.demoman_tier }}</span
+                  >
+                  <span class="rating-text"
+                    >R{{ mapInfo?.map.demoman_rating }}</span
+                  >
+                </div>
+              </div>
+              <div
+                v-if="mapInfo?.map.intended_class"
+                :class="[
+                  'intended-class-display',
+                  { 'no-circle': mapInfo.map.intended_class === 5 },
+                ]"
+              >
+                <div
+                  v-if="mapInfo.map.intended_class === 5"
+                  class="both-classes"
+                >
+                  <div class="class-circle">
+                    <img
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="intended-class-icon"
+                    />
+                  </div>
+                  <div class="class-circle">
+                    <img
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="intended-class-icon"
+                    />
+                  </div>
+                </div>
+                <img
+                  v-else-if="mapInfo.map.intended_class === 3"
+                  src="/icons/soldier.png"
+                  alt="Soldier"
+                  class="intended-class-icon"
+                />
+                <img
+                  v-else-if="mapInfo.map.intended_class === 4"
+                  src="/icons/demoman.png"
+                  alt="Demoman"
+                  class="intended-class-icon"
+                />
+              </div>
+            </div>
+          </div>
+          <div v-if="mapInfo" class="lookup-map-secondary">
+            <span class="secondary-stat"
+              >{{ mapInfo.map.course_count }} courses</span
+            >
+            <span class="stat-separator">•</span>
+            <span class="secondary-stat"
+              >{{ mapInfo.map.bonus_count }} bonuses</span
+            >
+            <span class="stat-separator">•</span>
+            <span class="secondary-stat"
+              >{{ mapInfo.map.soldier_completion_count }} [S] completions</span
+            >
+            <span class="stat-separator">•</span>
+            <span class="secondary-stat"
+              >{{ mapInfo.map.demoman_completion_count }} [D] completions</span
+            >
+            <span class="stat-separator">•</span>
+            <span class="secondary-stat"
+              >Added {{ formatMapDate(mapInfo.map.date_added) }}</span
+            >
+          </div>
+          <div v-else-if="loading" class="loading-ranks">
+            <div class="loading-spinner"></div>
+            <span>Loading...</span>
+          </div>
+        </SmartLink>
+      </div>
       <div class="search-section">
         <div class="search-container" @click.stop>
           <div class="search-input-wrapper">
@@ -611,6 +775,15 @@ export default {
     });
   },
   data: () => ({
+    playerRankInfo: null,
+    loadingRankInfo: false,
+    playerAvatar: null,
+    playerCountry: null,
+    playerCountryCode: null,
+    bannerColors: {
+      color1: "rgba(74, 111, 165, 0.4)",
+      color2: "rgba(74, 111, 165, 0.2)",
+    },
     playerId: null,
     playerName: null,
     selectedPlayerName: null,
@@ -832,6 +1005,7 @@ export default {
     playerId(newPlayerId) {
       if (newPlayerId) {
         this.fetchRecords();
+        this.fetchPlayerRankInfo(newPlayerId);
       }
     },
     mapId(newMapId) {
@@ -855,9 +1029,24 @@ export default {
       },
       immediate: true,
     },
-    $route(to) {
-      if (to.params.playerId) {
+    $route(to, from) {
+      if (to.params.playerId && to.params.playerId !== from.params.playerId) {
         this.playerId = to.params.playerId;
+        this.mapId = null;
+        this.selectedMapName = null;
+        this.findPlayerName(this.playerId);
+        this.fetchPlayerRankInfo(this.playerId);
+        this.fetchRecords();
+      } else if (to.params.mapId && to.params.mapId !== from.params.mapId) {
+        this.mapId = to.params.mapId;
+        this.playerId = null;
+        this.selectedPlayerName = null;
+        this.playerAvatar = null;
+        this.playerCountry = null;
+        this.playerCountryCode = null;
+        this.playerRankInfo = null;
+        this.findMapName(this.mapId);
+        this.fetchMapRecords();
       }
     },
   },
@@ -889,16 +1078,21 @@ export default {
       this.playerId = null;
       this.playerName = null;
     }
+
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
       this.mapId = null;
       this.selectedMapName = null;
       await this.findPlayerName(this.playerId);
+      await this.fetchPlayerRankInfo(this.playerId);
       await this.fetchRecords();
     } else if (this.$route.params.mapId) {
       this.mapId = this.$route.params.mapId;
       this.playerId = null;
       this.selectedPlayerName = null;
+      this.playerAvatar = null;
+      this.playerCountry = null;
+      this.playerCountryCode = null;
       await this.findMapName(this.mapId);
       await this.fetchMapRecords();
     } else if (
@@ -907,17 +1101,39 @@ export default {
       !this.$route.params.mapId
     ) {
       this.selectedPlayerName = this.playerName;
+      await this.fetchPlayerRankInfo(this.playerId);
+      await this.fetchRecords();
       this.$router.push({
         name: "LookupPlayer",
         params: { playerId: this.playerId },
       });
     }
-
-    if (this.playerId && !this.$route.params.mapId) {
-      await this.fetchRecords();
-    }
   },
   methods: {
+    formatMapDate(unixTimestamp) {
+      const date = new Date(unixTimestamp * 1000);
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${month}/${year}`;
+    },
+    async fetchPlayerRankInfo(playerId) {
+      this.loadingRankInfo = true;
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/players/${playerId}/ranks`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch rank info");
+        }
+        const data = await response.json();
+        this.playerRankInfo = data[0] || null;
+      } catch (error) {
+        console.error("Error fetching player rank info:", error);
+        this.playerRankInfo = null;
+      } finally {
+        this.loadingRankInfo = false;
+      }
+    },
     async fetchMapRecords() {
       this.loading = true;
       this.error = null;
@@ -1150,6 +1366,13 @@ export default {
       const response = await fetch(`${API_BASE_URL}/players/${playerId}`);
       const data = await response.json();
       this.selectedPlayerName = data[0].name;
+      this.playerAvatar = data[0].steam_avatar;
+      this.playerCountry = data[0].country;
+      this.playerCountryCode = data[0].country_code;
+    },
+    getFlagImageUrl(countryCode) {
+      if (!countryCode) return "";
+      return `https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`;
     },
     formatIndex(record) {
       const type = record.type;
@@ -1269,6 +1492,7 @@ export default {
       ).name;
       this.searchQuery = "";
       this.searchResults = null;
+      this.fetchPlayerRankInfo(playerId);
       this.$router.push({
         name: "LookupPlayer",
         params: { playerId: playerId },
@@ -1442,7 +1666,11 @@ export default {
 
 .search-input:focus {
   outline: none;
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
 }
 
@@ -1629,7 +1857,11 @@ export default {
 }
 
 .search-results-dropdown li:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateX(4px);
 }
 
@@ -1685,7 +1917,11 @@ export default {
 }
 
 .form-select:focus {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .form-option:hover {
@@ -1705,7 +1941,11 @@ export default {
 
 .btn-secondary:hover {
   border: 1px solid var(--color-dark);
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .tier-filter-container,
@@ -2021,7 +2261,11 @@ export default {
 
 .dropdown-item:hover {
   color: var(--color-text);
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .class-icon {
@@ -2051,7 +2295,11 @@ export default {
 
 .search-records-input:focus {
   outline: none;
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
 }
 
@@ -2134,7 +2382,11 @@ export default {
 }
 
 .show-more-btn {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   font-weight: bold;
   width: 100%;
   border-radius: 0 0 10px 10px;
@@ -2256,7 +2508,11 @@ export default {
   }
 
   .show-more-btn {
-    background: rgba(74, 111, 165, 0.8) !important;
+    background: linear-gradient(
+      to bottom,
+      rgba(74, 111, 165, 0.5),
+      rgba(74, 111, 165, 0.3)
+    ) !important;
     font-weight: bold;
     width: 100%;
     border-radius: 0 0 10px 10px;
@@ -2404,6 +2660,363 @@ export default {
   }
   .search-results-dropdown {
     margin-top: 65px !important;
+  }
+}
+.lookup-player-banner {
+  width: 100%;
+  max-width: 1000px;
+  margin: 20px auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.lookup-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  gap: 24px;
+  transition: all 0.3s ease;
+}
+
+.lookup-banner-content:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lookup-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+.lookup-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.lookup-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lookup-player-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lookup-country {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.lookup-flag-icon {
+  width: 24px;
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.lookup-banner-stats {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.lookup-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px 20px;
+  min-width: 120px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lookup-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lookup-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.lookup-stat-points {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+@media (max-width: 991.98px) {
+  .lookup-banner-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 20px;
+  }
+
+  .lookup-banner-left {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lookup-player-info {
+    align-items: center;
+  }
+
+  .lookup-banner-stats {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .lookup-stat-card {
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .lookup-player-name {
+    font-size: 1.25rem;
+  }
+
+  .lookup-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .lookup-stat-card {
+    min-width: 90px;
+    padding: 10px 16px;
+  }
+
+  .lookup-stat-value {
+    font-size: 1.25rem;
+  }
+}
+.lookup-map-banner {
+  width: 100%;
+  max-width: 1000px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.lookup-map-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 111, 165, 0.2),
+    rgba(74, 111, 165, 0.1)
+  );
+  pointer-events: none;
+}
+
+.lookup-map-banner .lookup-banner-content {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.lookup-map-banner .lookup-banner-content:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lookup-map-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lookup-map-name {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+.map-primary-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.map-tiers {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.tier-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-class-icon {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.tier-text {
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.rating-text {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
+}
+
+.tier-divider {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+}
+
+.intended-class-display {
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(74, 111, 165, 0.3);
+}
+
+.intended-class-display.no-circle {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.intended-class-icon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.both-classes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.class-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(74, 111, 165, 0.3);
+  background: #000000b3;
+}
+
+.lookup-map-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.secondary-stat {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.stat-separator {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .lookup-map-banner .lookup-banner-content {
+    padding: 20px 16px;
+  }
+
+  .lookup-map-name {
+    font-size: 1.5rem;
+  }
+
+  .map-tiers {
+    font-size: 1rem;
+  }
+
+  .tier-class-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .tier-text,
+  .rating-text {
+    font-size: 1rem;
+  }
+
+  .intended-class-display {
+    padding: 5px;
+  }
+
+  .intended-class-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lookup-map-secondary {
+    font-size: 0.8rem;
+    gap: 8px;
+  }
+
+  .secondary-stat {
+    font-size: 0.75rem;
   }
 }
 </style>

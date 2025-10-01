@@ -267,7 +267,11 @@
               <button
                 class="btn btn-dark update-button"
                 style="
-                  background: rgba(74, 111, 165, 0.8);
+                  background: linear-gradient(
+                    to bottom,
+                    rgba(74, 111, 165, 0.5),
+                    rgba(74, 111, 165, 0.3)
+                  );
                   font-weight: bold;
                   width: 100%;
                 "
@@ -406,7 +410,11 @@
               <button
                 class="btn btn-dark update-button"
                 style="
-                  background: rgba(74, 111, 165, 0.8);
+                  background: linear-gradient(
+                    to bottom,
+                    rgba(74, 111, 165, 0.5),
+                    rgba(74, 111, 165, 0.3)
+                  );
                   font-weight: bold;
                   width: 100%;
                 "
@@ -1241,7 +1249,11 @@ export default {
 }
 
 .search-result-item:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateX(4px);
 }
 

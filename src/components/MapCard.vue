@@ -241,7 +241,6 @@ export default {
 }
 
 .card-image.loading {
-  /* Add any loading state styles if needed */
 }
 .card-image.image-failed {
   opacity: 1;

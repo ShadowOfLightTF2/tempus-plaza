@@ -1432,7 +1432,11 @@ export default {
 }
 
 .picker-btn:hover:not(:disabled) {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   color: #ffffff;
   cursor: pointer;
 }
@@ -1677,7 +1681,11 @@ export default {
 }
 
 .btn-secondary:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .table-responsive {
@@ -1719,7 +1727,11 @@ export default {
 }
 
 .table th:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .table td {
@@ -1741,7 +1753,11 @@ export default {
 }
 
 .table-dark tr:nth-child(odd) .map-name:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .table-dark tr:nth-child(odd) .map-name {
@@ -1753,7 +1769,11 @@ export default {
 }
 
 .map-name:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   color: white;
 }
 

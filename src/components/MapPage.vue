@@ -22,22 +22,125 @@
       </div>
       <div v-else>
         <div class="map-name-container">
-          <h1 class="text-center maps-title">
-            {{ mapName }}
-          </h1>
-          <a
-            :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
-            class="download-btn"
-            :download="`${mapName}.bsp.bz2`"
-            title="Download Map"
+          <SmartLink
+            tag="div"
+            :to="{ name: 'LookupMap', params: { mapId: mapId } }"
+            class="lookup-map-banner fancy-hover"
+            :style="{
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${
+                map?.name || mapName
+              }.jpg')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }"
           >
-            <i class="bi bi-download"></i>
-          </a>
+            <div class="lookup-banner-content">
+              <div class="lookup-map-main">
+                <h1
+                  class="lookup-map-name"
+                  v-html="mapName || 'Selected Map'"
+                ></h1>
+                <div v-if="map" class="map-primary-info">
+                  <div class="map-tiers">
+                    <div class="tier-group">
+                      <img
+                        src="/icons/soldier.png"
+                        alt="Soldier"
+                        class="tier-class-icon"
+                      />
+                      <span class="tier-text">T{{ map.soldier_tier }}</span>
+                      <span class="rating-text">R{{ map.soldier_rating }}</span>
+                    </div>
+                    <span class="tier-divider">•</span>
+                    <div class="tier-group">
+                      <img
+                        src="/icons/demoman.png"
+                        alt="Demoman"
+                        class="tier-class-icon"
+                      />
+                      <span class="tier-text">T{{ map.demoman_tier }}</span>
+                      <span class="rating-text">R{{ map.demoman_rating }}</span>
+                    </div>
+                  </div>
+                  <div
+                    v-if="map.intended_class"
+                    :class="[
+                      'intended-class-display',
+                      { 'no-circle': map.intended_class === 5 },
+                    ]"
+                  >
+                    <div v-if="map.intended_class === 5" class="both-classes">
+                      <div class="class-circle">
+                        <img
+                          src="/icons/soldier.png"
+                          alt="Soldier"
+                          class="intended-class-icon"
+                        />
+                      </div>
+                      <div class="class-circle">
+                        <img
+                          src="/icons/demoman.png"
+                          alt="Demoman"
+                          class="intended-class-icon"
+                        />
+                      </div>
+                    </div>
+                    <img
+                      v-else-if="isIntendedClass('soldier')"
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="intended-class-icon"
+                    />
+                    <img
+                      v-else-if="isIntendedClass('demoman')"
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="intended-class-icon"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div v-if="map" class="lookup-map-secondary">
+                <span class="secondary-stat"
+                  >{{ map.course_count }} courses</span
+                >
+                <span class="stat-separator">•</span>
+                <span class="secondary-stat"
+                  >{{ map.bonus_count }} bonuses</span
+                >
+                <span class="stat-separator">•</span>
+                <span class="secondary-stat"
+                  >{{ map.soldier_completion_count }} [S] completions</span
+                >
+                <span class="stat-separator">•</span>
+                <span class="secondary-stat"
+                  >{{ map.demoman_completion_count }} [D] completions</span
+                >
+                <span class="stat-separator">•</span>
+                <span class="secondary-stat"
+                  >Added {{ formatDate(map.date_added) }}</span
+                >
+              </div>
+              <div v-else class="loading-ranks">
+                <div class="loading-spinner"></div>
+                <span>Loading...</span>
+              </div>
+              <a
+                :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
+                class="download-btn"
+                :download="`${mapName}.bsp.bz2`"
+                title="Download Map"
+                @click.stop
+              >
+                <i class="bi bi-download"></i>
+              </a>
+            </div>
+          </SmartLink>
         </div>
         <hr class="row-divider" style="width: 100%" />
         <div class="collapsible-header" @click="toggleMapBanner">
           <h5 class="video-section-title mb-0">
-            🗺️ Map Information
+            🗺️ More Map Information
             <i
               class="bi"
               :class="showMapBanner ? 'bi-chevron-up' : 'bi-chevron-down'"
@@ -1141,7 +1244,7 @@ export default {
       showCourseVideos: false,
       showBonusVideos: false,
       showMapVideos: false,
-      showMapBanner: true,
+      showMapBanner: false,
       activeVideo: null,
       playerId: null,
     };
@@ -1522,40 +1625,14 @@ export default {
 }
 
 .return-button:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.map-name-container {
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  background: linear-gradient(
-    135deg,
-    rgba(74, 111, 165, 0.3),
-    rgba(37, 55, 82, 0.3)
-  );
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-border-soft);
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.maps-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 2rem;
-  font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  color: var(--color-text);
 }
 
 .download-btn {
@@ -1574,8 +1651,9 @@ export default {
   color: var(--color-text);
   text-decoration: none;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
   font-size: 1rem;
+  pointer-events: auto;
+  z-index: 10;
 }
 
 .download-btn:hover {
@@ -1622,7 +1700,11 @@ export default {
 }
 
 .clickable:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .map-name {
@@ -1656,7 +1738,11 @@ export default {
 }
 
 .back-button:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -2018,7 +2104,7 @@ export default {
     var(--color-primary),
     transparent
   );
-  margin: 15px 0;
+  margin: 30px 0;
   opacity: 0.6;
 }
 
@@ -2201,7 +2287,11 @@ export default {
 }
 
 .collapsible-header:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateY(-2px);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
@@ -2351,7 +2441,11 @@ export default {
 }
 
 .load-more-btn:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   color: var(--color-text);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
@@ -2381,7 +2475,6 @@ export default {
   color: var(--color-text);
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
   font-size: 1rem;
 }
 
@@ -2458,7 +2551,6 @@ export default {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
 }
 
 .tag-modal {
@@ -2707,7 +2799,6 @@ export default {
     padding: 4px 10px;
   }
 }
-/* Login Required Popup Styles - Dark Mode Default */
 .login-popup-backdrop {
   position: fixed;
   top: 0;
@@ -2719,7 +2810,6 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1050;
-  backdrop-filter: blur(3px);
 }
 
 .login-popup {
@@ -2844,6 +2934,205 @@ export default {
   .btn-cancel {
     padding: 0.875rem 1.25rem;
     font-size: 0.95rem;
+  }
+}
+
+.lookup-map-banner {
+  width: 100%;
+  max-width: 1000px;
+  margin: 20px auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.lookup-map-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 111, 165, 0.2),
+    rgba(74, 111, 165, 0.1)
+  );
+  pointer-events: none;
+}
+
+.lookup-map-banner .lookup-banner-content {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.lookup-map-banner .lookup-banner-content:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lookup-map-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lookup-map-name {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+.map-primary-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.map-tiers {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.tier-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-class-icon {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.tier-text {
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.rating-text {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
+}
+
+.tier-divider {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+}
+
+.intended-class-display {
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(74, 111, 165, 0.3);
+}
+
+.intended-class-display.no-circle {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.intended-class-icon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.both-classes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.class-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(74, 111, 165, 0.3);
+  background: #000000b3;
+}
+
+.lookup-map-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.secondary-stat {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.stat-separator {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .lookup-map-banner .lookup-banner-content {
+    padding: 20px 16px;
+  }
+
+  .lookup-map-name {
+    font-size: 1.5rem;
+  }
+
+  .map-tiers {
+    font-size: 1rem;
+  }
+
+  .tier-class-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .tier-text,
+  .rating-text {
+    font-size: 1rem;
+  }
+
+  .intended-class-display {
+    padding: 5px;
+  }
+
+  .intended-class-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lookup-map-secondary {
+    font-size: 0.8rem;
+    gap: 8px;
+  }
+
+  .secondary-stat {
+    font-size: 0.75rem;
   }
 }
 </style>

@@ -3524,7 +3524,11 @@ export default {
   color: var(--color-text);
 }
 .return-button:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   color: var(--color-text);
 }
 .profile-banner {
@@ -3562,6 +3566,10 @@ export default {
   width: 96px;
   height: 96px;
   border: 3px solid var(--color-primary);
+}
+
+.avatar:hover {
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.75);
 }
 .golden-avatar {
   width: 96px;
@@ -3622,7 +3630,12 @@ export default {
 .shared-row:hover,
 .record-item:hover {
   transform: scale(1.03);
-  background-color: var(--color-primary);
+
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 .stat-item {
   background: rgba(255, 255, 255, 0.05);
@@ -3766,12 +3779,20 @@ export default {
 }
 
 .filter-button.active {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   border-color: var(--color-border, #444);
 }
 
 .filter-button:hover:not(.active) {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .gain-loss-filter-container {
@@ -3871,7 +3892,11 @@ export default {
 }
 
 .btn-secondary:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 
 .card-header {
@@ -3999,7 +4024,11 @@ export default {
   box-shadow: 0 0px 10px rgba(0, 0, 0, 0.75);
 }
 .list-group-item.record-item:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   cursor: pointer;
 }
 .card-body,
@@ -4255,7 +4284,11 @@ export default {
   cursor: pointer;
 }
 .clickable:hover {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
 }
 .clickable-text {
   color: var(--color-text-clickable) !important;
@@ -4678,7 +4711,11 @@ export default {
 }
 
 .search-input:focus {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   outline: none;
   box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
 }
@@ -4717,7 +4754,11 @@ export default {
 }
 
 .search-results-dropdown li:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateX(4px);
 }
 
@@ -4803,12 +4844,20 @@ export default {
 
 .class-option:hover {
   border-color: var(--color-primary);
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .class-option.active {
   border-color: var(--color-primary);
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
 }
 
 .class-icon {

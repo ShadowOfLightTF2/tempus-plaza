@@ -983,7 +983,11 @@ body {
 }
 
 .form-check-input:checked {
-  background: rgba(74, 111, 165, 0.8) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  ) !important;
   border-color: var(--color-primary);
 }
 
@@ -1093,7 +1097,11 @@ body {
 }
 
 .footer-link:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   color: var(--color-text);
   text-decoration: none;
   transform: translateY(-2px);
@@ -1115,7 +1123,11 @@ body {
 }
 
 .login-popup {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   border-radius: 12px;
   max-width: 450px;
   width: 90%;
@@ -1188,7 +1200,7 @@ body {
 
 .feature-item i {
   margin-right: 0.75rem;
-  color: var(--color-primary-dark);
+  color: var(--color-text);
   font-size: 1.1rem;
   width: 20px;
   text-align: center;
@@ -1674,7 +1686,11 @@ body {
 }
 
 .search-results-dropdown li:hover {
-  background: rgba(74, 111, 165, 0.8);
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
   transform: translateX(4px);
 }
 
