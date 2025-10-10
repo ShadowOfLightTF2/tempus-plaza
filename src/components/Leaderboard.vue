@@ -1,9 +1,9 @@
 <template>
   <div
-    class="container py-2 d-flex flex-column align-items-center"
+    class="container d-flex flex-column align-items-center"
     style="z-index: 1"
   >
-    <hr class="row-divider" style="width: 100%" />
+    <hr class="row-divider-no-top" style="width: 100%" />
     <div
       v-if="courseCount > 0 || bonusCount > 0"
       class="category-tabs-container"
@@ -217,6 +217,11 @@
                     tag="td"
                     :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
                     class="name-cell align-middle player-name clickable name-column"
+                    :class="{
+                      'rank-1-name': entry.rank === 1,
+                      'rank-2-name': entry.rank === 2,
+                      'rank-3-name': entry.rank === 3,
+                    }"
                   >
                     {{ entry.name }}
                   </SmartLink>
@@ -378,6 +383,11 @@
                     tag="td"
                     :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
                     class="name-cell align-middle player-name clickable name-column"
+                    :class="{
+                      'rank-1-name': entry.rank === 1,
+                      'rank-2-name': entry.rank === 2,
+                      'rank-3-name': entry.rank === 3,
+                    }"
                   >
                     {{ entry.name }}
                   </SmartLink>
@@ -821,6 +831,62 @@ export default {
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
+.table-dark tr .name-cell.rank-1-name,
+.table-dark tr .name-cell.rank-2-name,
+.table-dark tr .name-cell.rank-3-name {
+  position: relative;
+}
+.table-dark tr .name-cell.rank-1-name::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 0px;
+  right: 6px;
+  bottom: 5px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 215, 0, 0.25),
+    rgba(255, 215, 0, 0.1)
+  );
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 0 10px 10px 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.table-dark tr .name-cell.rank-2-name::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 16px;
+  bottom: 6px;
+  background: linear-gradient(
+    to right,
+    rgba(192, 192, 192, 0.2),
+    rgba(192, 192, 192, 0.08)
+  );
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: -1;
+}
+.table-dark tr .name-cell.rank-3-name::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 26px;
+  bottom: 6px;
+  background: linear-gradient(
+    to right,
+    rgba(205, 127, 50, 0.2),
+    rgba(205, 127, 50, 0.08)
+  );
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: -1;
+}
 .name-cell {
   max-width: 250px;
   white-space: normal;
@@ -969,7 +1035,7 @@ export default {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 .subcategory-pills {
   display: flex;
@@ -1116,7 +1182,19 @@ export default {
     var(--color-primary),
     transparent
   );
-  margin: 30px 0;
+  margin: 15px 0 30px 0;
+  opacity: 0.6;
+}
+.row-divider-no-top {
+  border: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
+  margin: 5px 0 15px 0;
   opacity: 0.6;
 }
 </style>

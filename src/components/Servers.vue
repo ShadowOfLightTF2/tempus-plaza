@@ -246,12 +246,13 @@
                         </SmartLink>
                         <td class="align-middle">
                           <div class="player-info">
-                            <span
+                            <span v-if="server.hostname !== null"
                               >{{ server.playerCount }}/{{
                                 server.maxPlayers
                               }}</span
                             >
                             <div
+                              v-if="server.hostname !== null"
                               class="server-status"
                               :class="
                                 getServerStatusClass(
@@ -260,6 +261,7 @@
                                 )
                               "
                             ></div>
+                            <span v-else class="server-offline">Offline</span>
                           </div>
                         </td>
                         <td class="align-middle">
@@ -1180,6 +1182,12 @@ export default {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
+}
+
+.server-offline {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 0.85rem;
 }
 
 .status-high {
