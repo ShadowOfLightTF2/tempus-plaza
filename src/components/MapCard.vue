@@ -121,7 +121,9 @@
 
         <div v-if="currentView === 'maps'" class="map-date-added">
           Date Added:
-          {{ new Date(item.date_added * 1000).toLocaleDateString() }}
+          {{
+            formatDate(new Date(item.date_added * 1000).toLocaleDateString())
+          }}
         </div>
       </div>
     </div>
@@ -150,6 +152,12 @@ export default {
     };
   },
   computed: {
+    formatDate() {
+      return (dateString) => {
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+      };
+    },
     backgroundImageStyle() {
       if (this.imageFailed) {
         return "background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%)";
@@ -159,7 +167,7 @@ export default {
         : "";
     },
     imagePath() {
-      return `/map-backgrounds/thumbnails/${
+      return `/map-backgrounds/medium/${
         this.currentView === "maps" ? this.item.name : this.item.map_name
       }.jpg`;
     },

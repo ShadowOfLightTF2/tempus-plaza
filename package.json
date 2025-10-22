@@ -23,6 +23,7 @@
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
     "debounce": "^2.2.0",
+    "discord.js": "^14.23.2",
     "dompurify": "^3.2.6",
     "gh-pages": "^6.3.0",
     "masonry-layout": "^4.2.2",

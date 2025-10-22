@@ -89,53 +89,409 @@
           </div>
         </div>
         <hr class="divider" style="width: 100%" />
-        <div class="winner-section-wrapper">
-          <div class="wc-container">
-            <div class="winner-announcement">
-              <h3 class="winner-title">TEAM ASIA</h3>
-              <p class="winner-subtitle">2025 Jump World Cup Champions</p>
-              <div class="champion-team-card">
-                <div class="champion-players-grid">
+        <div class="tempus-cup-wrapper">
+          <div class="tempus-cup-container">
+            <div class="tempus-cup-header">
+              <h3 class="cup-title">TEMPUS CUP 2</h3>
+              <p class="cup-subtitle">Phase {{ currentPhase }} of 3</p>
+              <p class="cup-dates">
+                {{
+                  new Date(
+                    tempusCupPhases[currentPhase - 1].startDate
+                  ).toLocaleDateString()
+                }}
+                -
+                {{
+                  new Date(
+                    tempusCupPhases[currentPhase - 1].endDate
+                  ).toLocaleDateString()
+                }}
+              </p>
+            </div>
+            <div class="phase-content">
+              <!-- Soldier Section (Left) -->
+              <div class="phase-section soldier-section">
+                <div class="records-list" v-if="!loadingRecords">
+                  <div class="records-header">
+                    <img
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="class-icon-medium"
+                    />
+                    <span>Top 10 - Phase {{ selectedSoldierPhase }}</span>
+                  </div>
                   <SmartLink
-                    v-for="player in asiaTeamPlayers"
-                    :key="player.id"
+                    v-for="(record, index) in phaseRecords.soldier"
+                    :key="record.id"
                     :to="{
                       name: 'PlayerPage',
-                      params: { playerId: player.id },
+                      params: { playerId: record.player_id },
                     }"
-                    class="champion-player-square"
-                    :style="{
-                      backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.8) 100%), url('https://flagcdn.com/256x192/${getPlayerCountryCode(
-                        player.id
-                      ).toLowerCase()}.png')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
+                    class="record-item"
+                    :class="{
+                      'record-gold': index === 0,
+                      'record-silver': index === 1,
+                      'record-bronze': index === 2,
                     }"
                   >
+                    <div class="record-rank">{{ index + 1 }}</div>
                     <img
-                      :src="getPlayerAvatar(player.id)"
+                      :src="record.steam_avatar"
                       alt="Avatar"
-                      class="champion-player-avatar-square"
+                      class="record-avatar"
                     />
-                    <div class="champion-player-info-square">
-                      <div class="champion-player-name-square">
-                        {{ player.displayName }}
+                    <div class="record-info">
+                      <div class="record-player-name">
+                        {{ record.name }}
                       </div>
-                      <img
-                        :src="getClassIcon(player.class)"
-                        alt="class"
-                        class="champion-class-icon-square"
-                      />
+                      <div class="record-time">
+                        {{ formatTime(record.duration) }}
+                      </div>
                     </div>
                   </SmartLink>
                 </div>
+                <div v-else class="loading-container">
+                  <div class="loading-spinner"></div>
+                  <span>Loading records...</span>
+                </div>
               </div>
-              <div class="celebration-text">
-                <p>
-                  Congratulations to Team Asia for their outstanding performance
-                  in the 2025 Jump World Cup!
-                </p>
+
+              <!-- Maps Section (Center) -->
+              <div class="maps-center">
+                <!-- Phase 1 Soldier Map -->
+                <div
+                  @click="isPhaseActive(1) && selectMap(1, 'soldier')"
+                  class="cup-map-card soldier-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(1),
+                    'map-selected': selectedSoldierPhase === 1,
+                  }"
+                  :style="
+                    isPhaseActive(1)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[0].soldierMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(1)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 1</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Soldier</h5>
+                    <h3>{{ tempusCupPhases[0].soldierMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[0].soldierMap.soldier_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[0].soldierMap.soldier_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Phase 1 Demoman Map -->
+                <div
+                  @click="isPhaseActive(1) && selectMap(1, 'demoman')"
+                  class="cup-map-card demoman-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(1),
+                    'map-selected': selectedDemomanPhase === 1,
+                  }"
+                  :style="
+                    isPhaseActive(1)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[0].demomanMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(1)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 1</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Demoman</h5>
+                    <h3>{{ tempusCupPhases[0].demomanMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[0].demomanMap.demoman_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[0].demomanMap.demoman_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Phase 2 Soldier Map -->
+                <div
+                  @click="isPhaseActive(2) && selectMap(2, 'soldier')"
+                  class="cup-map-card soldier-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(2),
+                    'map-selected': selectedSoldierPhase === 2,
+                  }"
+                  :style="
+                    isPhaseActive(2)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[1].soldierMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(2)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 2</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Soldier</h5>
+                    <h3>{{ tempusCupPhases[1].soldierMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[1].soldierMap.soldier_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[1].soldierMap.soldier_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Phase 2 Demoman Map -->
+                <div
+                  @click="isPhaseActive(2) && selectMap(2, 'demoman')"
+                  class="cup-map-card demoman-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(2),
+                    'map-selected': selectedDemomanPhase === 2,
+                  }"
+                  :style="
+                    isPhaseActive(2)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[1].demomanMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(2)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 2</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Demoman</h5>
+                    <h3>{{ tempusCupPhases[1].demomanMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[1].demomanMap.demoman_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[1].demomanMap.demoman_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Phase 3 Soldier Map -->
+                <div
+                  @click="isPhaseActive(3) && selectMap(3, 'soldier')"
+                  class="cup-map-card soldier-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(3),
+                    'map-selected': selectedSoldierPhase === 3,
+                  }"
+                  :style="
+                    isPhaseActive(3)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[2].soldierMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(3)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 3</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Soldier</h5>
+                    <h3>{{ tempusCupPhases[2].soldierMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[2].soldierMap.soldier_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[2].soldierMap.soldier_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Phase 3 Demoman Map -->
+                <div
+                  @click="isPhaseActive(3) && selectMap(3, 'demoman')"
+                  class="cup-map-card demoman-map"
+                  :class="{
+                    'map-locked': !isPhaseActive(3),
+                    'map-selected': selectedDemomanPhase === 3,
+                  }"
+                  :style="
+                    isPhaseActive(3)
+                      ? {
+                          background: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      url('/map-backgrounds/medium/${tempusCupPhases[2].demomanMap.name}.jpg') center/cover no-repeat
+    `,
+                          backgroundBlendMode: 'multiply, normal, normal',
+                          backgroundSize: 'cover, cover, cover',
+                          backgroundPosition: 'center, center, center',
+                        }
+                      : {}
+                  "
+                >
+                  <div v-if="!isPhaseActive(3)" class="locked-overlay">
+                    <div class="lock-icon">?</div>
+                    <div class="lock-text">Phase 3</div>
+                  </div>
+                  <template v-else>
+                    <h5 class="section-subtitle">Demoman</h5>
+                    <h3>{{ tempusCupPhases[2].demomanMap.name }}</h3>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="
+                              'tier-' +
+                              tempusCupPhases[2].demomanMap.demoman_tier
+                            "
+                          >
+                            T{{ tempusCupPhases[2].demomanMap.demoman_tier }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Demoman Section (Right) -->
+              <div class="phase-section demoman-section">
+                <div class="records-list" v-if="!loadingRecords">
+                  <div class="records-header">
+                    <img
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="class-icon-medium"
+                    />
+                    <span>Top 10 - Phase {{ selectedDemomanPhase }}</span>
+                  </div>
+                  <SmartLink
+                    v-for="(record, index) in phaseRecords.demoman"
+                    :key="record.id"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: record.player_id },
+                    }"
+                    class="record-item"
+                    :class="{
+                      'record-gold': index === 0,
+                      'record-silver': index === 1,
+                      'record-bronze': index === 2,
+                    }"
+                  >
+                    <div class="record-rank">{{ index + 1 }}</div>
+                    <img
+                      :src="record.steam_avatar"
+                      alt="Avatar"
+                      class="record-avatar"
+                    />
+                    <div class="record-info">
+                      <div class="record-player-name">
+                        {{ record.name }}
+                      </div>
+                      <div class="record-time">
+                        {{ formatTime(record.duration) }}
+                      </div>
+                    </div>
+                  </SmartLink>
+                </div>
+                <div v-else class="loading-container">
+                  <div class="loading-spinner"></div>
+                  <span>Loading records...</span>
+                </div>
               </div>
             </div>
           </div>
@@ -402,36 +758,223 @@ export default {
   },
   data() {
     return {
-      asiaTeamPlayers: [
+      tempusCupPhases: [
         {
-          displayName: "Cander",
-          id: 243670,
-          class: "demoman",
-          country: "Indonesia",
-          countryCode: "id",
+          phase: 1,
+          startDate: "2025-10-10",
+          endDate: "2025-10-14",
+          soldierMap: {
+            id: 708,
+            name: "jump_relicta_rc2",
+            soldier_tier: 2,
+          },
+          demomanMap: {
+            id: 709,
+            name: "jump_beryllium_v5",
+            demoman_tier: 2,
+          },
         },
         {
-          displayName: "Vice",
-          id: 10736,
-          class: "soldier",
-          country: "Singapore",
-          countryCode: "sg",
+          phase: 2,
+          startDate: "2025-10-14",
+          endDate: "2025-10-25",
+          soldierMap: {
+            id: 710,
+            name: "jump_vespertine_rc3",
+            soldier_tier: 4,
+          },
+          demomanMap: {
+            id: 711,
+            name: "jump_causatham_rc5",
+            demoman_tier: 4,
+          },
         },
         {
-          displayName: "Rubidus",
-          id: 392512,
-          class: "soldier",
-          country: "South Korea",
-          countryCode: "kr",
-        },
-        {
-          displayName: "Song",
-          id: 370388,
-          class: "soldier",
-          country: "South Korea",
-          countryCode: "kr",
+          phase: 3,
+          startDate: "2025-11-17",
+          endDate: "2025-11-24",
+          soldierMap: {
+            id: 712,
+            name: "jump_ember_rc6",
+            soldier_tier: 5,
+          },
+          demomanMap: {
+            id: 713,
+            name: "jump_and",
+            demoman_tier: 5,
+          },
         },
       ],
+      currentPhase: 1,
+      selectedSoldierPhase: 1,
+      selectedDemomanPhase: 1,
+      phaseRecords: {
+        soldier: [
+          {
+            id: 1,
+            player_id: 101,
+            name: "speedrunner123",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 45.123,
+          },
+          {
+            id: 2,
+            player_id: 102,
+            name: "jump_master",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 46.789,
+          },
+          {
+            id: 3,
+            player_id: 103,
+            name: "rocket_wizard",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 47.456,
+          },
+          {
+            id: 4,
+            player_id: 104,
+            name: "pogo_king",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 48.234,
+          },
+          {
+            id: 5,
+            player_id: 105,
+            name: "airshot_pro",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 49.012,
+          },
+          {
+            id: 6,
+            player_id: 106,
+            name: "sync_legend",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 50.567,
+          },
+          {
+            id: 7,
+            player_id: 107,
+            name: "tempus_hero",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 51.89,
+          },
+          {
+            id: 8,
+            player_id: 108,
+            name: "jump_veteran",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 52.345,
+          },
+          {
+            id: 9,
+            player_id: 109,
+            name: "marathon_man",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 53.678,
+          },
+          {
+            id: 10,
+            player_id: 110,
+            name: "tf2_jumper",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 54.901,
+          },
+        ],
+        demoman: [
+          {
+            id: 11,
+            player_id: 201,
+            name: "sticky_expert",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 42.567,
+          },
+          {
+            id: 12,
+            player_id: 202,
+            name: "demo_warrior",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 43.89,
+          },
+          {
+            id: 13,
+            player_id: 203,
+            name: "pipe_dream",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 44.234,
+          },
+          {
+            id: 14,
+            player_id: 204,
+            name: "bomb_squad",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 45.678,
+          },
+          {
+            id: 15,
+            player_id: 205,
+            name: "highland_hero",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 46.123,
+          },
+          {
+            id: 16,
+            player_id: 206,
+            name: "kaboom_king",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 47.456,
+          },
+          {
+            id: 17,
+            player_id: 207,
+            name: "demo_god",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 48.789,
+          },
+          {
+            id: 18,
+            player_id: 208,
+            name: "sticky_master",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 49.012,
+          },
+          {
+            id: 19,
+            player_id: 209,
+            name: "explosion_ace",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 50.345,
+          },
+          {
+            id: 20,
+            player_id: 210,
+            name: "charge_champion",
+            steam_avatar:
+              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+            duration: 51.678,
+          },
+        ],
+      },
+      loadingRecords: false,
       playerData: {},
       searchQuery: "",
       searchResults: null,
@@ -446,6 +989,19 @@ export default {
     };
   },
   computed: {
+    currentPhase() {
+      const today = new Date();
+      for (let i = 0; i < this.tempusCupPhases.length; i++) {
+        const phase = this.tempusCupPhases[i];
+        const start = new Date(phase.startDate);
+        const end = new Date(phase.endDate);
+        if (today >= start && today <= end) {
+          return i + 1;
+        }
+      }
+      // If no active phase, return the last phase
+      return this.tempusCupPhases.length;
+    },
     cleanMapName() {
       return (mapName) => {
         return mapName.replace(/^jump_/, "").replace(/_[a-zA-Z0-9_]*$/, "");
@@ -534,6 +1090,87 @@ export default {
     },
   },
   methods: {
+    selectMap(phase, classType) {
+      if (classType === "soldier") {
+        this.selectedSoldierPhase = phase;
+      } else {
+        this.selectedDemomanPhase = phase;
+      }
+      this.loadPhaseRecords(phase, classType);
+    },
+    async loadPhaseRecords(phase, classType) {
+      //this.loadingRecords = true;
+      const phaseData = this.tempusCupPhases[phase - 1];
+      const mapId =
+        classType === "soldier"
+          ? phaseData.soldierMap.id
+          : phaseData.demomanMap.id;
+
+      try {
+        const records = await this.fetchPhaseRecords(mapId, classType);
+        this.phaseRecords[classType] =
+          records && records.length > 0 ? records : [];
+      } catch (error) {
+        console.error(
+          `Error loading ${classType} records for phase ${phase}:`,
+          error
+        );
+        this.phaseRecords[classType] = [];
+      } finally {
+        //this.loadingRecords = false;
+      }
+    },
+
+    isPhaseActive(phase) {
+      const today = new Date();
+      const phaseData = this.tempusCupPhases[phase - 1];
+      const start = new Date(phaseData.startDate);
+      return today >= start;
+    },
+
+    async fetchPhaseRecords(mapId, classType) {
+      try {
+        const url = `${API_BASE_URL}/maps/${mapId}/null/records/${classType}/0/10`;
+        const response = await axios.get(url);
+        const records = response.data;
+
+        // Fetch player data for each record
+        const recordsWithAvatars = await Promise.all(
+          records.map(async (record) => {
+            try {
+              const playerResponse = await axios.get(
+                `${API_BASE_URL}/players/${record.id}`
+              );
+              const playerData = playerResponse.data[0];
+              return {
+                ...record,
+                steam_avatar: playerData.steam_avatar,
+                player_name: playerData.name,
+              };
+            } catch (error) {
+              console.error(`Error fetching player ${record.id}:`, error);
+              return {
+                ...record,
+                steam_avatar:
+                  "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+                player_name: record.player_name || `Player ${record.id}`,
+              };
+            }
+          })
+        );
+
+        return recordsWithAvatars;
+      } catch (error) {
+        console.error(`Error fetching ${classType} records:`, error);
+        return [];
+      }
+    },
+
+    formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = (seconds % 60).toFixed(3);
+      return `${mins}:${secs.padStart(6, "0")}`;
+    },
     async fetchPlayerData(playerId) {
       try {
         const response = await axios.get(`${API_BASE_URL}/players/${playerId}`);
@@ -553,10 +1190,6 @@ export default {
         console.error("Error fetching player data:", error);
         return this.playerData[playerId];
       }
-    },
-    async loadTournamentData() {
-      const allPlayerIds = this.asiaTeamPlayers.map((player) => player.id);
-      await Promise.all(allPlayerIds.map((id) => this.fetchPlayerData(id)));
     },
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
@@ -690,7 +1323,8 @@ export default {
     this.fetchTopPlayers();
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
-    this.loadTournamentData();
+    this.loadPhaseRecords(1, "soldier");
+    this.loadPhaseRecords(1, "demoman");
   },
   beforeDestroy() {
     if (this.updateInterval) {
@@ -711,22 +1345,14 @@ export default {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-.wc-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 20px;
+.container.hero {
+  max-width: 1600px;
 }
 
 .hero {
@@ -743,12 +1369,6 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 40px;
 }
 
 .search-container {
@@ -949,7 +1569,7 @@ export default {
 }
 
 .section-subtitle {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
   color: #ffffff;
@@ -1393,222 +2013,433 @@ export default {
     font-size: 1rem;
   }
 }
-
-.winner-section-wrapper {
+.tempus-cup-wrapper {
   background: linear-gradient(
     135deg,
-    rgba(255, 215, 0, 0.1) 0%,
-    rgba(255, 215, 0, 0.05) 50%,
-    rgba(102, 126, 234, 0.05) 100%
+    rgba(102, 126, 234, 0.15) 0%,
+    rgba(102, 126, 234, 0.08) 50%,
+    rgba(74, 111, 165, 0.08) 100%
   );
   border-radius: 25px;
-  padding: 40px;
+  padding: 40px 30px;
   margin: 40px auto;
-  max-width: 900px;
-  box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  max-width: 1600px;
+  box-shadow: 0 0 60px rgba(102, 126, 234, 0.3);
+  border: 2px solid rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
 }
-.winner-announcement {
+
+.tempus-cup-container {
+}
+
+.phase-content {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 50px;
+  align-items: start;
+  justify-content: center;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.phase-section {
+  width: 350px;
+  margin: 0 auto;
+}
+
+.tempus-cup-header {
   text-align: center;
-  position: relative;
-  z-index: 1;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.winner-title {
+.cup-title {
   font-size: 3.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+  background: linear-gradient(135deg, #667eea 0%, #4a6fa5 50%, #667eea 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
   margin-bottom: 10px;
   letter-spacing: 3px;
   animation: glow-pulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow-pulse {
-  from {
-    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+  0% {
+    filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
   }
-  to {
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+  100% {
+    filter: drop-shadow(0 0 30px rgba(102, 126, 234, 0.9));
   }
 }
 
-.winner-subtitle {
-  font-size: 1.3rem;
+.cup-subtitle {
+  font-size: 1.5rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
-  margin-bottom: 15px !important;
   text-transform: uppercase;
   letter-spacing: 2px;
+  margin: 0px;
 }
 
-@keyframes bounce {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.1);
-  }
+.cup-dates {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  margin: 3px;
 }
 
-.champion-players-grid {
+.maps-center {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 15px;
+  gap: 25px;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+  margin: 20px auto 0;
 }
 
-.champion-player-square {
-  aspect-ratio: 3/2;
+.cup-map-card {
+  display: block;
+  border-radius: 20px;
+  padding: 10px;
+  padding-bottom: 25px;
+  min-height: 200px;
+  width: 100%;
+  min-width: 300px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+}
+
+.cup-map-card h3 {
+  margin: 15px 0;
+  color: #ffffff;
+  padding: 0 5px;
+}
+
+.cup-map-card .section-subtitle {
+  font-size: 1.5rem;
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.cup-map-card .compact-ratings-grid {
+  margin-top: auto;
+}
+
+.cup-map-card .rating-pill {
+  padding: 5px 10px;
+  font-size: 1.5rem;
+  border-radius: 50%;
+}
+
+.cup-map-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+  border-color: rgba(102, 126, 234, 0.5);
+  cursor: pointer;
+}
+
+.map-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.map-class-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.map-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.records-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.class-icon-medium {
+  width: 28px;
+  height: 28px;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.record-item:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateX(5px);
+  cursor: pointer;
+}
+
+.soldier-section .record-item:hover {
+  transform: translateX(-5px);
+}
+
+.record-gold {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.15),
+    rgba(255, 215, 0, 0.05)
+  );
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.record-silver {
+  background: linear-gradient(
+    135deg,
+    rgba(192, 192, 192, 0.2),
+    rgba(192, 192, 192, 0.1)
+  );
+  border-color: rgba(192, 192, 192, 0.3);
+}
+
+.record-bronze {
+  background: linear-gradient(
+    135deg,
+    rgba(205, 127, 50, 0.15),
+    rgba(205, 127, 50, 0.05)
+  );
+  border-color: rgba(205, 127, 50, 0.3);
+}
+
+.record-rank {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 30px;
+  text-align: center;
+  margin-right: 8px;
+}
+
+.record-gold .record-rank {
+  color: #ffd700;
+}
+
+.record-silver .record-rank {
+  color: #c0c0c0;
+}
+
+.record-bronze .record-rank {
+  color: #cd7f32;
+}
+
+.record-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+.record-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.record-player-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+  max-width: 175px;
+}
+
+.record-time {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+@media (max-width: 1400px) {
+  .phase-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .phase-section {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .maps-center {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .soldier-section .record-item:hover {
+    transform: translateX(5px);
+  }
+}
+
+@media (max-width: 768px) {
+  .tempus-cup-wrapper {
+    padding: 30px 15px;
+  }
+
+  .cup-title {
+    font-size: 2.5rem;
+  }
+
+  .cup-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .tempus-cup-wrapper {
+    max-width: 100%;
+  }
+}
+@media (max-width: 560px) {
+  .tempus-cup-wrapper {
+    padding: 20px 10px;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .cup-title {
+    font-size: 1.8rem;
+  }
+
+  .cup-subtitle {
+    font-size: 1rem;
+  }
+
+  .cup-dates {
+    font-size: 0.9rem;
+  }
+
+  .phase-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .phase-section {
+    width: 100%;
+  }
+
+  .maps-center {
+    grid-template-columns: 1fr;
+    min-width: unset;
+    width: 100%;
+  }
+
+  .cup-map-card {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .records-list {
+    width: 100%;
+  }
+
+  .record-item {
+    padding: 8px;
+  }
+
+  .record-player-name {
+    font-size: 0.85rem;
+  }
+
+  .record-time {
+    font-size: 0.8rem;
+  }
+}
+.map-locked {
+  filter: blur(8px);
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+.map-locked:hover {
+  transform: none !important;
+  box-shadow: 0 0px 20px rgb(0, 0, 0) !important;
+}
+
+.map-selected {
+  border: 3px solid var(--color-primary);
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+}
+
+.locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
 }
 
-.champion-player-square:hover::before {
-  left: 100%;
-}
-
-.champion-player-square:hover {
-  transform: scale(1.05);
-  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
-  border-color: rgba(255, 215, 0, 0.5);
-  cursor: pointer;
-}
-
-.champion-player-avatar-square {
-  width: 75px;
-  height: 75px;
-  border-radius: 50%;
-  margin-bottom: 12px;
-  border: 3px solid #ffd700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-}
-
-.champion-player-info-square {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 8px;
-  border-radius: 10px;
-}
-
-.champion-player-name-square {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.champion-class-icon-square {
-  width: 25px;
-  height: 25px;
-}
-
-@media (max-width: 768px) {
-  .champion-players-grid {
-    max-width: 400px;
-    gap: 12px;
-  }
-
-  .champion-player-square {
-    padding: 15px;
-  }
-
-  .champion-player-avatar-square {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 10px;
-  }
-
-  .champion-player-name-square {
-    font-size: 1rem;
-  }
-
-  .champion-class-icon-square {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-.celebration-text {
-  margin-top: 30px;
-  padding: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  border-radius: 15px;
-}
-
-.celebration-text p {
-  font-size: 1rem;
+.lock-icon {
+  font-size: 4rem;
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
-  line-height: 1.6;
-  margin: 0;
-  font-style: italic;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
-@media (max-width: 768px) {
-  .winner-section-wrapper {
-    padding: 30px 20px;
-    margin: 30px 0;
-  }
+.lock-text {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
 
-  .winner-title {
-    font-size: 2.5rem;
-    letter-spacing: 2px;
-  }
-
-  .winner-subtitle {
-    font-size: 1rem;
-    letter-spacing: 1px;
-  }
-
-  .champion-team-card {
-    padding: 20px;
-    max-width: 100%;
-  }
-
-  .team-name-winner {
-    font-size: 1.5rem;
-  }
-
-  .trophy-icon {
-    font-size: 2rem;
-  }
+.cup-map-card {
+  cursor: pointer;
 }
 </style>

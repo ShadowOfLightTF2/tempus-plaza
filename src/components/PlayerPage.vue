@@ -151,67 +151,28 @@
         </div>
         <div class="row">
           <div class="col-md-4">
-            <div class="card chart-container">
-              <div class="chart-header">
-                <p class="section-header">Soldier Points History</p>
-              </div>
-              <div class="chart-body">
-                <div v-if="loading.points" class="text-center">
-                  <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading chart...</span>
-                  </div>
-                </div>
-                <apexchart
-                  v-else
-                  type="line"
-                  height="250"
-                  :options="soldierChartOptions"
-                  :series="soldierChartSeries"
-                />
-              </div>
-            </div>
+            <PointsChart
+              title="Soldier Points History"
+              chart-type="soldier"
+              :points-data="pointsHistory"
+              :loading="loading.points"
+            />
           </div>
           <div class="col-md-4">
-            <div class="card chart-container">
-              <div class="chart-header">
-                <p class="section-header">Overall Points History</p>
-              </div>
-              <div class="chart-body">
-                <div v-if="loading.points" class="text-center">
-                  <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading chart...</span>
-                  </div>
-                </div>
-                <apexchart
-                  v-else
-                  type="line"
-                  height="250"
-                  :options="overallChartOptions"
-                  :series="overallChartSeries"
-                />
-              </div>
-            </div>
+            <PointsChart
+              title="Overall Points History"
+              chart-type="overall"
+              :points-data="pointsHistory"
+              :loading="loading.points"
+            />
           </div>
           <div class="col-md-4">
-            <div class="card chart-container">
-              <div class="chart-header">
-                <p class="section-header">Demoman Points History</p>
-              </div>
-              <div class="chart-body">
-                <div v-if="loading.points" class="text-center">
-                  <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading chart...</span>
-                  </div>
-                </div>
-                <apexchart
-                  v-else
-                  type="line"
-                  height="250"
-                  :options="demomanChartOptions"
-                  :series="demomanChartSeries"
-                />
-              </div>
-            </div>
+            <PointsChart
+              title="Demoman Points History"
+              chart-type="demoman"
+              :points-data="pointsHistory"
+              :loading="loading.points"
+            />
           </div>
         </div>
         <div class="row main-content-wrapper">
@@ -591,6 +552,15 @@
                           class="global-btn"
                         >
                           Gained
+                        </button>
+                        <button
+                          @click="toggleUnchangedFilter"
+                          :class="{
+                            active: filterOptions.selectedUnchanged,
+                          }"
+                          class="global-btn"
+                        >
+                          Unchanged
                         </button>
                         <button
                           @click="toggleGainLossFilter('gained')"
@@ -1022,7 +992,7 @@
                           background: `
                   linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                   radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                  url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
+                  url('/map-backgrounds/medium/${map.name}.jpg') center/cover no-repeat
                 `,
                           backgroundBlendMode: 'multiply, normal, normal',
                           backgroundSize: 'cover, cover, cover',
@@ -1228,7 +1198,7 @@
                     background: `
       linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
       radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/thumbnails/${map.map_name}.jpg') center/cover no-repeat
+      url('/map-backgrounds/medium/${map.map_name}.jpg') center/cover no-repeat
     `,
                   }"
                 >
@@ -1450,7 +1420,7 @@
 
 <script>
 import axios from "axios";
-import VueApexCharts from "vue3-apexcharts";
+import PointsChart from "./PointsChart.vue";
 import { ref } from "vue";
 import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";
@@ -1478,7 +1448,7 @@ export default {
     },
   },
   components: {
-    apexchart: VueApexCharts,
+    PointsChart,
   },
   data: () => ({
     authoredMaps: [],
@@ -1637,351 +1607,13 @@ export default {
     sharedTimesSoldier: [],
     sharedTimesDemoman: [],
     pointsHistory: [],
-    overallChartSeries: [],
-    soldierChartSeries: [],
-    demomanChartSeries: [],
-    overallChartOptions: {
-      chart: {
-        type: "line",
-        height: 250,
-        background: "rgba(255, 255, 255, 0.05)",
-        dropShadow: {
-          enabled: true,
-          color: "red",
-          top: 5,
-          left: 3,
-          blur: 8,
-          opacity: 0.5,
-        },
-        toolbar: {
-          show: false,
-        },
-        zoom: {
-          enabled: false,
-        },
-      },
-      markers: {
-        size: 1,
-      },
-      theme: {
-        mode: "dark",
-      },
-      colors: ["#FF6B6B"],
-      stroke: {
-        curve: "straight",
-        width: 3,
-      },
-      grid: {
-        borderColor: "#444",
-        strokeDashArray: 5,
-      },
-      xaxis: {
-        type: "datetime",
-        tooltip: {
-          enabled: false,
-        },
-        labels: {
-          tooltip: false,
-          datetimeUTC: true,
-          style: {
-            colors: "#aaa",
-          },
-          formatter: function (value, timestamp) {
-            const date = new Date(timestamp);
-            const day = date.getUTCDate();
-            const month = date.toLocaleDateString("en-US", {
-              month: "short",
-              timeZone: "UTC",
-            });
-            return `${day} ${month}`;
-          },
-          maxHeight: undefined,
-          rotate: 0,
-        },
-        tickAmount: 6,
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: "#aaa",
-          },
-        },
-      },
-      tooltip: {
-        theme: "dark",
-        x: {
-          format: "dd MMM yyyy",
-        },
-        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-          const data =
-            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
-          const date = new Date(data.x).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          });
-          const points = data.y;
-          const rank = data.overall_rank;
-          return `
-        <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Overall points: </span>
-              <span class="apexcharts-tooltip-text-y-value">${points}</span>
-            </div>
-          </div>
-        </div>
-        <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-          <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #FF6B6B;"></span>
-          <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-            <div class="apexcharts-tooltip-y-group">
-              <span class="apexcharts-tooltip-text-y-label">Overall rank: </span>
-              <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
-            </div>
-          </div>
-        </div>
-      `;
-        },
-      },
-      legend: {
-        labels: {
-          colors: "#fff",
-        },
-      },
-    },
-    soldierChartOptions: {
-      chart: {
-        type: "line",
-        height: 250,
-        background: "rgba(255, 255, 255, 0.05)",
-        dropShadow: {
-          enabled: true,
-          color: "cyan",
-          top: 5,
-          left: 3,
-          blur: 8,
-          opacity: 0.5,
-        },
-        toolbar: {
-          show: false,
-        },
-        zoom: {
-          enabled: false,
-        },
-      },
-      markers: {
-        size: 1,
-      },
-      theme: {
-        mode: "dark",
-      },
-      colors: ["#4ECDC4"],
-      stroke: {
-        curve: "straight",
-        width: 3,
-      },
-      grid: {
-        borderColor: "#444",
-        strokeDashArray: 5,
-      },
-      xaxis: {
-        type: "datetime",
-        tooltip: {
-          enabled: false,
-        },
-        labels: {
-          tooltip: false,
-          datetimeUTC: true,
-          style: {
-            colors: "#aaa",
-          },
-          formatter: function (value, timestamp) {
-            const date = new Date(timestamp);
-            const day = date.getUTCDate();
-            const month = date.toLocaleDateString("en-US", {
-              month: "short",
-              timeZone: "UTC",
-            });
-            return `${day} ${month}`;
-          },
-          maxHeight: undefined,
-          rotate: 0,
-        },
-        tickAmount: 6,
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: "#aaa",
-          },
-        },
-      },
-      tooltip: {
-        theme: "dark",
-        x: {
-          format: "dd MMM yyyy",
-        },
-        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-          const data =
-            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
-          const date = new Date(data.x).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          });
-          const points = data.y;
-          const rank = data.soldier_rank;
-          return `
-            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Soldier points: </span>
-                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
-                </div>
-              </div>
-            </div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #4ECDC4;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Soldier rank: </span>
-                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
-                </div>
-              </div>
-            </div>
-          `;
-        },
-      },
-      legend: {
-        labels: {
-          colors: "#fff",
-        },
-      },
-    },
-    demomanChartOptions: {
-      chart: {
-        type: "line",
-        height: 250,
-        background: "rgba(255, 255, 255, 0.05)",
-        dropShadow: {
-          enabled: true,
-          color: "blue",
-          top: 5,
-          left: 3,
-          blur: 8,
-          opacity: 0.5,
-        },
-        toolbar: {
-          show: false,
-        },
-        zoom: {
-          enabled: false,
-        },
-      },
-      markers: {
-        size: 1,
-      },
-      theme: {
-        mode: "dark",
-      },
-      colors: ["#45B7D1"],
-      stroke: {
-        curve: "straight",
-        width: 3,
-      },
-      grid: {
-        borderColor: "#444",
-        strokeDashArray: 5,
-      },
-      xaxis: {
-        type: "datetime",
-        tooltip: {
-          enabled: false,
-        },
-        labels: {
-          tooltip: false,
-          datetimeUTC: true,
-          style: {
-            colors: "#aaa",
-          },
-          formatter: function (value, timestamp) {
-            const date = new Date(timestamp);
-            const day = date.getUTCDate();
-            const month = date.toLocaleDateString("en-US", {
-              month: "short",
-              timeZone: "UTC",
-            });
-            return `${day} ${month}`;
-          },
-          maxHeight: undefined,
-          rotate: 0,
-        },
-        tickAmount: 6,
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: "#aaa",
-          },
-        },
-      },
-      tooltip: {
-        theme: "dark",
-        x: {
-          format: "dd MMM yyyy",
-        },
-        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-          const data =
-            w.globals.initialSeries[seriesIndex].data[dataPointIndex];
-          const date = new Date(data.x).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          });
-          const points = data.y;
-          const rank = data.demoman_rank;
-          return `
-            <div class="apexcharts-tooltip-title" style="font-size: 12px; font-weight:bold; margin: 2px 0 5px; padding: 4px;">${date}</div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 1; display: flex; align-items: center; padding: 0 10px 0 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Demoman points: </span>
-                  <span class="apexcharts-tooltip-text-y-value">${points}</span>
-                </div>
-              </div>
-            </div>
-            <div class="apexcharts-tooltip-series-group apexcharts-active" style="order: 2; display: flex; align-items: center; padding: 0 10px 7px 10px;">
-              <span class="apexcharts-tooltip-marker" style="width: 12px; height: 12px; position: relative; top: 0; margin-right: 4px; border-radius: 50%; background-color: #45B7D1;"></span>
-              <div class="apexcharts-tooltip-text" style="font-size: 12px;">
-                <div class="apexcharts-tooltip-y-group">
-                  <span class="apexcharts-tooltip-text-y-label">Demoman rank: </span>
-                  <span class="apexcharts-tooltip-text-y-value">#${rank}</span>
-                </div>
-              </div>
-            </div>
-          `;
-        },
-      },
-      legend: {
-        labels: {
-          colors: "#fff",
-        },
-      },
-    },
     showFilterSection: false,
     filterOptions: {
       selectedClasses: [],
       selectedTypes: [],
       selectedPlacements: [],
       selectedGainLoss: [],
+      selectedUnchanged: false,
     },
   }),
   computed: {
@@ -2212,19 +1844,37 @@ export default {
             return false;
           }
         }
-        if (this.filterOptions.selectedGainLoss.length > 0) {
-          const isGain = placement.rank_change > 0;
-          const isLoss = placement.rank_change < 0;
+        if (
+          this.filterOptions.selectedGainLoss.length > 0 ||
+          this.filterOptions.selectedUnchanged
+        ) {
+          const isGain = placement.points_change > 0;
+          const isLoss = placement.points_change < 0;
+          const isUnchanged = placement.points_change === 0;
 
-          const matchesGainLoss = this.filterOptions.selectedGainLoss.some(
-            (filter) => {
-              if (filter === "gained" && isGain) return true;
-              if (filter === "lost" && isLoss) return true;
-              return false;
+          let matches = false;
+
+          // Check if it matches unchanged filter
+          if (this.filterOptions.selectedUnchanged && isUnchanged) {
+            matches = true;
+          }
+
+          // Check if it matches gain/loss filters
+          if (this.filterOptions.selectedGainLoss.length > 0) {
+            const matchesGainLoss = this.filterOptions.selectedGainLoss.some(
+              (filter) => {
+                if (filter === "lost" && isGain) return true;
+                if (filter === "gained" && isLoss) return true;
+                return false;
+              }
+            );
+            if (matchesGainLoss) {
+              matches = true;
             }
-          );
+          }
 
-          if (!matchesGainLoss) {
+          // If no match found, filter out this record
+          if (!matches) {
             return false;
           }
         }
@@ -2862,6 +2512,10 @@ export default {
         this.filterOptions.selectedGainLoss.splice(index, 1);
       }
     },
+    toggleUnchangedFilter() {
+      this.filterOptions.selectedUnchanged =
+        !this.filterOptions.selectedUnchanged;
+    },
     toggleFilterSection() {
       this.showFilterSection = !this.showFilterSection;
     },
@@ -2882,6 +2536,7 @@ export default {
         selectedTypes: [],
         selectedPlacements: [],
         selectedGainLoss: [],
+        selectedUnchanged: false,
       };
       this.currentPage = 1;
     },
@@ -2901,87 +2556,16 @@ export default {
     },
     async fetchPlayerPoints(playerId) {
       try {
+        this.loading.points = true;
         const response = await axios.get(
           `${API_BASE_URL}/players/${playerId}/points`
         );
         this.pointsHistory = response.data;
-        this.updateChartData();
+        this.loading.points = false;
       } catch (error) {
         console.error("Error fetching player points:", error);
-      }
-    },
-    updateChartData() {
-      if (!this.pointsHistory.length) {
         this.loading.points = false;
-        return;
       }
-
-      const sortedData = [...this.pointsHistory].sort(
-        (a, b) => a.date - b.date
-      );
-
-      const filterDuplicates = (data, pointsKey, rankKey) => {
-        return data.filter((point, index) => {
-          if (index === 0) return true;
-
-          const prev = data[index - 1];
-          return (
-            point[pointsKey] !== prev[pointsKey] ||
-            point[rankKey] !== prev[rankKey]
-          );
-        });
-      };
-
-      const filteredOverallData = filterDuplicates(
-        sortedData,
-        "overall_points",
-        "overall_rank"
-      );
-      const filteredSoldierData = filterDuplicates(
-        sortedData,
-        "soldier_points",
-        "soldier_rank"
-      );
-      const filteredDemomanData = filterDuplicates(
-        sortedData,
-        "demoman_points",
-        "demoman_rank"
-      );
-
-      this.overallChartSeries = [
-        {
-          name: "Overall Points",
-          data: filteredOverallData.map((point) => ({
-            x: point.date * 1000,
-            y: point.overall_points,
-            overall_rank: point.overall_rank,
-          })),
-        },
-      ];
-
-      this.soldierChartSeries = [
-        {
-          name: "Soldier Points",
-          data: filteredSoldierData.map((point) => ({
-            x: point.date * 1000,
-            y: point.soldier_points,
-            soldier_rank: point.soldier_rank,
-          })),
-        },
-      ];
-
-      this.demomanChartSeries = [
-        {
-          name: "Demoman Points",
-          data: filteredDemomanData.map((point) => ({
-            x: point.date * 1000,
-            y: point.demoman_points,
-            demoman_rank: point.demoman_rank,
-          })),
-        },
-      ];
-
-      this.loading.points = false;
     },
     goToRecords(mapId) {
       this.$router.push({
@@ -3558,10 +3142,6 @@ export default {
     box-shadow: 0 0 5px gold;
   }
 }
-.vue-apexcharts {
-  min-height: 200px !important;
-  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.75);
-}
 .avatar {
   width: 96px;
   height: 96px;
@@ -3974,7 +3554,6 @@ export default {
   border-bottom: 8px solid transparent;
   border-left: 9px solid rgba(255, 255, 255, 0.3);
 }
-
 .stat-type-label {
   color: var(--color-text);
   font-size: 1rem;
@@ -3983,15 +3562,9 @@ export default {
   margin-bottom: 0;
   text-transform: capitalize;
 }
-
 .card-body {
   position: relative;
   padding: 20px;
-}
-.chart-body {
-  padding: 0px 10px !important;
-  border-radius: 0 0 10px 10px !important;
-  margin-bottom: 20px;
 }
 .card-row {
   padding: 0px 15px 10px 15px;
@@ -4254,19 +3827,6 @@ export default {
 }
 .tabs-header .btn {
   flex: 1;
-}
-.chart-container {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 0 5px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  margin-bottom: 20px;
-  color: #fff;
-}
-.chart-header {
-  margin-bottom: 10px;
-  margin-top: 10px;
-  color: var(--color-text);
 }
 .stats-boxes {
   flex: 1;
@@ -5212,6 +4772,80 @@ export default {
 
   .class-option span {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 567px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-banner {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .stat-block,
+  .records-card {
+    max-width: 340px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .stats-container {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .rotw-grid,
+  .map-grid,
+  .author-map-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    overflow-x: hidden;
+    gap: 15px;
+  }
+
+  .map-container,
+  .rotw-container {
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .map-card,
+  .rotw-card {
+    max-width: 320px;
+  }
+
+  .main-content-wrapper {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .stats-boxes,
+  .tabs-container {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .row.g-0 {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .col-md-4 {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  :deep(.global-btn),
+  :deep(.global-btn.active) {
+    font-size: 0.8rem !important;
+    padding: 10px !important;
   }
 }
 </style>
