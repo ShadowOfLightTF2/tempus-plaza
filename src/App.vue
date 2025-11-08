@@ -299,13 +299,13 @@
               >
                 <i class="bi bi-steam"></i> Login with Steam
               </button>
-
               <div v-if="user && user.steamid" class="dropdown">
                 <button
                   class="btn dropdown-toggle d-flex align-items-center"
                   type="button"
                   id="playerDropdown"
                   data-bs-toggle="dropdown"
+                  data-bs-display="static"
                   aria-expanded="false"
                   style="color: var(--color-text); font-weight: bold"
                 >
@@ -1274,26 +1274,6 @@ body {
     margin-bottom: 0;
   }
 
-  .search-container {
-    width: 100%;
-    margin: 1rem 0;
-    display: flex;
-    justify-content: center;
-  }
-
-  .search-input {
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .search-results-dropdown {
-    width: 90vw;
-    max-width: 300px;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 50px !important;
-  }
-
   .navbar {
     font-size: medium;
   }
@@ -1301,12 +1281,6 @@ body {
   .navbar-right {
     flex-direction: column;
     align-items: center;
-    width: 100%;
-  }
-
-  .search-container {
-    margin-right: 0 !important;
-    margin-bottom: 1rem;
     width: 100%;
   }
 
@@ -1339,6 +1313,30 @@ body {
 </style>
 
 <style scoped>
+@media (max-width: 768px) {
+  .search-container {
+    width: 100%;
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+    margin-right: 0 !important;
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .search-results-dropdown {
+    width: 90vw;
+    max-width: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 50px !important;
+  }
+}
 .update-banner {
   background: linear-gradient(135deg, #ff6b35, #f7931e);
   color: white;
@@ -1478,6 +1476,37 @@ body {
   border-radius: 12px !important;
   padding: 0.25rem 0;
   backdrop-filter: blur(6px);
+}
+
+.dropdown-menu[data-bs-popper] {
+  margin-top: 8px !important;
+}
+
+@media (max-width: 991px) {
+  .dropdown-menu {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 991px) and (max-height: 1115px) {
+  .dropdown-menu {
+    position: absolute !important;
+    bottom: 100% !important;
+    top: auto !important;
+    transform: translateY(-8px) !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-width: max-content !important;
+  }
+
+  .dropdown-menu[data-bs-popper] {
+    bottom: 100% !important;
+    top: auto !important;
+    transform: translateY(-8px) !important;
+    margin-top: 0 !important;
+  }
 }
 
 .dropdown-item {

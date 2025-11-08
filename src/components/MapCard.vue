@@ -121,9 +121,7 @@
 
         <div v-if="currentView === 'maps'" class="map-date-added">
           Date Added:
-          {{
-            formatDate(new Date(item.date_added * 1000).toLocaleDateString())
-          }}
+          {{ formatDate(item.date_added * 1000) }}
         </div>
       </div>
     </div>

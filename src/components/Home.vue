@@ -88,24 +88,20 @@
             </div>
           </div>
         </div>
-        <hr class="divider" style="width: 100%" />
-        <div class="tempus-cup-wrapper">
+        <hr v-if="tempusCupActive === 1" class="divider" style="width: 100%" />
+        <div v-if="tempusCupActive === 1" class="tempus-cup-wrapper">
           <div class="tempus-cup-container">
             <div class="tempus-cup-header">
               <h3 class="cup-title">TEMPUS CUP 2</h3>
-              <p class="cup-subtitle">Phase {{ currentPhase }} of 3</p>
-              <p class="cup-dates">
-                {{
-                  new Date(
-                    tempusCupPhases[currentPhase - 1].startDate
-                  ).toLocaleDateString()
-                }}
+              <p class="cup-subtitle">Stage {{ currentPhase }} of 3</p>
+              <p
+                class="cup-dates"
+                v-if="currentPhase > 0 && tempusCupPhases[currentPhase - 1]"
+              >
+                {{ formatDate(tempusCupPhases[currentPhase - 1].startDate) }}
                 -
-                {{
-                  new Date(
-                    tempusCupPhases[currentPhase - 1].endDate
-                  ).toLocaleDateString()
-                }}
+                {{ formatDate(tempusCupPhases[currentPhase - 1].endDate) }}
+                | {{ timeUntilNextPhase }}
               </p>
             </div>
             <div class="phase-content">
@@ -118,37 +114,51 @@
                       alt="Soldier"
                       class="class-icon-medium"
                     />
-                    <span>Top 10 - Phase {{ selectedSoldierPhase }}</span>
+                    <span>
+                      Top 10<span v-if="selectedSoldierPhase > 0">
+                        - Stage {{ selectedSoldierPhase }}</span
+                      >
+                    </span>
                   </div>
-                  <SmartLink
-                    v-for="(record, index) in phaseRecords.soldier"
-                    :key="record.id"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: record.player_id },
-                    }"
-                    class="record-item"
-                    :class="{
-                      'record-gold': index === 0,
-                      'record-silver': index === 1,
-                      'record-bronze': index === 2,
-                    }"
-                  >
-                    <div class="record-rank">{{ index + 1 }}</div>
-                    <img
-                      :src="record.steam_avatar"
-                      alt="Avatar"
-                      class="record-avatar"
-                    />
-                    <div class="record-info">
-                      <div class="record-player-name">
-                        {{ record.name }}
+                  <template v-for="i in 10" :key="i">
+                    <SmartLink
+                      v-if="phaseRecords?.soldier?.[i - 1]"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: {
+                          playerId: phaseRecords.soldier[i - 1].player_id,
+                        },
+                      }"
+                      class="record-item"
+                      :class="{
+                        'record-gold': i === 1,
+                        'record-silver': i === 2,
+                        'record-bronze': i === 3,
+                      }"
+                    >
+                      <div class="record-rank">{{ i }}</div>
+                      <img
+                        :src="phaseRecords.soldier[i - 1].steam_avatar"
+                        alt="Avatar"
+                        class="record-avatar"
+                      />
+                      <div class="record-info">
+                        <div class="record-player-name">
+                          {{ phaseRecords.soldier[i - 1].name }}
+                        </div>
+                        <div class="record-time">
+                          {{ formatTime(phaseRecords.soldier[i - 1].duration) }}
+                        </div>
                       </div>
-                      <div class="record-time">
-                        {{ formatTime(record.duration) }}
+                    </SmartLink>
+
+                    <div v-else class="record-item record-empty">
+                      <div class="record-rank">{{ i }}</div>
+                      <div class="record-info">
+                        <div class="record-player-name empty-text">—</div>
                       </div>
                     </div>
-                  </SmartLink>
+                  </template>
                 </div>
                 <div v-else class="loading-container">
                   <div class="loading-spinner"></div>
@@ -160,290 +170,290 @@
               <div class="maps-center">
                 <!-- Phase 1 Soldier Map -->
                 <div
-                  @click="isPhaseActive(1) && selectMap(1, 'soldier')"
+                  @click="
+                    isPhaseActive(1) &&
+                      handleMapClick(
+                        1,
+                        'soldier',
+                        tempusCupPhases[0].soldierMap.id
+                      )
+                  "
                   class="cup-map-card soldier-map"
                   :class="{
                     'map-locked': !isPhaseActive(1),
                     'map-selected': selectedSoldierPhase === 1,
                   }"
-                  :style="
-                    isPhaseActive(1)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[0].soldierMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[0].soldierMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(1)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 1</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Soldier</h5>
-                    <h3>{{ tempusCupPhases[0].soldierMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[0].soldierMap.soldier_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[0].soldierMap.soldier_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(1)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Soldier</h5>
+                  <h3>{{ tempusCupPhases[0].soldierMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[0].soldierMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[0].soldierMap.soldier_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[0].soldierMap.soldier_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Phase 1 Demoman Map -->
                 <div
-                  @click="isPhaseActive(1) && selectMap(1, 'demoman')"
+                  @click="
+                    isPhaseActive(1) &&
+                      handleMapClick(
+                        1,
+                        'demoman',
+                        tempusCupPhases[0].demomanMap.id
+                      )
+                  "
                   class="cup-map-card demoman-map"
                   :class="{
                     'map-locked': !isPhaseActive(1),
                     'map-selected': selectedDemomanPhase === 1,
                   }"
-                  :style="
-                    isPhaseActive(1)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[0].demomanMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[0].demomanMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(1)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 1</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Demoman</h5>
-                    <h3>{{ tempusCupPhases[0].demomanMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[0].demomanMap.demoman_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[0].demomanMap.demoman_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(1)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Demoman</h5>
+                  <h3>{{ tempusCupPhases[0].demomanMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[0].demomanMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[0].demomanMap.demoman_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[0].demomanMap.demoman_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Phase 2 Soldier Map -->
                 <div
-                  @click="isPhaseActive(2) && selectMap(2, 'soldier')"
+                  @click="
+                    isPhaseActive(2) &&
+                      handleMapClick(
+                        2,
+                        'soldier',
+                        tempusCupPhases[1].soldierMap.id
+                      )
+                  "
                   class="cup-map-card soldier-map"
                   :class="{
                     'map-locked': !isPhaseActive(2),
                     'map-selected': selectedSoldierPhase === 2,
                   }"
-                  :style="
-                    isPhaseActive(2)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[1].soldierMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[1].soldierMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(2)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 2</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Soldier</h5>
-                    <h3>{{ tempusCupPhases[1].soldierMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[1].soldierMap.soldier_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[1].soldierMap.soldier_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(2)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Soldier</h5>
+                  <h3>{{ tempusCupPhases[1].soldierMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[1].soldierMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[1].soldierMap.soldier_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[1].soldierMap.soldier_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Phase 2 Demoman Map -->
                 <div
-                  @click="isPhaseActive(2) && selectMap(2, 'demoman')"
+                  @click="
+                    isPhaseActive(2) &&
+                      handleMapClick(
+                        2,
+                        'demoman',
+                        tempusCupPhases[1].demomanMap.id
+                      )
+                  "
                   class="cup-map-card demoman-map"
                   :class="{
                     'map-locked': !isPhaseActive(2),
                     'map-selected': selectedDemomanPhase === 2,
                   }"
-                  :style="
-                    isPhaseActive(2)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[1].demomanMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[1].demomanMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(2)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 2</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Demoman</h5>
-                    <h3>{{ tempusCupPhases[1].demomanMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[1].demomanMap.demoman_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[1].demomanMap.demoman_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(2)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Demoman</h5>
+                  <h3>{{ tempusCupPhases[1].demomanMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[1].demomanMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[1].demomanMap.demoman_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[1].demomanMap.demoman_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Phase 3 Soldier Map -->
                 <div
-                  @click="isPhaseActive(3) && selectMap(3, 'soldier')"
+                  @click="
+                    isPhaseActive(3) &&
+                      handleMapClick(
+                        3,
+                        'soldier',
+                        tempusCupPhases[2].soldierMap.id
+                      )
+                  "
                   class="cup-map-card soldier-map"
                   :class="{
                     'map-locked': !isPhaseActive(3),
                     'map-selected': selectedSoldierPhase === 3,
                   }"
-                  :style="
-                    isPhaseActive(3)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[2].soldierMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[2].soldierMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(3)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 3</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Soldier</h5>
-                    <h3>{{ tempusCupPhases[2].soldierMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[2].soldierMap.soldier_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[2].soldierMap.soldier_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(3)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Soldier</h5>
+                  <h3>{{ tempusCupPhases[2].soldierMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[2].soldierMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[2].soldierMap.soldier_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[2].soldierMap.soldier_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
 
                 <!-- Phase 3 Demoman Map -->
                 <div
-                  @click="isPhaseActive(3) && selectMap(3, 'demoman')"
+                  @click="
+                    isPhaseActive(3) &&
+                      handleMapClick(
+                        3,
+                        'demoman',
+                        tempusCupPhases[2].demomanMap.id
+                      )
+                  "
                   class="cup-map-card demoman-map"
                   :class="{
                     'map-locked': !isPhaseActive(3),
                     'map-selected': selectedDemomanPhase === 3,
                   }"
-                  :style="
-                    isPhaseActive(3)
-                      ? {
-                          background: `
-      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      url('/map-backgrounds/medium/${tempusCupPhases[2].demomanMap.name}.jpg') center/cover no-repeat
-    `,
-                          backgroundBlendMode: 'multiply, normal, normal',
-                          backgroundSize: 'cover, cover, cover',
-                          backgroundPosition: 'center, center, center',
-                        }
-                      : {}
-                  "
+                  :style="{
+                    background: `
+                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      url('/map-backgrounds/medium/${tempusCupPhases[2].demomanMap.name}.jpg') center/cover no-repeat
+                    `,
+                    backgroundBlendMode: 'multiply, normal, normal',
+                    backgroundSize: 'cover, cover, cover',
+                    backgroundPosition: 'center, center, center',
+                  }"
                 >
-                  <div v-if="!isPhaseActive(3)" class="locked-overlay">
-                    <div class="lock-icon">?</div>
-                    <div class="lock-text">Phase 3</div>
-                  </div>
-                  <template v-else>
-                    <h5 class="section-subtitle">Demoman</h5>
-                    <h3>{{ tempusCupPhases[2].demomanMap.name }}</h3>
-                    <div class="compact-ratings-grid">
-                      <div class="rating-section">
-                        <div class="rating-pills">
-                          <span
-                            class="rating-pill tier-color"
-                            :class="
-                              'tier-' +
-                              tempusCupPhases[2].demomanMap.demoman_tier
-                            "
-                          >
-                            T{{ tempusCupPhases[2].demomanMap.demoman_tier }}
-                          </span>
-                        </div>
+                  <div v-if="!isPhaseActive(3)" class="locked-overlay"></div>
+                  <h5 class="section-subtitle">Demoman</h5>
+                  <h3>{{ tempusCupPhases[2].demomanMap.name }}</h3>
+                  <p class="mapper-name">
+                    by {{ tempusCupPhases[2].demomanMap.mapper }}
+                  </p>
+                  <div class="compact-ratings-grid">
+                    <div class="rating-section">
+                      <div class="rating-pills">
+                        <span
+                          class="rating-pill tier-color"
+                          :class="
+                            'tier-' + tempusCupPhases[2].demomanMap.demoman_tier
+                          "
+                        >
+                          T{{ tempusCupPhases[2].demomanMap.demoman_tier }}
+                        </span>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
               </div>
 
@@ -456,37 +466,51 @@
                       alt="Demoman"
                       class="class-icon-medium"
                     />
-                    <span>Top 10 - Phase {{ selectedDemomanPhase }}</span>
+                    <span>
+                      Top 10<span v-if="selectedSoldierPhase > 0">
+                        - Stage {{ selectedDemomanPhase }}</span
+                      >
+                    </span>
                   </div>
-                  <SmartLink
-                    v-for="(record, index) in phaseRecords.demoman"
-                    :key="record.id"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: record.player_id },
-                    }"
-                    class="record-item"
-                    :class="{
-                      'record-gold': index === 0,
-                      'record-silver': index === 1,
-                      'record-bronze': index === 2,
-                    }"
-                  >
-                    <div class="record-rank">{{ index + 1 }}</div>
-                    <img
-                      :src="record.steam_avatar"
-                      alt="Avatar"
-                      class="record-avatar"
-                    />
-                    <div class="record-info">
-                      <div class="record-player-name">
-                        {{ record.name }}
+                  <template v-for="i in 10" :key="i">
+                    <SmartLink
+                      v-if="phaseRecords.demoman[i - 1]"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: {
+                          playerId: phaseRecords.demoman[i - 1].player_id,
+                        },
+                      }"
+                      class="record-item"
+                      :class="{
+                        'record-gold': i === 1,
+                        'record-silver': i === 2,
+                        'record-bronze': i === 3,
+                      }"
+                    >
+                      <div class="record-rank">{{ i }}</div>
+                      <img
+                        :src="phaseRecords.demoman[i - 1].steam_avatar"
+                        alt="Avatar"
+                        class="record-avatar"
+                      />
+                      <div class="record-info">
+                        <div class="record-player-name">
+                          {{ phaseRecords.demoman[i - 1].name }}
+                        </div>
+                        <div class="record-time">
+                          {{ formatTime(phaseRecords.demoman[i - 1].duration) }}
+                        </div>
                       </div>
-                      <div class="record-time">
-                        {{ formatTime(record.duration) }}
+                    </SmartLink>
+
+                    <div v-else class="record-item record-empty">
+                      <div class="record-rank">{{ i }}</div>
+                      <div class="record-info">
+                        <div class="record-player-name empty-text">—</div>
                       </div>
                     </div>
-                  </SmartLink>
+                  </template>
                 </div>
                 <div v-else class="loading-container">
                   <div class="loading-spinner"></div>
@@ -598,7 +622,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/medium/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -660,7 +684,7 @@
                   background: `
                     linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                    url('/map-backgrounds/thumbnails/${map.name}.jpg') center/cover no-repeat
+                    url('/map-backgrounds/medium/${map.name}.jpg') center/cover no-repeat
                   `,
                   backgroundBlendMode: 'multiply, normal, normal',
                   backgroundSize: 'cover, cover, cover',
@@ -758,221 +782,68 @@ export default {
   },
   data() {
     return {
+      timeUntilNextPhase: "",
+      countdownInterval: null,
+      tempusCupActive: 1,
+      currentPhase: 1,
       tempusCupPhases: [
         {
           phase: 1,
-          startDate: "2025-10-10",
-          endDate: "2025-10-14",
+          startDate: "2025-11-03",
+          endDate: "2025-11-09",
           soldierMap: {
-            id: 708,
-            name: "jump_relicta_rc2",
+            id: 799,
+            name: "jump_oblivius",
             soldier_tier: 2,
+            mapper: "Finn",
           },
           demomanMap: {
-            id: 709,
-            name: "jump_beryllium_v5",
+            id: 800,
+            name: "jump_terminal",
             demoman_tier: 2,
+            mapper: "Waldo",
           },
         },
         {
           phase: 2,
-          startDate: "2025-10-14",
-          endDate: "2025-10-25",
+          startDate: "2025-11-10",
+          endDate: "2025-11-16",
           soldierMap: {
-            id: 710,
-            name: "jump_vespertine_rc3",
+            id: 801,
+            name: "jump_ambition",
             soldier_tier: 4,
+            mapper: "Tev",
           },
           demomanMap: {
-            id: 711,
-            name: "jump_causatham_rc5",
-            demoman_tier: 4,
+            id: 802,
+            name: "jump_marid",
+            demoman_tier: 3,
+            mapper: "Myria",
           },
         },
         {
           phase: 3,
           startDate: "2025-11-17",
-          endDate: "2025-11-24",
+          endDate: "2025-11-23",
           soldierMap: {
-            id: 712,
-            name: "jump_ember_rc6",
+            id: 803,
+            name: "jump_covert",
             soldier_tier: 5,
+            mapper: "Maxxy",
           },
           demomanMap: {
-            id: 713,
-            name: "jump_and",
+            id: 804,
+            name: "jump_boron",
             demoman_tier: 5,
+            mapper: "879m",
           },
         },
       ],
-      currentPhase: 1,
-      selectedSoldierPhase: 1,
-      selectedDemomanPhase: 1,
+      selectedSoldierPhase: null,
+      selectedDemomanPhase: null,
       phaseRecords: {
-        soldier: [
-          {
-            id: 1,
-            player_id: 101,
-            name: "speedrunner123",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 45.123,
-          },
-          {
-            id: 2,
-            player_id: 102,
-            name: "jump_master",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 46.789,
-          },
-          {
-            id: 3,
-            player_id: 103,
-            name: "rocket_wizard",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 47.456,
-          },
-          {
-            id: 4,
-            player_id: 104,
-            name: "pogo_king",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 48.234,
-          },
-          {
-            id: 5,
-            player_id: 105,
-            name: "airshot_pro",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 49.012,
-          },
-          {
-            id: 6,
-            player_id: 106,
-            name: "sync_legend",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 50.567,
-          },
-          {
-            id: 7,
-            player_id: 107,
-            name: "tempus_hero",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 51.89,
-          },
-          {
-            id: 8,
-            player_id: 108,
-            name: "jump_veteran",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 52.345,
-          },
-          {
-            id: 9,
-            player_id: 109,
-            name: "marathon_man",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 53.678,
-          },
-          {
-            id: 10,
-            player_id: 110,
-            name: "tf2_jumper",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 54.901,
-          },
-        ],
-        demoman: [
-          {
-            id: 11,
-            player_id: 201,
-            name: "sticky_expert",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 42.567,
-          },
-          {
-            id: 12,
-            player_id: 202,
-            name: "demo_warrior",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 43.89,
-          },
-          {
-            id: 13,
-            player_id: 203,
-            name: "pipe_dream",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 44.234,
-          },
-          {
-            id: 14,
-            player_id: 204,
-            name: "bomb_squad",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 45.678,
-          },
-          {
-            id: 15,
-            player_id: 205,
-            name: "highland_hero",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 46.123,
-          },
-          {
-            id: 16,
-            player_id: 206,
-            name: "kaboom_king",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 47.456,
-          },
-          {
-            id: 17,
-            player_id: 207,
-            name: "demo_god",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 48.789,
-          },
-          {
-            id: 18,
-            player_id: 208,
-            name: "sticky_master",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 49.012,
-          },
-          {
-            id: 19,
-            player_id: 209,
-            name: "explosion_ace",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 50.345,
-          },
-          {
-            id: 20,
-            player_id: 210,
-            name: "charge_champion",
-            steam_avatar:
-              "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-            duration: 51.678,
-          },
-        ],
+        soldier: [],
+        demoman: [],
       },
       loadingRecords: false,
       playerData: {},
@@ -989,37 +860,21 @@ export default {
     };
   },
   computed: {
-    currentPhase() {
-      const today = new Date();
-      for (let i = 0; i < this.tempusCupPhases.length; i++) {
-        const phase = this.tempusCupPhases[i];
-        const start = new Date(phase.startDate);
-        const end = new Date(phase.endDate);
-        if (today >= start && today <= end) {
-          return i + 1;
-        }
-      }
-      // If no active phase, return the last phase
-      return this.tempusCupPhases.length;
-    },
     cleanMapName() {
       return (mapName) => {
         return mapName.replace(/^jump_/, "").replace(/_[a-zA-Z0-9_]*$/, "");
       };
     },
-
     getClassIcon() {
       return (playerClass) => {
         return `/icons/${playerClass}.png`;
       };
     },
-
     getPlayerAvatar() {
       return (playerId) => {
         return this.playerData[playerId]?.steam_avatar || "";
       };
     },
-
     getPlayerCountryCode() {
       return (playerId) => {
         const tournamentPlayer = this.asiaTeamPlayers.find(
@@ -1031,7 +886,6 @@ export default {
         return this.playerData[playerId]?.country_code || "us";
       };
     },
-
     getPlayerCountry() {
       return (playerId) => {
         const tournamentPlayer = this.asiaTeamPlayers.find(
@@ -1043,7 +897,6 @@ export default {
         return this.playerData[playerId]?.country || "Unknown";
       };
     },
-
     getPlayerRankForClass() {
       return (playerId, playerClass) => {
         const playerData = this.playerData[playerId];
@@ -1054,19 +907,16 @@ export default {
           : playerData.demoman_rank || "N/A";
       };
     },
-
     getPlayerSoldierRank() {
       return (playerId) => {
         return this.playerData[playerId]?.soldier_rank || "N/A";
       };
     },
-
     getPlayerDemoRank() {
       return (playerId) => {
         return this.playerData[playerId]?.demoman_rank || "N/A";
       };
     },
-
     getFlagImageUrl() {
       return (countryCode) => {
         const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
@@ -1075,13 +925,11 @@ export default {
         return `https://flagcdn.com/24x18/${validCode}.png`;
       };
     },
-
     sanitize() {
       return (text) => {
         return DOMPurify.sanitize(text);
       };
     },
-
     formatDate() {
       return (dateString) => {
         const options = { year: "numeric", month: "short", day: "numeric" };
@@ -1090,6 +938,82 @@ export default {
     },
   },
   methods: {
+    updateCountdown() {
+      const now = new Date();
+      let targetDate;
+      let messagePrefix;
+
+      // Check if we're before phase 1 starts
+      const phase1Start = new Date(
+        `${this.tempusCupPhases[0].startDate}T00:00:00-05:00`
+      );
+
+      if (now < phase1Start) {
+        // Before tournament starts
+        targetDate = phase1Start;
+        messagePrefix = "Starts in";
+      } else if (this.currentPhase < 3) {
+        // Time until next phase starts
+        const nextPhase = this.tempusCupPhases[this.currentPhase];
+        targetDate = new Date(`${nextPhase.startDate}T00:00:00-05:00`);
+        messagePrefix = "Next stage in";
+      } else {
+        // Time until current phase ends
+        const currentPhaseData = this.tempusCupPhases[this.currentPhase - 1];
+        targetDate = new Date(`${currentPhaseData.endDate}T23:59:59-05:00`);
+        messagePrefix = "Stage ends in";
+      }
+
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        this.timeUntilNextPhase = "";
+        this.calculateCurrentPhase();
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      this.timeUntilNextPhase = `${messagePrefix} ${days}d ${hours}h ${minutes}m`;
+    },
+    calculateCurrentPhase() {
+      const today = new Date();
+
+      for (let i = 0; i < this.tempusCupPhases.length; i++) {
+        const phase = this.tempusCupPhases[i];
+        const start = new Date(`${phase.startDate}T00:00:00-05:00`);
+        const end = new Date(`${phase.endDate}T23:59:59-05:00`);
+
+        if (today >= start && today <= end) {
+          this.currentPhase = i + 1;
+          this.selectedSoldierPhase = i + 1;
+          this.selectedDemomanPhase = i + 1;
+          return;
+        }
+      }
+
+      const phase3End = new Date(this.tempusCupPhases[2].endDate);
+      phase3End.setHours(23, 59, 59, 999);
+      this.currentPhase = today > phase3End ? 3 : 1;
+    },
+    handleMapClick(phase, classType, mapId) {
+      const isCurrentlySelected =
+        classType === "soldier"
+          ? this.selectedSoldierPhase === phase
+          : this.selectedDemomanPhase === phase;
+
+      if (isCurrentlySelected) {
+        // Navigate to map page if already selected
+        this.$router.push({ name: "MapPage", params: { mapId } });
+      } else {
+        // Select the map if not already selected
+        this.selectMap(phase, classType);
+      }
+    },
     selectMap(phase, classType) {
       if (classType === "soldier") {
         this.selectedSoldierPhase = phase;
@@ -1107,7 +1031,7 @@ export default {
           : phaseData.demomanMap.id;
 
       try {
-        const records = await this.fetchPhaseRecords(mapId, classType);
+        const records = await this.fetchPhaseRecords(mapId);
         this.phaseRecords[classType] =
           records && records.length > 0 ? records : [];
       } catch (error) {
@@ -1127,33 +1051,34 @@ export default {
       const start = new Date(phaseData.startDate);
       return today >= start;
     },
-
-    async fetchPhaseRecords(mapId, classType) {
+    async fetchPhaseRecords(mapId) {
       try {
-        const url = `${API_BASE_URL}/maps/${mapId}/null/records/${classType}/0/10`;
+        const url = `${API_BASE_URL}/tempus-cup/records/${mapId}`;
         const response = await axios.get(url);
         const records = response.data;
 
-        // Fetch player data for each record
         const recordsWithAvatars = await Promise.all(
           records.map(async (record) => {
             try {
               const playerResponse = await axios.get(
-                `${API_BASE_URL}/players/${record.id}`
+                `${API_BASE_URL}/players/${record.player_id}`
               );
               const playerData = playerResponse.data[0];
               return {
                 ...record,
                 steam_avatar: playerData.steam_avatar,
-                player_name: playerData.name,
+                name: playerData.name,
               };
             } catch (error) {
-              console.error(`Error fetching player ${record.id}:`, error);
+              console.error(
+                `Error fetching player ${record.player_id}:`,
+                error
+              );
               return {
                 ...record,
                 steam_avatar:
                   "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
-                player_name: record.player_name || `Player ${record.id}`,
+                name: record.player_name || `Player ${record.player_id}`,
               };
             }
           })
@@ -1161,11 +1086,10 @@ export default {
 
         return recordsWithAvatars;
       } catch (error) {
-        console.error(`Error fetching ${classType} records:`, error);
+        console.error(`Error fetching ${mapId} records:`, error);
         return [];
       }
     },
-
     formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = (seconds % 60).toFixed(3);
@@ -1317,6 +1241,9 @@ export default {
     },
   },
   mounted() {
+    this.calculateCurrentPhase();
+    this.updateCountdown();
+    this.countdownInterval = setInterval(this.updateCountdown, 60000);
     if (!this.updateInterval) {
       this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
     }
@@ -1330,6 +1257,10 @@ export default {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
+    }
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
     }
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
@@ -1945,6 +1876,15 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .search-container {
+    width: 95% !important;
+  }
+  .search-results-dropdown {
+    width: 90vw;
+    max-width: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
   .hero h1 {
     font-size: 2.5rem;
   }
@@ -2030,9 +1970,6 @@ export default {
   overflow: hidden;
 }
 
-.tempus-cup-container {
-}
-
 .phase-content {
   display: grid;
   grid-template-columns: auto auto auto;
@@ -2042,6 +1979,36 @@ export default {
   width: 100%;
   max-width: 1500px;
   margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .tempus-cup-wrapper {
+    width: 95% !important;
+  }
+  .phase-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "maps"
+      "soldier"
+      "demoman";
+    gap: 30px;
+  }
+
+  .maps-center {
+    grid-area: maps;
+  }
+
+  .demoman-section {
+    grid-area: demoman;
+  }
+
+  .soldier-section {
+    grid-area: soldier;
+  }
+
+  .cup-dates {
+    margin-bottom: 20px !important;
+  }
 }
 
 .phase-section {
@@ -2117,7 +2084,7 @@ export default {
 }
 
 .cup-map-card h3 {
-  margin: 15px 0;
+  margin: 15px 0 0;
   color: #ffffff;
   padding: 0 5px;
 }
@@ -2133,8 +2100,8 @@ export default {
 }
 
 .cup-map-card .rating-pill {
-  padding: 5px 10px;
-  font-size: 1.5rem;
+  padding: 8px;
+  font-size: 1rem;
   border-radius: 50%;
 }
 
@@ -2325,23 +2292,6 @@ export default {
 
 @media (max-width: 768px) {
   .tempus-cup-wrapper {
-    padding: 30px 15px;
-  }
-
-  .cup-title {
-    font-size: 2.5rem;
-  }
-
-  .cup-subtitle {
-    font-size: 1.2rem;
-  }
-
-  .tempus-cup-wrapper {
-    max-width: 100%;
-  }
-}
-@media (max-width: 560px) {
-  .tempus-cup-wrapper {
     padding: 20px 10px;
     max-width: 100%;
     width: 100%;
@@ -2397,7 +2347,7 @@ export default {
   }
 }
 .map-locked {
-  filter: blur(8px);
+  filter: blur(3px);
   cursor: not-allowed !important;
   position: relative;
 }
@@ -2418,28 +2368,28 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
+  background: transparent;
   z-index: 10;
-}
-
-.lock-icon {
-  font-size: 4rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-.lock-text {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 600;
+  pointer-events: none;
 }
 
 .cup-map-card {
   cursor: pointer;
+}
+
+.mapper-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0.25rem 0 0.5rem 0;
+  font-style: italic;
+}
+
+.record-empty {
+  opacity: 0.3;
+}
+
+.empty-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
 }
 </style>
