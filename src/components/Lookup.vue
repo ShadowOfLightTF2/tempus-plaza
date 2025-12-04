@@ -518,6 +518,13 @@
                 {{ totalRecordsLength() }} records</span
               >
             </div>
+            <button
+              @click="downloadAsCSV"
+              class="btn btn-success"
+              style="margin-left: 10px"
+            >
+              <span class="download-button">Download CSV</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1110,6 +1117,98 @@ export default {
     }
   },
   methods: {
+    downloadAsCSV() {
+      const data = this.filteredSortedItems;
+
+      if (data.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      // Define headers
+      const headers = [
+        this.playerId ? "Map" : "Player",
+        "Type",
+        "Class",
+        "Tier",
+        "Rating",
+        "Time",
+        "Rank",
+        "Completion",
+        "Percentile",
+        "Points",
+        "Date",
+        "Status",
+      ];
+
+      // Convert data to CSV rows
+      const rows = data.map((record) => {
+        const percentile =
+          record.rank && record.completion_count
+            ? ((record.rank / record.completion_count) * 100).toFixed(1) + "%"
+            : "";
+
+        const formattedDate =
+          record.date !== null
+            ? new Date(record.date * 1000).toISOString().split("T")[0]
+            : "";
+
+        let typeDisplay =
+          record.type.charAt(0).toUpperCase() + record.type.slice(1); // "Map", "Course", "Bonus"
+        if (record.type !== "map" && record.index) {
+          typeDisplay += " " + record.index; // "Course 1", "Bonus 2"
+        }
+
+        return [
+          this.playerId ? record.map_name : record.name || "Unknown",
+          typeDisplay,
+          record.class,
+          record.tier,
+          record.rating,
+          record.duration !== null ? this.formatDuration(record.duration) : "",
+          record.rank !== null ? record.rank : "",
+          record.completion_count || "",
+          percentile,
+          record.points !== null ? record.points : "",
+          formattedDate,
+          record.duration !== null ? "Complete" : "Incomplete",
+        ];
+      });
+
+      // Escape CSV values
+      const escapeCsv = (val) => {
+        const str = String(val);
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      // Build CSV content
+      const csvContent = [
+        headers.map(escapeCsv).join(","),
+        ...rows.map((row) => row.map(escapeCsv).join(",")),
+      ].join("\n");
+
+      // Create and trigger download (with BOM for Excel UTF-8 support)
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      const fileName = this.playerId
+        ? `${this.selectedPlayerName}_records.csv`
+        : `${this.selectedMapName}_records.csv`;
+
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    },
     formatMapDate(unixTimestamp) {
       const date = new Date(unixTimestamp * 1000);
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -1727,6 +1826,11 @@ export default {
   color: white;
   font-weight: bold;
   margin-top: 5px;
+}
+
+.download-button {
+  color: white;
+  font-weight: bold;
 }
 
 .filter-title {

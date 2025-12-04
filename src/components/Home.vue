@@ -93,16 +93,7 @@
           <div class="tempus-cup-container">
             <div class="tempus-cup-header">
               <h3 class="cup-title">TEMPUS CUP 2</h3>
-              <p class="cup-subtitle">Stage {{ currentPhase }} of 3</p>
-              <p
-                class="cup-dates"
-                v-if="currentPhase > 0 && tempusCupPhases[currentPhase - 1]"
-              >
-                {{ formatDate(tempusCupPhases[currentPhase - 1].startDate) }}
-                -
-                {{ formatDate(tempusCupPhases[currentPhase - 1].endDate) }}
-                | {{ timeUntilNextPhase }}
-              </p>
+              <p class="cup-subtitle">All stages finished!</p>
             </div>
             <div class="phase-content">
               <!-- Soldier Section (Left) -->
@@ -784,7 +775,7 @@ export default {
     return {
       timeUntilNextPhase: "",
       countdownInterval: null,
-      tempusCupActive: 1,
+      tempusCupActive: 0,
       currentPhase: 1,
       tempusCupPhases: [
         {
@@ -809,13 +800,13 @@ export default {
           startDate: "2025-11-10",
           endDate: "2025-11-16",
           soldierMap: {
-            id: 801,
+            id: 802,
             name: "jump_ambition",
             soldier_tier: 4,
-            mapper: "Tev",
+            mapper: "Tev & Finn",
           },
           demomanMap: {
-            id: 802,
+            id: 801,
             name: "jump_marid",
             demoman_tier: 3,
             mapper: "Myria",
@@ -824,17 +815,17 @@ export default {
         {
           phase: 3,
           startDate: "2025-11-17",
-          endDate: "2025-11-23",
+          endDate: "2025-12-23",
           soldierMap: {
-            id: 803,
+            id: 804,
             name: "jump_covert",
             soldier_tier: 5,
             mapper: "Maxxy",
           },
           demomanMap: {
-            id: 804,
+            id: 803,
             name: "jump_boron",
-            demoman_tier: 5,
+            demoman_tier: 4,
             mapper: "879m",
           },
         },
@@ -938,68 +929,6 @@ export default {
     },
   },
   methods: {
-    updateCountdown() {
-      const now = new Date();
-      let targetDate;
-      let messagePrefix;
-
-      // Check if we're before phase 1 starts
-      const phase1Start = new Date(
-        `${this.tempusCupPhases[0].startDate}T00:00:00-05:00`
-      );
-
-      if (now < phase1Start) {
-        // Before tournament starts
-        targetDate = phase1Start;
-        messagePrefix = "Starts in";
-      } else if (this.currentPhase < 3) {
-        // Time until next phase starts
-        const nextPhase = this.tempusCupPhases[this.currentPhase];
-        targetDate = new Date(`${nextPhase.startDate}T00:00:00-05:00`);
-        messagePrefix = "Next stage in";
-      } else {
-        // Time until current phase ends
-        const currentPhaseData = this.tempusCupPhases[this.currentPhase - 1];
-        targetDate = new Date(`${currentPhaseData.endDate}T23:59:59-05:00`);
-        messagePrefix = "Stage ends in";
-      }
-
-      const diff = targetDate - now;
-
-      if (diff <= 0) {
-        this.timeUntilNextPhase = "";
-        this.calculateCurrentPhase();
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-      this.timeUntilNextPhase = `${messagePrefix} ${days}d ${hours}h ${minutes}m`;
-    },
-    calculateCurrentPhase() {
-      const today = new Date();
-
-      for (let i = 0; i < this.tempusCupPhases.length; i++) {
-        const phase = this.tempusCupPhases[i];
-        const start = new Date(`${phase.startDate}T00:00:00-05:00`);
-        const end = new Date(`${phase.endDate}T23:59:59-05:00`);
-
-        if (today >= start && today <= end) {
-          this.currentPhase = i + 1;
-          this.selectedSoldierPhase = i + 1;
-          this.selectedDemomanPhase = i + 1;
-          return;
-        }
-      }
-
-      const phase3End = new Date(this.tempusCupPhases[2].endDate);
-      phase3End.setHours(23, 59, 59, 999);
-      this.currentPhase = today > phase3End ? 3 : 1;
-    },
     handleMapClick(phase, classType, mapId) {
       const isCurrentlySelected =
         classType === "soldier"
@@ -1044,12 +973,8 @@ export default {
         //this.loadingRecords = false;
       }
     },
-
     isPhaseActive(phase) {
-      const today = new Date();
-      const phaseData = this.tempusCupPhases[phase - 1];
-      const start = new Date(phaseData.startDate);
-      return today >= start;
+      return true;
     },
     async fetchPhaseRecords(mapId) {
       try {
@@ -1067,7 +992,7 @@ export default {
               return {
                 ...record,
                 steam_avatar: playerData.steam_avatar,
-                name: playerData.name,
+                name: record.player_name || playerData.name,
               };
             } catch (error) {
               console.error(
@@ -1241,17 +1166,15 @@ export default {
     },
   },
   mounted() {
-    this.calculateCurrentPhase();
-    this.updateCountdown();
-    this.countdownInterval = setInterval(this.updateCountdown, 60000);
-    if (!this.updateInterval) {
-      this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
-    }
     this.fetchTopPlayers();
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
-    this.loadPhaseRecords(1, "soldier");
-    this.loadPhaseRecords(1, "demoman");
+    const randomSoldierPhase = Math.floor(Math.random() * 3) + 1;
+    const randomDemomanPhase = Math.floor(Math.random() * 3) + 1;
+    this.selectedSoldierPhase = randomSoldierPhase;
+    this.selectedDemomanPhase = randomDemomanPhase;
+    this.loadPhaseRecords(randomSoldierPhase, "soldier");
+    this.loadPhaseRecords(randomDemomanPhase, "demoman");
   },
   beforeDestroy() {
     if (this.updateInterval) {
@@ -2042,7 +1965,7 @@ export default {
 }
 
 .cup-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
   text-transform: uppercase;

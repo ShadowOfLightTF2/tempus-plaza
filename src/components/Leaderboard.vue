@@ -603,15 +603,30 @@ export default {
         this.mapTiers.demoman.tier = map.demoman_tier || 0;
         this.mapTiers.demoman.rating = map.demoman_rating || 0;
 
-        this.courses = courses.map((c) => ({
-          soldier: { tier: c.soldier_tier || 0, rating: c.soldier_rating || 0 },
-          demoman: { tier: c.demoman_tier || 0, rating: c.demoman_rating || 0 },
-        }));
-
-        this.bonuses = bonuses.map((b) => ({
-          soldier: { tier: b.soldier_tier || 0, rating: b.soldier_rating || 0 },
-          demoman: { tier: b.demoman_tier || 0, rating: b.demoman_rating || 0 },
-        }));
+        this.courses = (courses || [])
+          .sort((a, b) => a.index - b.index)
+          .map((c) => ({
+            soldier: {
+              tier: c.soldier_tier || 0,
+              rating: c.soldier_rating || 0,
+            },
+            demoman: {
+              tier: c.demoman_tier || 0,
+              rating: c.demoman_rating || 0,
+            },
+          }));
+        this.bonuses = (bonuses || [])
+          .sort((a, b) => a.index - b.index)
+          .map((b) => ({
+            soldier: {
+              tier: b.soldier_tier || 0,
+              rating: b.soldier_rating || 0,
+            },
+            demoman: {
+              tier: b.demoman_tier || 0,
+              rating: b.demoman_rating || 0,
+            },
+          }));
       } catch (err) {
         console.error("Error fetching map data:", err);
         this.error = "Failed to fetch map data.";

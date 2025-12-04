@@ -685,7 +685,7 @@ export default {
         }
       }
     }
-    this.fetchDataForCurrentSelection(0);
+    this.fetchDataForCurrentSelection(0, "both");
   },
   computed: {
     formattedHeaderTitle() {
@@ -866,7 +866,7 @@ export default {
         e.target.src = fallback;
       }
     },
-    async fetchDataForCurrentSelection(index) {
+    async fetchDataForCurrentSelection(index, classType = "both") {
       if (this.initialLoad) {
         this.loading = true;
       }
@@ -883,14 +883,14 @@ export default {
 
         if (category === "completion") {
           this.points = false;
-          await this.fetchCompletions(type, index);
+          await this.fetchCompletions(type, index, classType);
           if (index === 0) await this.fetchUserRank();
           return;
         }
 
         if (category === "countries") {
           this.points = true;
-          await this.fetchCountries(index);
+          await this.fetchCountries(index, classType);
           if (index === 0) await this.fetchUserRank();
           return;
         }
@@ -910,7 +910,7 @@ export default {
           type = "maps";
         } else if (tableName === "groups") {
           if (type === "groups") {
-            await this.fetchPlayers(type, "total", cat, index);
+            await this.fetchPlayers(tableName, "total", cat, index, classType);
             if (index === 0) await this.fetchUserRank();
             return;
           } else {
@@ -925,7 +925,7 @@ export default {
 
         if (tableName === "tiers") cat = "total";
 
-        await this.fetchPlayers(tableName, type, cat, index);
+        await this.fetchPlayers(tableName, type, cat, index, classType);
         if (index === 0) await this.fetchUserRank();
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -936,7 +936,7 @@ export default {
         this.loadingDemomen = false;
       }
     },
-    async fetchCompletions(type, index) {
+    async fetchCompletions(type, index, classType = "both") {
       let indexFix = 0;
       if (index > 0) indexFix = 50;
 
@@ -954,8 +954,12 @@ export default {
         this.soldierPlayers = soldierPlayers;
         this.demomanPlayers = demomanPlayers;
       } else {
-        this.soldierPlayers = [...this.soldierPlayers, ...soldierPlayers];
-        this.demomanPlayers = [...this.demomanPlayers, ...demomanPlayers];
+        if (classType === "both" || classType === "soldier") {
+          this.soldierPlayers = [...this.soldierPlayers, ...soldierPlayers];
+        }
+        if (classType === "both" || classType === "demoman") {
+          this.demomanPlayers = [...this.demomanPlayers, ...demomanPlayers];
+        }
       }
     },
     async loadCountriesList() {
@@ -1001,7 +1005,7 @@ export default {
       this.filteredCountries = [...this.allCountries];
       this.searchQuery = "";
     },
-    async fetchCountries(index) {
+    async fetchCountries(index, classType = "both") {
       try {
         if (this.selectedItem === "Total") {
           if (index === 0) {
@@ -1065,14 +1069,21 @@ export default {
               "demoman_total_points"
             );
           } else {
-            this.soldierPlayers = [
-              ...this.soldierPlayers,
-              ...normalizePlayers(players.topSoldiers, "soldier_total_points"),
-            ];
-            this.demomanPlayers = [
-              ...this.demomanPlayers,
-              ...normalizePlayers(players.topDemomen, "demoman_total_points"),
-            ];
+            if (classType === "both" || classType === "soldier") {
+              this.soldierPlayers = [
+                ...this.soldierPlayers,
+                ...normalizePlayers(
+                  players.topSoldiers,
+                  "soldier_total_points"
+                ),
+              ];
+            }
+            if (classType === "both" || classType === "demoman") {
+              this.demomanPlayers = [
+                ...this.demomanPlayers,
+                ...normalizePlayers(players.topDemomen, "demoman_total_points"),
+              ];
+            }
           }
         }
       } catch (error) {
@@ -1135,12 +1146,12 @@ export default {
         this.searchQuery = "";
       }
 
-      this.currentSoldierIndex = 50;
-      this.currentDemomanIndex = 50;
       this.soldierPlayers = [];
       this.demomanPlayers = [];
+      this.currentSoldierIndex = 50;
+      this.currentDemomanIndex = 50;
 
-      await this.fetchDataForCurrentSelection(0);
+      await this.fetchDataForCurrentSelection(0, "both");
 
       this.$router.push({
         name: "Players",
@@ -1150,7 +1161,7 @@ export default {
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
     },
-    async fetchPlayers(tableName, type, category, index) {
+    async fetchPlayers(tableName, type, category, index, classType = "both") {
       try {
         let indexFix = 0;
         if (index > 0) indexFix = 50;
@@ -1164,8 +1175,12 @@ export default {
           this.soldierPlayers = players[0];
           this.demomanPlayers = players[1];
         } else {
-          this.soldierPlayers = [...this.soldierPlayers, ...players[0]];
-          this.demomanPlayers = [...this.demomanPlayers, ...players[1]];
+          if (classType === "both" || classType === "soldier") {
+            this.soldierPlayers = [...this.soldierPlayers, ...players[0]];
+          }
+          if (classType === "both" || classType === "demoman") {
+            this.demomanPlayers = [...this.demomanPlayers, ...players[1]];
+          }
         }
       } catch (error) {
         console.error("Error fetching players");
@@ -1174,12 +1189,12 @@ export default {
     loadMoreDemomen() {
       this.loadingDemomen = true;
       this.currentDemomanIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentDemomanIndex);
+      this.fetchDataForCurrentSelection(this.currentDemomanIndex, "demoman");
     },
     loadMoreSoldiers() {
       this.loadingSoldiers = true;
       this.currentSoldierIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentSoldierIndex);
+      this.fetchDataForCurrentSelection(this.currentSoldierIndex, "soldier");
     },
   },
   watch: {
@@ -1196,7 +1211,7 @@ export default {
               this.selectedCountry = foundCountry;
             }
           }
-          this.fetchDataForCurrentSelection(0);
+          this.fetchDataForCurrentSelection(0, "both");
         }
       },
       immediate: true,
