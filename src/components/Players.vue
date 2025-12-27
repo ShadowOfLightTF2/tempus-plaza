@@ -143,16 +143,7 @@
       >
         <div class="soldier-table-container">
           <div class="table-wrapper">
-            <div
-              class="header-content"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  rgba(74, 111, 165, 0.3),
-                  rgba(37, 55, 82, 0.3)
-                );
-              "
-            >
+            <div class="header-content">
               <img
                 src="/icons/soldier.png"
                 alt="Soldier Icon"
@@ -408,7 +399,6 @@
                     </th>
                   </tr>
                 </thead>
-                <tbody></tbody>
                 <tbody>
                   <!-- User's Rank Row for Demoman -->
                   <tr

@@ -1,6 +1,19 @@
 <template>
   <div id="app" @click="closeDropdown">
     <div
+      class="snowflake"
+      v-for="i in 8"
+      :key="'snow-' + i"
+      :style="{
+        left: i <= 4 ? i * 5 + '%' : 80 + (i - 4) * 5 + '%',
+        animationDuration: 3 + Math.random() * 5 + 's',
+        animationDelay: Math.random() * 5 + 's',
+        fontSize: 1 + Math.random() + 'rem',
+      }"
+    >
+      ❄️
+    </div>
+    <div
       v-if="showLoginPopup"
       class="login-popup-overlay"
       @click="closeLoginPopup"
@@ -110,6 +123,10 @@
       </div> -->
     </div>
     <nav class="navbar navbar-expand-lg bg-custom">
+      <div class="christmas-lights">
+        <div class="light" v-for="i in 30" :key="'light-' + i"></div>
+      </div>
+
       <div class="container-fluid">
         <button
           class="navbar-toggler"
@@ -530,6 +547,7 @@ export default {
       donator: 0,
       currentUser: null,
       isUpdating: false,
+      isAnnouncement: false,
       updatingPercentage: 0,
       updateDismissed: false,
       showTooltip: false,
@@ -606,6 +624,9 @@ export default {
     dismissUpdate() {
       this.updateDismissed = true;
       this.isUpdating = false;
+    },
+    dismissAnnouncement() {
+      this.showAnnouncement = false;
     },
     closeDropdown() {
       this.searchResults = null;
@@ -874,6 +895,87 @@ export default {
 </script>
 
 <style>
+/* Christmas lights */
+.christmas-lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 10px;
+  z-index: 1;
+}
+
+.light {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+.light:nth-child(5n + 1) {
+  background: #ff0000ce;
+  box-shadow: 0 0 10px #ff0000;
+  animation-delay: 0s;
+}
+
+.light:nth-child(5n + 2) {
+  background: #00ff00ce;
+  box-shadow: 0 0 10px #00ff00;
+  animation-delay: 0.3s;
+}
+
+.light:nth-child(5n + 3) {
+  background: #0000ffce;
+  box-shadow: 0 0 10px #0000ff;
+  animation-delay: 0.6s;
+}
+
+.light:nth-child(5n + 4) {
+  background: #ffff00ce;
+  box-shadow: 0 0 10px #ffff00;
+  animation-delay: 0.9s;
+}
+
+.light:nth-child(5n + 5) {
+  background: #ff00ffce;
+  box-shadow: 0 0 10px #ff00ff;
+  animation-delay: 1.2s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+.navbar .container-fluid {
+  position: relative;
+}
+
+.snowflake {
+  position: fixed;
+  top: -10px;
+  z-index: 0;
+  color: rgba(255, 255, 255, 0.397);
+  font-size: 1rem;
+  animation: fall linear infinite;
+  pointer-events: none;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
 body,
 html {
   margin: 0;
@@ -1346,7 +1448,17 @@ body {
   animation: slideDown 0.3s ease-out;
 }
 
-.update-banner-content {
+.announcement-banner {
+  background: linear-gradient(135deg, #b85b5b, #c24949);
+  color: white;
+  position: relative;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease-out;
+}
+
+.update-banner-content,
+.announcement-banner-content {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1356,7 +1468,8 @@ body {
   margin: 0 auto;
 }
 
-.update-icon {
+.update-icon,
+.announcement-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1368,14 +1481,16 @@ body {
   animation: spin 2s linear infinite;
 }
 
-.update-text {
-  font-weight: 500;
-  font-size: 14px;
+.update-text,
+.announcement-text {
+  font-weight: 600;
+  font-size: 16px;
   flex: 1;
   text-align: center;
 }
 
-.update-close {
+.update-close,
+.announcement-close {
   background: none;
   border: none;
   color: white;
@@ -1388,7 +1503,8 @@ body {
   justify-content: center;
 }
 
-.update-close:hover {
+.update-close:hover,
+.announcement-close:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 

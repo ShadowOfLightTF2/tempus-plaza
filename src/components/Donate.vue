@@ -12,9 +12,6 @@
             <span class="title-icon">❤️</span>
             Support Tempus Plaza
           </h1>
-          <p class="page-subtitle">
-            Help keep the servers running and unlock exclusive perks
-          </p>
         </div>
         <hr class="row-divider" style="width: 75%" />
         <div class="donation-section">
@@ -22,11 +19,12 @@
             <div class="donation-header">
               <h2 class="donation-title">Make a Donation</h2>
               <p class="donation-description">
-                Your support directly helps with maintaining server uptime,
-                improve website features, and upgrading the servers.
+                Donations are not necessary or needed in order to keep plaza
+                running. If you still would like to support me that is still
+                appreciated. Tempus Plaza is not associated or affiliated with
+                Tempus.
               </p>
             </div>
-
             <div class="donation-options">
               <a
                 href="https://ko-fi.com/shadowoflight"
@@ -45,7 +43,8 @@
                 <p class="instructions-text">
                   While donating, simply include your
                   <strong>Player ID</strong> in the Ko-fi message and your perks
-                  will activate within 24 hours!
+                  will activate within 24 hours! Any donation amount will unlock
+                  the perks
                 </p>
                 <div class="player-id-help">
                   <p class="help-text">
@@ -60,7 +59,7 @@
               </div>
             </div>
           </div>
-          <div class="perks-panel">
+          <!-- <div class="perks-panel">
             <h2 class="perks-title">
               <span class="perks-icon"></span>
               Donator Perks
@@ -108,7 +107,7 @@
                 perks with the minimum donation amount of €3,-.
               </p>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="preview-section">
           <h2 class="preview-title">{{ previewTitle }}</h2>
@@ -218,13 +217,13 @@
             </div>
           </div>
         </div>
-        <div class="thank-you-section">
+        <!-- <div class="thank-you-section">
           <h2 class="thank-you-title">Thank You!</h2>
           <p class="thank-you-text">
             Every donation, no matter the size, makes a real difference in
             keeping Tempus Plaza running smoothly and continuously improving.
           </p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
