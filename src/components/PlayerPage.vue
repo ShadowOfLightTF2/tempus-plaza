@@ -1123,7 +1123,7 @@
                   @click.stop="
                     toggleRotwVideo(
                       video.video_id,
-                      index % 2 === 0 ? 'left' : 'right'
+                      index % 2 === 0 ? 'left' : 'right',
                     )
                   "
                 >
@@ -1619,7 +1619,7 @@ export default {
   computed: {
     hasMapAtCurrentIndex() {
       const currentMap = this.favoriteMaps.find(
-        (map) => map.index === this.currentMapIndex
+        (map) => map.index === this.currentMapIndex,
       );
       return currentMap && currentMap.id !== null;
     },
@@ -1633,7 +1633,7 @@ export default {
       Object.keys(this.filteredAndPaginatedChangedPlacements || {}).forEach(
         (date) => {
           headers[date] = this.formatDateHeader(date);
-        }
+        },
       );
 
       return headers;
@@ -1642,7 +1642,7 @@ export default {
       const processed = {};
 
       for (const [date, placements] of Object.entries(
-        this.filteredAndPaginatedChangedPlacements
+        this.filteredAndPaginatedChangedPlacements,
       )) {
         processed[date] = placements.map((placement) => {
           let placementClass;
@@ -1705,7 +1705,7 @@ export default {
       return Math.min(
         this.player.overall_rank,
         this.player.soldier_rank,
-        this.player.demoman_rank
+        this.player.demoman_rank,
       );
     },
     playerRankInfo() {
@@ -1728,13 +1728,13 @@ export default {
     },
     hasFavoriteMaps() {
       return this.favoriteMaps.some(
-        (map) => map.name && map.name.trim() !== ""
+        (map) => map.name && map.name.trim() !== "",
       );
     },
 
     filteredFavoriteMaps() {
       return this.favoriteMaps.filter(
-        (map) => map.name && map.name.trim() !== ""
+        (map) => map.name && map.name.trim() !== "",
       );
     },
 
@@ -1828,16 +1828,16 @@ export default {
               // Check old_rank
               const oldRankMatches = this.checkPlacementMatch(
                 placement.old_rank,
-                selectedPlacement
+                selectedPlacement,
               );
               // Check new_rank
               const newRankMatches = this.checkPlacementMatch(
                 placement.new_rank,
-                selectedPlacement
+                selectedPlacement,
               );
 
               return oldRankMatches || newRankMatches;
-            }
+            },
           );
 
           if (!matchesPlacement) {
@@ -1866,7 +1866,7 @@ export default {
                 if (filter === "lost" && isGain) return true;
                 if (filter === "gained" && isLoss) return true;
                 return false;
-              }
+              },
             );
             if (matchesGainLoss) {
               matches = true;
@@ -2068,7 +2068,7 @@ export default {
     async fetchAuthoredMaps(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/maps-from-author`
+          `${API_BASE_URL}/players/${playerId}/maps-from-author`,
         );
         this.authoredMaps = response.data
           .map((map) => ({
@@ -2111,12 +2111,12 @@ export default {
     async fetchRotwVideos(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/rotw-videos`
+          `${API_BASE_URL}/players/${playerId}/rotw-videos`,
         );
 
         const uniqueVideos = response.data.filter(
           (video, index, self) =>
-            index === self.findIndex((v) => v.video_id === video.video_id)
+            index === self.findIndex((v) => v.video_id === video.video_id),
         );
 
         this.rotwVideos = uniqueVideos.map((video) => ({
@@ -2126,7 +2126,7 @@ export default {
 
         this.visibleRotwVideos = this.rotwVideos.slice(
           0,
-          this.rotwVideosPerPage
+          this.rotwVideosPerPage,
         );
       } catch (error) {
         console.error("Error fetching ROTW videos:", error);
@@ -2167,13 +2167,13 @@ export default {
     showAllAuthoredMaps() {
       this.visibleAuthoredMaps = [...this.authoredMaps];
       this.authoredMapsPage = Math.ceil(
-        this.authoredMaps.length / this.authoredMapsPerPage
+        this.authoredMaps.length / this.authoredMapsPerPage,
       );
     },
     closeAllAuthoredMaps() {
       this.visibleAuthoredMaps = this.authoredMaps.slice(
         0,
-        this.authoredMapsPerPage
+        this.authoredMapsPerPage,
       );
       this.authoredMapsPage = 1;
     },
@@ -2190,13 +2190,13 @@ export default {
     async loadPlayerPageData(playerId) {
       try {
         fetch(
-          `https://api.tempusplaza.xyz/players/${playerId}/update-player-last-seen`,
+          `https://api.tempusplaza.com/players/${playerId}/update-player-last-seen`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         this.currentUser = await this.fetchUser();
         await Promise.all([
@@ -2258,7 +2258,7 @@ export default {
       this.loading["Lost placements"] = true;
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/lost-records`
+          `${API_BASE_URL}/players/${playerId}/lost-records`,
         );
         const data = await response.json();
 
@@ -2279,10 +2279,10 @@ export default {
             points_change,
 
             oldRankDisplay: `${this.getMedal(old_rank)}${this.formatRankDisplay(
-              old_rank
+              old_rank,
             )}`,
             newRankDisplay: `${this.getMedal(new_rank)}${this.formatRankDisplay(
-              new_rank
+              new_rank,
             )}`,
             oldRankClass: this.getPlacementClass(old_rank),
             newRankClass: this.getPlacementClass(new_rank),
@@ -2361,7 +2361,7 @@ export default {
 
           console.log(
             "Search completed, results:",
-            this.mapSearchResults.length
+            this.mapSearchResults.length,
           );
         } catch (error) {
           console.error("Error searching for maps:", error);
@@ -2431,7 +2431,7 @@ export default {
           `${API_BASE_URL}/users/${currentUser.playerid}/update-favorite-maps/${mapId}/${index}/${classType}`,
           {
             method: "POST",
-          }
+          },
         );
 
         if (!response.ok)
@@ -2448,7 +2448,7 @@ export default {
           `${API_BASE_URL}/users/${currentUser.playerid}/remove-favorite-map/${index}`,
           {
             method: "DELETE",
-          }
+          },
         );
 
         if (!response.ok)
@@ -2558,7 +2558,7 @@ export default {
       try {
         this.loading.points = true;
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/points`
+          `${API_BASE_URL}/players/${playerId}/points`,
         );
         this.pointsHistory = response.data;
         this.loading.points = false;
@@ -2733,7 +2733,7 @@ export default {
     async fetchFavoriteMaps(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/users/${playerId}/get-favorite-maps`
+          `${API_BASE_URL}/users/${playerId}/get-favorite-maps`,
         );
         this.populateFavoriteMaps(response.data);
       } catch (error) {
@@ -2823,7 +2823,7 @@ export default {
     async fetchPlayerRanks(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/ranks`
+          `${API_BASE_URL}/players/${playerId}/ranks`,
         );
         const playerRanks = response.data[0];
         this.player.overall_rank = playerRanks.overall_rank;
@@ -2843,7 +2843,7 @@ export default {
     async fetchRecentRecords(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/recent-records`
+          `${API_BASE_URL}/players/${playerId}/recent-records`,
         );
 
         this.records.recentRecords = response.data.map((r) => ({
@@ -2866,7 +2866,7 @@ export default {
     async fetchPlayerStats(playerId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/stats`
+          `${API_BASE_URL}/players/${playerId}/stats`,
         );
         const stats = response.data;
         this.stats = {
@@ -2874,11 +2874,11 @@ export default {
             completion: {
               soldier:
                 Math.round(
-                  (stats.soldier.completion.total + Number.EPSILON) * 100
+                  (stats.soldier.completion.total + Number.EPSILON) * 100,
                 ) / 100,
               demoman:
                 Math.round(
-                  (stats.demoman.completion.total + Number.EPSILON) * 100
+                  (stats.demoman.completion.total + Number.EPSILON) * 100,
                 ) / 100,
             },
             worldRecordAmount: {
@@ -2908,11 +2908,11 @@ export default {
             completion: {
               soldier:
                 Math.round(
-                  (stats.soldier.completion.map + Number.EPSILON) * 100
+                  (stats.soldier.completion.map + Number.EPSILON) * 100,
                 ) / 100,
               demoman:
                 Math.round(
-                  (stats.demoman.completion.map + Number.EPSILON) * 100
+                  (stats.demoman.completion.map + Number.EPSILON) * 100,
                 ) / 100,
             },
             worldRecordAmount: {
@@ -2942,11 +2942,11 @@ export default {
             completion: {
               soldier:
                 Math.round(
-                  (stats.soldier.completion.course + Number.EPSILON) * 100
+                  (stats.soldier.completion.course + Number.EPSILON) * 100,
                 ) / 100,
               demoman:
                 Math.round(
-                  (stats.demoman.completion.course + Number.EPSILON) * 100
+                  (stats.demoman.completion.course + Number.EPSILON) * 100,
                 ) / 100,
             },
             worldRecordAmount: {
@@ -2976,11 +2976,11 @@ export default {
             completion: {
               soldier:
                 Math.round(
-                  (stats.soldier.completion.bonus + Number.EPSILON) * 100
+                  (stats.soldier.completion.bonus + Number.EPSILON) * 100,
                 ) / 100,
               demoman:
                 Math.round(
-                  (stats.demoman.completion.bonus + Number.EPSILON) * 100
+                  (stats.demoman.completion.bonus + Number.EPSILON) * 100,
                 ) / 100,
             },
             worldRecordAmount: {
@@ -3025,7 +3025,7 @@ export default {
         const fetchSharedData = async (classType, placement, isGroupOne) => {
           try {
             const response = await axios.get(
-              `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+              `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`,
             );
             return response.data;
           } catch (e) {
@@ -3033,7 +3033,7 @@ export default {
               `${classType} ${
                 isGroupOne ? "group1" : "top time"
               } fetch failed:`,
-              e
+              e,
             );
             return [];
           }
@@ -3042,7 +3042,7 @@ export default {
           classType,
           countProperty,
           sharedTypeProperty,
-          groupOnePlacement
+          groupOnePlacement,
         ) => {
           const placement = stats[countProperty] === 0 ? groupOnePlacement : 10;
           const isGroupOne = stats[countProperty] === 0;
@@ -3056,13 +3056,13 @@ export default {
             "soldier",
             "soldier_maps_count",
             "shared_soldier_type",
-            11
+            11,
           ),
           processClassData(
             "demoman",
             "demoman_maps_count",
             "shared_demoman_type",
-            11
+            11,
           ),
         ]);
         this.sharedTimesSoldier = Object.entries(sharedSoldiers).map(
@@ -3071,7 +3071,7 @@ export default {
             count: data.record_count,
             playerName: data.player_name,
             avatar: data.avatar,
-          })
+          }),
         );
         this.sharedTimesDemoman = Object.entries(sharedDemomans).map(
           ([_, data]) => ({
@@ -3079,7 +3079,7 @@ export default {
             count: data.record_count,
             playerName: data.player_name,
             avatar: data.avatar,
-          })
+          }),
         );
       } catch (error) {
         console.error("Error fetching shared top times:", error);

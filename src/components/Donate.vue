@@ -51,9 +51,9 @@
                     <span class="help-icon">💡</span>
                     Find your Player ID on your profile page URL:
                     <code v-if="isLoggedIn"
-                      >tempusplaza.xyz/players/{{ playerId }}</code
+                      >tempusplaza.com/players/{{ playerId }}</code
                     >
-                    <code v-else>tempusplaza.xyz/players/[YOUR_ID]</code>
+                    <code v-else>tempusplaza.com/players/[YOUR_ID]</code>
                   </p>
                 </div>
               </div>
@@ -439,7 +439,7 @@ export default {
 
       return (
         Math.min(
-          ...[overall_rank, soldier_rank, demoman_rank].filter(Boolean)
+          ...[overall_rank, soldier_rank, demoman_rank].filter(Boolean),
         ) || 10
       );
     },
@@ -501,7 +501,7 @@ export default {
             : defaultVal;
           if (format) value = this.formatNumber(value);
           return { title, value: `${prefix}${value}` };
-        }
+        },
       );
     },
 
@@ -606,7 +606,7 @@ export default {
       if (!playerId) return;
       try {
         const data = await cachedFetch(
-          `${API_BASE_URL}/players/${playerId}/ranks`
+          `${API_BASE_URL}/players/${playerId}/ranks`,
         );
         if (data?.length) {
           const ranks = data[0];

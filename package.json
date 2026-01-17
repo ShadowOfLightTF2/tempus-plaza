@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "homepage": "tempusplaza.xyz",
+  "homepage": "tempusplaza.com",
   "scripts": {
     "dev": "vite",
     "serve": "vue-cli-service serve",
     "build": "vite build",
-    "build:dev": "vite build --mode development && scp ./dist/index.html shadowuser@5.181.51.167:/tmp/ && scp -r ./dist/assets shadowuser@5.181.51.167:/tmp/ && ssh shadowuser@5.181.51.167 \"mv /tmp/index.html /www/wwwroot/dev.tempusplaza.xyz/ && rm -rf /www/wwwroot/dev.tempusplaza.xyz/assets && mv /tmp/assets /www/wwwroot/dev.tempusplaza.xyz/ && find /www/wwwroot/dev.tempusplaza.xyz \\! -name '.user.ini' -type d -exec chmod 755 {} \\; && find /www/wwwroot/dev.tempusplaza.xyz \\! -name '.user.ini' -type f -exec chmod 644 {} \\;\"",
+    "build:dev": "vite build --mode development && scp ./dist/index.html shadowuser@5.181.51.167:/tmp/ && scp -r ./dist/assets shadowuser@5.181.51.167:/tmp/ && ssh shadowuser@5.181.51.167 \"mv /tmp/index.html /www/wwwroot/dev.tempusplaza.com/ && rm -rf /www/wwwroot/dev.tempusplaza.com/assets && mv /tmp/assets /www/wwwroot/dev.tempusplaza.com/ && find /www/wwwroot/dev.tempusplaza.com \\! -name '.user.ini' -type d -exec chmod 755 {} \\; && find /www/wwwroot/dev.tempusplaza.com \\! -name '.user.ini' -type f -exec chmod 644 {} \\;\"",
     "preview": "vite preview"
   },
   "dependencies": {
