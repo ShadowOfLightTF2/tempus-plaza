@@ -634,7 +634,9 @@
                                 loading="lazy"
                               />
                               <span class="ms-2 record-map">
-                                {{ record.map_name }}
+                                <HoverPreview :map-name="record.map_name">
+                                  {{ record.map_name }}
+                                </HoverPreview>
                                 <span v-if="record.type !== 'map'">
                                   |
                                   <template v-if="record.type === 'course'"
@@ -708,7 +710,9 @@
                                 loading="lazy"
                               />
                               <span class="ms-2 record-map">
-                                {{ placement.map_name }}
+                                <HoverPreview :map-name="placement.map_name">
+                                  {{ placement.map_name }}
+                                </HoverPreview>
                                 <span v-if="placement.type !== 'map'">
                                   |
                                   <template v-if="placement.type === 'course'"
@@ -3207,16 +3211,21 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   border-radius: 10px;
 }
+.record-item,
+.shared-row {
+  transition: transform 0.25s ease;
+}
+
 .shared-row:hover,
 .record-item:hover {
-  transform: scale(1.03);
-
+  transform: scale(1.01);
   background: linear-gradient(
     to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
+    rgba(74, 111, 165, 0.3),
+    rgba(74, 111, 165, 0.1)
   );
 }
+
 .stat-item {
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0px 15px rgb(0, 0, 0, 0.5);
@@ -3525,8 +3534,20 @@ export default {
   justify-content: center;
 }
 
-.nav-bar:hover {
-  background: rgba(172, 172, 172, 0.1);
+.right-nav-bar:hover {
+  background: linear-gradient(
+    to right,
+    rgba(74, 111, 165, 0.3),
+    rgba(74, 111, 165, 0.1)
+  );
+}
+
+.left-nav-bar:hover {
+  background: linear-gradient(
+    to left,
+    rgba(74, 111, 165, 0.3),
+    rgba(74, 111, 165, 0.1)
+  );
 }
 
 .left-nav-bar {
@@ -3599,8 +3620,8 @@ export default {
 .list-group-item.record-item:hover {
   background: linear-gradient(
     to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
+    rgba(74, 111, 165, 0.3),
+    rgba(74, 111, 165, 0.1)
   ) !important;
   cursor: pointer;
 }
@@ -4035,6 +4056,7 @@ export default {
 }
 
 .map-card:hover {
+  border-radius: 15px;
   transform: scale(1.05);
   box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
   cursor: pointer;
@@ -4583,7 +4605,7 @@ export default {
   margin-top: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
   .rotw-grid,
   .map-grid,
   .author-map-grid {
@@ -4674,6 +4696,10 @@ export default {
     box-sizing: border-box;
   }
 
+  .rotw-card {
+    max-width: 100%;
+  }
+
   .map-section-title {
     font-size: 1.5rem;
     margin-bottom: 20px;
@@ -4687,6 +4713,7 @@ export default {
   }
 
   .map-card:hover {
+    border-radius: 15px;
     transform: scale(1.01);
     box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
   }
@@ -4783,19 +4810,16 @@ export default {
   }
 
   .profile-banner {
-    max-width: 340px;
-    margin: 0 auto;
+    margin: 0 10px;
   }
 
   .stat-block,
   .records-card {
-    max-width: 340px;
     margin-left: auto !important;
     margin-right: auto !important;
   }
 
   .stats-container {
-    max-width: 340px;
     margin: 0 auto;
   }
 
@@ -4804,7 +4828,6 @@ export default {
   .author-map-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
-    max-width: 320px !important;
     overflow-x: hidden;
     gap: 15px;
   }
@@ -4812,33 +4835,24 @@ export default {
   .map-container,
   .rotw-container {
     width: 100%;
-    max-width: 340px;
     margin: 0 auto;
   }
 
-  .map-card,
-  .rotw-card {
-    max-width: 320px;
-  }
-
   .main-content-wrapper {
-    max-width: 340px;
     margin: 0 auto;
   }
 
   .stats-boxes,
   .tabs-container {
-    max-width: 340px;
     margin: 0 auto;
   }
 
   .row.g-0 {
-    max-width: 340px;
     margin: 0 auto;
   }
 
   .col-md-4 {
-    max-width: 340px;
+    max-width: 550px;
     margin: 0 auto;
   }
 
@@ -4846,6 +4860,24 @@ export default {
   :deep(.global-btn.active) {
     font-size: 0.8rem !important;
     padding: 10px !important;
+  }
+}
+
+@media (max-width: 536px) {
+  .col-md-4 {
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 485px) {
+  .col-md-4 {
+    max-width: 465px;
+  }
+}
+
+@media (max-width: 424px) {
+  .col-md-4 {
+    max-width: 425px;
   }
 }
 </style>

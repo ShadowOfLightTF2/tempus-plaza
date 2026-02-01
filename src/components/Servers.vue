@@ -32,85 +32,185 @@
               Servers
             </button>
           </div>
-
           <div v-if="loading" class="text-center py-5">
             <div class="spinner-border text-light" role="status">
               <span class="visually-hidden">Loading {{ currentView }}...</span>
             </div>
           </div>
           <div v-else class="table-container">
-            <div v-if="currentView === 'topplayers'" class="table-wrapper">
+            <div v-if="currentView === 'topplayers'" class="top-players-cards">
               <div class="table-header-content topplayers-header">
                 <div class="table-header-icon">🏆</div>
                 <div class="table-header-text">
                   <h3 class="table-header-title">Top Players Online</h3>
                   <p class="table-header-subtitle">Updates every minute</p>
                 </div>
+                <label v-if="!isMobile" class="min-mode-checkbox">
+                  <input type="checkbox" v-model="minMode" />
+                  <span class="checkmark"></span>
+                  <span class="checkbox-label">Min Mode</span>
+                </label>
               </div>
-              <div class="table-responsive">
-                <table class="table table-dark">
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Player</th>
-                      <th>Map</th>
-                      <th>Server</th>
-                      <th>Connect</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="(player, index) in topPlayersData"
-                      :key="player.player_id"
-                      class="fade-in"
-                    >
-                      <td>
-                        {{ player.highest_rank }} {{ player.highest_rank_type }}
-                      </td>
-                      <SmartLink
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: player.player_id },
-                        }"
-                        class="name-cell align-middle player-name clickable"
-                      >
-                        <img
-                          :src="player.steam_avatar"
-                          alt="Avatar"
-                          class="avatar"
-                        />
-                        {{ player.player_name }}
-                      </SmartLink>
-                      <SmartLink
-                        tag="td"
-                        :to="{
-                          name: 'MapPage',
-                          params: { mapId: player.map_id },
-                        }"
-                        class="map-cell align-middle map-name clickable"
-                      >
-                        {{ player.current_map }}
-                      </SmartLink>
-                      <td>{{ player.shortname }} | {{ player.server_name }}</td>
-                      <td class="align-middle">
-                        <button
-                          @click.stop="
-                            connectToServer(player.ipaddr, player.port)
-                          "
-                          class="btn btn-primary btn-sm connect-btn"
-                          style="
-                            background: var(--color-primary);
-                            border: none;
-                            font-weight: bold;
+              <div
+                class="players-cards-container"
+                :class="{ 'min-mode': minMode }"
+              >
+                <div
+                  v-for="(player, index) in topPlayersData"
+                  :key="player.player_id"
+                  class="player-card fade-in"
+                  :class="{ 'min-mode': minMode }"
+                >
+                  <!-- Ranks Section -->
+                  <div class="ranks-section">
+                    <div class="player-ranks">
+                      <template v-if="!minMode">
+                        <div class="rank-badge soldier">
+                          <img
+                            src="/icons/soldier.png"
+                            alt="Soldier"
+                            class="class-icon-small"
+                          />
+                          <span class="rank-value">{{
+                            player.soldier_rank || "N/A"
+                          }}</span>
+                        </div>
+                        <div class="rank-badge demoman">
+                          <img
+                            src="/icons/demoman.png"
+                            alt="Demoman"
+                            class="class-icon-small"
+                          />
+                          <span class="rank-value">{{
+                            player.demoman_rank || "N/A"
+                          }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div
+                          class="rank-badge"
+                          :class="
+                            player.highest_rank === player.soldier_rank
+                              ? 'soldier'
+                              : 'demoman'
                           "
                         >
-                          Connect
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                          <img
+                            :src="`/icons/${
+                              player.highest_rank === player.soldier_rank
+                                ? 'soldier'
+                                : 'demoman'
+                            }.png`"
+                            :alt="
+                              player.highest_rank === player.soldier_rank
+                                ? 'Soldier'
+                                : 'Demoman'
+                            "
+                            class="class-icon-small"
+                          />
+                          <span class="rank-value">{{
+                            player.highest_rank || "N/A"
+                          }}</span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Player Info Section -->
+                  <div class="player-info-section">
+                    <SmartLink
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: player.player_id },
+                      }"
+                      class="player-link"
+                    >
+                      <img
+                        v-if="!minMode"
+                        :src="player.steam_avatar"
+                        alt="Avatar"
+                        class="player-avatar-large"
+                      />
+                      <div class="player-details">
+                        <div class="player-name-large">
+                          <img
+                            v-if="minMode"
+                            :src="player.steam_avatar"
+                            alt="Avatar"
+                            class="player-avatar-small"
+                          />
+                          {{ player.player_name }}
+                        </div>
+                        <div v-if="!minMode" class="player-country">
+                          <img
+                            :src="getFlagImageUrl(player.country_code)"
+                            alt="Flag"
+                            class="flag-icon-large"
+                          />
+                          {{ player.country }}
+                        </div>
+                      </div>
+                    </SmartLink>
+                  </div>
+                  <!-- Map Info Section -->
+                  <SmartLink
+                    :to="{
+                      name: 'MapPage',
+                      params: { mapId: player.map_id },
+                    }"
+                    class="map-info-section"
+                    :style="
+                      !minMode && !failedMapImages.has(player.current_map)
+                        ? `background-image: url('/map-backgrounds/medium/${player.current_map}.jpg')`
+                        : ''
+                    "
+                  >
+                    <div class="map-details">
+                      <div class="map-name-row">
+                        <div class="map-class">
+                          <img
+                            v-if="
+                              player.intended_class === 'soldier' ||
+                              player.intended_class === 'demoman'
+                            "
+                            :src="`/icons/${player.intended_class}.png`"
+                            :alt="player.intended_class"
+                            class="class-icon-medium"
+                          />
+                          <template v-if="player.intended_class === 'both'">
+                            <img
+                              src="/icons/soldier.png"
+                              alt="Soldier"
+                              class="class-icon-medium dual-icon"
+                            />
+                            <img
+                              src="/icons/demoman.png"
+                              alt="Demoman"
+                              class="class-icon-medium dual-icon"
+                            />
+                          </template>
+                        </div>
+                        <HoverPreview :map-name="player.current_map">
+                          <div class="map-name-large">
+                            {{ player.current_map }}
+                          </div>
+                        </HoverPreview>
+                      </div>
+                    </div>
+                  </SmartLink>
+                  <!-- Server Info Section -->
+                  <div class="server-info-section">
+                    <div class="server-name-large">
+                      {{ player.shortname }} | {{ player.server_name }}
+                    </div>
+                    <button
+                      @click.stop="connectToServer(player.ipaddr, player.port)"
+                      class="global-btn"
+                    >
+                      Connect
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             <div v-if="currentView === 'servers'" class="table-wrapper">
@@ -242,7 +342,9 @@
                           style="color: var(--color-text-clickable)"
                           @click.stop
                         >
-                          {{ server.currentMap }}
+                          <HoverPreview :map-name="server.currentMap">
+                            {{ server.currentMap }}
+                          </HoverPreview>
                         </SmartLink>
                         <td class="align-middle">
                           <div class="player-info">
@@ -257,7 +359,7 @@
                               :class="
                                 getServerStatusClass(
                                   server.playerCount,
-                                  server.maxPlayers
+                                  server.maxPlayers,
                                 )
                               "
                             ></div>
@@ -269,12 +371,7 @@
                             @click.stop="
                               connectToServer(server.ipAddr, server.port)
                             "
-                            class="btn btn-primary btn-sm connect-btn"
-                            style="
-                              background: var(--color-primary);
-                              border: none;
-                              font-weight: bold;
-                            "
+                            class="global-btn connect-btn"
                           >
                             Connect
                           </button>
@@ -365,6 +462,10 @@ export default {
     return {
       currentView: "topplayers",
       loading: false,
+      failedMapImages: new Set(),
+      isMobile: window.innerWidth <= 1024,
+      minMode: false,
+      minMode: localStorage.getItem("minMode") === "true",
       topPlayersData: [],
       serversData: [],
       expandedServerId: null,
@@ -400,7 +501,7 @@ export default {
       // Filter by region
       if (this.selectedRegion !== "all") {
         filtered = filtered.filter(
-          (server) => server.region === this.selectedRegion
+          (server) => server.region === this.selectedRegion,
         );
       }
 
@@ -408,11 +509,11 @@ export default {
       if (!this.selectedServerTypes.includes("all")) {
         filtered = filtered.filter((server) => {
           const matchesIncluded = this.selectedServerTypes.some((type) =>
-            this.matchesServerType(server.name, type)
+            this.matchesServerType(server.name, type),
           );
 
           const matchesExcluded = this.excludedServerTypes.some((type) =>
-            this.matchesServerType(server.name, type)
+            this.matchesServerType(server.name, type),
           );
 
           return matchesIncluded && !matchesExcluded;
@@ -421,7 +522,7 @@ export default {
         // When "all" is selected, only apply exclusions
         filtered = filtered.filter((server) => {
           const matchesExcluded = this.excludedServerTypes.some((type) =>
-            this.matchesServerType(server.name, type)
+            this.matchesServerType(server.name, type),
           );
 
           return !matchesExcluded;
@@ -444,6 +545,9 @@ export default {
     },
   },
   watch: {
+    minMode(newValue) {
+      localStorage.setItem("minMode", newValue);
+    },
     $route(to) {
       if (to.params.view) {
         this.currentView = to.params.view;
@@ -465,6 +569,15 @@ export default {
     }
   },
   methods: {
+    handleResize() {
+      this.isMobile = window.innerWidth <= 1024;
+      if (this.isMobile) {
+        this.minMode = true;
+      }
+    },
+    handleMapImageError(mapName) {
+      this.failedMapImages.add(mapName);
+    },
     extractAvailableRanks() {
       const ranks = new Set();
 
@@ -516,7 +629,7 @@ export default {
         } else if (isCurrentlySelected && !isCurrentlyExcluded) {
           // Second click: move to excluded
           this.selectedServerTypes = this.selectedServerTypes.filter(
-            (type) => type !== serverType
+            (type) => type !== serverType,
           );
           this.excludedServerTypes.push(serverType);
 
@@ -527,7 +640,7 @@ export default {
         } else if (isCurrentlyExcluded) {
           // Third click: remove from excluded
           this.excludedServerTypes = this.excludedServerTypes.filter(
-            (type) => type !== serverType
+            (type) => type !== serverType,
           );
         }
       }
@@ -662,23 +775,31 @@ export default {
       try {
         const response = await fetch(`${API_BASE_URL}/servers/top-players`);
         const data = await response.json();
-
         this.topPlayersData = data
           .sort((a, b) => {
             if (a.highest_rank === null) return 1;
             if (b.highest_rank === null) return -1;
-
             return a.highest_rank - b.highest_rank;
           })
-          .slice(0, 20);
+          .slice(0, 20)
+          .map((player) => ({
+            ...player,
+            intended_class:
+              player.intended_class === "3"
+                ? "soldier"
+                : player.intended_class === "4"
+                ? "demoman"
+                : player.intended_class === "5"
+                ? "both"
+                : player.intended_class || "soldier",
+          }));
       } catch (error) {
         console.error(
           "There was an error fetching the top players data:",
-          error
+          error,
         );
       }
     },
-
     async fetchServersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers`);
@@ -741,6 +862,12 @@ export default {
       this.currentView = view;
       this.$router.push({ name: "Servers", params: { view } });
     },
+  },
+  mounted() {
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
   },
 };
 </script>
@@ -1013,15 +1140,66 @@ export default {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
+  justify-content: space-between;
 }
 
 .topplayers-header .table-header-icon {
   margin-right: 1rem;
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .topplayers-header .table-header-text {
   flex: 1;
+}
+
+.min-mode-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.min-mode-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.min-mode-checkbox:hover .checkmark {
+  background: rgba(74, 111, 165, 0.3);
+}
+
+.min-mode-checkbox input[type="checkbox"]:checked + .checkmark {
+  background: var(--color-primary);
+}
+
+.min-mode-checkbox input[type="checkbox"]:checked + .checkmark::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.checkbox-label {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .table-header-top {
@@ -1103,29 +1281,6 @@ export default {
   background: rgba(119, 119, 119, 0.05);
 }
 
-.name-cell,
-.map-cell {
-  max-width: 250px;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--color-text-clickable) !important;
-}
-
-.name-column {
-  width: auto;
-  white-space: nowrap;
-}
-
-.player-name:hover,
-.map-name:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  ) !important;
-}
-
 .clickable {
   cursor: pointer;
 }
@@ -1133,7 +1288,6 @@ export default {
 .class-icon-small {
   width: 20px;
   height: 20px;
-  margin-right: 8px;
   vertical-align: middle;
 }
 
@@ -1145,18 +1299,6 @@ export default {
   border-radius: 2px;
 }
 
-.type-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.record-type {
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.25rem;
-  font-weight: bold;
-}
-
 .server-info {
   display: flex;
   flex-direction: column;
@@ -1165,11 +1307,6 @@ export default {
 .server-name {
   font-weight: bold;
   color: var(--color-text);
-}
-
-.server-ip {
-  color: var(--color-text);
-  opacity: 0.7;
 }
 
 .player-info {
@@ -1202,28 +1339,14 @@ export default {
   background: #22c55e;
 }
 
-.location-info {
-  color: var(--color-text);
-}
-
 .connect-btn {
   padding: 0.25rem 0.75rem;
-  background: rgba(57, 106, 141, 0.432) !important;
-}
-
-.connect-btn:hover {
-  background: var(--color-row) !important;
-}
-
-.timestamp-cell {
-  color: var(--color-text);
 }
 
 @media (max-width: 767.98px) {
   .button-group {
     flex-direction: column;
     width: 100%;
-    max-width: 300px;
     margin: 0 auto 2rem;
     border-radius: 12px;
   }
@@ -1371,5 +1494,433 @@ export default {
   .player-item {
     padding: 0.75rem;
   }
+}
+
+.top-players-cards {
+  width: 100%;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.players-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.player-card {
+  display: grid;
+  grid-template-columns: 0.6fr 2fr 2fr minmax(400px, 1.5fr);
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--color-border-semi-soft);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.player-card:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.player-card:nth-child(even) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.player-card:nth-child(odd):hover {
+  background: rgba(74, 111, 165, 0.2);
+}
+
+.player-card:nth-child(even):hover {
+  background: rgba(74, 111, 165, 0.2);
+}
+
+.player-info-section {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  padding-left: 1.5rem;
+}
+
+.player-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+}
+
+.player-avatar-large {
+  width: 54px;
+  height: 54px;
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.player-avatar-small {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-primary);
+  border-radius: 2px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.player-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.player-name-large {
+  font-size: 1.2rem;
+  font-weight: bold;
+  width: 210px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-clickable);
+  display: flex;
+  align-items: center;
+}
+
+.player-country {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.flag-icon-large {
+  width: 18px;
+  height: auto;
+}
+
+.ranks-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+}
+
+.player-ranks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rank-value {
+  color: var(--color-text);
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.map-info-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  padding-left: 1.5rem;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.map-info-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: inherit;
+}
+
+.player-card.min-mode .map-info-section::before {
+  display: none;
+}
+
+.map-details {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.map-name-large {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--color-text-clickable);
+}
+
+.map-class {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.class-icon-medium {
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  padding: 4px;
+  border: 2px solid rgba(74, 111, 165, 0.3);
+}
+
+.class-icon-medium.dual-icon {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+
+.server-info-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-left: 1px solid var(--color-border-soft);
+  min-width: 0;
+}
+
+.player-card.min-mode .server-info-section {
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.server-name-large {
+  font-size: 0.95rem;
+  font-weight: 1000;
+  color: var(--color-text);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.player-card.min-mode {
+  padding: 0.2rem 0.4rem;
+  padding-right: 3.2px;
+  gap: 1rem;
+  border-color: var(--color-border-soft);
+}
+
+.player-card.min-mode .player-link {
+  gap: 0.5rem;
+}
+
+.player-card.min-mode .player-name-large {
+  width: auto;
+}
+
+.player-card.min-mode .map-info-section {
+  padding-left: 1rem;
+}
+
+.player-card.min-mode .server-info-section {
+  padding-left: 1rem;
+}
+
+.map-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-card.min-mode .class-icon-medium {
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+}
+
+.player-card.min-mode .class-icon-medium.dual-icon {
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+}
+
+@media (max-width: 1024px) {
+  .player-card {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .player-card.min-mode {
+    grid-template-columns: 65px minmax(100px, 200px) minmax(110px, auto) auto;
+    gap: 0.5rem;
+  }
+
+  .ranks-section {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-soft);
+    padding: 0.5rem;
+    justify-content: center;
+  }
+
+  .player-card.min-mode .ranks-section {
+    border-bottom: none;
+    border-right: 1px solid var(--color-border-soft);
+    padding: 0 0.5rem;
+  }
+
+  .player-info-section,
+  .map-info-section,
+  .server-info-section {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .player-info-section {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.8rem;
+  }
+
+  .player-card.min-mode .player-info-section {
+    border-bottom: none;
+    border-right: 1px solid var(--color-border-soft);
+    padding: 0;
+    padding-right: 0.5rem;
+  }
+
+  .map-info-section {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.8rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .player-card.min-mode .map-info-section {
+    border-bottom: none;
+    flex-direction: row;
+    padding: 0;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-link {
+    gap: 0.5rem;
+  }
+
+  .player-details {
+    align-items: flex-start;
+  }
+
+  .player-card.min-mode .player-details {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-card.min-mode .player-country {
+    display: none;
+  }
+
+  .map-details {
+    align-items: flex-start;
+  }
+
+  .player-card.min-mode .map-details {
+    align-items: flex-start;
+  }
+
+  .server-info-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.5rem;
+  }
+
+  .player-card.min-mode .server-info-section {
+    display: none;
+  }
+
+  .server-name-large {
+    text-align: left;
+  }
+
+  .player-card.min-mode .server-name-large {
+    display: none;
+  }
+}
+
+.player-card.min-mode .player-name-large {
+  font-size: 0.9rem;
+}
+
+.player-card.min-mode .map-name-large {
+  font-size: 0.85rem;
+}
+
+.player-card.min-mode .server-name-large {
+  font-size: 0.75rem;
+}
+
+.player-card.min-mode .rank-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.player-card.min-mode .rank-value {
+  font-size: 1rem;
+}
+
+.player-card.min-mode .class-icon-small {
+  width: 16px;
+  height: 16px;
+}
+
+.player-card.min-mode .global-btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.server-info-section .global-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.player-card.min-mode .server-info-section .global-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.players-cards-container.min-mode {
+  gap: 0.3rem;
+}
+
+.min-mode-checkbox.mobile-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.min-mode-checkbox.mobile-disabled input[type="checkbox"] {
+  cursor: not-allowed;
 }
 </style>

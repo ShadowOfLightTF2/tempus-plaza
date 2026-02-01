@@ -273,7 +273,7 @@ export default {
       if (!this.filteredPointsData.length) return [];
 
       const sortedData = [...this.filteredPointsData].sort(
-        (a, b) => a.date - b.date
+        (a, b) => a.date - b.date,
       );
 
       const pointsKey = `${this.chartType}_points`;
@@ -340,17 +340,21 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 0 15px;
+  margin-top: 5px;
 }
 
 .time-range-buttons {
   display: flex;
   gap: 0.5rem;
-  justify-content: center;
-  padding: 0 15px 15px 15px;
+  justify-content: space-between;
+  padding: 5px 15px 15px 15px;
+  width: 100%;
 }
 
 .global-btn {
-  padding: 0.5rem 1rem;
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0;
   border: 2px solid var(--color-border-soft);
   background: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
@@ -359,6 +363,14 @@ export default {
   transition: all 0.2s ease;
   font-weight: 500;
   font-size: 0.9rem;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .global-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
 }
 
 .global-btn:hover {

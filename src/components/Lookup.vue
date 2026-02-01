@@ -676,7 +676,9 @@
                     }"
                     class="fancy-hover"
                   >
-                    {{ record.map_name }}
+                    <HoverPreview :map-name="record.map_name">
+                      {{ record.map_name }}
+                    </HoverPreview>
                   </SmartLink>
                   <SmartLink
                     v-else-if="mapId"
@@ -1075,7 +1077,7 @@ export default {
         console.log(
           "User not logged in or auth failed:",
           response.status,
-          response.statusText
+          response.statusText,
         );
         this.playerId = null;
         this.playerName = null;
@@ -1219,7 +1221,7 @@ export default {
       this.loadingRankInfo = true;
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/ranks`
+          `${API_BASE_URL}/players/${playerId}/ranks`,
         );
         if (!response.ok) {
           throw new Error("Failed to fetch rank info");
@@ -1258,7 +1260,7 @@ export default {
             throw new Error("Access denied");
           } else {
             throw new Error(
-              `Failed to fetch records (${recordsResponse.status})`
+              `Failed to fetch records (${recordsResponse.status})`,
             );
           }
         }
@@ -1279,26 +1281,26 @@ export default {
         this.cachedRecords = {
           records: [
             ...(mapRecords.soldier_map || []).map((r) =>
-              this.convertMapRecord(r, "soldier", "map")
+              this.convertMapRecord(r, "soldier", "map"),
             ),
             ...(mapRecords.demoman_map || []).map((r) =>
-              this.convertMapRecord(r, "demoman", "map")
+              this.convertMapRecord(r, "demoman", "map"),
             ),
           ],
           courseRecords: [
             ...(mapRecords.soldier_course || []).map((r) =>
-              this.convertMapRecord(r, "soldier", "course")
+              this.convertMapRecord(r, "soldier", "course"),
             ),
             ...(mapRecords.demoman_course || []).map((r) =>
-              this.convertMapRecord(r, "demoman", "course")
+              this.convertMapRecord(r, "demoman", "course"),
             ),
           ],
           bonusRecords: [
             ...(mapRecords.soldier_bonus || []).map((r) =>
-              this.convertMapRecord(r, "soldier", "bonus")
+              this.convertMapRecord(r, "soldier", "bonus"),
             ),
             ...(mapRecords.demoman_bonus || []).map((r) =>
-              this.convertMapRecord(r, "demoman", "bonus")
+              this.convertMapRecord(r, "demoman", "bonus"),
             ),
           ],
         };
@@ -1344,7 +1346,7 @@ export default {
           intendedClass = this.mapInfo.map.intended_class;
         } else if (type === "course") {
           const course = this.mapInfo.courses?.find(
-            (c) => c.index === record.index
+            (c) => c.index === record.index,
           );
           if (course) {
             tierInfo =
@@ -1362,7 +1364,7 @@ export default {
           }
         } else if (type === "bonus") {
           const bonus = this.mapInfo.bonuses?.find(
-            (b) => b.index === record.index
+            (b) => b.index === record.index,
           );
           if (bonus) {
             tierInfo =
@@ -1418,7 +1420,7 @@ export default {
     toggleClass(classOption) {
       if (this.selectedClasses.includes(classOption)) {
         this.selectedClasses = this.selectedClasses.filter(
-          (c) => c !== classOption
+          (c) => c !== classOption,
         );
       } else {
         this.selectedClasses.push(classOption);
@@ -1436,7 +1438,7 @@ export default {
     toggleStatus(statusOption) {
       if (this.selectedStatus.includes(statusOption)) {
         this.selectedStatus = this.selectedStatus.filter(
-          (s) => s !== statusOption
+          (s) => s !== statusOption,
         );
       } else {
         this.selectedStatus.push(statusOption);
@@ -1446,7 +1448,7 @@ export default {
     toggleIntendedClass(clsId) {
       if (this.selectedIntendedClasses.includes(clsId)) {
         this.selectedIntendedClasses = this.selectedIntendedClasses.filter(
-          (id) => id !== clsId
+          (id) => id !== clsId,
         );
       } else {
         this.selectedIntendedClasses.push(clsId);
@@ -1587,7 +1589,7 @@ export default {
       this.mapId = null;
       this.selectedMapName = null;
       this.selectedPlayerName = this.searchResults.players.find(
-        (player) => player.id === playerId
+        (player) => player.id === playerId,
       ).name;
       this.searchQuery = "";
       this.searchResults = null;
@@ -1628,7 +1630,7 @@ export default {
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/all-records`
+          `${API_BASE_URL}/players/${playerId}/all-records`,
         );
 
         if (!response.ok) {
@@ -1651,7 +1653,7 @@ export default {
         this.cachedRecords = {
           records: allRecords.filter((record) => record.type === "map"),
           courseRecords: allRecords.filter(
-            (record) => record.type === "course"
+            (record) => record.type === "course",
           ),
           bonusRecords: allRecords.filter((record) => record.type === "bonus"),
           allRecords: allRecords,
