@@ -109,226 +109,8 @@
               </div>
             </div>
           </div>
-          <div v-if="visibleRotwVideos.length > 0" class="rotw-section">
-            <div class="rotw-container">
-              <h4 class="rotw-section-title">
-                Runs of the Week
-                <span class="rotw-count">({{ rotwVideos.length }})</span>
-              </h4>
-              <div class="rotw-grid">
-                <div
-                  v-for="(video, index) in visibleRotwVideos"
-                  :key="index"
-                  class="rotw-card"
-                  :class="{
-                    'rotw-card-active': activeRotwVideo === video.video_id,
-                    'rotw-card-left': index % 2 === 0,
-                    'rotw-card-right': index % 2 !== 0,
-                  }"
-                  @click.stop="
-                    toggleRotwVideo(
-                      video.video_id,
-                      index % 2 === 0 ? 'left' : 'right',
-                    )
-                  "
-                >
-                  <div class="rotw-video-embed">
-                    <div class="video-scale-wrapper">
-                      <iframe
-                        :src="`https://www.youtube.com/embed/${video.video_id}`"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                        :style="{
-                          pointerEvents:
-                            activeRotwVideo === video.video_id
-                              ? 'auto'
-                              : 'none',
-                        }"
-                      ></iframe>
-                    </div>
-                  </div>
-                  <div class="rotw-video-info">
-                    <h5>{{ video.map_name }}</h5>
-                    <p>{{ video.formatted_upload_date }}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="load-more-container">
-                <button
-                  v-if="visibleRotwVideos.length < rotwVideos.length"
-                  @click="loadMoreRotwVideos"
-                  class="global-btn"
-                >
-                  Load More
-                </button>
-                <button
-                  v-if="visibleRotwVideos.length < rotwVideos.length"
-                  @click="showAllRotwVideos"
-                  class="global-btn"
-                >
-                  Show All
-                </button>
-                <button
-                  v-if="visibleRotwVideos.length > 2"
-                  @click="closeAllRotwVideos"
-                  class="global-btn"
-                >
-                  Close All
-                </button>
-              </div>
-            </div>
-          </div>
-          <div
-            v-if="authoredMaps.length > 0"
-            id="authored-maps"
-            class="map-section"
-          >
-            <div class="map-container">
-              <h4 class="map-section-title">
-                Authored maps
-                <span class="rotw-count">({{ authoredMaps.length }})</span>
-              </h4>
-              <div class="author-map-grid">
-                <SmartLink
-                  v-for="(map, index) in visibleAuthoredMaps"
-                  :key="index"
-                  :to="{
-                    name: 'MapPage',
-                    params: { mapId: map.map_id },
-                  }"
-                  tag="div"
-                  class="map-card author-card"
-                  :style="{
-                    background: `
-                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                      url('/map-backgrounds/medium/${map.map_name}.jpg') center/cover no-repeat
-                    `,
-                  }"
-                >
-                  <div class="class-icon-container">
-                    <img
-                      v-for="icon in map.classIcons"
-                      :key="icon.alt"
-                      :src="icon.src"
-                      :class="icon.class"
-                      :alt="icon.alt"
-                    />
-                  </div>
-                  <div class="map-header">
-                    <h3 class="map-name">{{ map.map_name }}</h3>
-                  </div>
-                  <div class="map-compact-ratings-grid">
-                    <div
-                      v-if="map.intended_class === 4"
-                      class="map-rating-section intended-class-section"
-                    >
-                      <div class="map-rating-label">Demoman</div>
-                      <div class="map-rating-pills">
-                        <span
-                          class="map-rating-pill map-tier-color"
-                          :class="'tier-' + map.demoman_tier"
-                        >
-                          T{{ map.demoman_tier }}
-                        </span>
-                        <span
-                          class="map-rating-pill map-rating-color"
-                          :class="'rating-' + map.demoman_rating"
-                        >
-                          R{{ map.demoman_rating }}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      v-else
-                      class="map-rating-section intended-class-section"
-                    >
-                      <div class="map-rating-label">Soldier</div>
-                      <div class="map-rating-pills">
-                        <span
-                          class="map-rating-pill map-tier-color"
-                          :class="'tier-' + map.soldier_tier"
-                        >
-                          T{{ map.soldier_tier }}
-                        </span>
-                        <span
-                          class="map-rating-pill map-rating-color"
-                          :class="'rating-' + map.soldier_rating"
-                        >
-                          R{{ map.soldier_rating }}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      v-if="map.intended_class === 4"
-                      class="map-rating-section"
-                    >
-                      <div class="map-rating-label">Soldier</div>
-                      <div class="map-rating-pills">
-                        <span
-                          class="map-rating-pill map-tier-color"
-                          :class="'tier-' + map.soldier_tier"
-                        >
-                          T{{ map.soldier_tier }}
-                        </span>
-                        <span
-                          class="map-rating-pill map-rating-color"
-                          :class="'rating-' + map.soldier_rating"
-                        >
-                          R{{ map.soldier_rating }}
-                        </span>
-                      </div>
-                    </div>
-                    <div v-else class="map-rating-section">
-                      <div class="map-rating-label">Demoman</div>
-                      <div class="map-rating-pills">
-                        <span
-                          class="map-rating-pill map-tier-color"
-                          :class="'tier-' + map.demoman_tier"
-                        >
-                          T{{ map.demoman_tier }}
-                        </span>
-                        <span
-                          class="map-rating-pill map-rating-color"
-                          :class="'rating-' + map.demoman_rating"
-                        >
-                          R{{ map.demoman_rating }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="map-date-added">
-                    Date Added:
-                    {{ map.date_added }}
-                  </div>
-                </SmartLink>
-              </div>
-              <div class="load-more-container">
-                <button
-                  v-if="visibleAuthoredMaps.length < authoredMaps.length"
-                  @click="loadMoreAuthoredMaps"
-                  class="global-btn"
-                >
-                  Load More
-                </button>
-                <button
-                  v-if="visibleAuthoredMaps.length < authoredMaps.length"
-                  @click="showAllAuthoredMaps"
-                  class="global-btn"
-                >
-                  Show All
-                </button>
-                <button
-                  v-if="visibleAuthoredMaps.length > authoredMapsPerPage"
-                  @click="closeAllAuthoredMaps"
-                  class="global-btn"
-                >
-                  Close All
-                </button>
-              </div>
-            </div>
-          </div>
+          <RotwVideos :player-id="playerId" />
+          <AuthoredMaps :player-id="playerId" />
           <MapSearchModal
             :show="showMapSearch"
             :search-results="mapSearchResults"
@@ -351,6 +133,8 @@ import SharedTimesCard from "./SharedTimesCard.vue";
 import RecordsSection from "./RecordsSection.vue";
 import FavoriteMapCard from "./FavoriteMapCard.vue";
 import MapSearchModal from "./MapSearchModal.vue";
+import RotwVideos from "./RotwVideos.vue";
+import AuthoredMaps from "./AuthoredMaps.vue";
 import axios from "axios";
 import PointsChart from "./PointsChart.vue";
 import { ref } from "vue";
@@ -381,24 +165,16 @@ export default {
   },
   components: {
     ProfileBanner,
+    PointsChart,
     ClassStatsCard,
     SharedTimesCard,
     RecordsSection,
     FavoriteMapCard,
     MapSearchModal,
-    PointsChart,
+    RotwVideos,
+    AuthoredMaps,
   },
   data: () => ({
-    authoredMaps: [],
-    visibleAuthoredMaps: [],
-    authoredMapsPage: 1,
-    authoredMapsPerPage: 3,
-    rotwVideos: [],
-    visibleRotwVideos: [],
-    activeRotwVideo: null,
-    activeRotwSide: null,
-    rotwVideosPage: 1,
-    rotwVideosPerPage: 2,
     currentTime: new Date(),
     updateTimer: null,
     debounceTimer: null,
@@ -551,11 +327,6 @@ export default {
       );
       return currentMap && currentMap.id !== null;
     },
-    visibleAuthoredMaps() {
-      const start = 0;
-      const end = this.authoredMapsPage * this.authoredMapsPerPage;
-      return this.authoredMaps.slice(start, end);
-    },
     nextUpdateCountdown() {
       const now = this.currentTime;
       const nextUpdate = new Date(now);
@@ -643,12 +414,10 @@ export default {
     },
   },
   async mounted() {
-    document.addEventListener("click", this.handleClickOutside);
     await this.loadPlayerPageData(this.playerId);
     this.startUpdateTimer();
   },
   beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
     if (this.updateTimer) {
       clearInterval(this.updateTimer);
     }
@@ -678,7 +447,6 @@ export default {
             "Latest runs": true,
           };
           this.currentPage = 1;
-          this.closeAllRotwVideos();
           this.currentStatType.soldier = "total";
           this.currentStatType.demoman = "total";
           this.favoriteMaps = [
@@ -722,184 +490,12 @@ export default {
               record_placement: null,
             },
           ];
-          this.rotwVideos = [];
-          this.visibleRotwVideos = [];
-          this.rotwVideosPage = 1;
           await this.loadPlayerPageData(newId);
         }
       },
     },
   },
   methods: {
-    scrollToAuthoredMaps() {
-      const attemptScroll = () => {
-        const element = document.getElementById("authored-maps");
-        if (element) {
-          element.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-      };
-      // Initial scroll
-      this.$nextTick(attemptScroll);
-      // Retry scrolling after potential layout shifts
-      setTimeout(attemptScroll, 500);
-    },
-    formatUploadDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    },
-    getClassIcons(intendedClass) {
-      if (intendedClass === 3) {
-        return [
-          {
-            src: "/icons/soldier.png",
-            alt: "Soldier class icon",
-            class: "author-class-icon",
-          },
-        ];
-      }
-      if (intendedClass === 4) {
-        return [
-          {
-            src: "/icons/demoman.png",
-            alt: "Demoman class icon",
-            class: "author-class-icon",
-          },
-        ];
-      }
-      if (intendedClass === 5) {
-        return [
-          {
-            src: "/icons/soldier.png",
-            alt: "Soldier class icon",
-            class: "author-class-icon dual-icon",
-          },
-          {
-            src: "/icons/demoman.png",
-            alt: "Demoman class icon",
-            class: "author-class-icon dual-icon",
-          },
-        ];
-      }
-      return [];
-    },
-    async fetchAuthoredMaps(playerId) {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/maps-from-author`,
-        );
-        this.authoredMaps = response.data
-          .map((map) => ({
-            map_id: map.map_id,
-            map_name: map.name,
-            soldier_tier: map.soldier_tier,
-            soldier_rating: map.soldier_rating,
-            demoman_tier: map.demoman_tier,
-            demoman_rating: map.demoman_rating,
-            intended_class: map.intended_class,
-            classIcons: this.getClassIcons(map.intended_class),
-            date_added: this.formatDate2(map.date_added),
-          }))
-          .sort((a, b) => b.map_id - a.map_id);
-      } catch (error) {
-        console.error("Error fetching authored maps:", error);
-      }
-    },
-    formatDate2(unixTimestamp) {
-      const date = new Date(unixTimestamp * 1000);
-      const day = String(date.getDate()).padStart(2, "0");
-      const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      const monthName = monthNames[date.getMonth()];
-      const year = date.getFullYear();
-      return `${day} ${monthName} ${year}`;
-    },
-    async fetchRotwVideos(playerId) {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/rotw-videos`,
-        );
-
-        const uniqueVideos = response.data.filter(
-          (video, index, self) =>
-            index === self.findIndex((v) => v.video_id === video.video_id),
-        );
-
-        this.rotwVideos = uniqueVideos.map((video) => ({
-          ...video,
-          formatted_upload_date: this.formatUploadDate(video.uploaded_at),
-        }));
-
-        this.visibleRotwVideos = this.rotwVideos.slice(
-          0,
-          this.rotwVideosPerPage,
-        );
-      } catch (error) {
-        console.error("Error fetching ROTW videos:", error);
-      }
-    },
-    loadMoreRotwVideos() {
-      const start = this.rotwVideosPage * this.rotwVideosPerPage;
-      const end = start + this.rotwVideosPerPage;
-      this.visibleRotwVideos = [
-        ...this.visibleRotwVideos,
-        ...this.rotwVideos.slice(start, end),
-      ];
-      this.rotwVideosPage++;
-    },
-    showAllRotwVideos() {
-      this.visibleRotwVideos = [...this.rotwVideos];
-    },
-    closeAllRotwVideos() {
-      this.visibleRotwVideos = this.rotwVideos.slice(0, 2);
-      this.rotwVideosPage = 1;
-      this.activeRotwVideo = null;
-      this.activeRotwSide = null;
-    },
-    toggleRotwVideo(videoId, side) {
-      this.activeRotwVideo = this.activeRotwVideo === videoId ? null : videoId;
-      this.activeRotwSide = side;
-    },
-    loadMoreAuthoredMaps() {
-      const start = this.authoredMapsPage * this.authoredMapsPerPage;
-      const end = start + this.authoredMapsPerPage;
-      this.visibleAuthoredMaps = [
-        ...this.visibleAuthoredMaps,
-        ...this.authoredMaps.slice(start, end),
-      ];
-      this.authoredMapsPage++;
-    },
-    showAllAuthoredMaps() {
-      this.visibleAuthoredMaps = [...this.authoredMaps];
-      this.authoredMapsPage = Math.ceil(
-        this.authoredMaps.length / this.authoredMapsPerPage,
-      );
-    },
-    closeAllAuthoredMaps() {
-      this.visibleAuthoredMaps = this.authoredMaps.slice(
-        0,
-        this.authoredMapsPerPage,
-      );
-      this.authoredMapsPage = 1;
-    },
     handleClickOutside(e) {
       if (!e.target.closest(".rotw-card")) {
         this.activeRotwVideo = null;
@@ -930,8 +526,6 @@ export default {
           this.fetchPlayerPoints(playerId),
           this.fetchFavoriteMaps(playerId),
           this.fetchChangedPlacements(playerId),
-          this.fetchRotwVideos(playerId),
-          this.fetchAuthoredMaps(playerId),
         ]);
         await this.fetchPlayerStats(playerId);
         await this.fetchSharedTimes(playerId);
@@ -1783,591 +1377,21 @@ export default {
   grid-template-columns: repeat(3, minmax(300px, 1fr));
   width: 1200px;
 }
-.author-map-grid {
-  display: grid;
-  gap: 30px;
-  margin: 20px auto;
-  justify-content: center;
-  max-width: 1200px;
-}
-.author-map-grid:has(.map-card:nth-child(1):last-child) {
-  grid-template-columns: 1fr;
-  width: 500px;
-}
-.author-map-grid:has(.map-card:nth-child(2):last-child) {
-  grid-template-columns: repeat(2, 1fr);
-  width: 800px;
-}
-.author-map-grid:has(.map-card:nth-child(3)) {
-  grid-template-columns: repeat(3, 1fr);
-  width: 1200px;
-}
-.author-card {
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.class-icon-container {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-  display: flex;
-  gap: 8px;
-}
-.author-class-icon {
-  width: 50px;
-  height: 50px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 50%;
-  padding: 8px;
-  border: 2px solid rgba(74, 111, 165, 0.3);
-}
-.author-class-icon.dual-icon {
-  width: 40px;
-  height: 40px;
-  padding: 6px;
-}
-.map-card {
-  box-shadow: 0 0 20px rgba(0, 0, 0);
-  background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.288) 20%,
-      rgba(255, 255, 255, 0.15) 40%,
-      rgba(255, 255, 255, 0) 100%
-    ),
-    rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  padding: 10px;
-  padding-bottom: 25px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  min-height: 300px;
-}
-.map-card:hover {
-  border-radius: 15px;
-  transform: scale(1.05);
-  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
-  cursor: pointer;
-}
-.map-card-subtitle {
-  font-size: 1.75rem;
-  font-weight: 700;
-  text-align: center;
-  color: #ffffff;
-  margin-bottom: 35px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  z-index: 10;
-  text-transform: capitalize;
-}
-.map-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  color: #ffffff;
-  text-align: center;
-}
-.map-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  margin-top: 50px;
-}
-.map-header-nonmargin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.map-name {
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  margin: 0;
-  text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.4);
-  line-height: 1.2;
-}
-.map-compact-ratings-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.map-rating-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.map-rating-pills {
-  display: flex;
-  gap: 8px;
-}
-.map-rating-pill {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: var(--color-dark);
-  text-shadow: none;
-  min-width: 40px;
-  text-align: center;
-}
-.map-rating-label {
-  font-size: 0.75rem;
-  color: var(--color-text);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.8;
-}
-.map-date-added {
-  text-align: center;
-  font-size: 0.85rem;
-  margin-top: 0.75rem;
-  color: var(--color-text-soft);
-  font-style: italic;
-  margin-top: auto;
-}
-.record-row {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 1rem;
-  color: var(--color-text);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-.map-class-icon {
-  height: 24px;
-  width: 24px;
-}
-.map-tier-color.tier-0 {
-  background: rgba(51, 51, 51, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-1 {
-  background: rgba(110, 208, 246, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-2 {
-  background: rgba(86, 179, 233, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-3 {
-  background: rgba(69, 184, 173, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-4 {
-  background: rgba(101, 193, 139, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-5 {
-  background: rgba(163, 217, 119, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-6 {
-  background: rgba(243, 230, 131, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-7 {
-  background: rgba(246, 194, 103, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-8 {
-  background: rgba(240, 141, 91, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-9 {
-  background: rgba(230, 105, 94, 0.5);
-  color: var(--color-text);
-}
-.map-tier-color.tier-10 {
-  background: rgba(214, 69, 69, 0.5);
-  color: var(--color-text);
-}
-.map-rating-color.rating-1 {
-  background: rgba(148, 196, 125, 0.5);
-  color: var(--color-text);
-}
-.map-rating-color.rating-2 {
-  background: rgba(171, 208, 153, 0.5);
-  color: var(--color-text);
-}
-.map-rating-color.rating-3 {
-  background: rgba(195, 178, 147, 0.5);
-  color: var(--color-text);
-}
-.map-rating-color.rating-4 {
-  background: rgba(224, 102, 102, 0.5);
-  color: var(--color-text);
-}
-.map-empty-map {
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 2px dashed rgba(255, 255, 255, 0.3);
-}
-.map-empty-map h3 {
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-.map-search-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.map-search-container {
-  background: var(--color-dark);
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  position: relative;
-  min-width: 300px;
-}
-.search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-.search-icon {
-  position: absolute;
-  left: 16px;
-  color: #888;
-  z-index: 2;
-}
-.search-input {
-  width: 100%;
-  padding: 8px 8px 8px 40px;
-  background: var(--color-box);
-  border: 2px solid var(--color-border-soft);
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-.search-input:focus {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.212);
-}
-.search-input::placeholder {
-  color: #888;
-}
-.search-results-dropdown {
-  background: var(--color-box);
-  border: 1px solid rgba(68, 68, 68, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-bottom: 15px;
-}
-.search-results-dropdown ul {
-  list-style: none;
-  padding: 8px;
-  margin: 0;
-}
-.search-results-dropdown li {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  background: var(--color-box);
-  font-weight: bold;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.search-results-dropdown li:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-  transform: translateX(4px);
-}
-.search-results-dropdown li:last-child {
-  margin-bottom: 0;
-}
-.search-results-dropdown li.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  background: var(--color-box);
-}
-.search-results-dropdown li.disabled:hover {
-  background: var(--color-box);
-  transform: none;
-}
-.search-results-dropdown h6 {
-  margin: 12px 16px 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.search-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-.cancel-button,
-.remove-button {
-  background: var(--color-box);
-  color: var(--color-text);
-  border: 1px solid var(--color-border-soft);
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.cancel-button:hover {
-  color: var(--color-text);
-  background: var(--color-primary);
-}
-.remove-button:hover {
-  color: var(--color-text);
-  background: #a54a4a;
-}
-.class-selection {
-  margin-bottom: 20px;
-}
-.class-selection h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #ffffff;
-}
-.class-icons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-}
-.class-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  border: 2px solid var(--color-border-soft);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 80px;
-  background: var(--color-box);
-}
-.class-option:hover {
-  border-color: var(--color-primary);
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-}
-.class-option.active {
-  border-color: var(--color-primary);
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-}
-.class-icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 5px;
-}
-.class-option span {
-  font-size: 12px;
-  color: #ffffff;
-  text-transform: capitalize;
-}
-.class-warning-popup {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #ff4444;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 12px;
-  z-index: 1001;
-  pointer-events: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-.rotw-section {
-  padding: 15px 0;
-  display: flex;
-  justify-content: center;
-}
-.rotw-container {
-  width: fit-content;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-}
-.rotw-section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 30px;
-  color: var(--color-text);
-}
-.rotw-count {
-  font-size: 1.5rem;
-  color: var(--color-text-soft);
-  font-weight: normal;
-}
-.rotw-grid {
-  display: grid;
-  gap: 30px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  justify-content: center;
-  max-width: 1250px;
-  width: 100%;
-  grid-template-columns: repeat(2, minmax(590px, 1fr));
-}
-.rotw-grid:has(.rotw-card:nth-child(1):last-child) {
-  grid-template-columns: minmax(750px, 1fr);
-}
-.rotw-grid:has(.rotw-card:nth-child(1):last-child) .rotw-card-active {
-  transform: scale(1.416);
-}
-.rotw-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  transition: all 0.3s ease;
-  min-width: 300px;
-  max-width: 750px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  z-index: 1;
-}
-.rotw-card-active {
-  z-index: 100;
-  position: relative;
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-  background: var(--color-primary-dark);
-}
-.rotw-card-active.rotw-card-left {
-  transform: translateX(52%) scale(1.8);
-}
-.rotw-card-active.rotw-card-right {
-  transform: translateX(-52%) scale(1.8);
-}
-.rotw-card-active .video-scale-wrapper iframe {
-  pointer-events: auto;
-}
-.rotw-video-embed {
-  position: relative;
-  width: 100%;
-  height: 0;
-  padding-bottom: 56.25%;
-  overflow: hidden;
-  border-radius: 8px;
-}
-.rotw-video-embed iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-}
-.video-scale-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform: scale(0.75);
-  transform-origin: top left;
-}
-.video-scale-wrapper iframe {
-  width: calc(100% / 0.75);
-  height: calc(100% / 0.75);
-  border-radius: 8px;
-}
-.rotw-video-info {
-  padding-top: 10px;
-  text-align: center;
-}
-.rotw-video-info h5 {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 1.1rem;
-}
-.rotw-video-info p {
-  margin: 5px 0 0;
-  color: #aaa;
-  font-size: 0.9rem;
-}
-.load-more-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
 @media (max-width: 1400px) {
-  .rotw-grid,
-  .map-grid,
-  .author-map-grid {
+  .map-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
     max-width: none !important;
     overflow-x: hidden;
     gap: 15px;
   }
-  .rotw-section-title {
-    font-size: 1.5rem;
-  }
-  .rotw-count {
-    font-size: 1rem;
-  }
-  .rotw-card-active,
-  .map-card {
-    transform: none !important;
-    width: 100%;
-    max-width: 100%;
-  }
   .map-section {
     padding: 15px 10px;
   }
-  .map-container,
-  .rotw-container {
+  .map-container {
     padding: 10px;
     width: 100%;
     box-sizing: border-box;
-  }
-  .rotw-card {
-    max-width: 100%;
   }
   .map-section-title {
     font-size: 1.5rem;
@@ -2464,16 +1488,13 @@ export default {
   .stats-container {
     margin: 0 auto;
   }
-  .rotw-grid,
-  .map-grid,
-  .author-map-grid {
+  .map-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
     overflow-x: hidden;
     gap: 15px;
   }
-  .map-container,
-  .rotw-container {
+  .map-container {
     width: 100%;
     margin: 0 auto;
   }

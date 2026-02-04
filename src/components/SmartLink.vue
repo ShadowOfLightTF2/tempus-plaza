@@ -41,13 +41,11 @@ export default {
 
       this.$emit("click", event);
     },
-
     handleMouseDown(event) {
       if (event.button === 1) {
         event.preventDefault();
       }
     },
-
     handleAuxClick(event) {
       if (event.button === 1) {
         event.preventDefault();
@@ -55,7 +53,6 @@ export default {
         this.openInNewTab();
       }
     },
-
     openInNewTab() {
       if (this.href) {
         window.open(this.href, "_blank");
