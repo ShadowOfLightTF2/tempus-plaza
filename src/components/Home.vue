@@ -92,13 +92,25 @@
         <div class="section">
           <div class="container">
             <h2 class="section-title">Most points gained</h2>
-            <h5 class="section-title-subtitle">(past 3 days)</h5>
+            <div class="period-selector">
+              <button
+                v-for="period in periods"
+                :key="period.value"
+                @click="selectedPeriod = period.value"
+                :class="[
+                  'period-btn',
+                  { active: selectedPeriod === period.value },
+                ]"
+              >
+                {{ period.label }}
+              </button>
+            </div>
             <div class="top-players-grid">
               <div class="class-section">
                 <h5 class="section-subtitle">Soldier</h5>
                 <div class="players-list">
                   <SmartLink
-                    v-for="(player, index) in topSoldiers"
+                    v-for="(player, index) in filteredTopSoldiers"
                     :key="player.id"
                     :to="{
                       name: 'PlayerPage',
@@ -137,7 +149,7 @@
                 <h5 class="section-subtitle">Demoman</h5>
                 <div class="players-list">
                   <SmartLink
-                    v-for="(player, index) in topDemomen"
+                    v-for="(player, index) in filteredTopDemomen"
                     :key="player.id"
                     :to="{
                       name: 'PlayerPage',
@@ -172,6 +184,346 @@
                   </SmartLink>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider" style="width: 100%" />
+        <div class="section">
+          <div class="container">
+            <h2 class="section-title">Latest tier/rating changes</h2>
+            <h5 class="section-title-subtitle">(last 10 changes)</h5>
+            <div
+              class="tier-carousel-container"
+              v-if="dataLoaded && tierRatingChanges.length > 0"
+            >
+              <div
+                class="tier-carousel-wrapper"
+                @touchstart="handleTouchStart"
+                @touchend="handleTouchEnd"
+              >
+                <div
+                  class="tier-carousel-track"
+                  :style="{
+                    transform: carouselTransform,
+                  }"
+                >
+                  <div
+                    class="tier-carousel-item"
+                    v-for="(change, index) in tierRatingChanges"
+                    :key="change.id"
+                    :class="{
+                      'carousel-prev':
+                        index === validCurrentSlide - 1 && !isMobileView,
+                      'carousel-active': isMobileView
+                        ? index === validCurrentSlide
+                        : index === validCurrentSlide ||
+                          index === validCurrentSlide + 1 ||
+                          index === validCurrentSlide + 2,
+                      'carousel-next':
+                        index === validCurrentSlide + 3 && !isMobileView,
+                    }"
+                    @click="
+                      (index === currentSlide - 1 ||
+                        index === currentSlide + 3) &&
+                      !isMobileView
+                        ? goToSlide(index)
+                        : null
+                    "
+                  >
+                    <SmartLink
+                      v-if="
+                        isMobileView ||
+                        (index >= currentSlide && index <= currentSlide + 2)
+                      "
+                      class="card"
+                      :to="{
+                        name: 'MapPage',
+                        params: { mapId: change.map_id },
+                      }"
+                      :style="{
+                        background: `
+              linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.6) 100%),
+              radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              url('/map-backgrounds/medium/${change.name}.jpg') center/cover no-repeat
+            `,
+                        backgroundBlendMode: 'multiply, normal, normal',
+                        backgroundSize: 'cover, cover, cover',
+                        backgroundPosition: 'center, center, center',
+                      }"
+                    >
+                      <div class="change-header-inline">
+                        <h3>{{ change.name }}</h3>
+                      </div>
+                      <div class="zone-info-center">
+                        <span class="zone-info">
+                          {{
+                            change.zone_type === "map"
+                              ? "Map"
+                              : change.zone_type === "course"
+                              ? "Course"
+                              : "Bonus"
+                          }}
+                          {{
+                            change.zone_type !== "map" ? change.zone_index : ""
+                          }}
+                        </span>
+                      </div>
+                      <div class="compact-ratings-grid">
+                        <div class="rating-section">
+                          <div class="rating-label">Soldier</div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill tier-color"
+                              :class="'tier-' + change.old_soldier_tier"
+                            >
+                              T{{ change.old_soldier_tier }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill tier-color"
+                              :class="[
+                                'tier-' + change.new_soldier_tier,
+                                {
+                                  changed:
+                                    change.old_soldier_tier !==
+                                    change.new_soldier_tier,
+                                },
+                              ]"
+                            >
+                              T{{ change.new_soldier_tier }}
+                            </span>
+                          </div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill rating-color"
+                              :class="'rating-' + change.old_soldier_rating"
+                            >
+                              R{{ change.old_soldier_rating }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill rating-color"
+                              :class="[
+                                'rating-' + change.new_soldier_rating,
+                                {
+                                  changed:
+                                    change.old_soldier_rating !==
+                                    change.new_soldier_rating,
+                                },
+                              ]"
+                            >
+                              R{{ change.new_soldier_rating }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="rating-section">
+                          <div class="rating-label">Demoman</div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill tier-color"
+                              :class="'tier-' + change.old_demoman_tier"
+                            >
+                              T{{ change.old_demoman_tier }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill tier-color"
+                              :class="[
+                                'tier-' + change.new_demoman_tier,
+                                {
+                                  changed:
+                                    change.old_demoman_tier !==
+                                    change.new_demoman_tier,
+                                },
+                              ]"
+                            >
+                              T{{ change.new_demoman_tier }}
+                            </span>
+                          </div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill rating-color"
+                              :class="'rating-' + change.old_demoman_rating"
+                            >
+                              R{{ change.old_demoman_rating }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill rating-color"
+                              :class="[
+                                'rating-' + change.new_demoman_rating,
+                                {
+                                  changed:
+                                    change.old_demoman_rating !==
+                                    change.new_demoman_rating,
+                                },
+                              ]"
+                            >
+                              R{{ change.new_demoman_rating }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="completion-count">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ formatDate(change.changed_at) }}
+                      </div>
+                    </SmartLink>
+                    <div
+                      v-else-if="!isMobileView"
+                      class="card"
+                      :style="{
+                        background: `
+                    linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+              radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              url('/map-backgrounds/medium/${change.name}.jpg') center/cover no-repeat
+            `,
+                        backgroundBlendMode: 'multiply, normal, normal',
+                        backgroundSize: 'cover, cover, cover',
+                        backgroundPosition: 'center, center, center',
+                      }"
+                    >
+                      <div class="change-header-inline">
+                        <h3>{{ change.name }}</h3>
+                      </div>
+                      <div class="zone-info-center">
+                        <span class="zone-info">
+                          {{
+                            change.zone_type === "map"
+                              ? "Map"
+                              : change.zone_type === "course"
+                              ? "Course"
+                              : "Bonus"
+                          }}
+                          {{
+                            change.zone_type !== "map" ? change.zone_index : ""
+                          }}
+                        </span>
+                      </div>
+                      <div class="compact-ratings-grid">
+                        <div class="rating-section">
+                          <div class="rating-label">Soldier</div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill tier-color"
+                              :class="'tier-' + change.old_soldier_tier"
+                            >
+                              T{{ change.old_soldier_tier }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill tier-color"
+                              :class="[
+                                'tier-' + change.new_soldier_tier,
+                                {
+                                  changed:
+                                    change.old_soldier_tier !==
+                                    change.new_soldier_tier,
+                                },
+                              ]"
+                            >
+                              T{{ change.new_soldier_tier }}
+                            </span>
+                          </div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill rating-color"
+                              :class="'rating-' + change.old_soldier_rating"
+                            >
+                              R{{ change.old_soldier_rating }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill rating-color"
+                              :class="[
+                                'rating-' + change.new_soldier_rating,
+                                {
+                                  changed:
+                                    change.old_soldier_rating !==
+                                    change.new_soldier_rating,
+                                },
+                              ]"
+                            >
+                              R{{ change.new_soldier_rating }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="rating-section">
+                          <div class="rating-label">Demoman</div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill tier-color"
+                              :class="'tier-' + change.old_demoman_tier"
+                            >
+                              T{{ change.old_demoman_tier }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill tier-color"
+                              :class="[
+                                'tier-' + change.new_demoman_tier,
+                                {
+                                  changed:
+                                    change.old_demoman_tier !==
+                                    change.new_demoman_tier,
+                                },
+                              ]"
+                            >
+                              T{{ change.new_demoman_tier }}
+                            </span>
+                          </div>
+                          <div class="rating-change-pills">
+                            <span
+                              class="rating-pill rating-color"
+                              :class="'rating-' + change.old_demoman_rating"
+                            >
+                              R{{ change.old_demoman_rating }}
+                            </span>
+                            <span class="arrow-small">→</span>
+                            <span
+                              class="rating-pill rating-color"
+                              :class="[
+                                'rating-' + change.new_demoman_rating,
+                                {
+                                  changed:
+                                    change.old_demoman_rating !==
+                                    change.new_demoman_rating,
+                                },
+                              ]"
+                            >
+                              R{{ change.new_demoman_rating }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="completion-count">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ formatDate(change.changed_at) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="carousel-indicators"
+                v-if="isMobileView && tierRatingChanges.length > 1"
+              >
+                <span
+                  v-for="(change, index) in tierRatingChanges"
+                  :key="'indicator-' + index"
+                  class="indicator-dot"
+                  :class="{ active: index === validCurrentSlide }"
+                  @click="currentSlide = index"
+                ></span>
+              </div>
+            </div>
+            <div
+              v-else-if="!dataLoaded"
+              class="loading-container"
+              style="padding: 60px 0"
+            >
+              <div class="loading-spinner"></div>
+              <span>Loading tier changes...</span>
             </div>
           </div>
         </div>
@@ -336,6 +688,7 @@
 
 <script>
 import { useHead } from "@vueuse/head";
+import { ref } from "vue";
 import DOMPurify from "dompurify";
 import axios from "axios";
 
@@ -363,9 +716,49 @@ export default {
       tf2rjweeklyVideos: [],
       topSoldiers: [],
       topDemomen: [],
+      selectedPeriod: "3day",
+      periods: [
+        { value: "3day", label: "Past 3 Days" },
+        { value: "7day", label: "Past 7 Days" },
+        { value: "30day", label: "Past 30 Days" },
+      ],
+      isMobileView: false,
+      tierRatingChanges: [],
+      dataLoaded: false,
+      currentSlide: 0,
+      touchStartX: 0,
+      touchEndX: 0,
     };
   },
   computed: {
+    filteredTopSoldiers() {
+      return this.topSoldiers
+        .filter((player) => player.period_type === this.selectedPeriod)
+        .sort((a, b) => b.points_gained - a.points_gained)
+        .slice(0, 3);
+    },
+    filteredTopDemomen() {
+      return this.topDemomen
+        .filter((player) => player.period_type === this.selectedPeriod)
+        .sort((a, b) => b.points_gained - a.points_gained)
+        .slice(0, 3);
+    },
+    validCurrentSlide() {
+      if (!this.tierRatingChanges.length) return 0;
+      return Math.min(
+        this.currentSlide,
+        Math.max(
+          0,
+          this.tierRatingChanges.length - (this.isMobileView ? 1 : 3),
+        ),
+      );
+    },
+    carouselTransform() {
+      if (this.isMobileView) {
+        return `translateX(-${this.validCurrentSlide * 100}%)`;
+      }
+      return `translateX(-${this.validCurrentSlide * (100 / 3)}%)`;
+    },
     cleanMapName() {
       return (mapName) => {
         return mapName.replace(/^jump_/, "").replace(/_[a-zA-Z0-9_]*$/, "");
@@ -384,7 +777,7 @@ export default {
     getPlayerCountryCode() {
       return (playerId) => {
         const tournamentPlayer = this.asiaTeamPlayers.find(
-          (p) => p.id === playerId
+          (p) => p.id === playerId,
         );
         if (tournamentPlayer && tournamentPlayer.countryCode) {
           return tournamentPlayer.countryCode;
@@ -395,7 +788,7 @@ export default {
     getPlayerCountry() {
       return (playerId) => {
         const tournamentPlayer = this.asiaTeamPlayers.find(
-          (p) => p.id === playerId
+          (p) => p.id === playerId,
         );
         if (tournamentPlayer && tournamentPlayer.country) {
           return tournamentPlayer.country;
@@ -444,6 +837,51 @@ export default {
     },
   },
   methods: {
+    checkMobileView() {
+      this.isMobileView = window.innerWidth <= 768;
+    },
+    handleCarouselClick(index, event, mapId) {
+      if (index === this.currentSlide - 1 || index === this.currentSlide + 3) {
+        this.goToSlide(index);
+      } else if (index >= this.currentSlide && index <= this.currentSlide + 2) {
+        this.$router.push({ name: "MapPage", params: { mapId: mapId } });
+      }
+    },
+    goToSlide(index) {
+      if (index === this.currentSlide - 1) {
+        this.currentSlide = Math.max(0, this.currentSlide - 1);
+      } else if (index === this.currentSlide + 3) {
+        this.currentSlide = Math.min(
+          this.tierRatingChanges.length - 3,
+          this.currentSlide + 1,
+        );
+      }
+    },
+    handleTouchStart(e) {
+      this.touchStartX = e.changedTouches[0].screenX;
+    },
+    handleTouchEnd(e) {
+      this.touchEndX = e.changedTouches[0].screenX;
+      this.handleSwipe();
+    },
+    handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = this.touchStartX - this.touchEndX;
+
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          // Swiped left - go to next
+          if (this.currentSlide < this.tierRatingChanges.length - 1) {
+            this.currentSlide++;
+          }
+        } else {
+          // Swiped right - go to previous
+          if (this.currentSlide > 0) {
+            this.currentSlide--;
+          }
+        }
+      }
+    },
     formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = (seconds % 60).toFixed(3);
@@ -456,7 +894,7 @@ export default {
         const playerInfo = data[0];
 
         const ranksResponse = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/ranks`
+          `${API_BASE_URL}/players/${playerId}/ranks`,
         );
         const ranksData = ranksResponse.data;
         playerInfo.soldier_rank = ranksData[0].soldier_rank;
@@ -480,22 +918,34 @@ export default {
       this.loadingMaps = false;
       this.loadingPlayers = false;
     },
+    async fetchTierRatingHistory() {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/maps/tier-rating-history`,
+        );
+        const data = response.data;
+        this.tierRatingChanges = data;
+        this.dataLoaded = true;
+        this.currentSlide = 0;
+      } catch (error) {
+        console.error("Error fetching tier rating history:", error);
+        this.tierRatingChanges = [];
+        this.dataLoaded = false;
+      }
+    },
     async fetchTopPlayers() {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/get-top-gainers`
+          `${API_BASE_URL}/players/get-top-gainers`,
         );
         const data = response.data;
 
-        this.topSoldiers = data
-          .filter((player) => player.class_type === "soldier")
-          .sort((a, b) => b.points_gained - a.points_gained)
-          .slice(0, 3);
-
-        this.topDemomen = data
-          .filter((player) => player.class_type === "demoman")
-          .sort((a, b) => b.points_gained - a.points_gained)
-          .slice(0, 3);
+        this.topSoldiers = data.filter(
+          (player) => player.class_type === "soldier",
+        );
+        this.topDemomen = data.filter(
+          (player) => player.class_type === "demoman",
+        );
       } catch (error) {
         console.error("Error fetching top players:", error);
       }
@@ -503,7 +953,7 @@ export default {
     async fetchPopularMaps() {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/maps/get-popular-maps`
+          `${API_BASE_URL}/maps/get-popular-maps`,
         );
         const data = response.data;
         this.popularSoldierMaps = data
@@ -595,9 +1045,12 @@ export default {
     },
   },
   mounted() {
+    this.fetchTierRatingHistory();
     this.fetchTopPlayers();
     this.fetchPopularMaps();
     this.fetchTF2RJWeeklyVideos();
+    this.checkMobileView();
+    window.addEventListener("resize", this.checkMobileView);
   },
   beforeDestroy() {
     if (this.updateInterval) {
@@ -612,6 +1065,7 @@ export default {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = null;
     }
+    window.removeEventListener("resize", this.checkMobileView);
   },
   watch: {
     searchQuery() {
@@ -639,17 +1093,24 @@ export default {
 }
 
 .hero h1 {
-  font-size: 4rem;
-  font-weight: 800;
+  font-size: 4.5rem;
+  font-weight: 900;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--color-primary) 50%,
+    #ffffff 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 0 80px rgba(102, 126, 234, 0.5);
+  letter-spacing: -2px;
 }
 
 .search-container {
-  margin: 40px 0;
+  margin: 50px 0;
   position: relative;
   max-width: 600px;
   margin-left: auto;
@@ -658,19 +1119,22 @@ export default {
 
 .search-box {
   display: flex;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .search-box:hover,
 .search-box:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 15px 45px rgba(102, 126, 234, 0.4),
+    0 0 60px rgba(102, 126, 234, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
 }
 .search-icon-container {
   display: flex;
@@ -687,7 +1151,7 @@ export default {
 
 .search-input {
   flex: 1;
-  padding: 18px 10px;
+  padding: 20px 15px;
   background: transparent;
   border: none;
   color: #ffffff;
@@ -756,7 +1220,7 @@ export default {
 }
 
 .search-btn {
-  padding: 18px 25px;
+  padding: 20px 30px;
   background: linear-gradient(
     135deg,
     var(--color-primary) 0%,
@@ -766,7 +1230,19 @@ export default {
   color: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.search-btn:hover {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-dark) 0%,
+    var(--color-primary) 100%
+  );
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
 }
 
 .loading-container {
@@ -806,15 +1282,16 @@ export default {
 
 .divider {
   border: none;
-  height: 2px;
+  height: 1px;
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-primary),
+    rgba(102, 126, 234, 0.6),
     transparent
   );
-  margin: 30px 0;
-  opacity: 0.6;
+  margin: 40px 0;
+  opacity: 0.8;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 .section {
@@ -822,13 +1299,21 @@ export default {
 }
 
 .section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 3rem;
+  font-weight: 800;
   text-align: center;
-  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--color-primary) 50%,
+    #ffffff 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 60px rgba(102, 126, 234, 0.3);
 }
 
 .section-title-subtitle {
@@ -897,23 +1382,46 @@ export default {
 .player-card {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.03) 100%
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
   );
-  border-radius: 15px;
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
+  max-width: 418px;
+}
+
+.player-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.player-card:hover::after {
+  left: 100%;
 }
 
 .player-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+  transform: scale(1.02);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
   cursor: pointer;
 }
 
@@ -977,7 +1485,14 @@ export default {
   height: 75px;
   border-radius: 50%;
   margin-right: 25px;
-  border: 2px solid var(--color-primary);
+  border: 3px solid var(--color-primary);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.player-card:hover .player-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
 }
 
 .player-name {
@@ -1053,6 +1568,7 @@ export default {
   display: flex;
   flex-direction: column;
   text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .card:hover {
@@ -1099,14 +1615,32 @@ export default {
 
 .rating-pill {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.8rem;
+  font-weight: 700;
+  font-size: 0.85rem;
   color: var(--color-dark);
   text-shadow: none;
-  min-width: 40px;
+  min-width: 45px;
   text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rating-pill.changed {
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .rating-label {
@@ -1282,6 +1816,7 @@ export default {
   }
 
   .player-card {
+    max-width: none;
     padding: 15px;
   }
 
@@ -1297,6 +1832,231 @@ export default {
 
   .points-value {
     font-size: 1rem;
+  }
+}
+
+.change-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.change-header-inline h3 {
+  margin-bottom: 0;
+}
+
+.zone-info-center {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0px;
+}
+
+.zone-info {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.rating-change-pills {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-small {
+  color: var(--color-primary);
+  font-size: 1.1rem;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+.rating-pill.changed {
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.tier-carousel-container {
+  position: relative;
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 0 100px;
+}
+
+.tier-carousel-wrapper {
+  overflow: visible;
+  position: relative;
+}
+
+.tier-carousel-track {
+  display: flex;
+  gap: 30px;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tier-carousel-item {
+  flex: 0 0 calc((100% - 60px) / 3);
+  transition: all 0.5s ease;
+  transform-origin: center;
+}
+
+.tier-carousel-item.carousel-active {
+  z-index: 2;
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.tier-carousel-item.carousel-prev,
+.tier-carousel-item.carousel-next {
+  opacity: 0.2;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+  position: relative;
+}
+
+.tier-carousel-item.carousel-prev {
+  transform: scale(0.85) rotateY(15deg);
+}
+
+.tier-carousel-item.carousel-next {
+  transform: scale(0.85) rotateY(-15deg);
+}
+
+.tier-carousel-item.carousel-prev:hover,
+.tier-carousel-item.carousel-next:hover {
+  opacity: 0.7;
+  transform: scale(0.85) rotateY(0deg);
+}
+
+.tier-carousel-item:not(.carousel-active):not(.carousel-prev):not(
+    .carousel-next
+  ) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tier-carousel-item .card {
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background: var(--color-primary);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.indicator-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .tier-carousel-container {
+    padding: 0 20px;
+  }
+
+  .tier-carousel-track {
+    gap: 0;
+  }
+
+  .tier-carousel-item {
+    flex: 0 0 100%;
+  }
+
+  .tier-carousel-item .card {
+    padding-bottom: 40px;
+  }
+
+  .tier-carousel-item.carousel-active {
+    opacity: 1;
+    transform: none;
+    display: block;
+  }
+
+  .tier-carousel-item:not(.carousel-active) {
+    opacity: 0;
+    transform: none;
+  }
+
+  .tier-carousel-item.carousel-prev,
+  .tier-carousel-item.carousel-next {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.period-selector {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0 35px 0;
+}
+
+.period-btn {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 25px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.period-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(102, 126, 234, 0.5);
+  color: #ffffff;
+}
+
+.period-btn.active {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  border-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+@media (max-width: 768px) {
+  .period-selector {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px;
+  }
+
+  .period-btn {
+    width: 100%;
   }
 }
 </style>

@@ -1611,8 +1611,7 @@ export default {
 .ranks-section {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 0.5rem;
+  justify-content: left;
 }
 
 .player-ranks {
@@ -1772,7 +1771,6 @@ export default {
   .ranks-section {
     border-right: none;
     border-bottom: 1px solid var(--color-border-soft);
-    padding: 0.5rem;
     justify-content: center;
   }
 
