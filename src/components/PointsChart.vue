@@ -319,6 +319,7 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   margin-bottom: 20px;
   color: #fff;
+  min-height: 368px;
 }
 
 .section-header {

@@ -111,6 +111,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
+  min-height: 395px;
 }
 
 .stat-block .card-title {

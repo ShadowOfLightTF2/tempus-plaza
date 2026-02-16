@@ -1,5 +1,7 @@
 <template>
+  <LeaderboardSkeleton v-if="loading" />
   <div
+    v-else
     class="container d-flex flex-column align-items-center"
     style="z-index: 1"
   >
@@ -49,19 +51,6 @@
     </div>
     <div v-if="selectedTypePill !== 'Map'" class="subcategory-container">
       <div class="subcategory-pills">
-        <!-- Map 
-        <div v-show="selectedTypePill === 'Map'">
-          <div class="pill-row">
-            <button
-              class="subcategory-pill map-pill"
-              :class="{ active: type === 'map' }"
-              @click="goTo('map', null)"
-            >
-              Map
-            </button>
-          </div>
-        </div>-->
-        <!-- Courses -->
         <div v-show="selectedTypePill === 'Course' && courseCount > 0">
           <div class="pill-row">
             <button
@@ -75,8 +64,6 @@
             </button>
           </div>
         </div>
-
-        <!-- Bonuses -->
         <div v-show="selectedTypePill === 'Bonus' && bonusCount > 0">
           <div class="pill-row">
             <button
@@ -441,6 +428,7 @@ import axios from "axios";
 import { formatDuration, formatDate } from "@/utils/calculations.js";
 import { ref } from "vue";
 import { useHead } from "@vueuse/head";
+import LeaderboardSkeleton from "./Skeletons/LeaderboardSkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const capitalizeFirstLetter = (str) =>
@@ -448,6 +436,7 @@ const capitalizeFirstLetter = (str) =>
 
 export default {
   name: "Leaderboard",
+  components: { LeaderboardSkeleton },
   props: {
     mapId: { type: Number, required: true },
     type: {
@@ -533,13 +522,13 @@ export default {
     displayedSoldierEntries() {
       return this.selectedSoldierRecords.slice(
         0,
-        this.soldierDisplayCount + this.soldierOffset
+        this.soldierDisplayCount + this.soldierOffset,
       );
     },
     displayedDemomanEntries() {
       return this.selectedDemomanRecords.slice(
         0,
-        this.demomanDisplayCount + this.demomanOffset
+        this.demomanDisplayCount + this.demomanOffset,
       );
     },
   },
@@ -587,7 +576,7 @@ export default {
       this.error = null;
       try {
         const { data } = await axios.get(
-          `${API_BASE_URL}/maps/${this.mapId}/all-info`
+          `${API_BASE_URL}/maps/${this.mapId}/all-info`,
         );
         const { map, courses, bonuses } = data;
 
@@ -639,7 +628,7 @@ export default {
       classType = "both",
       index = null,
       offset = 0,
-      limit = 51
+      limit = 51,
     ) {
       if (offset === 0) this.loading = true;
       else this.showMoreLoading = true;
@@ -739,7 +728,7 @@ export default {
         type,
         "soldier",
         index,
-        this.soldierDisplayCount + this.soldierOffset
+        this.soldierDisplayCount + this.soldierOffset,
       );
       this.soldierOffset += 50;
     },
@@ -754,7 +743,7 @@ export default {
         type,
         "demoman",
         index,
-        this.demomanDisplayCount + this.demomanOffset
+        this.demomanDisplayCount + this.demomanOffset,
       );
       this.demomanOffset += 50;
     },

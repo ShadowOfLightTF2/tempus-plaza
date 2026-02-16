@@ -32,9 +32,113 @@
               Servers
             </button>
           </div>
-          <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading {{ currentView }}...</span>
+          <div
+            v-if="loading && currentView === 'topplayers'"
+            class="top-players-cards"
+          >
+            <div class="table-header-content topplayers-header">
+              <div class="skeleton-block skeleton-icon"></div>
+              <div class="table-header-text">
+                <div class="skeleton-block skeleton-title"></div>
+                <div class="skeleton-block skeleton-subtitle"></div>
+              </div>
+            </div>
+            <div class="players-cards-container">
+              <div v-for="n in 20" :key="n" class="player-card skeleton-card">
+                <div class="ranks-section">
+                  <div class="player-ranks">
+                    <div class="skeleton-block skeleton-rank"></div>
+                    <div class="skeleton-block skeleton-rank"></div>
+                  </div>
+                </div>
+                <div class="player-info-section">
+                  <div class="skeleton-block skeleton-avatar-large"></div>
+                  <div class="player-details" style="gap: 0.5rem">
+                    <div class="skeleton-block skeleton-player-name"></div>
+                    <div class="skeleton-block skeleton-player-country"></div>
+                  </div>
+                </div>
+                <div class="map-info-section" style="background-image: none">
+                  <div class="map-details">
+                    <div class="skeleton-block skeleton-class-icon"></div>
+                    <div class="skeleton-block skeleton-map-name"></div>
+                  </div>
+                </div>
+                <div class="server-info-section">
+                  <div class="skeleton-block skeleton-server-name"></div>
+                  <div class="skeleton-block skeleton-btn"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            v-else-if="loading && currentView === 'servers'"
+            class="table-wrapper"
+          >
+            <div class="table-header-content">
+              <div class="table-header-top">
+                <div class="skeleton-block skeleton-icon"></div>
+                <div class="table-header-title-section">
+                  <div class="skeleton-block skeleton-title"></div>
+                  <div class="skeleton-block skeleton-subtitle"></div>
+                </div>
+              </div>
+              <div class="table-header-filters">
+                <div class="region-buttons">
+                  <div
+                    v-for="n in 9"
+                    :key="n"
+                    class="skeleton-block skeleton-region-btn"
+                  ></div>
+                </div>
+                <div class="server-type-buttons" style="margin-top: 0.75rem">
+                  <div
+                    v-for="n in 4"
+                    :key="n"
+                    class="skeleton-block skeleton-type-btn"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th><div class="skeleton-block skeleton-th"></div></th>
+                    <th><div class="skeleton-block skeleton-th"></div></th>
+                    <th><div class="skeleton-block skeleton-th"></div></th>
+                    <th><div class="skeleton-block skeleton-th"></div></th>
+                    <th><div class="skeleton-block skeleton-th"></div></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="n in 30" :key="n" class="fade-in">
+                    <td class="align-middle">
+                      <div class="skeleton-row-inner">
+                        <div class="skeleton-block skeleton-flag"></div>
+                        <div class="skeleton-block skeleton-td-text"></div>
+                      </div>
+                    </td>
+                    <td class="align-middle">
+                      <div class="skeleton-block skeleton-td-text-long"></div>
+                    </td>
+                    <td class="align-middle">
+                      <div class="skeleton-block skeleton-td-text"></div>
+                    </td>
+                    <td class="align-middle">
+                      <div class="skeleton-row-inner">
+                        <div
+                          class="skeleton-block skeleton-td-text-short"
+                        ></div>
+                        <div class="skeleton-block skeleton-status-dot"></div>
+                      </div>
+                    </td>
+                    <td class="align-middle">
+                      <div class="skeleton-block skeleton-btn-sm"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           <div v-else class="table-container">
@@ -61,7 +165,6 @@
                   class="player-card fade-in"
                   :class="{ 'min-mode': minMode }"
                 >
-                  <!-- Ranks Section -->
                   <div class="ranks-section">
                     <div class="player-ranks">
                       <template v-if="!minMode">
@@ -115,8 +218,6 @@
                       </template>
                     </div>
                   </div>
-
-                  <!-- Player Info Section -->
                   <div class="player-info-section">
                     <SmartLink
                       :to="{
@@ -152,7 +253,6 @@
                       </div>
                     </SmartLink>
                   </div>
-                  <!-- Map Info Section -->
                   <SmartLink
                     :to="{
                       name: 'MapPage',
@@ -198,7 +298,6 @@
                       </div>
                     </div>
                   </SmartLink>
-                  <!-- Server Info Section -->
                   <div class="server-info-section">
                     <div class="server-name-large">
                       {{ player.shortname }} | {{ player.server_name }}
@@ -464,7 +563,6 @@ export default {
       loading: false,
       failedMapImages: new Set(),
       isMobile: window.innerWidth <= 1024,
-      minMode: false,
       minMode: localStorage.getItem("minMode") === "true",
       topPlayersData: [],
       serversData: [],
@@ -498,33 +596,27 @@ export default {
     filteredServersData() {
       let filtered = this.serversData;
 
-      // Filter by region
       if (this.selectedRegion !== "all") {
         filtered = filtered.filter(
           (server) => server.region === this.selectedRegion,
         );
       }
 
-      // Filter by server type (include/exclude logic)
       if (!this.selectedServerTypes.includes("all")) {
         filtered = filtered.filter((server) => {
           const matchesIncluded = this.selectedServerTypes.some((type) =>
             this.matchesServerType(server.name, type),
           );
-
           const matchesExcluded = this.excludedServerTypes.some((type) =>
             this.matchesServerType(server.name, type),
           );
-
           return matchesIncluded && !matchesExcluded;
         });
       } else {
-        // When "all" is selected, only apply exclusions
         filtered = filtered.filter((server) => {
           const matchesExcluded = this.excludedServerTypes.some((type) =>
             this.matchesServerType(server.name, type),
           );
-
           return !matchesExcluded;
         });
       }
@@ -580,7 +672,6 @@ export default {
     },
     extractAvailableRanks() {
       const ranks = new Set();
-
       this.serversData.forEach((server) => {
         const name = server.name.toLowerCase();
         const rankMatch = name.match(/rank (\d+)/i);
@@ -588,14 +679,12 @@ export default {
           ranks.add(parseInt(rankMatch[1]));
         }
       });
-
       this.availableRanks = Array.from(ranks).sort((a, b) => a - b);
     },
 
     getServerTypeButtonClass(serverType) {
       const isSelected = this.selectedServerTypes.includes(serverType);
       const isExcluded = this.excludedServerTypes.includes(serverType);
-
       return {
         active: isSelected && !isExcluded,
         excluded: isExcluded,
@@ -604,13 +693,11 @@ export default {
 
     filterByRegion(region) {
       this.selectedRegion = region;
-      // Reset expanded server when filtering
       this.expandedServerId = null;
     },
 
     toggleServerType(serverType) {
       if (serverType === "all") {
-        // If "All Maps" is clicked, clear other selections and exclusions
         this.selectedServerTypes = ["all"];
         this.excludedServerTypes = [];
       } else {
@@ -620,54 +707,42 @@ export default {
           this.excludedServerTypes.includes(serverType);
 
         if (!isCurrentlySelected && !isCurrentlyExcluded) {
-          // First click: add to selected
           if (this.selectedServerTypes.includes("all")) {
             this.selectedServerTypes = [serverType];
           } else {
             this.selectedServerTypes.push(serverType);
           }
         } else if (isCurrentlySelected && !isCurrentlyExcluded) {
-          // Second click: move to excluded
           this.selectedServerTypes = this.selectedServerTypes.filter(
             (type) => type !== serverType,
           );
           this.excludedServerTypes.push(serverType);
-
-          // If no types are selected, default to "all"
           if (this.selectedServerTypes.length === 0) {
             this.selectedServerTypes = ["all"];
           }
         } else if (isCurrentlyExcluded) {
-          // Third click: remove from excluded
           this.excludedServerTypes = this.excludedServerTypes.filter(
             (type) => type !== serverType,
           );
         }
       }
-
-      // Reset expanded server when filtering
       this.expandedServerId = null;
     },
 
     matchesServerType(serverName, type) {
       const name = serverName.toLowerCase();
-
       switch (type) {
         case "beginner":
           return name.includes("beginner") || name.includes("iniciantes");
         case "rank_only":
           const hasRankPattern = /rank (\d+)/i.test(name);
           if (!hasRankPattern) return false;
-
-          // If a specific rank is selected, match only that rank
           if (this.selectedRank !== "all") {
             const rankMatch = name.match(/rank (\d+)/i);
             return rankMatch && parseInt(rankMatch[1]) === this.selectedRank;
           }
-
           return true;
         case "empty":
-          // Find the server in serversData to check player count
           const server = this.serversData.find((s) => s.name === serverName);
           return server && server.playerCount === 0;
         case "all":
@@ -704,6 +779,7 @@ export default {
         this.loading = false;
       }
     },
+
     sortServersByPlayers() {
       if (this.sortBy === "players") {
         this.sortDirection *= -1;
@@ -711,11 +787,11 @@ export default {
         this.sortBy = "players";
         this.sortDirection = -1;
       }
-
       this.serversData.sort((a, b) => {
         return (a.playerCount - b.playerCount) * this.sortDirection;
       });
     },
+
     sortServersByMap() {
       if (this.sortBy === "map") {
         this.sortDirection *= -1;
@@ -723,13 +799,13 @@ export default {
         this.sortBy = "map";
         this.sortDirection = 1;
       }
-
       this.serversData.sort((a, b) => {
         const mapA = a.currentMap || "";
         const mapB = b.currentMap || "";
         return mapA.localeCompare(mapB) * this.sortDirection;
       });
     },
+
     sortServersByRegion() {
       if (this.sortBy === "region") {
         this.sortDirection *= -1;
@@ -737,7 +813,6 @@ export default {
         this.sortBy = "region";
         this.sortDirection = 1;
       }
-
       const regionOrder = [
         "north_america",
         "europe",
@@ -748,17 +823,15 @@ export default {
         "middle_east",
         "unknown",
       ];
-
       this.serversData.sort((a, b) => {
         const regionA = regionOrder.indexOf(a.region);
         const regionB = regionOrder.indexOf(b.region);
-
         if (regionA !== regionB)
           return (regionA - regionB) * this.sortDirection;
-
         return a.country.localeCompare(b.country) * this.sortDirection;
       });
     },
+
     sortServersByName() {
       if (this.sortBy === "name") {
         this.sortDirection *= -1;
@@ -766,11 +839,11 @@ export default {
         this.sortBy = "name";
         this.sortDirection = 1;
       }
-
       this.serversData.sort((a, b) => {
         return a.name.localeCompare(b.name) * this.sortDirection;
       });
     },
+
     async fetchTopPlayersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers/top-players`);
@@ -800,11 +873,11 @@ export default {
         );
       }
     },
+
     async fetchServersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers`);
         const data = await response.json();
-
         const regionOrder = [
           "north_america",
           "europe",
@@ -815,7 +888,6 @@ export default {
           "middle_east",
           "unknown",
         ];
-
         this.serversData = data
           .filter((server) => server.hidden !== 1)
           .map((server) => ({
@@ -825,7 +897,6 @@ export default {
           .sort((a, b) => {
             const regionA = regionOrder.indexOf(a.region);
             const regionB = regionOrder.indexOf(b.region);
-
             if (regionA !== regionB) return regionA - regionB;
             return a.country.localeCompare(b.country);
           });
@@ -839,11 +910,6 @@ export default {
         ? countryCode.toLowerCase()
         : "unknown";
       return `https://flagcdn.com/24x18/${validCode}.png`;
-    },
-
-    switchView(view) {
-      if (this.currentView === view) return;
-      this.currentView = view;
     },
 
     getServerStatusClass(players, maxPlayers) {
@@ -873,6 +939,135 @@ export default {
 </script>
 
 <style scoped>
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+.skeleton-block {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.13) 50%,
+    rgba(255, 255, 255, 0.06) 75%
+  );
+  background-size: 600px 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.skeleton-title {
+  width: 180px;
+  height: 1.3rem;
+  margin-bottom: 0.4rem;
+}
+.skeleton-subtitle {
+  width: 120px;
+  height: 0.85rem;
+}
+.skeleton-rank {
+  width: 52px;
+  height: 28px;
+  border-radius: 6px;
+}
+.skeleton-avatar-large {
+  width: 54px;
+  height: 54px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.skeleton-player-name {
+  width: 150px;
+  height: 1.1rem;
+}
+.skeleton-player-country {
+  width: 90px;
+  height: 0.85rem;
+}
+.skeleton-class-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.skeleton-map-name {
+  width: 130px;
+  height: 1rem;
+}
+.skeleton-server-name {
+  width: 80%;
+  height: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.skeleton-btn {
+  width: 72px;
+  height: 30px;
+  border-radius: 5px;
+}
+.skeleton-btn-sm {
+  width: 64px;
+  height: 26px;
+  border-radius: 5px;
+}
+
+.skeleton-region-btn {
+  width: 90px;
+  height: 30px;
+  border-radius: 5px;
+}
+.skeleton-type-btn {
+  width: 76px;
+  height: 28px;
+  border-radius: 5px;
+}
+.skeleton-th {
+  width: 70%;
+  height: 0.85rem;
+}
+.skeleton-flag {
+  width: 24px;
+  height: 18px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.skeleton-td-text {
+  width: 90px;
+  height: 0.85rem;
+}
+.skeleton-td-text-long {
+  width: 160px;
+  height: 0.85rem;
+}
+.skeleton-td-text-short {
+  width: 50px;
+  height: 0.85rem;
+}
+.skeleton-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.skeleton-row-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-card.skeleton-card {
+  pointer-events: none;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
 .page-header {
   margin-bottom: 2rem;
 }
@@ -1515,13 +1710,14 @@ export default {
   grid-template-columns: 0.6fr 2fr 2fr minmax(400px, 1.5fr);
   gap: 0.5rem;
   padding: 0.3rem 0.6rem;
-  border: 1px solid var(--color-border-semi-soft);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .player-card:hover {
-  transform: translateY(-2px);
+  border: 1px solid var(--color-border-semi-soft);
+  background: rgba(74, 111, 165, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -1721,6 +1917,10 @@ export default {
   padding-right: 3.2px;
   gap: 1rem;
   border-color: var(--color-border-soft);
+}
+
+.player-card.min-mode:hover {
+  border-color: var(--color-border-semi-soft);
 }
 
 .player-card.min-mode .player-link {

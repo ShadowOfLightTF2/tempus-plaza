@@ -563,17 +563,6 @@ export default {
 </script>
 
 <style scoped>
-.record-item {
-  transition: transform 0.25s ease;
-}
-.record-item:hover {
-  transform: scale(1.01);
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.3),
-    rgba(74, 111, 165, 0.1)
-  );
-}
 .button-container-wrapper {
   display: flex;
   width: 100%;
@@ -700,6 +689,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+}
+.record-item:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.3),
+    rgba(74, 111, 165, 0.1)
+  );
 }
 .pagination-controls {
   display: flex;

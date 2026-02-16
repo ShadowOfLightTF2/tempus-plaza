@@ -7,121 +7,126 @@
       loading: isLoading,
       'image-failed': imageFailed,
     }"
-    :style="backgroundImageStyle"
   >
     <div v-if="!imageLoaded && !imageFailed" class="loading-placeholder">
       <div class="spinner"></div>
     </div>
-    <div class="card-overlay">
-      <div
-        class="card-header"
-        :style="currentView !== 'maps' ? 'margin-top: 70px;' : ''"
-      >
-        <div class="class-icon-container">
-          <img
-            v-if="item.intended_class === 3 || item.intended_class === 4"
-            :src="`/icons/${item.class}.png`"
-            :alt="item.class"
-            class="author-class-icon"
-          />
-          <template v-if="item.intended_class === 5">
+    <div class="card-bg" :style="backgroundImageStyle"></div>
+    <div class="card-inner">
+      <div class="card-overlay">
+        <div
+          class="card-header"
+          :style="currentView !== 'maps' ? 'margin-top: 70px;' : ''"
+        >
+          <div class="class-icon-container">
             <img
-              :src="`/icons/soldier.png`"
+              v-if="item.intended_class === 3 || item.intended_class === 4"
+              :src="`/icons/${item.class}.png`"
               :alt="item.class"
-              class="author-class-icon dual-icon"
+              class="author-class-icon"
             />
-            <img
-              :src="`/icons/demoman.png`"
-              :alt="item.class"
-              class="author-class-icon dual-icon"
-            />
-          </template>
-        </div>
-        <h3 class="card-title">
-          {{
-            currentView === "maps"
-              ? item.name
-              : `${item.map_name} (${currentView.slice(0, 1).toUpperCase()}${
-                  item.index
-                })`
-          }}
-        </h3>
-      </div>
-
-      <div class="card-body">
-        <div class="class-tiers">
-          <div class="tier-section">
-            <span class="class-label">Soldier</span>
-            <div class="tier-group">
-              <span
-                class="tier-badge tier-badge-card"
-                :class="`tier-${item.soldier_tier}`"
-                >T{{ item.soldier_tier }}</span
-              >
-              <span
-                class="rating-badge rating-badge-card"
-                :class="`rating-${item.soldier_rating}`"
-                >R{{ item.soldier_rating }}</span
-              >
-            </div>
-            <div class="completion-item">
-              <i class="bi bi-check-circle me-1"></i>
-              {{ item.soldier_completion_count?.toLocaleString() || 0 }}
-            </div>
+            <template v-if="item.intended_class === 5">
+              <img
+                :src="`/icons/soldier.png`"
+                :alt="item.class"
+                class="author-class-icon dual-icon"
+              />
+              <img
+                :src="`/icons/demoman.png`"
+                :alt="item.class"
+                class="author-class-icon dual-icon"
+              />
+            </template>
           </div>
-
-          <div class="tier-section">
-            <span class="class-label">Demoman</span>
-            <div class="tier-group">
-              <span
-                class="tier-badge tier-badge-card"
-                :class="`tier-${item.demoman_tier}`"
-                >T{{ item.demoman_tier }}</span
-              >
-              <span
-                class="rating-badge rating-badge-card"
-                :class="`rating-${item.demoman_rating}`"
-                >R{{ item.demoman_rating }}</span
-              >
-            </div>
-            <div class="completion-item">
-              <i class="bi bi-check-circle me-1"></i>
-              {{ item.demoman_completion_count?.toLocaleString() || 0 }}
-            </div>
-          </div>
+          <h3 class="card-title">
+            {{
+              currentView === "maps"
+                ? item.name
+                : `${item.map_name} (${currentView.slice(0, 1).toUpperCase()}${
+                    item.index
+                  })`
+            }}
+          </h3>
         </div>
 
-        <div class="card-stats">
-          <div v-if="currentView === 'maps'" class="stat-row">
-            <div class="stat-item">
-              <span class="stat-label">Courses</span>
-              <span class="stat-value">{{ item.course_count || 0 }}</span>
+        <div class="card-body">
+          <div class="class-tiers">
+            <div class="tier-section">
+              <span class="class-label">Soldier</span>
+              <div class="tier-group">
+                <span
+                  class="tier-badge tier-badge-card"
+                  :class="`tier-${item.soldier_tier}`"
+                  >T{{ item.soldier_tier }}</span
+                >
+                <span
+                  class="rating-badge rating-badge-card"
+                  :class="`rating-${item.soldier_rating}`"
+                  >R{{ item.soldier_rating }}</span
+                >
+              </div>
+              <div class="completion-item">
+                <i class="bi bi-check-circle me-1"></i>
+                {{ item.soldier_completion_count?.toLocaleString() || 0 }}
+              </div>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Bonuses</span>
-              <span class="stat-value">{{ item.bonus_count || 0 }}</span>
+
+            <div class="tier-section">
+              <span class="class-label">Demoman</span>
+              <div class="tier-group">
+                <span
+                  class="tier-badge tier-badge-card"
+                  :class="`tier-${item.demoman_tier}`"
+                  >T{{ item.demoman_tier }}</span
+                >
+                <span
+                  class="rating-badge rating-badge-card"
+                  :class="`rating-${item.demoman_rating}`"
+                  >R{{ item.demoman_rating }}</span
+                >
+              </div>
+              <div class="completion-item">
+                <i class="bi bi-check-circle me-1"></i>
+                {{ item.demoman_completion_count?.toLocaleString() || 0 }}
+              </div>
             </div>
           </div>
 
-          <div class="map-tags" v-if="item.tags && item.tags.length > 0">
-            <div
-              v-for="tag in item.tags"
-              :key="tag.id"
-              class="map-tag"
-              :style="{
-                backgroundColor: tag.color + '20',
-                borderColor: tag.color,
-              }"
-            >
-              <i class="bi bi-tag-fill me-1" :style="{ color: tag.color }"></i>
-              {{ tag.name }}
+          <div class="card-stats">
+            <div v-if="currentView === 'maps'" class="stat-row">
+              <div class="stat-item">
+                <span class="stat-label">Courses</span>
+                <span class="stat-value">{{ item.course_count || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Bonuses</span>
+                <span class="stat-value">{{ item.bonus_count || 0 }}</span>
+              </div>
+            </div>
+
+            <div class="map-tags" v-if="item.tags && item.tags.length > 0">
+              <div
+                v-for="tag in item.tags"
+                :key="tag.id"
+                class="map-tag"
+                :style="{
+                  backgroundColor: tag.color + '20',
+                  borderColor: tag.color,
+                }"
+              >
+                <i
+                  class="bi bi-tag-fill me-1"
+                  :style="{ color: tag.color }"
+                ></i>
+                {{ tag.name }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div v-if="currentView === 'maps'" class="map-date-added">
-          Date Added:
-          {{ formatDate(item.date_added * 1000) }}
+          <div v-if="currentView === 'maps'" class="map-date-added">
+            Date Added:
+            {{ formatDate(item.date_added * 1000) }}
+          </div>
         </div>
       </div>
     </div>
@@ -169,11 +174,6 @@ export default {
         this.currentView === "maps" ? this.item.name : this.item.map_name
       }.jpg`;
     },
-    backgroundImageStyle() {
-      return this.imageLoaded
-        ? `background-image: url('${this.imagePath}')`
-        : "";
-    },
   },
   mounted() {
     this.setupLazyLoading();
@@ -202,7 +202,7 @@ export default {
           },
           {
             rootMargin: "50px",
-          }
+          },
         );
 
         this.observer.observe(this.$refs.cardElement);
@@ -232,24 +232,50 @@ export default {
 <style scoped>
 .card-image {
   position: relative;
-  transition: opacity 0.3s ease;
-  opacity: 0;
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   min-height: 200px;
   width: 100%;
   height: 100%;
+}
+
+.card-image.loaded .card-bg,
+.card-image.image-failed .card-bg {
+  opacity: 1;
+}
+
+.card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
+  background-image: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  z-index: 0;
 }
 
-.card-image.loaded {
-  opacity: 1;
+.card-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
 }
 
-.card-image.loading {
+.card-image:hover .card-bg {
+  transform: scale(1.04);
 }
-.card-image.image-failed {
-  opacity: 1;
+
+.card-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .loading-placeholder {
@@ -261,7 +287,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
   z-index: 1;
 }
 
@@ -289,12 +314,6 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.1) 30%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
   padding: 15px;
   display: flex;
   flex-direction: column;

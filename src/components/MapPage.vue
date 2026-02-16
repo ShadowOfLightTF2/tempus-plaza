@@ -934,7 +934,7 @@
                               {{
                                 formatDate(
                                   new Date(rotwVideo.uploaded_at).getTime() /
-                                    1000
+                                    1000,
                                 )
                               }}
                             </small>
@@ -1301,7 +1301,7 @@ export default {
         if (mapId) {
           try {
             const votesResponse = await fetch(
-              `${API_BASE_URL}/maps/${mapId}/map-tag-votes`
+              `${API_BASE_URL}/maps/${mapId}/map-tag-votes`,
             );
             const votesData = await votesResponse.json();
 
@@ -1391,7 +1391,7 @@ export default {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ mapTags: plainTagIds }),
-            }
+            },
           );
         } else {
           this.showLoginRequiredMessage = true;
@@ -1503,7 +1503,7 @@ export default {
       if (wasShowingAll && !this.showAllRotwVideos) {
         this.$nextTick(() => {
           const rotwSection = document.querySelector(
-            ".video-section:has(.video-card-rotw)"
+            ".video-section:has(.video-card-rotw)",
           );
           if (rotwSection) {
             rotwSection.scrollIntoView({
@@ -1541,7 +1541,7 @@ export default {
     async fetchAllMapData(mapId) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/maps/${mapId}/all-info`
+          `${API_BASE_URL}/maps/${mapId}/all-info`,
         );
         if (!response.data.map) {
           this.mapNotFound = true;
@@ -1551,10 +1551,10 @@ export default {
         this.mapName = response.data.map.name;
         this.authors = response.data.authors;
         this.courses = (response.data.courses || []).sort(
-          (a, b) => a.index - b.index
+          (a, b) => a.index - b.index,
         );
         this.bonuses = (response.data.bonuses || []).sort(
-          (a, b) => a.index - b.index
+          (a, b) => a.index - b.index,
         );
         this.rotwVideos = response.data.rotw_videos || [];
       } catch (error) {
@@ -1872,6 +1872,11 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
+}
+
+.video-card:hover {
+  cursor: pointer;
+  background: var(--color-primary-dark);
 }
 
 .video-card-soldier.active {
@@ -2292,7 +2297,6 @@ export default {
     rgba(74, 111, 165, 0.5),
     rgba(74, 111, 165, 0.3)
   );
-  transform: translateY(-2px);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
@@ -2968,6 +2972,7 @@ export default {
   padding: 24px 32px;
   gap: 12px;
   transition: all 0.3s ease;
+  min-height: 188px;
 }
 
 .lookup-map-banner .lookup-banner-content:hover {

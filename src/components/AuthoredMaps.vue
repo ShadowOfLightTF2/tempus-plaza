@@ -393,7 +393,6 @@ export default {
 }
 .map-card:hover {
   border-radius: 15px;
-  transform: scale(1.05);
   box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
   cursor: pointer;
 }
@@ -562,7 +561,6 @@ export default {
   }
   .map-card:hover {
     border-radius: 15px;
-    transform: scale(1.01);
     box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
   }
   .map-card h3 {

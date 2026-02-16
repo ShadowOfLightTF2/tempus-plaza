@@ -127,15 +127,7 @@
         </div>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <div v-if="loading && initialLoad" class="text-center">
-        <div
-          class="spinner-border text-light"
-          role="status"
-          style="margin-top: 100px"
-        >
-          <span class="visually-hidden">Loading players...</span>
-        </div>
-      </div>
+      <PlayersSkeleton v-if="loading && initialLoad" />
       <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
       <div
         v-else
@@ -181,7 +173,7 @@
                     v-if="
                       userRankSoldier &&
                       (!displayedSoldierPlayers.some(
-                        (p) => p.player_id === currentUserId
+                        (p) => p.player_id === currentUserId,
                       ) ||
                         userRankSoldier.rank > 50)
                     "
@@ -405,7 +397,7 @@
                     v-if="
                       userRankDemoman &&
                       (!displayedDemomanPlayers.some(
-                        (p) => p.player_id === currentUserId
+                        (p) => p.player_id === currentUserId,
                       ) ||
                         userRankDemoman.rank > 50)
                     "
@@ -592,10 +584,12 @@
 <script>
 import axios from "axios";
 import { useHead } from "@vueuse/head";
+import PlayersSkeleton from "./Skeletons/PlayersSkeleton.vue";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Players",
+  components: { PlayersSkeleton },
   setup() {
     useHead({
       title: "Tempus Plaza | Players",
@@ -653,6 +647,7 @@ export default {
     currentDemomanIndex: 50,
   }),
   async mounted() {
+    this.loading = true;
     this.fillDropdowns();
     await this.loadCountriesList();
     const { category, item } = this.$route.params;
@@ -668,7 +663,7 @@ export default {
       this.selectedItem = item;
       if (category === "countries" && item !== "Total") {
         const foundCountry = this.allCountries.find(
-          (c) => c.name.toLowerCase() === item.toLowerCase()
+          (c) => c.name.toLowerCase() === item.toLowerCase(),
         );
         if (foundCountry) {
           this.selectedCountry = foundCountry;
@@ -730,7 +725,7 @@ export default {
         if (tableName === "ratings") {
           const newName = type.replace(
             /rating(\d+)/g,
-            (match, num) => `r${num}s`
+            (match, num) => `r${num}s`,
           );
           tableName = newName;
           type = "maps";
@@ -741,7 +736,7 @@ export default {
           } else {
             const newName = type.replace(
               /group(\d+)/g,
-              (match, num) => `g${num}s`
+              (match, num) => `g${num}s`,
             );
             tableName = newName;
             type = "total";
@@ -763,7 +758,7 @@ export default {
     async fetchUserPlayerRank(tableName, type, category) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/user-rank/${tableName}/${type}/${category}/${this.currentUserId}`
+          `${API_BASE_URL}/players/user-rank/${tableName}/${type}/${category}/${this.currentUserId}`,
         );
         const data = response.data;
         this.userRankSoldier = data.soldierRank || null;
@@ -778,7 +773,7 @@ export default {
     async fetchUserCompletionRank(type) {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/user-rank-completion/${type}/${this.currentUserId}`
+          `${API_BASE_URL}/players/user-rank-completion/${type}/${this.currentUserId}`,
         );
         const data = response.data;
         this.userRankSoldier = data.soldierRank || null;
@@ -795,7 +790,7 @@ export default {
         // For country totals, get the user's country rank
         try {
           const response = await axios.get(
-            `${API_BASE_URL}/players/user-country-rank/${this.currentUserId}`
+            `${API_BASE_URL}/players/user-country-rank/${this.currentUserId}`,
           );
           const data = response.data;
           this.userRankSoldier = data.soldierRank || null;
@@ -809,7 +804,7 @@ export default {
         // For specific country players
         try {
           const response = await axios.get(
-            `${API_BASE_URL}/players/user-rank-country/${this.selectedCountry.code}/${this.currentUserId}`
+            `${API_BASE_URL}/players/user-rank-country/${this.selectedCountry.code}/${this.currentUserId}`,
           );
           const data = response.data;
 
@@ -894,7 +889,7 @@ export default {
         if (tableName === "ratings") {
           const newName = type.replace(
             /rating(\d+)/g,
-            (match, num) => `r${num}s`
+            (match, num) => `r${num}s`,
           );
           tableName = newName;
           type = "maps";
@@ -906,7 +901,7 @@ export default {
           } else {
             const newName = type.replace(
               /group(\d+)/g,
-              (match, num) => `g${num}s`
+              (match, num) => `g${num}s`,
             );
             tableName = newName;
             type = "total";
@@ -933,7 +928,7 @@ export default {
       const response = await axios.get(
         `${API_BASE_URL}/players/players-completion-stats/${type}/${
           index - indexFix
-        }`
+        }`,
       );
       const playersResponse = response.data;
 
@@ -955,7 +950,7 @@ export default {
     async loadCountriesList() {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/players/get-countries-data`
+          `${API_BASE_URL}/players/get-countries-data`,
         );
         this.allCountries = response.data
           .map((country) => ({
@@ -981,7 +976,7 @@ export default {
       this.filteredCountries = this.allCountries.filter(
         (country) =>
           country.name.toLowerCase().includes(query) ||
-          country.code.toLowerCase().includes(query)
+          country.code.toLowerCase().includes(query),
       );
     },
 
@@ -1000,7 +995,7 @@ export default {
         if (this.selectedItem === "Total") {
           if (index === 0) {
             const response = await axios.get(
-              `${API_BASE_URL}/players/get-countries-data`
+              `${API_BASE_URL}/players/get-countries-data`,
             );
             const countriesData = response.data;
 
@@ -1034,7 +1029,7 @@ export default {
           const response = await axios.get(
             `${API_BASE_URL}/players/country-top-players/${
               this.selectedCountry.code
-            }/${index - indexFix}`
+            }/${index - indexFix}`,
           );
 
           const players = response.data;
@@ -1052,11 +1047,11 @@ export default {
           if (index === 0) {
             this.soldierPlayers = normalizePlayers(
               players.topSoldiers,
-              "soldier_total_points"
+              "soldier_total_points",
             );
             this.demomanPlayers = normalizePlayers(
               players.topDemomen,
-              "demoman_total_points"
+              "demoman_total_points",
             );
           } else {
             if (classType === "both" || classType === "soldier") {
@@ -1064,7 +1059,7 @@ export default {
                 ...this.soldierPlayers,
                 ...normalizePlayers(
                   players.topSoldiers,
-                  "soldier_total_points"
+                  "soldier_total_points",
                 ),
               ];
             }
@@ -1158,7 +1153,7 @@ export default {
         const response = await axios.get(
           `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${
             index - indexFix
-          }`
+          }`,
         );
         const players = response.data;
         if (index === 0) {
@@ -1195,7 +1190,7 @@ export default {
           this.selectedItem = params.item;
           if (params.category === "countries" && params.item !== "Total") {
             const foundCountry = this.allCountries.find(
-              (c) => c.name.toLowerCase() === params.item.toLowerCase()
+              (c) => c.name.toLowerCase() === params.item.toLowerCase(),
             );
             if (foundCountry) {
               this.selectedCountry = foundCountry;

@@ -22,7 +22,7 @@
                 Donations are not necessary or needed in order to keep plaza
                 running. If you still would like to support me that is still
                 appreciated. Tempus Plaza is not associated or affiliated with
-                Tempus.
+                Tempus and donations will not go towards Tempus itself.
               </p>
             </div>
             <div class="donation-options">

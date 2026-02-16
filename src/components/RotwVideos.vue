@@ -221,6 +221,9 @@ export default {
   position: relative;
   z-index: 1;
 }
+.rotw-card:hover {
+  background: var(--color-primary-dark);
+}
 .rotw-card-active {
   z-index: 100;
   position: relative;
@@ -274,6 +277,7 @@ export default {
   margin: 0;
   color: var(--color-text);
   font-size: 1.1rem;
+  font-weight: 700;
 }
 .rotw-video-info p {
   margin: 5px 0 0;

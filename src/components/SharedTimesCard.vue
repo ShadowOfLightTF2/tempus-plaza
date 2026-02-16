@@ -99,6 +99,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
+  min-height: 345px;
 }
 
 .card-header {
@@ -144,7 +145,6 @@ export default {
 }
 
 .shared-row:hover {
-  transform: scale(1.01);
   background: linear-gradient(
     to bottom,
     rgba(74, 111, 165, 0.3),

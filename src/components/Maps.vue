@@ -19,7 +19,6 @@
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
-
             <div class="tag-modal-description">
               <p class="description-text">
                 <i class="bi bi-info-circle me-2"></i>
@@ -32,7 +31,6 @@
 
             <div class="tag-modal-body">
               <div class="tag-section">
-                <!-- Soldier Tags -->
                 <div
                   class="tag-class-group"
                   v-if="getTagsByClass('soldier').length > 0"
@@ -69,8 +67,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Demoman Tags -->
                 <div
                   class="tag-class-group"
                   v-if="getTagsByClass('demoman').length > 0"
@@ -107,8 +103,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Both Classes Tags -->
                 <div
                   class="tag-class-group"
                   v-if="getTagsByClass('both').length > 0"
@@ -138,8 +132,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Extra Tags -->
                 <div
                   class="tag-class-group"
                   v-if="getTagsByClass('extra').length > 0"
@@ -429,12 +421,10 @@
           </div>
         </div>
         <hr class="row-divider" style="width: 75%" />
-        <div v-if="loading" class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading {{ currentView }}...</span>
-          </div>
+        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-else-if="loading" class="table-container">
+          <MapsSkeleton />
         </div>
-        <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
         <div v-else class="table-container">
           <div class="table-header-section">
             <div class="button-group">
@@ -648,24 +638,37 @@
           </div>
           <div v-else class="grid-container">
             <div class="maps-grid">
-              <div
-                ref="gridCards"
-                v-for="(item, index) in filteredAndSortedItems"
-                :key="currentView + '-grid-' + index"
-                :class="{
-                  'card-eliminated': eliminatedRows.has(getRowId(item, index)),
-                  'card-winner':
-                    pickerComplete &&
-                    !eliminatedRows.has(getRowId(item, index)),
-                  'card-eliminating':
-                    eliminatingRowId === getRowId(item, index),
-                }"
-                class="map-card fade-in"
-              >
-                <SmartLink :to="getMapRoute(item)" class="card-link">
-                  <MapCard :item="item" :current-view="currentView" />
-                </SmartLink>
-              </div>
+              <template v-if="loading">
+                <div
+                  v-for="i in 24"
+                  :key="'skel-' + i"
+                  class="map-card skeleton-card"
+                >
+                  <div class="shimmer"></div>
+                </div>
+              </template>
+              <template v-else>
+                <div
+                  ref="gridCards"
+                  v-for="(item, index) in filteredAndSortedItems"
+                  :key="currentView + '-grid-' + index"
+                  :class="{
+                    'card-eliminated': eliminatedRows.has(
+                      getRowId(item, index),
+                    ),
+                    'card-winner':
+                      pickerComplete &&
+                      !eliminatedRows.has(getRowId(item, index)),
+                    'card-eliminating':
+                      eliminatingRowId === getRowId(item, index),
+                  }"
+                  class="map-card fade-in"
+                >
+                  <SmartLink :to="getMapRoute(item)" class="card-link">
+                    <MapCard :item="item" :current-view="currentView" />
+                  </SmartLink>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -679,6 +682,7 @@ import axios from "axios";
 import { useHead } from "@vueuse/head";
 import { useRoute, useRouter } from "vue-router";
 import MapCard from "./MapCard.vue";
+import MapsSkeleton from "./Skeletons/MapsSkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
@@ -686,6 +690,7 @@ const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 export default {
   components: {
     MapCard,
+    MapsSkeleton,
   },
   name: "Maps",
   setup() {
@@ -733,7 +738,7 @@ export default {
     };
   },
   async mounted() {
-    await this.fetchAvailableTags();
+    this.fetchAvailableTags();
     this.parseUrlFilters();
     this.fetchData();
   },
@@ -914,7 +919,7 @@ export default {
 
         if (
           ["soldier_completion_count", "demoman_completion_count"].includes(
-            effectiveSortField
+            effectiveSortField,
           )
         ) {
           return (fieldB - fieldA) * effectiveSortDirection;
@@ -1022,19 +1027,19 @@ export default {
       // Parse tiers and ratings
       this.selectedSoldierTiers = this.parseArrayParam(
         query.st,
-        this.availableTiers
+        this.availableTiers,
       );
       this.selectedSoldierRatings = this.parseArrayParam(
         query.sr,
-        this.availableRatings
+        this.availableRatings,
       );
       this.selectedDemomanTiers = this.parseArrayParam(
         query.dt,
-        this.availableTiers
+        this.availableTiers,
       );
       this.selectedDemomanRatings = this.parseArrayParam(
         query.dr,
-        this.availableRatings
+        this.availableRatings,
       );
 
       // Parse intended classes
@@ -1129,7 +1134,7 @@ export default {
     toggleIntendedClass(clsId) {
       if (this.selectedIntendedClasses.includes(clsId)) {
         this.selectedIntendedClasses = this.selectedIntendedClasses.filter(
-          (id) => id !== clsId
+          (id) => id !== clsId,
         );
       } else {
         this.selectedIntendedClasses.push(clsId);
@@ -1192,7 +1197,7 @@ export default {
                 tags: [],
               };
             }
-          })
+          }),
         );
 
         this.maps = mapsWithTags;
@@ -1329,7 +1334,7 @@ export default {
       const remainingToEliminate = availableRows.length - 1;
       const itemsToEliminateThisStep = Math.min(
         itemsPerStep,
-        remainingToEliminate
+        remainingToEliminate,
       );
 
       const shuffledRows = [...availableRows].sort(() => Math.random() - 0.5);
@@ -1916,7 +1921,7 @@ export default {
 }
 
 .map-card:hover {
-  transform: scale(1.05);
+  border: 1px solid var(--color-primary);
   box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
   cursor: pointer;
 }
@@ -2167,5 +2172,34 @@ export default {
 .description-text i {
   color: #17a2b8;
   opacity: 0.8;
+}
+
+.skeleton-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border-soft);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.shimmer {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
 }
 </style>

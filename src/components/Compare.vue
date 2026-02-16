@@ -375,7 +375,7 @@
                     getStatValue(
                       "playerOneStats",
                       "completion",
-                      "total"
+                      "total",
                     ).toFixed(2)
                   }}%
                 </span>
@@ -385,7 +385,7 @@
                     getStatValue(
                       "playerTwoStats",
                       "completion",
-                      "total"
+                      "total",
                     ).toFixed(2)
                   }}%
                 </span>
@@ -527,7 +527,7 @@
                       getStatValue(
                         "playerOneStats",
                         "completion",
-                        type
+                        type,
                       ).toFixed(2)
                     }}%
                   </td>
@@ -536,7 +536,7 @@
                       getStatValue(
                         "playerTwoStats",
                         "completion",
-                        type
+                        type,
                       ).toFixed(2)
                     }}%
                   </td>
@@ -910,7 +910,7 @@ export default {
       this.loadingTopPlayers = true;
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/top-two-players/overall`
+          `${API_BASE_URL}/players/top-two-players/overall`,
         );
         if (!response.ok) throw new Error("Failed to fetch top players");
         const topPlayers = await response.json();
@@ -1080,7 +1080,7 @@ export default {
     async fetchPlayerStats(playerId, statsProperty) {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/stats`
+          `${API_BASE_URL}/players/${playerId}/stats`,
         );
         if (!response.ok) throw new Error("Failed to fetch player stats");
         const data = await response.json();
@@ -1102,7 +1102,7 @@ export default {
     async fetchPlayerRanks(playerId, ranksProperty) {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/ranks`
+          `${API_BASE_URL}/players/${playerId}/ranks`,
         );
         if (!response.ok) throw new Error("Failed to fetch player ranks");
         const data = await response.json();
@@ -1149,12 +1149,12 @@ export default {
       const player1Value = this.getStatValue(
         "playerOneStats",
         "completion",
-        type
+        type,
       );
       const player2Value = this.getStatValue(
         "playerTwoStats",
         "completion",
-        type
+        type,
       );
       const diff = Math.abs(player1Value - player2Value);
       return diff.toFixed(2);
@@ -1222,10 +1222,10 @@ export default {
       try {
         const [player1Response, player2Response] = await Promise.all([
           fetch(
-            `${API_BASE_URL}/maps/${this.selectedMap.id}/${this.playerOne.id}/records/${this.selectedMapClass}/0/1`
+            `${API_BASE_URL}/maps/${this.selectedMap.id}/${this.playerOne.id}/records/${this.selectedMapClass}/0/1`,
           ),
           fetch(
-            `${API_BASE_URL}/maps/${this.selectedMap.id}/${this.playerTwo.id}/records/${this.selectedMapClass}/0/1`
+            `${API_BASE_URL}/maps/${this.selectedMap.id}/${this.playerTwo.id}/records/${this.selectedMapClass}/0/1`,
           ),
         ]);
 
@@ -1776,10 +1776,6 @@ export default {
   backdrop-filter: blur(10px);
   transition: transform 0.3s ease;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
-}
-
-.rank-card:hover {
-  transform: translateY(-2px);
 }
 
 .rank-icon {

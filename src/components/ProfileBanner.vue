@@ -244,10 +244,6 @@ export default {
   border-radius: 10px;
 }
 
-.banner-block:hover {
-  transform: translateY(-2px);
-}
-
 .banner-block .card-title {
   color: #aaa;
   font-weight: bold;

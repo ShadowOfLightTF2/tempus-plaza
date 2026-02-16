@@ -1912,7 +1912,6 @@ export default {
 
 .sort-toggle-btn:hover {
   background-color: rgba(74, 111, 165, 0.8);
-  transform: scale(1.05);
 }
 
 .sort-toggle-btn span {

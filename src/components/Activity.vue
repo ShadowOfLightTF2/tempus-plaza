@@ -39,11 +39,7 @@
               <span class="btn-text">Group 1s</span>
             </button>
           </div>
-          <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading {{ currentView }}...</span>
-            </div>
-          </div>
+          <ActivitySkeleton v-if="loading" />
           <div v-else class="table-container">
             <div v-if="currentView === 'worldrecords'" class="activity-cards">
               <div class="table-header-content">
@@ -595,11 +591,13 @@
 <script>
 import { formatDate, formatDuration } from "@/utils/calculations";
 import { useHead } from "@vueuse/head";
+import ActivitySkeleton from "./Skeletons/ActivitySkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Activity",
+  components: { ActivitySkeleton },
   setup() {
     useHead({
       title: "Tempus Plaza | Activity",
@@ -1142,14 +1140,14 @@ export default {
   gap: 1.5rem;
   padding: 0.3rem 0.6rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border-semi-soft);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .activity-card:hover {
+  border: 1px solid var(--color-border-semi-soft);
   background: rgba(74, 111, 165, 0.2);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
