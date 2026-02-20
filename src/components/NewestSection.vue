@@ -516,7 +516,7 @@ export default {
 }
 .author-class-icon.dual-icon {
   width: 35px;
-  height: 35x;
+  height: 35px;
   padding: 6px;
 }
 

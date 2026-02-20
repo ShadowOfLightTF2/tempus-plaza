@@ -114,6 +114,44 @@
                   T{{ currentSoldierTier }} - R{{ currentSoldierRating }}
                 </p>
               </div>
+              <div class="group-cutoffs">
+                <div
+                  class="cutoff-box cutoff-g1"
+                  v-if="currentSoldierCutoffs.g1"
+                >
+                  <span class="cutoff-label">G1</span>
+                  <span class="cutoff-value">{{
+                    currentSoldierCutoffs.g1
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g2"
+                  v-if="currentSoldierCutoffs.g2"
+                >
+                  <span class="cutoff-label">G2</span>
+                  <span class="cutoff-value">{{
+                    currentSoldierCutoffs.g2
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g3"
+                  v-if="currentSoldierCutoffs.g3"
+                >
+                  <span class="cutoff-label">G3</span>
+                  <span class="cutoff-value">{{
+                    currentSoldierCutoffs.g3
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g4"
+                  v-if="currentSoldierCutoffs.g4"
+                >
+                  <span class="cutoff-label">G4</span>
+                  <span class="cutoff-value">{{
+                    currentSoldierCutoffs.g4
+                  }}</span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="table-responsive">
@@ -279,6 +317,44 @@
                 <p class="header-tier-rating">
                   T{{ currentDemomanTier }} - R{{ currentDemomanRating }}
                 </p>
+              </div>
+              <div class="group-cutoffs">
+                <div
+                  class="cutoff-box cutoff-g1"
+                  v-if="currentDemomanCutoffs.g1"
+                >
+                  <span class="cutoff-label">G1</span>
+                  <span class="cutoff-value">{{
+                    currentDemomanCutoffs.g1
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g2"
+                  v-if="currentDemomanCutoffs.g2"
+                >
+                  <span class="cutoff-label">G2</span>
+                  <span class="cutoff-value">{{
+                    currentDemomanCutoffs.g2
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g3"
+                  v-if="currentDemomanCutoffs.g3"
+                >
+                  <span class="cutoff-label">G3</span>
+                  <span class="cutoff-value">{{
+                    currentDemomanCutoffs.g3
+                  }}</span>
+                </div>
+                <div
+                  class="cutoff-box cutoff-g4"
+                  v-if="currentDemomanCutoffs.g4"
+                >
+                  <span class="cutoff-label">G4</span>
+                  <span class="cutoff-value">{{
+                    currentDemomanCutoffs.g4
+                  }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -464,6 +540,10 @@ export default {
         soldier: { tier: 0, rating: 0 },
         demoman: { tier: 0, rating: 0 },
       },
+      mapCutoffs: {
+        soldier: { g1: 0, g2: 0, g3: 0, g4: 0 },
+        demoman: { g1: 0, g2: 0, g3: 0, g4: 0 },
+      },
       courses: [],
       bonuses: [],
       selectedType: "map",
@@ -518,6 +598,50 @@ export default {
       if (this.type === "bonus" && this.index != null)
         return this.bonuses[this.index - 1]?.demoman.rating || 0;
       return 0;
+    },
+    currentSoldierCutoffs() {
+      if (this.type === "map") return this.mapCutoffs.soldier;
+      if (this.type === "course" && this.index != null)
+        return (
+          this.courses[this.index - 1]?.soldier.cutoffs || {
+            g1: 0,
+            g2: 0,
+            g3: 0,
+            g4: 0,
+          }
+        );
+      if (this.type === "bonus" && this.index != null)
+        return (
+          this.bonuses[this.index - 1]?.soldier.cutoffs || {
+            g1: 0,
+            g2: 0,
+            g3: 0,
+            g4: 0,
+          }
+        );
+      return { g1: 0, g2: 0, g3: 0, g4: 0 };
+    },
+    currentDemomanCutoffs() {
+      if (this.type === "map") return this.mapCutoffs.demoman;
+      if (this.type === "course" && this.index != null)
+        return (
+          this.courses[this.index - 1]?.demoman.cutoffs || {
+            g1: 0,
+            g2: 0,
+            g3: 0,
+            g4: 0,
+          }
+        );
+      if (this.type === "bonus" && this.index != null)
+        return (
+          this.bonuses[this.index - 1]?.demoman.cutoffs || {
+            g1: 0,
+            g2: 0,
+            g3: 0,
+            g4: 0,
+          }
+        );
+      return { g1: 0, g2: 0, g3: 0, g4: 0 };
     },
     displayedSoldierEntries() {
       return this.selectedSoldierRecords.slice(
@@ -592,16 +716,38 @@ export default {
         this.mapTiers.demoman.tier = map.demoman_tier || 0;
         this.mapTiers.demoman.rating = map.demoman_rating || 0;
 
+        this.mapCutoffs.soldier.g1 = map.soldier_group_1_cutoff || 0;
+        this.mapCutoffs.soldier.g2 = map.soldier_group_2_cutoff || 0;
+        this.mapCutoffs.soldier.g3 = map.soldier_group_3_cutoff || 0;
+        this.mapCutoffs.soldier.g4 = map.soldier_group_4_cutoff || 0;
+
+        this.mapCutoffs.demoman.g1 = map.demoman_group_1_cutoff || 0;
+        this.mapCutoffs.demoman.g2 = map.demoman_group_2_cutoff || 0;
+        this.mapCutoffs.demoman.g3 = map.demoman_group_3_cutoff || 0;
+        this.mapCutoffs.demoman.g4 = map.demoman_group_4_cutoff || 0;
+
         this.courses = (courses || [])
           .sort((a, b) => a.index - b.index)
           .map((c) => ({
             soldier: {
               tier: c.soldier_tier || 0,
               rating: c.soldier_rating || 0,
+              cutoffs: {
+                g1: c.soldier_group_1_cutoff || 0,
+                g2: c.soldier_group_2_cutoff || 0,
+                g3: c.soldier_group_3_cutoff || 0,
+                g4: c.soldier_group_4_cutoff || 0,
+              },
             },
             demoman: {
               tier: c.demoman_tier || 0,
               rating: c.demoman_rating || 0,
+              cutoffs: {
+                g1: c.demoman_group_1_cutoff || 0,
+                g2: c.demoman_group_2_cutoff || 0,
+                g3: c.demoman_group_3_cutoff || 0,
+                g4: c.demoman_group_4_cutoff || 0,
+              },
             },
           }));
         this.bonuses = (bonuses || [])
@@ -610,10 +756,22 @@ export default {
             soldier: {
               tier: b.soldier_tier || 0,
               rating: b.soldier_rating || 0,
+              cutoffs: {
+                g1: b.soldier_group_1_cutoff || 0,
+                g2: b.soldier_group_2_cutoff || 0,
+                g3: b.soldier_group_3_cutoff || 0,
+                g4: b.soldier_group_4_cutoff || 0,
+              },
             },
             demoman: {
               tier: b.demoman_tier || 0,
               rating: b.demoman_rating || 0,
+              cutoffs: {
+                g1: b.demoman_group_1_cutoff || 0,
+                g2: b.demoman_group_2_cutoff || 0,
+                g3: b.demoman_group_3_cutoff || 0,
+                g4: b.demoman_group_4_cutoff || 0,
+              },
             },
           }));
       } catch (err) {
@@ -901,12 +1059,14 @@ export default {
 .header-content {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 10px;
 }
 .header-text {
   margin-left: 10px;
   text-align: left;
   font-weight: bold;
+  flex: 1;
 }
 .header-type {
   margin: 0;
@@ -919,6 +1079,71 @@ export default {
   font-size: 14px;
   font-weight: bold;
   color: var(--color-text);
+}
+.group-cutoffs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+.cutoff-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  min-width: 45px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+.cutoff-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  opacity: 0.9;
+}
+.cutoff-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+.cutoff-g1 {
+  border-color: rgba(255, 151, 151, 0.4);
+}
+.cutoff-g1 .cutoff-label {
+  color: #ff9797;
+}
+.cutoff-g1 .cutoff-value {
+  color: #ff9797;
+}
+.cutoff-g2 {
+  border-color: rgba(247, 207, 132, 0.4);
+}
+.cutoff-g2 .cutoff-label {
+  color: #f7cf84;
+}
+.cutoff-g2 .cutoff-value {
+  color: #f7cf84;
+}
+.cutoff-g3 {
+  border-color: rgba(210, 125, 45, 0.4);
+}
+.cutoff-g3 .cutoff-label {
+  color: #d27d2d;
+}
+.cutoff-g3 .cutoff-value {
+  color: #d27d2d;
+}
+.cutoff-g4 {
+  border-color: rgba(179, 179, 179, 0.4);
+}
+.cutoff-g4 .cutoff-label {
+  color: #b3b3b3;
+}
+.cutoff-g4 .cutoff-value {
+  color: #b3b3b3;
 }
 .maps-header {
   color: var(--color-text);
@@ -1028,6 +1253,19 @@ export default {
     flex-direction: column;
     align-items: center;
     width: 115%;
+  }
+  .group-cutoffs {
+    gap: 4px;
+  }
+  .cutoff-box {
+    padding: 4px 8px;
+    min-width: 40px;
+  }
+  .cutoff-label {
+    font-size: 9px;
+  }
+  .cutoff-value {
+    font-size: 11px;
   }
 }
 .category-container {

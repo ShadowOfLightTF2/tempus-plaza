@@ -220,6 +220,7 @@ export default {
   cursor: pointer;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 .rotw-card:hover {
   background: var(--color-primary-dark);
@@ -263,7 +264,13 @@ export default {
   height: 100%;
   transform: scale(0.75);
   transform-origin: top left;
+  transition: transform 0.4s ease;
 }
+
+.rotw-card:hover .video-scale-wrapper {
+  transform: scale(0.78);
+}
+
 .video-scale-wrapper iframe {
   width: calc(100% / 0.75);
   height: calc(100% / 0.75);
@@ -277,7 +284,6 @@ export default {
   margin: 0;
   color: var(--color-text);
   font-size: 1.1rem;
-  font-weight: 700;
 }
 .rotw-video-info p {
   margin: 5px 0 0;

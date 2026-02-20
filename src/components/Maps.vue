@@ -315,7 +315,10 @@
                 </div>
               </div>
             </div>
-            <div class="column-toggles-section">
+            <div
+              class="column-toggles-section"
+              :class="{ 'grid-mode': currentLayout === 'grid' }"
+            >
               <div class="column-toggles" v-if="currentLayout === 'table'">
                 <button
                   @click="toggleColumns('soldier')"
@@ -344,29 +347,24 @@
                   <span v-else>Show</span>
                   Completions
                 </button>
-                <button @click="openTagFilterModal" class="global-btn">
-                  <i class="bi bi-tags me-2"></i>Filter by Tags
-                </button>
-              </div>
-              <div class="column-toggles" v-else>
-                <button @click="openTagFilterModal" class="global-btn">
-                  <i class="bi bi-tags me-2"></i>Filter by Tags
-                </button>
               </div>
             </div>
-            <div class="filter-actions">
-              <button @click="clearAllFilters" class="btn btn-secondary">
-                Clear filters
+            <div class="compact-controls">
+              <button @click="openTagFilterModal" class="filter-btn">
+                <i class="bi bi-tags me-1"></i>Tags
               </button>
-              <span class="filter-count"
-                >Showing {{ filteredAndSortedItems.length }} of
-                {{ currentItems.length }} items</span
-              >
-              <div class="search-input-wrapper">
+
+              <button @click="clearAllFilters" class="filter-btn">Clear</button>
+
+              <span class="filter-count">
+                {{ filteredAndSortedItems.length }}/{{ currentItems.length }}
+              </span>
+
+              <div class="search-input-wrapper compact-search">
                 <svg
                   class="search-icon"
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -378,53 +376,45 @@
                 <input
                   type="text"
                   v-model="searchQuery"
-                  placeholder="Search for map..."
+                  placeholder="Search..."
                   class="search-input"
                 />
               </div>
-            </div>
-            <div class="filter-actions">
+
               <div
-                class="picker-section"
-                v-if="filteredAndSortedItems.length > 0"
+                v-if="filteredAndSortedItems.length > 1"
+                class="compact-picker"
               >
-                <div class="picker-controls">
-                  <button
-                    @click="startRandomPicker"
-                    :disabled="
-                      isPickerActive || filteredAndSortedItems.length <= 1
-                    "
-                    class="btn picker-btn"
-                    :class="{ 'picker-btn-active': isPickerActive }"
-                  >
-                    <span v-if="!isPickerActive">Random map picker</span>
-                    <span v-else>Eliminating...</span>
-                  </button>
-                  <button
-                    @click="resetPicker"
-                    v-if="eliminatedRows.size > 0"
-                    class="btn btn-secondary ml-2"
-                  >
-                    Reset
-                  </button>
-                  <div
-                    class="picker-status"
-                    v-if="isPickerActive || eliminatedRows.size > 0"
-                  >
-                    <span class="remaining-count"
-                      >{{ remainingCount }} remaining</span
-                    >
-                  </div>
-                </div>
+                <button
+                  @click="startRandomPicker"
+                  :disabled="isPickerActive"
+                  class="filter-btn"
+                  :class="{ 'picker-btn-active': isPickerActive }"
+                >
+                  <span v-if="!isPickerActive">Random</span>
+                  <span v-else>Eliminating...</span>
+                </button>
+
+                <button
+                  v-if="eliminatedRows.size > 0"
+                  @click="resetPicker"
+                  class="filter-btn"
+                >
+                  Reset
+                </button>
+
+                <span
+                  v-if="isPickerActive || eliminatedRows.size > 0"
+                  class="remaining-count small"
+                >
+                  {{ remainingCount }}
+                </span>
               </div>
             </div>
           </div>
         </div>
         <hr class="row-divider" style="width: 75%" />
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
-        <div v-else-if="loading" class="table-container">
-          <MapsSkeleton />
-        </div>
         <div v-else class="table-container">
           <div class="table-header-section">
             <div class="button-group">
@@ -682,7 +672,6 @@ import axios from "axios";
 import { useHead } from "@vueuse/head";
 import { useRoute, useRouter } from "vue-router";
 import MapCard from "./MapCard.vue";
-import MapsSkeleton from "./Skeletons/MapsSkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
@@ -690,7 +679,6 @@ const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 export default {
   components: {
     MapCard,
-    MapsSkeleton,
   },
   name: "Maps",
   setup() {
@@ -708,7 +696,7 @@ export default {
       bonuses: [],
       currentView: "maps",
       currentLayout: "grid",
-      loading: false,
+      loading: true,
       error: null,
       sortField: "soldier_tier",
       sortDirection: 1,
@@ -738,9 +726,9 @@ export default {
     };
   },
   async mounted() {
-    this.fetchAvailableTags();
+    await this.fetchAvailableTags();
     this.parseUrlFilters();
-    this.fetchData();
+    await this.fetchData();
   },
   computed: {
     effectiveSortField() {
@@ -1013,9 +1001,6 @@ export default {
     getTagsByClass(className) {
       return this.availableTags.filter((tag) => tag.class === className);
     },
-    getMapRoute(item) {
-      return `/maps/${item.name}`;
-    },
     parseUrlFilters() {
       const query = this.$route.query;
 
@@ -1110,7 +1095,7 @@ export default {
         query.layout = this.currentLayout;
       }
 
-      if (JSON.stringify(this.$route.query) !== JSON.stringify(query)) {
+      if (Object.keys(query).length || Object.keys(this.$route.query).length) {
         this.$router.replace({ query });
       }
     },
@@ -1275,16 +1260,13 @@ export default {
       this.resetPicker();
       this.$router.replace({ query: {} });
     },
-
     onFilterChange() {
       this.resetPicker();
       this.updateUrl();
     },
-
-    getRowId(item, index) {
-      return `${this.currentView}-${item.id || item.map_id}-${index}`;
+    getRowId(item) {
+      return `${this.currentView}-${item.id || item.map_id}`;
     },
-
     async startRandomPicker() {
       if (this.isPickerActive || this.filteredAndSortedItems.length <= 1)
         return;
@@ -1305,7 +1287,7 @@ export default {
       if (!this.shouldContinuePicker) return;
 
       const availableRows = this.filteredAndSortedItems
-        .map((item, index) => ({ item, index, id: this.getRowId(item, index) }))
+        .map((item, index) => ({ item, index, id: this.getRowId(item) }))
         .filter((row) => !this.eliminatedRows.has(row.id));
 
       if (availableRows.length <= 1) {
@@ -1657,7 +1639,11 @@ export default {
 .column-toggles-section {
   display: flex;
   justify-content: center;
-  margin: 30px 0;
+  margin: 25px 0 5px;
+}
+
+.column-toggles-section.grid-mode {
+  margin: 0;
 }
 
 .column-toggles {
@@ -2201,5 +2187,68 @@ export default {
   100% {
     background-position: 800px 0;
   }
+}
+
+.compact-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.compact-search .search-input {
+  width: 200px;
+  padding: 8px 8px 8px 38px;
+  font-size: 14px;
+}
+
+.compact-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+}
+
+.filter-count {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.filter-btn {
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--color-border-soft);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.filter-btn:hover {
+  background: rgba(74, 111, 165, 0.25);
+  border-color: var(--color-primary);
+}
+
+.filter-btn.active {
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.filter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

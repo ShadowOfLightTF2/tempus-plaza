@@ -15,102 +15,103 @@
           }"
           tag="div"
           class="map-card author-card"
-          :style="{
-            background: `
-              linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-              radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-              url('/map-backgrounds/medium/${map.map_name}.jpg') center/cover no-repeat
-            `,
-          }"
         >
-          <div class="class-icon-container">
-            <img
-              v-for="icon in map.classIcons"
-              :key="icon.alt"
-              :src="icon.src"
-              :class="icon.class"
-              :alt="icon.alt"
-            />
-          </div>
-          <div class="map-header">
-            <h3 class="map-name">{{ map.map_name }}</h3>
-          </div>
-          <div class="map-compact-ratings-grid">
-            <div
-              v-if="map.intended_class === 4"
-              class="map-rating-section intended-class-section"
-            >
-              <div class="map-rating-label">Demoman</div>
-              <div class="map-rating-pills">
-                <span
-                  class="map-rating-pill map-tier-color"
-                  :class="'tier-' + map.demoman_tier"
-                >
-                  T{{ map.demoman_tier }}
-                </span>
-                <span
-                  class="map-rating-pill map-rating-color"
-                  :class="'rating-' + map.demoman_rating"
-                >
-                  R{{ map.demoman_rating }}
-                </span>
+          <div
+            class="card-bg"
+            :style="{
+              backgroundImage: `url('/map-backgrounds/medium/${map.map_name}.jpg')`,
+            }"
+          ></div>
+          <div class="card-inner">
+            <div class="class-icon-container">
+              <img
+                v-for="icon in map.classIcons"
+                :key="icon.alt"
+                :src="icon.src"
+                :class="icon.class"
+                :alt="icon.alt"
+              />
+            </div>
+            <div class="map-header">
+              <h3 class="map-name">{{ map.map_name }}</h3>
+            </div>
+            <div class="map-compact-ratings-grid">
+              <div
+                v-if="map.intended_class === 4"
+                class="map-rating-section intended-class-section"
+              >
+                <div class="map-rating-label">Demoman</div>
+                <div class="map-rating-pills">
+                  <span
+                    class="map-rating-pill map-tier-color"
+                    :class="'tier-' + map.demoman_tier"
+                  >
+                    T{{ map.demoman_tier }}
+                  </span>
+                  <span
+                    class="map-rating-pill map-rating-color"
+                    :class="'rating-' + map.demoman_rating"
+                  >
+                    R{{ map.demoman_rating }}
+                  </span>
+                </div>
+              </div>
+              <div v-else class="map-rating-section intended-class-section">
+                <div class="map-rating-label">Soldier</div>
+                <div class="map-rating-pills">
+                  <span
+                    class="map-rating-pill map-tier-color"
+                    :class="'tier-' + map.soldier_tier"
+                  >
+                    T{{ map.soldier_tier }}
+                  </span>
+                  <span
+                    class="map-rating-pill map-rating-color"
+                    :class="'rating-' + map.soldier_rating"
+                  >
+                    R{{ map.soldier_rating }}
+                  </span>
+                </div>
+              </div>
+              <div v-if="map.intended_class === 4" class="map-rating-section">
+                <div class="map-rating-label">Soldier</div>
+                <div class="map-rating-pills">
+                  <span
+                    class="map-rating-pill map-tier-color"
+                    :class="'tier-' + map.soldier_tier"
+                  >
+                    T{{ map.soldier_tier }}
+                  </span>
+                  <span
+                    class="map-rating-pill map-rating-color"
+                    :class="'rating-' + map.soldier_rating"
+                  >
+                    R{{ map.soldier_rating }}
+                  </span>
+                </div>
+              </div>
+              <div v-else class="map-rating-section">
+                <div class="map-rating-label">Demoman</div>
+                <div class="map-rating-pills">
+                  <span
+                    class="map-rating-pill map-tier-color"
+                    :class="'tier-' + map.demoman_tier"
+                  >
+                    T{{ map.demoman_tier }}
+                  </span>
+                  <span
+                    class="map-rating-pill map-rating-color"
+                    :class="'rating-' + map.demoman_rating"
+                  >
+                    R{{ map.demoman_rating }}
+                  </span>
+                </div>
               </div>
             </div>
-            <div v-else class="map-rating-section intended-class-section">
-              <div class="map-rating-label">Soldier</div>
-              <div class="map-rating-pills">
-                <span
-                  class="map-rating-pill map-tier-color"
-                  :class="'tier-' + map.soldier_tier"
-                >
-                  T{{ map.soldier_tier }}
-                </span>
-                <span
-                  class="map-rating-pill map-rating-color"
-                  :class="'rating-' + map.soldier_rating"
-                >
-                  R{{ map.soldier_rating }}
-                </span>
-              </div>
+            <div class="map-date-added">
+              Date Added:
+              {{ map.date_added }}
             </div>
-            <div v-if="map.intended_class === 4" class="map-rating-section">
-              <div class="map-rating-label">Soldier</div>
-              <div class="map-rating-pills">
-                <span
-                  class="map-rating-pill map-tier-color"
-                  :class="'tier-' + map.soldier_tier"
-                >
-                  T{{ map.soldier_tier }}
-                </span>
-                <span
-                  class="map-rating-pill map-rating-color"
-                  :class="'rating-' + map.soldier_rating"
-                >
-                  R{{ map.soldier_rating }}
-                </span>
-              </div>
-            </div>
-            <div v-else class="map-rating-section">
-              <div class="map-rating-label">Demoman</div>
-              <div class="map-rating-pills">
-                <span
-                  class="map-rating-pill map-tier-color"
-                  :class="'tier-' + map.demoman_tier"
-                >
-                  T{{ map.demoman_tier }}
-                </span>
-                <span
-                  class="map-rating-pill map-rating-color"
-                  :class="'rating-' + map.demoman_rating"
-                >
-                  R{{ map.demoman_rating }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="map-date-added">
-            Date Added:
-            {{ map.date_added }}
           </div>
         </SmartLink>
       </div>
@@ -349,11 +350,58 @@ export default {
   position: relative;
   overflow: hidden;
 }
+
+.card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
+  z-index: 0;
+}
+
+.card-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 1;
+}
+
+.card-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  z-index: 2;
+}
+
+.map-card:hover .card-bg {
+  transform: scale(1.04);
+}
+
+.card-inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .class-icon-container {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 2;
+  z-index: 10;
   display: flex;
   gap: 8px;
 }
@@ -393,7 +441,8 @@ export default {
 }
 .map-card:hover {
   border-radius: 15px;
-  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.3);
   cursor: pointer;
 }
 .map-header {

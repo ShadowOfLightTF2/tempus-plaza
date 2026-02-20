@@ -155,7 +155,7 @@
                       <HoverPreview :map-name="record.map">
                         <img
                           v-if="!failedMapImages.has(record.map)"
-                          :src="`/map-backgrounds/${record.map}.jpg`"
+                          :src="`/map-backgrounds/thumbnails/${record.map}.jpg`"
                           @error="handleMapImageError(record.map)"
                           alt="Map"
                           class="map-thumbnail"
@@ -325,7 +325,7 @@
                       <HoverPreview :map-name="record.map">
                         <img
                           v-if="!failedMapImages.has(record.map)"
-                          :src="`/map-backgrounds/${record.map}.jpg`"
+                          :src="`/map-backgrounds/thumbnails/${record.map}.jpg`"
                           @error="handleMapImageError(record.map)"
                           alt="Map"
                           class="map-thumbnail"
@@ -513,7 +513,7 @@
                       <HoverPreview :map-name="record.map">
                         <img
                           v-if="!failedMapImages.has(record.map)"
-                          :src="`/map-backgrounds/${record.map}.jpg`"
+                          :src="`/map-backgrounds/thumbnails/${record.map}.jpg`"
                           @error="handleMapImageError(record.map)"
                           alt="Map"
                           class="map-thumbnail"

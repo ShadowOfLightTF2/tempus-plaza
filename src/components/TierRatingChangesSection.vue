@@ -130,246 +130,243 @@
                   "
                   class="card"
                   :to="{ name: 'MapPage', params: { mapId: change.map_id } }"
-                  :style="{
-                    background: `
-                      linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.6) 100%),
-                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                      url('/map-backgrounds/medium/${change.name}.jpg') center/cover no-repeat
-                    `,
-                    backgroundBlendMode: 'multiply, normal, normal',
-                    backgroundSize: 'cover, cover, cover',
-                    backgroundPosition: 'center, center, center',
-                  }"
                 >
-                  <div class="change-header-inline">
-                    <h3>{{ change.name }}</h3>
-                  </div>
-                  <div class="zone-info-center">
-                    <span class="zone-info">
-                      {{
-                        change.zone_type === "map"
-                          ? "Map"
-                          : change.zone_type === "course"
-                          ? "Course"
-                          : "Bonus"
-                      }}
-                      {{ change.zone_type !== "map" ? change.zone_index : "" }}
-                    </span>
-                  </div>
-                  <div class="compact-ratings-grid">
-                    <div class="rating-section">
-                      <div class="rating-label">Soldier</div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill tier-color"
-                          :class="'tier-' + change.old_soldier_tier"
-                          >T{{ change.old_soldier_tier }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill tier-color"
-                          :class="[
-                            'tier-' + change.new_soldier_tier,
-                            {
-                              changed:
-                                change.old_soldier_tier !==
-                                change.new_soldier_tier,
-                            },
-                          ]"
-                          >T{{ change.new_soldier_tier }}</span
-                        >
+                  <div
+                    class="card-bg"
+                    :style="{
+                      backgroundImage: `url('/map-backgrounds/medium/${change.name}.jpg')`,
+                    }"
+                  ></div>
+                  <div class="card-inner">
+                    <div class="change-header-inline">
+                      <h3>{{ change.name }}</h3>
+                    </div>
+                    <div class="zone-info-center">
+                      <span class="zone-info">
+                        {{
+                          change.zone_type === "map"
+                            ? "Map"
+                            : change.zone_type === "course"
+                            ? "Course"
+                            : "Bonus"
+                        }}
+                        {{
+                          change.zone_type !== "map" ? change.zone_index : ""
+                        }}
+                      </span>
+                    </div>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-label">Soldier</div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="'tier-' + change.old_soldier_tier"
+                            >T{{ change.old_soldier_tier }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill tier-color"
+                            :class="[
+                              'tier-' + change.new_soldier_tier,
+                              {
+                                changed:
+                                  change.old_soldier_tier !==
+                                  change.new_soldier_tier,
+                              },
+                            ]"
+                            >T{{ change.new_soldier_tier }}</span
+                          >
+                        </div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill rating-color"
+                            :class="'rating-' + change.old_soldier_rating"
+                            >R{{ change.old_soldier_rating }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill rating-color"
+                            :class="[
+                              'rating-' + change.new_soldier_rating,
+                              {
+                                changed:
+                                  change.old_soldier_rating !==
+                                  change.new_soldier_rating,
+                              },
+                            ]"
+                            >R{{ change.new_soldier_rating }}</span
+                          >
+                        </div>
                       </div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill rating-color"
-                          :class="'rating-' + change.old_soldier_rating"
-                          >R{{ change.old_soldier_rating }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill rating-color"
-                          :class="[
-                            'rating-' + change.new_soldier_rating,
-                            {
-                              changed:
-                                change.old_soldier_rating !==
-                                change.new_soldier_rating,
-                            },
-                          ]"
-                          >R{{ change.new_soldier_rating }}</span
-                        >
+                      <div class="rating-section">
+                        <div class="rating-label">Demoman</div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="'tier-' + change.old_demoman_tier"
+                            >T{{ change.old_demoman_tier }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill tier-color"
+                            :class="[
+                              'tier-' + change.new_demoman_tier,
+                              {
+                                changed:
+                                  change.old_demoman_tier !==
+                                  change.new_demoman_tier,
+                              },
+                            ]"
+                            >T{{ change.new_demoman_tier }}</span
+                          >
+                        </div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill rating-color"
+                            :class="'rating-' + change.old_demoman_rating"
+                            >R{{ change.old_demoman_rating }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill rating-color"
+                            :class="[
+                              'rating-' + change.new_demoman_rating,
+                              {
+                                changed:
+                                  change.old_demoman_rating !==
+                                  change.new_demoman_rating,
+                              },
+                            ]"
+                            >R{{ change.new_demoman_rating }}</span
+                          >
+                        </div>
                       </div>
                     </div>
-                    <div class="rating-section">
-                      <div class="rating-label">Demoman</div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill tier-color"
-                          :class="'tier-' + change.old_demoman_tier"
-                          >T{{ change.old_demoman_tier }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill tier-color"
-                          :class="[
-                            'tier-' + change.new_demoman_tier,
-                            {
-                              changed:
-                                change.old_demoman_tier !==
-                                change.new_demoman_tier,
-                            },
-                          ]"
-                          >T{{ change.new_demoman_tier }}</span
-                        >
-                      </div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill rating-color"
-                          :class="'rating-' + change.old_demoman_rating"
-                          >R{{ change.old_demoman_rating }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill rating-color"
-                          :class="[
-                            'rating-' + change.new_demoman_rating,
-                            {
-                              changed:
-                                change.old_demoman_rating !==
-                                change.new_demoman_rating,
-                            },
-                          ]"
-                          >R{{ change.new_demoman_rating }}</span
-                        >
-                      </div>
+                    <div class="completion-count">
+                      <i class="bi bi-clock me-1"></i>
+                      {{ formatDate(change.changed_at) }}
                     </div>
-                  </div>
-                  <div class="completion-count">
-                    <i class="bi bi-clock me-1"></i>
-                    {{ formatDate(change.changed_at) }}
                   </div>
                 </SmartLink>
 
-                <div
-                  v-else-if="!isMobileView"
-                  class="card"
-                  :style="{
-                    background: `
-                      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-                      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                      url('/map-backgrounds/medium/${change.name}.jpg') center/cover no-repeat
-                    `,
-                    backgroundBlendMode: 'multiply, normal, normal',
-                    backgroundSize: 'cover, cover, cover',
-                    backgroundPosition: 'center, center, center',
-                  }"
-                >
-                  <div class="change-header-inline">
-                    <h3>{{ change.name }}</h3>
-                  </div>
-                  <div class="zone-info-center">
-                    <span class="zone-info">
-                      {{
-                        change.zone_type === "map"
-                          ? "Map"
-                          : change.zone_type === "course"
-                          ? "Course"
-                          : "Bonus"
-                      }}
-                      {{ change.zone_type !== "map" ? change.zone_index : "" }}
-                    </span>
-                  </div>
-                  <div class="compact-ratings-grid">
-                    <div class="rating-section">
-                      <div class="rating-label">Soldier</div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill tier-color"
-                          :class="'tier-' + change.old_soldier_tier"
-                          >T{{ change.old_soldier_tier }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill tier-color"
-                          :class="[
-                            'tier-' + change.new_soldier_tier,
-                            {
-                              changed:
-                                change.old_soldier_tier !==
-                                change.new_soldier_tier,
-                            },
-                          ]"
-                          >T{{ change.new_soldier_tier }}</span
-                        >
+                <div v-else-if="!isMobileView" class="card">
+                  <div
+                    class="card-bg"
+                    :style="{
+                      backgroundImage: `url('/map-backgrounds/medium/${change.name}.jpg')`,
+                    }"
+                  ></div>
+                  <div class="card-inner">
+                    <div class="change-header-inline">
+                      <h3>{{ change.name }}</h3>
+                    </div>
+                    <div class="zone-info-center">
+                      <span class="zone-info">
+                        {{
+                          change.zone_type === "map"
+                            ? "Map"
+                            : change.zone_type === "course"
+                            ? "Course"
+                            : "Bonus"
+                        }}
+                        {{
+                          change.zone_type !== "map" ? change.zone_index : ""
+                        }}
+                      </span>
+                    </div>
+                    <div class="compact-ratings-grid">
+                      <div class="rating-section">
+                        <div class="rating-label">Soldier</div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="'tier-' + change.old_soldier_tier"
+                            >T{{ change.old_soldier_tier }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill tier-color"
+                            :class="[
+                              'tier-' + change.new_soldier_tier,
+                              {
+                                changed:
+                                  change.old_soldier_tier !==
+                                  change.new_soldier_tier,
+                              },
+                            ]"
+                            >T{{ change.new_soldier_tier }}</span
+                          >
+                        </div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill rating-color"
+                            :class="'rating-' + change.old_soldier_rating"
+                            >R{{ change.old_soldier_rating }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill rating-color"
+                            :class="[
+                              'rating-' + change.new_soldier_rating,
+                              {
+                                changed:
+                                  change.old_soldier_rating !==
+                                  change.new_soldier_rating,
+                              },
+                            ]"
+                            >R{{ change.new_soldier_rating }}</span
+                          >
+                        </div>
                       </div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill rating-color"
-                          :class="'rating-' + change.old_soldier_rating"
-                          >R{{ change.old_soldier_rating }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill rating-color"
-                          :class="[
-                            'rating-' + change.new_soldier_rating,
-                            {
-                              changed:
-                                change.old_soldier_rating !==
-                                change.new_soldier_rating,
-                            },
-                          ]"
-                          >R{{ change.new_soldier_rating }}</span
-                        >
+                      <div class="rating-section">
+                        <div class="rating-label">Demoman</div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill tier-color"
+                            :class="'tier-' + change.old_demoman_tier"
+                            >T{{ change.old_demoman_tier }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill tier-color"
+                            :class="[
+                              'tier-' + change.new_demoman_tier,
+                              {
+                                changed:
+                                  change.old_demoman_tier !==
+                                  change.new_demoman_tier,
+                              },
+                            ]"
+                            >T{{ change.new_demoman_tier }}</span
+                          >
+                        </div>
+                        <div class="rating-change-pills">
+                          <span
+                            class="rating-pill rating-color"
+                            :class="'rating-' + change.old_demoman_rating"
+                            >R{{ change.old_demoman_rating }}</span
+                          >
+                          <span class="arrow-small">→</span>
+                          <span
+                            class="rating-pill rating-color"
+                            :class="[
+                              'rating-' + change.new_demoman_rating,
+                              {
+                                changed:
+                                  change.old_demoman_rating !==
+                                  change.new_demoman_rating,
+                              },
+                            ]"
+                            >R{{ change.new_demoman_rating }}</span
+                          >
+                        </div>
                       </div>
                     </div>
-                    <div class="rating-section">
-                      <div class="rating-label">Demoman</div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill tier-color"
-                          :class="'tier-' + change.old_demoman_tier"
-                          >T{{ change.old_demoman_tier }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill tier-color"
-                          :class="[
-                            'tier-' + change.new_demoman_tier,
-                            {
-                              changed:
-                                change.old_demoman_tier !==
-                                change.new_demoman_tier,
-                            },
-                          ]"
-                          >T{{ change.new_demoman_tier }}</span
-                        >
-                      </div>
-                      <div class="rating-change-pills">
-                        <span
-                          class="rating-pill rating-color"
-                          :class="'rating-' + change.old_demoman_rating"
-                          >R{{ change.old_demoman_rating }}</span
-                        >
-                        <span class="arrow-small">→</span>
-                        <span
-                          class="rating-pill rating-color"
-                          :class="[
-                            'rating-' + change.new_demoman_rating,
-                            {
-                              changed:
-                                change.old_demoman_rating !==
-                                change.new_demoman_rating,
-                            },
-                          ]"
-                          >R{{ change.new_demoman_rating }}</span
-                        >
-                      </div>
+                    <div class="completion-count">
+                      <i class="bi bi-clock me-1"></i>
+                      {{ formatDate(change.changed_at) }}
                     </div>
-                  </div>
-                  <div class="completion-count">
-                    <i class="bi bi-clock me-1"></i>
-                    {{ formatDate(change.changed_at) }}
                   </div>
                 </div>
               </div>
@@ -606,8 +603,56 @@ export default {
   will-change: transform;
 }
 
+.card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
+  z-index: 0;
+}
+
+.card-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 1;
+}
+
+.card-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  z-index: 2;
+}
+
+.card:hover .card-bg {
+  transform: scale(1.04);
+}
+
+.card-inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .card:hover {
-  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.35);
   cursor: pointer;
 }
 

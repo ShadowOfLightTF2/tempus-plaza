@@ -3,99 +3,101 @@
     class="map-card"
     :class="{ 'map-empty-map': !map.name }"
     @click="handleClick"
-    :style="backgroundStyle"
   >
-    <h5 v-if="map.name" class="map-card-subtitle">
-      {{ map.class_type }}
-    </h5>
-    <div class="map-header-nonmargin">
-      <h3 class="map-name">
-        {{ map.name || "Click to add a map" }}
-      </h3>
-    </div>
-    <div v-if="map.name" class="map-compact-ratings-grid">
-      <div
-        v-if="map.class_type === 'soldier'"
-        class="map-rating-section intended-class-section"
-      >
-        <div class="map-rating-label">Soldier</div>
-        <div class="map-rating-pills">
-          <span
-            class="map-rating-pill map-tier-color"
-            :class="'tier-' + map.map_soldier_tier"
-          >
-            T{{ map.map_soldier_tier }}
-          </span>
-          <span
-            class="map-rating-pill map-rating-color"
-            :class="'rating-' + map.map_soldier_rating"
-          >
-            R{{ map.map_soldier_rating }}
+    <div class="card-bg" :style="backgroundStyle"></div>
+    <div class="card-inner">
+      <h5 v-if="map.name" class="map-card-subtitle">
+        {{ map.class_type }}
+      </h5>
+      <div class="map-header-nonmargin">
+        <h3 class="map-name">
+          {{ map.name || "Click to add a map" }}
+        </h3>
+      </div>
+      <div v-if="map.name" class="map-compact-ratings-grid">
+        <div
+          v-if="map.class_type === 'soldier'"
+          class="map-rating-section intended-class-section"
+        >
+          <div class="map-rating-label">Soldier</div>
+          <div class="map-rating-pills">
+            <span
+              class="map-rating-pill map-tier-color"
+              :class="'tier-' + map.map_soldier_tier"
+            >
+              T{{ map.map_soldier_tier }}
+            </span>
+            <span
+              class="map-rating-pill map-rating-color"
+              :class="'rating-' + map.map_soldier_rating"
+            >
+              R{{ map.map_soldier_rating }}
+            </span>
+          </div>
+        </div>
+        <div v-else class="map-rating-section intended-class-section">
+          <div class="map-rating-label">Demoman</div>
+          <div class="map-rating-pills">
+            <span
+              class="map-rating-pill map-tier-color"
+              :class="'tier-' + map.map_demoman_tier"
+            >
+              T{{ map.map_demoman_tier }}
+            </span>
+            <span
+              class="map-rating-pill map-rating-color"
+              :class="'rating-' + map.map_demoman_rating"
+            >
+              R{{ map.map_demoman_rating }}
+            </span>
+          </div>
+        </div>
+        <div v-if="map.class_type === 'soldier'" class="map-rating-section">
+          <div class="map-rating-label">Demoman</div>
+          <div class="map-rating-pills">
+            <span
+              class="map-rating-pill map-tier-color"
+              :class="'tier-' + map.map_demoman_tier"
+            >
+              T{{ map.map_demoman_tier }}
+            </span>
+            <span
+              class="map-rating-pill map-rating-color"
+              :class="'rating-' + map.map_demoman_rating"
+            >
+              R{{ map.map_demoman_rating }}
+            </span>
+          </div>
+        </div>
+        <div v-else class="map-rating-section">
+          <div class="map-rating-label">Soldier</div>
+          <div class="map-rating-pills">
+            <span
+              class="map-rating-pill map-tier-color"
+              :class="'tier-' + map.map_soldier_tier"
+            >
+              T{{ map.map_soldier_tier }}
+            </span>
+            <span
+              class="map-rating-pill map-rating-color"
+              :class="'rating-' + map.map_soldier_rating"
+            >
+              R{{ map.map_soldier_rating }}
+            </span>
+          </div>
+        </div>
+        <div class="record-row">
+          <img
+            :src="`/icons/${map.class_type}.png`"
+            :alt="map.class_type"
+            class="map-class-icon"
+            loading="lazy"
+          />
+          {{ formatDuration(map.player_record_duration) }} |
+          <span :class="getPlacementClass(map.record_placement)">
+            #{{ map.record_rank }}
           </span>
         </div>
-      </div>
-      <div v-else class="map-rating-section intended-class-section">
-        <div class="map-rating-label">Demoman</div>
-        <div class="map-rating-pills">
-          <span
-            class="map-rating-pill map-tier-color"
-            :class="'tier-' + map.map_demoman_tier"
-          >
-            T{{ map.map_demoman_tier }}
-          </span>
-          <span
-            class="map-rating-pill map-rating-color"
-            :class="'rating-' + map.map_demoman_rating"
-          >
-            R{{ map.map_demoman_rating }}
-          </span>
-        </div>
-      </div>
-      <div v-if="map.class_type === 'soldier'" class="map-rating-section">
-        <div class="map-rating-label">Demoman</div>
-        <div class="map-rating-pills">
-          <span
-            class="map-rating-pill map-tier-color"
-            :class="'tier-' + map.map_demoman_tier"
-          >
-            T{{ map.map_demoman_tier }}
-          </span>
-          <span
-            class="map-rating-pill map-rating-color"
-            :class="'rating-' + map.map_demoman_rating"
-          >
-            R{{ map.map_demoman_rating }}
-          </span>
-        </div>
-      </div>
-      <div v-else class="map-rating-section">
-        <div class="map-rating-label">Soldier</div>
-        <div class="map-rating-pills">
-          <span
-            class="map-rating-pill map-tier-color"
-            :class="'tier-' + map.map_soldier_tier"
-          >
-            T{{ map.map_soldier_tier }}
-          </span>
-          <span
-            class="map-rating-pill map-rating-color"
-            :class="'rating-' + map.map_soldier_rating"
-          >
-            R{{ map.map_soldier_rating }}
-          </span>
-        </div>
-      </div>
-      <div class="record-row">
-        <img
-          :src="`/icons/${map.class_type}.png`"
-          :alt="map.class_type"
-          class="map-class-icon"
-          loading="lazy"
-        />
-        {{ formatDuration(map.player_record_duration) }} |
-        <span :class="getPlacementClass(map.record_placement)">
-          #{{ map.record_rank }}
-        </span>
       </div>
     </div>
   </div>
@@ -116,14 +118,7 @@ export default {
     backgroundStyle() {
       if (!this.map.name) return {};
       return {
-        background: `
-            linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
-            radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-            url('/map-backgrounds/medium/${this.map.name}.jpg') center/cover no-repeat
-        `,
-        backgroundBlendMode: "multiply, normal, normal",
-        backgroundSize: "cover, cover, cover",
-        backgroundPosition: "center, center, center",
+        backgroundImage: `url('/map-backgrounds/medium/${this.map.name}.jpg')`,
       };
     },
   },
@@ -179,9 +174,56 @@ export default {
   min-height: 300px;
 }
 
+.card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
+  z-index: 0;
+}
+
+.card-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 1;
+}
+
+.card-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  z-index: 2;
+}
+
+.map-card:hover .card-bg {
+  transform: scale(1.04);
+}
+
+.card-inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .map-card:hover {
   border-radius: 15px;
-  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.3);
   cursor: pointer;
 }
 
