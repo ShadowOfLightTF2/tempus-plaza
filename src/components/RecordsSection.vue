@@ -102,7 +102,18 @@
                       class="class-icon"
                       loading="lazy"
                     />
-                    <span class="ms-2 record-map">
+                    <span
+                      class="ms-2 record-map"
+                      :title="
+                        record.type !== 'map'
+                          ? `${record.map_name} | ${
+                              record.type === 'course' ? '🚩' : '⭐'
+                            } ${record.type.slice(0, 1).toUpperCase()}${
+                              record.index
+                            }`
+                          : record.map_name
+                      "
+                    >
                       <HoverPreview :map-name="record.map_name">
                         {{ record.map_name }}
                       </HoverPreview>
@@ -125,13 +136,18 @@
                           {{ record.durationFormatted }}
                         </span>
                         <span
+                          v-if="record.hasDurationImprovement"
+                          class="duration-delta"
+                        >
+                          {{ record.durationDeltaText }}
+                        </span>
+                        <span
                           class="record-rank"
                           :class="record.placementClass"
                         >
                           {{ record.medal }} #{{ record.rank }}
                         </span>
                       </div>
-
                       <span class="record-detail record-date">
                         {{ record.formattedDate }}
                       </span>
@@ -170,7 +186,18 @@
                       class="class-icon"
                       loading="lazy"
                     />
-                    <span class="ms-2 record-map">
+                    <span
+                      class="ms-2 record-map"
+                      :title="
+                        placement.type !== 'map'
+                          ? `${placement.map_name} | ${
+                              placement.type === 'course' ? '🚩' : '⭐'
+                            } ${placement.type.slice(0, 1).toUpperCase()}${
+                              placement.index
+                            }`
+                          : placement.map_name
+                      "
+                    >
                       <HoverPreview :map-name="placement.map_name">
                         {{ placement.map_name }}
                       </HoverPreview>
@@ -236,14 +263,6 @@
                 Previous
               </button>
             </div>
-
-            <div
-              class="pagination-info"
-              v-if="activeRecordsTab === 'changed-placements'"
-            >
-              Next update in {{ nextUpdateCountdown }}
-            </div>
-
             <div class="pagination-side">
               <button
                 v-if="shouldShowNextButton"
@@ -262,7 +281,6 @@
 
 <script>
 import RecordsFilter from "./RecordsFilter.vue";
-import { formatDuration, formatDate } from "@/utils/calculations.js";
 
 export default {
   name: "RecordsSection",
@@ -674,6 +692,15 @@ export default {
   font-size: 15px;
   white-space: nowrap;
 }
+.duration-delta {
+  color: #51cf66;
+  font-weight: bold;
+  font-size: 0.78rem;
+  background: rgba(81, 207, 102, 0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
 .record-rank {
   min-width: 40px;
   text-align: right;
@@ -703,13 +730,6 @@ export default {
   align-items: center;
   margin-top: 15px;
   padding-bottom: 10px;
-}
-.pagination-info {
-  color: var(--color-text-soft);
-  font-weight: bold;
-  text-align: center;
-  white-space: nowrap;
-  flex: 1;
 }
 .pagination-side {
   flex: 1;
@@ -772,7 +792,6 @@ export default {
 }
 .old-rank {
   color: var(--color-text-soft);
-  text-decoration: line-through;
 }
 .new-rank {
   font-weight: bold;
@@ -861,7 +880,9 @@ export default {
     font-size: 0.75rem;
     padding: 1px 4px;
   }
-  .record-detail.record-date {
+  .record-detail.record-date,
+  .record-duration,
+  .record-rank {
     font-size: 0.75rem;
     margin-top: 2px;
   }
@@ -882,6 +903,13 @@ export default {
     align-items: flex-end;
     min-width: 0;
   }
+  .record-map {
+    font-size: 14px;
+  }
+  .class-icon {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 @media (max-width: 567px) {
@@ -889,6 +917,15 @@ export default {
   :deep(.global-btn.active) {
     font-size: 0.8rem !important;
     padding: 10px !important;
+  }
+  .record-map,
+  .record-duration,
+  .record-rank {
+    font-size: 12px;
+  }
+  .class-icon {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>

@@ -179,7 +179,17 @@
                     {{ userRecord.soldier.rank }}
                   </td>
                   <td class="duration-column">
-                    {{ formatDuration(userRecord.soldier.duration) }}
+                    <a
+                      v-if="userRecord.soldier.demo_id"
+                      :href="`https://tempus2.xyz/demos/${userRecord.soldier.demo_id}`"
+                      target="_blank"
+                      class="demo-link"
+                    >
+                      {{ formatDuration(userRecord.soldier.duration) }}
+                    </a>
+                    <span v-else>{{
+                      formatDuration(userRecord.soldier.duration)
+                    }}</span>
                   </td>
                   <SmartLink
                     tag="td"
@@ -236,7 +246,15 @@
                     {{ entry.rank }}
                   </td>
                   <td class="duration-column">
-                    {{ formatDuration(entry.duration) }}
+                    <a
+                      v-if="entry.demo_id"
+                      :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                      target="_blank"
+                      class="demo-link"
+                    >
+                      {{ formatDuration(entry.duration) }}
+                    </a>
+                    <span v-else>{{ formatDuration(entry.duration) }}</span>
                   </td>
                   <SmartLink
                     tag="td"
@@ -383,7 +401,17 @@
                     {{ userRecord.demoman.rank }}
                   </td>
                   <td class="duration-column">
-                    {{ formatDuration(userRecord.demoman.duration) }}
+                    <a
+                      v-if="userRecord.demoman.demo_id"
+                      :href="`https://tempus2.xyz/demos/${userRecord.demoman.demo_id}`"
+                      target="_blank"
+                      class="demo-link"
+                    >
+                      {{ formatDuration(userRecord.demoman.duration) }}
+                    </a>
+                    <span v-else>{{
+                      formatDuration(userRecord.demoman.duration)
+                    }}</span>
                   </td>
                   <SmartLink
                     tag="td"
@@ -440,7 +468,15 @@
                     {{ entry.rank }}
                   </td>
                   <td class="duration-column">
-                    {{ formatDuration(entry.duration) }}
+                    <a
+                      v-if="entry.demo_id"
+                      :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                      target="_blank"
+                      class="demo-link"
+                    >
+                      {{ formatDuration(entry.duration) }}
+                    </a>
+                    <span v-else>{{ formatDuration(entry.duration) }}</span>
                   </td>
                   <SmartLink
                     tag="td"
@@ -1438,5 +1474,15 @@ export default {
   );
   margin: 5px 0 15px 0;
   opacity: 0.6;
+}
+.demo-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.demo-link:hover {
+  color: var(--color-text-clickable);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 </style>

@@ -20,7 +20,7 @@
               <h2 class="donation-title">Make a Donation</h2>
               <p class="donation-description">
                 Donations are not necessary or needed in order to keep plaza
-                running. If you still would like to support me that is still
+                running. If you still would like to support me that is very much
                 appreciated. Tempus Plaza is not associated or affiliated with
                 Tempus and donations will not go towards Tempus itself.
               </p>

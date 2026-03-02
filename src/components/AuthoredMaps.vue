@@ -577,9 +577,14 @@ export default {
   max-width: 150px;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 996px) {
   .author-map-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 1400px) {
+  .author-map-grid {
     width: 100% !important;
     max-width: none !important;
     overflow-x: hidden;

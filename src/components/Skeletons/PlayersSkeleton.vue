@@ -250,6 +250,7 @@ export default {
 }
 
 .tables-wrapper {
+  margin-top: -23px;
   display: flex;
   gap: 50px;
   width: 100%;

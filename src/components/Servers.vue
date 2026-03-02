@@ -150,7 +150,11 @@
                   <p class="table-header-subtitle">Updates every minute</p>
                 </div>
                 <label v-if="!isMobile" class="min-mode-checkbox">
-                  <input type="checkbox" v-model="minMode" />
+                  <input
+                    type="checkbox"
+                    :checked="minMode"
+                    @change="toggleMinMode"
+                  />
                   <span class="checkmark"></span>
                   <span class="checkbox-label">Min Mode</span>
                 </label>
@@ -562,8 +566,13 @@ export default {
       currentView: "topplayers",
       loading: false,
       failedMapImages: new Set(),
-      isMobile: window.innerWidth <= 1024,
-      minMode: localStorage.getItem("minMode") === "true",
+      isMobile: window.innerWidth <= 1200,
+      manualMinMode: localStorage.getItem("minMode") === "true",
+      minMode:
+        window.innerWidth <= 1200
+          ? true
+          : localStorage.getItem("minMode") === "true",
+      resizing: false,
       topPlayersData: [],
       serversData: [],
       expandedServerId: null,
@@ -637,9 +646,6 @@ export default {
     },
   },
   watch: {
-    minMode(newValue) {
-      localStorage.setItem("minMode", newValue);
-    },
     $route(to) {
       if (to.params.view) {
         this.currentView = to.params.view;
@@ -661,10 +667,21 @@ export default {
     }
   },
   methods: {
+    toggleMinMode() {
+      this.manualMinMode = !this.manualMinMode;
+      this.minMode = this.manualMinMode;
+      localStorage.setItem("minMode", this.manualMinMode);
+    },
     handleResize() {
-      this.isMobile = window.innerWidth <= 1024;
-      if (this.isMobile) {
-        this.minMode = true;
+      this.isMobile = window.innerWidth <= 1200;
+      this.minMode = this.isMobile ? true : this.manualMinMode;
+    },
+    handleStorageChange(event) {
+      if (event.key === "minMode") {
+        this.manualMinMode = event.newValue === "true";
+        if (!this.isMobile) {
+          this.minMode = this.manualMinMode;
+        }
       }
     },
     handleMapImageError(mapName) {
@@ -931,9 +948,11 @@ export default {
   },
   mounted() {
     window.addEventListener("resize", this.handleResize);
+    window.addEventListener("storage", this.handleStorageChange);
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener("storage", this.handleStorageChange);
   },
 };
 </script>
@@ -1789,6 +1808,7 @@ export default {
   color: var(--color-text-clickable);
   display: flex;
   align-items: center;
+  max-width: 250px;
 }
 
 .player-country {

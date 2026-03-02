@@ -546,29 +546,32 @@ export default {
           const new_rank = p.new_placement;
           const points_change = p.points_change;
           const date = p.change_date;
+          const isNewCompletion = old_rank === null || old_rank === undefined;
 
           return {
             ...p,
-            class: p.record_type.split("_")[0], // 'soldier' | 'demoman'
-            type: p.record_type.split("_")[1], // 'map' | 'course' | 'bonus'
+            class: p.record_type.split("_")[0],
+            type: p.record_type.split("_")[1],
             old_rank,
             new_rank,
             rank_change: p.placement_change,
             date,
             points_change,
-
-            oldRankDisplay: `${this.getMedal(old_rank)}${this.formatRankDisplay(
-              old_rank,
-            )}`,
+            isNewCompletion,
+            newDurationFormatted:
+              p.new_duration != null ? formatDuration(p.new_duration) : null,
+            oldRankDisplay: isNewCompletion
+              ? "New"
+              : `${this.getMedal(old_rank)}${this.formatRankDisplay(old_rank)}`,
             newRankDisplay: `${this.getMedal(new_rank)}${this.formatRankDisplay(
               new_rank,
             )}`,
-            oldRankClass: this.getPlacementClass(old_rank),
+            oldRankClass: isNewCompletion
+              ? ""
+              : this.getPlacementClass(old_rank),
             newRankClass: this.getPlacementClass(new_rank),
-
             pointsChangeClass: this.getPointsChangeClass(points_change),
             pointsChangeText: this.formatPointsChange(points_change),
-
             formattedDate: this.formatDate(date),
           };
         });
@@ -1053,15 +1056,24 @@ export default {
           `${API_BASE_URL}/players/${playerId}/recent-records`,
         );
 
-        this.records.recentRecords = response.data.map((r) => ({
-          ...r,
-          durationFormatted: this.formatDuration(r.duration),
-          rankClass:
-            r.rank >= 1 && r.rank <= 3 ? this.getPlacementClass(r.rank) : "",
-          placementClass: this.getPlacementClass(r.placement),
-          medal: this.getMedal(r.rank),
-          formattedDate: this.formatDate(r.date),
-        }));
+        this.records.recentRecords = response.data.map((r) => {
+          const hasDurationImprovement =
+            r.old_duration != null && r.old_duration > r.duration;
+
+          return {
+            ...r,
+            durationFormatted: this.formatDuration(r.duration),
+            rankClass:
+              r.rank >= 1 && r.rank <= 3 ? this.getPlacementClass(r.rank) : "",
+            placementClass: this.getPlacementClass(r.placement),
+            medal: this.getMedal(r.rank),
+            formattedDate: this.formatDate(r.date),
+            hasDurationImprovement,
+            durationDeltaText: hasDurationImprovement
+              ? `-${this.formatDuration(r.old_duration - r.duration)}`
+              : null,
+          };
+        });
       } catch (error) {
         this.error =
           "Failed to fetch player recent records. Please try again later.";
@@ -1377,9 +1389,13 @@ export default {
   grid-template-columns: repeat(3, minmax(300px, 1fr));
   width: 1200px;
 }
-@media (max-width: 1400px) {
+@media (max-width: 996px) {
   .map-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 1400px) {
+  .map-grid {
     width: 100% !important;
     max-width: none !important;
     overflow-x: hidden;
