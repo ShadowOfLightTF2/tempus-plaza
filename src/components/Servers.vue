@@ -32,115 +32,9 @@
               Servers
             </button>
           </div>
-          <div
-            v-if="loading && currentView === 'topplayers'"
-            class="top-players-cards"
-          >
-            <div class="table-header-content topplayers-header">
-              <div class="skeleton-block skeleton-icon"></div>
-              <div class="table-header-text">
-                <div class="skeleton-block skeleton-title"></div>
-                <div class="skeleton-block skeleton-subtitle"></div>
-              </div>
-            </div>
-            <div class="players-cards-container">
-              <div v-for="n in 20" :key="n" class="player-card skeleton-card">
-                <div class="ranks-section">
-                  <div class="player-ranks">
-                    <div class="skeleton-block skeleton-rank"></div>
-                    <div class="skeleton-block skeleton-rank"></div>
-                  </div>
-                </div>
-                <div class="player-info-section">
-                  <div class="skeleton-block skeleton-avatar-large"></div>
-                  <div class="player-details" style="gap: 0.5rem">
-                    <div class="skeleton-block skeleton-player-name"></div>
-                    <div class="skeleton-block skeleton-player-country"></div>
-                  </div>
-                </div>
-                <div class="map-info-section" style="background-image: none">
-                  <div class="map-details">
-                    <div class="skeleton-block skeleton-class-icon"></div>
-                    <div class="skeleton-block skeleton-map-name"></div>
-                  </div>
-                </div>
-                <div class="server-info-section">
-                  <div class="skeleton-block skeleton-server-name"></div>
-                  <div class="skeleton-block skeleton-btn"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            v-else-if="loading && currentView === 'servers'"
-            class="table-wrapper"
-          >
-            <div class="table-header-content">
-              <div class="table-header-top">
-                <div class="skeleton-block skeleton-icon"></div>
-                <div class="table-header-title-section">
-                  <div class="skeleton-block skeleton-title"></div>
-                  <div class="skeleton-block skeleton-subtitle"></div>
-                </div>
-              </div>
-              <div class="table-header-filters">
-                <div class="region-buttons">
-                  <div
-                    v-for="n in 9"
-                    :key="n"
-                    class="skeleton-block skeleton-region-btn"
-                  ></div>
-                </div>
-                <div class="server-type-buttons" style="margin-top: 0.75rem">
-                  <div
-                    v-for="n in 4"
-                    :key="n"
-                    class="skeleton-block skeleton-type-btn"
-                  ></div>
-                </div>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th><div class="skeleton-block skeleton-th"></div></th>
-                    <th><div class="skeleton-block skeleton-th"></div></th>
-                    <th><div class="skeleton-block skeleton-th"></div></th>
-                    <th><div class="skeleton-block skeleton-th"></div></th>
-                    <th><div class="skeleton-block skeleton-th"></div></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="n in 30" :key="n" class="fade-in">
-                    <td class="align-middle">
-                      <div class="skeleton-row-inner">
-                        <div class="skeleton-block skeleton-flag"></div>
-                        <div class="skeleton-block skeleton-td-text"></div>
-                      </div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="skeleton-block skeleton-td-text-long"></div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="skeleton-block skeleton-td-text"></div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="skeleton-row-inner">
-                        <div
-                          class="skeleton-block skeleton-td-text-short"
-                        ></div>
-                        <div class="skeleton-block skeleton-status-dot"></div>
-                      </div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="skeleton-block skeleton-btn-sm"></div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+
+          <ServersSkeleton v-if="loading" :view="currentView" />
+
           <div v-else class="table-container">
             <div v-if="currentView === 'topplayers'" class="top-players-cards">
               <div class="table-header-content topplayers-header">
@@ -316,6 +210,7 @@
                 </div>
               </div>
             </div>
+
             <div v-if="currentView === 'servers'" class="table-wrapper">
               <div class="table-header-content">
                 <div class="table-header-top">
@@ -451,11 +346,9 @@
                         </SmartLink>
                         <td class="align-middle">
                           <div class="player-info">
-                            <span v-if="server.hostname !== null"
-                              >{{ server.playerCount }}/{{
-                                server.maxPlayers
-                              }}</span
-                            >
+                            <span v-if="server.hostname !== null">
+                              {{ server.playerCount }}/{{ server.maxPlayers }}
+                            </span>
                             <div
                               v-if="server.hostname !== null"
                               class="server-status"
@@ -546,14 +439,15 @@
 
 <script>
 import { useHead } from "@vueuse/head";
+import ServersSkeleton from "./Skeletons/ServersSkeleton.vue";
+
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Servers",
+  components: { ServersSkeleton },
   setup() {
-    useHead({
-      title: "Tempus Plaza | Servers",
-    });
+    useHead({ title: "Tempus Plaza | Servers" });
   },
   props: {
     view: {
@@ -572,7 +466,6 @@ export default {
         window.innerWidth <= 1200
           ? true
           : localStorage.getItem("minMode") === "true",
-      resizing: false,
       topPlayersData: [],
       serversData: [],
       expandedServerId: null,
@@ -604,13 +497,11 @@ export default {
   computed: {
     filteredServersData() {
       let filtered = this.serversData;
-
       if (this.selectedRegion !== "all") {
         filtered = filtered.filter(
           (server) => server.region === this.selectedRegion,
         );
       }
-
       if (!this.selectedServerTypes.includes("all")) {
         filtered = filtered.filter((server) => {
           const matchesIncluded = this.selectedServerTypes.some((type) =>
@@ -629,27 +520,12 @@ export default {
           return !matchesExcluded;
         });
       }
-
       return filtered;
-    },
-
-    canIncrementRank() {
-      if (this.selectedRank === "all") return this.availableRanks.length > 0;
-      const currentIndex = this.availableRanks.indexOf(this.selectedRank);
-      return currentIndex < this.availableRanks.length - 1;
-    },
-
-    canDecrementRank() {
-      if (this.selectedRank === "all") return this.availableRanks.length > 0;
-      const currentIndex = this.availableRanks.indexOf(this.selectedRank);
-      return currentIndex > 0;
     },
   },
   watch: {
     $route(to) {
-      if (to.params.view) {
-        this.currentView = to.params.view;
-      }
+      if (to.params.view) this.currentView = to.params.view;
     },
     serversData: {
       handler() {
@@ -659,12 +535,17 @@ export default {
     },
   },
   async created() {
-    document.title = "Tempus plaza - Home";
     await this.fetchData();
     const { view } = this.$route.params;
-    if (view) {
-      this.currentView = view;
-    }
+    if (view) this.currentView = view;
+  },
+  mounted() {
+    window.addEventListener("resize", this.handleResize);
+    window.addEventListener("storage", this.handleStorageChange);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener("storage", this.handleStorageChange);
   },
   methods: {
     toggleMinMode() {
@@ -679,9 +560,7 @@ export default {
     handleStorageChange(event) {
       if (event.key === "minMode") {
         this.manualMinMode = event.newValue === "true";
-        if (!this.isMobile) {
-          this.minMode = this.manualMinMode;
-        }
+        if (!this.isMobile) this.minMode = this.manualMinMode;
       }
     },
     handleMapImageError(mapName) {
@@ -690,68 +569,54 @@ export default {
     extractAvailableRanks() {
       const ranks = new Set();
       this.serversData.forEach((server) => {
-        const name = server.name.toLowerCase();
-        const rankMatch = name.match(/rank (\d+)/i);
-        if (rankMatch) {
-          ranks.add(parseInt(rankMatch[1]));
-        }
+        const rankMatch = server.name.match(/rank (\d+)/i);
+        if (rankMatch) ranks.add(parseInt(rankMatch[1]));
       });
       this.availableRanks = Array.from(ranks).sort((a, b) => a - b);
     },
-
     getServerTypeButtonClass(serverType) {
       const isSelected = this.selectedServerTypes.includes(serverType);
       const isExcluded = this.excludedServerTypes.includes(serverType);
-      return {
-        active: isSelected && !isExcluded,
-        excluded: isExcluded,
-      };
+      return { active: isSelected && !isExcluded, excluded: isExcluded };
     },
-
     filterByRegion(region) {
       this.selectedRegion = region;
       this.expandedServerId = null;
     },
-
     toggleServerType(serverType) {
       if (serverType === "all") {
         this.selectedServerTypes = ["all"];
         this.excludedServerTypes = [];
       } else {
-        const isCurrentlySelected =
-          this.selectedServerTypes.includes(serverType);
-        const isCurrentlyExcluded =
-          this.excludedServerTypes.includes(serverType);
-
-        if (!isCurrentlySelected && !isCurrentlyExcluded) {
+        const isSelected = this.selectedServerTypes.includes(serverType);
+        const isExcluded = this.excludedServerTypes.includes(serverType);
+        if (!isSelected && !isExcluded) {
           if (this.selectedServerTypes.includes("all")) {
             this.selectedServerTypes = [serverType];
           } else {
             this.selectedServerTypes.push(serverType);
           }
-        } else if (isCurrentlySelected && !isCurrentlyExcluded) {
+        } else if (isSelected && !isExcluded) {
           this.selectedServerTypes = this.selectedServerTypes.filter(
-            (type) => type !== serverType,
+            (t) => t !== serverType,
           );
           this.excludedServerTypes.push(serverType);
-          if (this.selectedServerTypes.length === 0) {
+          if (this.selectedServerTypes.length === 0)
             this.selectedServerTypes = ["all"];
-          }
-        } else if (isCurrentlyExcluded) {
+        } else if (isExcluded) {
           this.excludedServerTypes = this.excludedServerTypes.filter(
-            (type) => type !== serverType,
+            (t) => t !== serverType,
           );
         }
       }
       this.expandedServerId = null;
     },
-
     matchesServerType(serverName, type) {
       const name = serverName.toLowerCase();
       switch (type) {
         case "beginner":
           return name.includes("beginner") || name.includes("iniciantes");
-        case "rank_only":
+        case "rank_only": {
           const hasRankPattern = /rank (\d+)/i.test(name);
           if (!hasRankPattern) return false;
           if (this.selectedRank !== "all") {
@@ -759,30 +624,26 @@ export default {
             return rankMatch && parseInt(rankMatch[1]) === this.selectedRank;
           }
           return true;
-        case "empty":
+        }
+        case "empty": {
           const server = this.serversData.find((s) => s.name === serverName);
           return server && server.playerCount === 0;
+        }
         case "all":
           return true;
         default:
           return false;
       }
     },
-
     getRegionName(regionKey) {
       if (regionKey === "all") return "All Regions";
       const region = this.availableRegions.find((r) => r.key === regionKey);
       return region ? region.name : regionKey;
     },
-
     toggleServerExpansion(serverId) {
-      if (this.expandedServerId === serverId) {
-        this.expandedServerId = null;
-      } else {
-        this.expandedServerId = serverId;
-      }
+      this.expandedServerId =
+        this.expandedServerId === serverId ? null : serverId;
     },
-
     async fetchData() {
       this.loading = true;
       try {
@@ -796,37 +657,31 @@ export default {
         this.loading = false;
       }
     },
-
     sortServersByPlayers() {
-      if (this.sortBy === "players") {
-        this.sortDirection *= -1;
-      } else {
+      if (this.sortBy === "players") this.sortDirection *= -1;
+      else {
         this.sortBy = "players";
         this.sortDirection = -1;
       }
-      this.serversData.sort((a, b) => {
-        return (a.playerCount - b.playerCount) * this.sortDirection;
-      });
+      this.serversData.sort(
+        (a, b) => (a.playerCount - b.playerCount) * this.sortDirection,
+      );
     },
-
     sortServersByMap() {
-      if (this.sortBy === "map") {
-        this.sortDirection *= -1;
-      } else {
+      if (this.sortBy === "map") this.sortDirection *= -1;
+      else {
         this.sortBy = "map";
         this.sortDirection = 1;
       }
-      this.serversData.sort((a, b) => {
-        const mapA = a.currentMap || "";
-        const mapB = b.currentMap || "";
-        return mapA.localeCompare(mapB) * this.sortDirection;
-      });
+      this.serversData.sort(
+        (a, b) =>
+          (a.currentMap || "").localeCompare(b.currentMap || "") *
+          this.sortDirection,
+      );
     },
-
     sortServersByRegion() {
-      if (this.sortBy === "region") {
-        this.sortDirection *= -1;
-      } else {
+      if (this.sortBy === "region") this.sortDirection *= -1;
+      else {
         this.sortBy = "region";
         this.sortDirection = 1;
       }
@@ -841,26 +696,22 @@ export default {
         "unknown",
       ];
       this.serversData.sort((a, b) => {
-        const regionA = regionOrder.indexOf(a.region);
-        const regionB = regionOrder.indexOf(b.region);
-        if (regionA !== regionB)
-          return (regionA - regionB) * this.sortDirection;
+        const diff =
+          regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
+        if (diff !== 0) return diff * this.sortDirection;
         return a.country.localeCompare(b.country) * this.sortDirection;
       });
     },
-
     sortServersByName() {
-      if (this.sortBy === "name") {
-        this.sortDirection *= -1;
-      } else {
+      if (this.sortBy === "name") this.sortDirection *= -1;
+      else {
         this.sortBy = "name";
         this.sortDirection = 1;
       }
-      this.serversData.sort((a, b) => {
-        return a.name.localeCompare(b.name) * this.sortDirection;
-      });
+      this.serversData.sort(
+        (a, b) => a.name.localeCompare(b.name) * this.sortDirection,
+      );
     },
-
     async fetchTopPlayersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers/top-players`);
@@ -884,13 +735,9 @@ export default {
                 : player.intended_class || "soldier",
           }));
       } catch (error) {
-        console.error(
-          "There was an error fetching the top players data:",
-          error,
-        );
+        console.error("Error fetching top players data:", error);
       }
     },
-
     async fetchServersData() {
       try {
         const response = await fetch(`${API_BASE_URL}/servers`);
@@ -912,181 +759,40 @@ export default {
             players: server.players ? JSON.parse(server.players) : [],
           }))
           .sort((a, b) => {
-            const regionA = regionOrder.indexOf(a.region);
-            const regionB = regionOrder.indexOf(b.region);
-            if (regionA !== regionB) return regionA - regionB;
+            const diff =
+              regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
+            if (diff !== 0) return diff;
             return a.country.localeCompare(b.country);
           });
       } catch (error) {
-        console.error("There was an error fetching the servers data:", error);
+        console.error("Error fetching servers data:", error);
       }
     },
-
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
         ? countryCode.toLowerCase()
         : "unknown";
       return `https://flagcdn.com/24x18/${validCode}.png`;
     },
-
     getServerStatusClass(players, maxPlayers) {
       const ratio = players / maxPlayers;
       if (ratio > 0.8) return "status-high";
       if (ratio > 0.4) return "status-medium";
       return "status-low";
     },
-
     connectToServer(ip, port) {
       window.open(`steam://connect/${ip}:${port}`, "_blank");
     },
-
     switchView(view) {
       if (this.currentView === view) return;
       this.currentView = view;
       this.$router.push({ name: "Servers", params: { view } });
     },
   },
-  mounted() {
-    window.addEventListener("resize", this.handleResize);
-    window.addEventListener("storage", this.handleStorageChange);
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.handleResize);
-    window.removeEventListener("storage", this.handleStorageChange);
-  },
 };
 </script>
 
 <style scoped>
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -600px 0;
-  }
-  100% {
-    background-position: 600px 0;
-  }
-}
-
-.skeleton-block {
-  border-radius: 4px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.06) 25%,
-    rgba(255, 255, 255, 0.13) 50%,
-    rgba(255, 255, 255, 0.06) 75%
-  );
-  background-size: 600px 100%;
-  animation: skeleton-shimmer 1.6s ease-in-out infinite;
-}
-
-.skeleton-icon {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-.skeleton-title {
-  width: 180px;
-  height: 1.3rem;
-  margin-bottom: 0.4rem;
-}
-.skeleton-subtitle {
-  width: 120px;
-  height: 0.85rem;
-}
-.skeleton-rank {
-  width: 52px;
-  height: 28px;
-  border-radius: 6px;
-}
-.skeleton-avatar-large {
-  width: 54px;
-  height: 54px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.skeleton-player-name {
-  width: 150px;
-  height: 1.1rem;
-}
-.skeleton-player-country {
-  width: 90px;
-  height: 0.85rem;
-}
-.skeleton-class-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-}
-.skeleton-map-name {
-  width: 130px;
-  height: 1rem;
-}
-.skeleton-server-name {
-  width: 80%;
-  height: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-.skeleton-btn {
-  width: 72px;
-  height: 30px;
-  border-radius: 5px;
-}
-.skeleton-btn-sm {
-  width: 64px;
-  height: 26px;
-  border-radius: 5px;
-}
-
-.skeleton-region-btn {
-  width: 90px;
-  height: 30px;
-  border-radius: 5px;
-}
-.skeleton-type-btn {
-  width: 76px;
-  height: 28px;
-  border-radius: 5px;
-}
-.skeleton-th {
-  width: 70%;
-  height: 0.85rem;
-}
-.skeleton-flag {
-  width: 24px;
-  height: 18px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-.skeleton-td-text {
-  width: 90px;
-  height: 0.85rem;
-}
-.skeleton-td-text-long {
-  width: 160px;
-  height: 0.85rem;
-}
-.skeleton-td-text-short {
-  width: 50px;
-  height: 0.85rem;
-}
-.skeleton-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.skeleton-row-inner {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.player-card.skeleton-card {
-  pointer-events: none;
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
 .page-header {
   margin-bottom: 2rem;
 }
@@ -1104,19 +810,23 @@ export default {
   opacity: 0.6;
 }
 
-.flag-icon {
-  width: 20px;
-  height: auto;
-  margin-right: 5px;
-}
-
 .content-container {
   width: 100%;
   max-width: 1200px;
 }
 
+.table-container-wrapper {
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+}
+
 .button-group {
   border: none;
+}
+
+.flag-icon {
+  width: 20px;
+  height: auto;
+  margin-right: 5px;
 }
 
 .region-buttons {
@@ -1170,128 +880,6 @@ export default {
   background: rgba(239, 68, 68, 0.8);
 }
 
-.rank-selector-container {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid var(--color-border-soft);
-}
-
-.rank-selector-label {
-  display: block;
-  color: var(--color-text);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-}
-
-.rank-selector-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.rank-all {
-  align-self: flex-start;
-}
-
-.rank-picker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 2px solid var(--color-border-soft);
-  border-radius: 6px;
-  width: 4rem;
-  user-select: none;
-}
-
-.rank-picker-btn {
-  width: 100%;
-  padding: 0.25rem;
-  border: none;
-  background: rgba(74, 111, 165, 0.3);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 0.8rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.rank-picker-btn:hover:not(:disabled) {
-  background: rgba(74, 111, 165, 0.6);
-}
-
-.rank-picker-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.rank-picker-up {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid var(--color-border-soft);
-}
-
-.rank-picker-down {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid var(--color-border-soft);
-}
-
-.rank-picker-display {
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  width: 100%;
-}
-
-.rank-picker-value {
-  font-weight: bold;
-  font-size: 1rem;
-  color: var(--color-text);
-}
-
-.rank-btn {
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--color-border-soft);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text);
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-.rank-btn:hover {
-  background: rgba(74, 111, 165, 0.25);
-  border-color: var(--color-primary);
-}
-
-.rank-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
-}
-
-.rank-number {
-  min-width: 3rem;
-  text-align: center;
-}
-
-.filter-indicator {
-  color: var(--color-primary);
-  font-weight: bold;
-}
-
 .no-servers-message {
   display: flex;
   justify-content: center;
@@ -1314,7 +902,6 @@ export default {
 
 .no-servers-content h4 {
   margin-bottom: 0.5rem;
-  color: var(--color-text);
 }
 
 .no-servers-content p {
@@ -1326,12 +913,7 @@ export default {
   width: 100%;
   border-radius: 0 0 8px 8px;
   overflow: hidden;
-  border-top: none;
   border-bottom: 1px solid var(--color-border-soft);
-}
-
-.table-container-wrapper {
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 
 .table-container {
@@ -1453,11 +1035,11 @@ export default {
 
 .table-responsive {
   overflow: hidden;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 .table-dark {
-  margin: 0px;
+  margin: 0;
 }
 
 .table-dark thead {
@@ -1482,11 +1064,9 @@ export default {
 .table-dark td:first-child {
   border-left: none !important;
 }
-
 .table-dark td:last-child {
   border-right: none !important;
 }
-
 .table-dark tr:last-child td {
   border-bottom: none !important;
 }
@@ -1513,16 +1093,6 @@ export default {
   border-radius: 2px;
 }
 
-.server-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.server-name {
-  font-weight: bold;
-  color: var(--color-text);
-}
-
 .player-info {
   display: flex;
   align-items: center;
@@ -1544,106 +1114,15 @@ export default {
 .status-high {
   background: #ef4444;
 }
-
 .status-medium {
   background: #eab308;
 }
-
 .status-low {
   background: #22c55e;
 }
 
 .connect-btn {
   padding: 0.25rem 0.75rem;
-}
-
-@media (max-width: 767.98px) {
-  .button-group {
-    flex-direction: column;
-    width: 100%;
-    margin: 0 auto 2rem;
-    border-radius: 12px;
-  }
-
-  .toggle-btn {
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .region-filters {
-    padding: 1rem;
-  }
-
-  .region-buttons {
-    justify-content: center;
-  }
-
-  .server-type-buttons {
-    justify-content: center;
-  }
-
-  .region-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-
-  .server-type-btn {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
-  }
-
-  .rank-selector-container {
-    padding: 0.75rem;
-  }
-
-  .rank-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-
-  .rank-picker {
-    width: 3.5rem;
-  }
-
-  .rank-picker-btn {
-    padding: 0.2rem;
-    font-size: 0.7rem;
-  }
-
-  .rank-picker-display {
-    padding: 0.4rem;
-    min-height: 1.5rem;
-  }
-
-  .rank-picker-value {
-    font-size: 0.9rem;
-  }
-
-  .table-header-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  .table-responsive {
-    display: block;
-    overflow-x: auto;
-  }
-
-  .table-dark td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .avatar {
-    width: 20px;
-    height: 20px;
-  }
-
-  .table-header-icon {
-    font-size: 1.5rem;
-  }
 }
 
 .server-row:hover {
@@ -1700,16 +1179,7 @@ export default {
   padding: 1rem;
 }
 
-@media (max-width: 767.98px) {
-  .players-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .player-item {
-    padding: 0.75rem;
-  }
-}
-
+/* ── Top Players cards ── */
 .top-players-cards {
   width: 100%;
   border-radius: 0 0 8px 8px;
@@ -1724,6 +1194,10 @@ export default {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.players-cards-container.min-mode {
+  gap: 0.3rem;
+}
+
 .player-card {
   display: grid;
   grid-template-columns: 0.6fr 2fr 2fr minmax(400px, 1.5fr);
@@ -1735,7 +1209,7 @@ export default {
 }
 
 .player-card:hover {
-  border: 1px solid var(--color-border-semi-soft);
+  border-color: var(--color-border-semi-soft);
   background: rgba(74, 111, 165, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -1743,17 +1217,35 @@ export default {
 .player-card:nth-child(odd) {
   background: rgba(255, 255, 255, 0.05);
 }
-
 .player-card:nth-child(even) {
   background: rgba(255, 255, 255, 0.08);
 }
-
-.player-card:nth-child(odd):hover {
+.player-card:nth-child(odd):hover,
+.player-card:nth-child(even):hover {
   background: rgba(74, 111, 165, 0.2);
 }
 
-.player-card:nth-child(even):hover {
-  background: rgba(74, 111, 165, 0.2);
+.player-card.min-mode {
+  padding: 0.2rem 0.4rem 0.2rem 0.4rem;
+  gap: 1rem;
+}
+
+.ranks-section {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.player-ranks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rank-value {
+  color: var(--color-text);
+  font-weight: bold;
+  margin-left: 4px;
 }
 
 .player-info-section {
@@ -1772,6 +1264,10 @@ export default {
   text-decoration: none;
   color: inherit;
   width: 100%;
+}
+
+.player-card.min-mode .player-link {
+  gap: 0.5rem;
 }
 
 .player-avatar-large {
@@ -1811,6 +1307,11 @@ export default {
   max-width: 250px;
 }
 
+.player-card.min-mode .player-name-large {
+  font-size: 0.9rem;
+  width: auto;
+}
+
 .player-country {
   display: flex;
   align-items: center;
@@ -1822,24 +1323,6 @@ export default {
 .flag-icon-large {
   width: 18px;
   height: auto;
-}
-
-.ranks-section {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-}
-
-.player-ranks {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.rank-value {
-  color: var(--color-text);
-  font-weight: bold;
-  margin-left: 4px;
 }
 
 .map-info-section {
@@ -1860,12 +1343,13 @@ export default {
 .map-info-section::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.3);
   border-radius: inherit;
+}
+
+.player-card.min-mode .map-info-section {
+  padding-left: 1rem;
 }
 
 .player-card.min-mode .map-info-section::before {
@@ -1880,10 +1364,20 @@ export default {
   z-index: 1;
 }
 
+.map-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .map-name-large {
   font-size: 1.1rem;
   font-weight: bold;
   color: var(--color-text-clickable);
+}
+
+.player-card.min-mode .map-name-large {
+  font-size: 0.85rem;
 }
 
 .map-class {
@@ -1904,7 +1398,17 @@ export default {
 .class-icon-medium.dual-icon {
   width: 32px;
   height: 32px;
-  padding: 4px;
+}
+
+.player-card.min-mode .class-icon-medium {
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+}
+
+.player-card.min-mode .class-icon-medium.dual-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .server-info-section {
@@ -1919,6 +1423,7 @@ export default {
 .player-card.min-mode .server-info-section {
   flex-direction: row;
   gap: 1rem;
+  padding-left: 1rem;
 }
 
 .server-name-large {
@@ -1932,49 +1437,86 @@ export default {
   width: 100%;
 }
 
-.player-card.min-mode {
-  padding: 0.2rem 0.4rem;
-  padding-right: 3.2px;
-  gap: 1rem;
-  border-color: var(--color-border-soft);
+.player-card.min-mode .server-name-large {
+  font-size: 0.75rem;
 }
 
-.player-card.min-mode:hover {
-  border-color: var(--color-border-semi-soft);
+.server-info-section .global-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
 }
 
-.player-card.min-mode .player-link {
-  gap: 0.5rem;
+.player-card.min-mode .global-btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
 }
 
-.player-card.min-mode .player-name-large {
-  width: auto;
-}
-
-.player-card.min-mode .map-info-section {
-  padding-left: 1rem;
-}
-
-.player-card.min-mode .server-info-section {
-  padding-left: 1rem;
-}
-
-.map-name-row {
+.player-card.min-mode .rank-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
 }
 
-.player-card.min-mode .class-icon-medium {
-  width: 24px;
-  height: 24px;
-  padding: 3px;
+.player-card.min-mode .rank-value {
+  font-size: 1rem;
 }
 
-.player-card.min-mode .class-icon-medium.dual-icon {
-  width: 22px;
-  height: 22px;
-  padding: 3px;
+.player-card.min-mode .class-icon-small {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1400px) {
+  .player-card:not(.min-mode) {
+    grid-template-columns: 0.6fr 1.8fr 1.8fr 1.8fr;
+  }
+
+  .player-avatar-large {
+    width: 40px;
+    height: 40px;
+  }
+
+  .player-name-large {
+    font-size: 1rem;
+    max-width: 160px;
+  }
+
+  .player-country {
+    font-size: 0.8rem;
+  }
+
+  .map-name-large {
+    font-size: 0.95rem;
+  }
+
+  .class-icon-medium {
+    width: 28px;
+    height: 28px;
+  }
+
+  .class-icon-medium.dual-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .server-name-large {
+    font-size: 0.8rem;
+  }
+
+  .player-info-section {
+    padding-left: 1rem;
+  }
+  .map-info-section {
+    padding-left: 1rem;
+  }
+}
+
+@media (max-width: 1199px) {
+  .player-name-large {
+    max-width: 130px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -2008,6 +1550,7 @@ export default {
   }
 
   .player-info-section {
+    border-right: none;
     border-bottom: 1px solid var(--color-border-soft);
     padding-bottom: 0.8rem;
   }
@@ -2015,8 +1558,7 @@ export default {
   .player-card.min-mode .player-info-section {
     border-bottom: none;
     border-right: 1px solid var(--color-border-soft);
-    padding: 0;
-    padding-right: 0.5rem;
+    padding: 0 0.5rem 0 0;
   }
 
   .map-info-section {
@@ -2029,19 +1571,13 @@ export default {
   .player-card.min-mode .map-info-section {
     border-bottom: none;
     flex-direction: row;
-    padding: 0;
-    padding-right: 0.5rem;
+    padding: 0 0.5rem 0 0;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .player-link {
     gap: 0.5rem;
-  }
-
-  .player-details {
-    align-items: flex-start;
   }
 
   .player-card.min-mode .player-details {
@@ -2050,19 +1586,10 @@ export default {
     gap: 0.3rem;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .player-card.min-mode .player-country {
     display: none;
-  }
-
-  .map-details {
-    align-items: flex-start;
-  }
-
-  .player-card.min-mode .map-details {
-    align-items: flex-start;
   }
 
   .server-info-section {
@@ -2072,73 +1599,78 @@ export default {
     padding-top: 0.5rem;
   }
 
-  .player-card.min-mode .server-info-section {
-    display: none;
-  }
-
   .server-name-large {
     text-align: left;
   }
 
+  .player-card.min-mode .server-info-section {
+    display: none;
+  }
   .player-card.min-mode .server-name-large {
     display: none;
   }
 }
 
-.player-card.min-mode .player-name-large {
-  font-size: 0.9rem;
-}
+@media (max-width: 767.98px) {
+  .player-card.min-mode {
+    grid-template-columns: 65px minmax(100px, 150px) minmax(110px, auto) auto;
+    gap: 0.5rem;
+  }
 
-.player-card.min-mode .map-name-large {
-  font-size: 0.85rem;
-}
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto 2rem;
+    border-radius: 12px;
+  }
 
-.player-card.min-mode .server-name-large {
-  font-size: 0.75rem;
-}
+  .toggle-btn {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
 
-.player-card.min-mode .rank-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  padding: 0.2rem 0.4rem;
-}
+  .region-buttons,
+  .server-type-buttons {
+    justify-content: center;
+  }
 
-.player-card.min-mode .rank-value {
-  font-size: 1rem;
-}
+  .server-type-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
 
-.player-card.min-mode .class-icon-small {
-  width: 16px;
-  height: 16px;
-}
+  .table-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
 
-.player-card.min-mode .global-btn {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
-}
+  .table-responsive {
+    display: block;
+    overflow-x: auto;
+  }
 
-.server-info-section .global-btn {
-  padding: 0.35rem 0.8rem;
-  font-size: 0.85rem;
-}
+  .table-dark td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-.player-card.min-mode .server-info-section .global-btn {
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-}
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
 
-.players-cards-container.min-mode {
-  gap: 0.3rem;
-}
+  .table-header-icon {
+    font-size: 1.5rem;
+  }
 
-.min-mode-checkbox.mobile-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
 
-.min-mode-checkbox.mobile-disabled input[type="checkbox"] {
-  cursor: not-allowed;
+  .player-item {
+    padding: 0.75rem;
+  }
 }
 </style>

@@ -328,7 +328,6 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
-  max-width: 418px;
 }
 
 .player-card::after {
@@ -465,7 +464,7 @@ export default {
 }
 
 .points-label {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
@@ -507,7 +506,44 @@ export default {
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1060px) {
+  .player-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .player-rank {
+    font-size: 1.3rem;
+    min-width: 35px;
+    margin-right: 12px;
+  }
+
+  .player-name {
+    font-size: 1rem;
+  }
+
+  .player-card {
+    padding: 12px 16px;
+  }
+
+  .class-section {
+    padding: 20px 15px;
+  }
+
+  .points-value,
+  .points-label {
+    font-size: 0.95rem;
+  }
+  .player-card .country {
+    font-size: 0.8rem;
+  }
+
+  .player-card .flag-icon {
+    width: 16px;
+  }
+}
+
+@media (max-width: 875px) {
   .top-players-grid {
     grid-template-columns: 1fr;
     gap: 30px;
@@ -518,8 +554,20 @@ export default {
   }
 
   .player-card {
-    max-width: none;
     padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .player-info {
+    flex: unset;
+    min-width: 200px;
+  }
+
+  .player-avatar {
+    width: 60px;
+    height: 60px;
   }
 
   .player-rank {
@@ -532,7 +580,16 @@ export default {
     font-size: 1.1rem;
   }
 
-  .points-value {
+  .player-card .country {
+    font-size: 0.8rem;
+  }
+
+  .player-card .flag-icon {
+    width: 18px;
+  }
+
+  .points-value,
+  .points-label {
     font-size: 1rem;
   }
 
@@ -548,6 +605,44 @@ export default {
 
   .section-title {
     font-size: 2rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .period-btn {
+    font-size: 0.8rem;
+    padding: 10px 20px;
+  }
+
+  .section-subtitle,
+  .player-card .player-rank {
+    font-size: 1.4rem;
+  }
+
+  .player-avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .player-card .player-name {
+    font-size: 1rem;
+  }
+
+  .player-card .points-gained .points-value,
+  .player-card .points-gained .points-label {
+    font-size: 0.9rem;
+  }
+
+  .player-card .country {
+    font-size: 0.7rem;
+  }
+
+  .player-card .flag-icon {
+    width: 15px;
+  }
+
+  .player-info {
+    min-width: 150px;
   }
 }
 

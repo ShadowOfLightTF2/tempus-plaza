@@ -341,7 +341,7 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 0 15px;
-  margin-top: 5px;
+  margin: 10px 0;
 }
 
 .time-range-buttons {
@@ -365,13 +365,9 @@ export default {
   font-weight: 500;
   font-size: 0.9rem;
   min-width: 0;
-}
-
-@media (max-width: 1024px) {
-  .global-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-  }
+  /* Prevent text from wrapping or overflowing */
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .global-btn:hover {
@@ -383,5 +379,50 @@ export default {
   background: rgba(74, 111, 165, 0.5);
   border-color: var(--color-primary);
   color: white;
+}
+
+@media (max-width: 1024px) {
+  .global-btn {
+    padding: 0.5rem 0;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .time-range-buttons {
+    gap: 0.3rem;
+    padding: 5px 8px 15px 8px;
+  }
+
+  .global-btn {
+    padding: 0.4rem 0;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .time-range-buttons {
+    gap: 0.2rem;
+    padding: 5px 5px 15px 5px;
+  }
+
+  .global-btn {
+    padding: 0.35rem 0;
+    font-size: 0.7rem;
+    border-width: 1px;
+  }
+}
+
+@media (max-width: 768px) {
+  .time-range-buttons {
+    gap: 0.5rem;
+    padding: 5px 15px 15px 15px;
+  }
+
+  .global-btn {
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    border-width: 2px;
+  }
 }
 </style>

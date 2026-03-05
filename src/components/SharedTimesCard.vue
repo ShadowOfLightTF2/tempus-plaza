@@ -43,7 +43,7 @@
                   alt="Avatar"
                   class="rounded me-2 shared-avatar"
                 />
-                <span class="fw-semibold" style="font-size: 0.95rem">
+                <span class="fw-semibold player-name">
                   {{ sharedPlayer.playerName }}
                 </span>
               </div>
@@ -93,7 +93,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .stat-block {
   background: rgba(255, 255, 255, 0.05);
@@ -101,7 +100,6 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   min-height: 345px;
 }
-
 .card-header {
   margin-bottom: 0;
   border-bottom: none;
@@ -111,7 +109,6 @@ export default {
   padding: 10px;
   padding-bottom: 0;
 }
-
 .section-header {
   color: var(--color-text);
   font-size: 20px;
@@ -119,22 +116,19 @@ export default {
   text-align: center;
   margin-bottom: 0;
 }
-
 .card-body {
   padding: 10px;
   padding-bottom: 0;
 }
-
 .shared-card-row {
   padding: 5px 5px 5px 5px;
 }
-
 .shared-avatar {
   width: 25px;
   height: 25px;
   border: 2px solid var(--color-primary);
+  flex-shrink: 0;
 }
-
 .shared-row {
   border: 1px solid var(--color-border-soft);
   background: rgba(255, 255, 255, 0.05);
@@ -143,7 +137,6 @@ export default {
   cursor: pointer;
   transition: transform 0.25s ease;
 }
-
 .shared-row:hover {
   background: linear-gradient(
     to bottom,
@@ -151,15 +144,108 @@ export default {
     rgba(74, 111, 165, 0.1)
   );
 }
-
 .shared-row-name {
   white-space: nowrap;
   overflow: hidden;
   width: 80%;
 }
-
 .shared-count {
   color: var(--color-text);
   font-weight: bold;
+}
+.player-name {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1400px) {
+  .stat-block {
+    min-height: 310px;
+  }
+  .section-header {
+    font-size: 17px;
+  }
+  .player-name {
+    font-size: 0.82rem;
+  }
+  .shared-count {
+    font-size: 0.82rem;
+  }
+  .shared-avatar {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .stat-block {
+    min-height: 275px;
+  }
+  .section-header {
+    font-size: 15px;
+  }
+  .player-name {
+    font-size: 0.72rem;
+  }
+  .shared-count {
+    font-size: 0.72rem;
+  }
+  .shared-avatar {
+    width: 18px;
+    height: 18px;
+  }
+  .shared-row {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .stat-block {
+    min-height: unset;
+  }
+  .section-header {
+    font-size: 13px;
+  }
+  .player-name {
+    font-size: 0.65rem;
+  }
+  .shared-count {
+    font-size: 0.65rem;
+  }
+  .shared-avatar {
+    width: 16px;
+    height: 16px;
+  }
+  .shared-card-row {
+    padding: 3px;
+  }
+}
+
+@media (max-width: 767px) {
+  .stat-block {
+    min-height: unset;
+  }
+  .section-header {
+    font-size: 20px;
+  }
+  .player-name {
+    font-size: 0.95rem;
+  }
+  .shared-count {
+    font-size: 0.95rem;
+  }
+  .shared-avatar {
+    width: 25px;
+    height: 25px;
+  }
+  .shared-row {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  .shared-card-row {
+    padding: 5px;
+  }
 }
 </style>

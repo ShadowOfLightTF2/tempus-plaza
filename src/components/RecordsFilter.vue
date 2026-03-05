@@ -14,7 +14,7 @@
               :class="{
                 active: filterOptions.selectedClasses.includes('soldier'),
               }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Soldier
             </button>
@@ -23,7 +23,7 @@
               :class="{
                 active: filterOptions.selectedClasses.includes('demoman'),
               }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Demoman
             </button>
@@ -36,7 +36,7 @@
             <button
               @click="toggleFilter('type', 'map')"
               :class="{ active: filterOptions.selectedTypes.includes('map') }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Map
             </button>
@@ -45,14 +45,14 @@
               :class="{
                 active: filterOptions.selectedTypes.includes('course'),
               }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Course
             </button>
             <button
               @click="toggleFilter('type', 'bonus')"
               :class="{ active: filterOptions.selectedTypes.includes('bonus') }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Bonus
             </button>
@@ -110,14 +110,14 @@
               :class="{
                 active: filterOptions.selectedGainLoss.includes('lost'),
               }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Gained
             </button>
             <button
               @click="toggleUnchangedFilter"
               :class="{ active: filterOptions.selectedUnchanged }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Unchanged
             </button>
@@ -126,7 +126,7 @@
               :class="{
                 active: filterOptions.selectedGainLoss.includes('gained'),
               }"
-              class="global-btn"
+              class="global-btn filter-btn"
             >
               Lost
             </button>
@@ -139,7 +139,7 @@
           <button
             type="button"
             @click="$emit('clear-filters')"
-            class="btn btn-secondary"
+            class="btn btn-secondary clear-btn"
           >
             Clear filters
           </button>
@@ -377,5 +377,128 @@ export default {
     rgba(74, 111, 165, 0.5),
     rgba(74, 111, 165, 0.3)
   ) !important;
+}
+
+@media (max-width: 1400px) {
+  .filter-columns {
+    gap: 28px;
+  }
+  .filter-title {
+    font-size: 13px;
+  }
+  .filter-button {
+    font-size: 12px;
+    padding: 6px 12px;
+    margin: 0 2px;
+  }
+  .group-badge {
+    font-size: 11px;
+    padding: 3px 7px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  .filter-actions {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .filter-columns {
+    gap: 20px;
+  }
+  .filter-title {
+    font-size: 12px;
+  }
+  .filter-button {
+    font-size: 12px;
+    padding: 6px 11px;
+    margin: 0 2px;
+  }
+  .group-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+    min-width: 26px;
+  }
+  .class-filter-container,
+  .type-filter-container,
+  .gain-loss-filter-container,
+  .group-filters {
+    gap: 6px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  .clear-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 992px) {
+  .filter-section {
+    padding: 10px;
+  }
+  .filter-content {
+    padding: 10px;
+  }
+  .filter-columns {
+    gap: 14px;
+  }
+  .filter-title {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  .filter-button {
+    font-size: 10px;
+    padding: 4px 8px;
+    margin: 0 1px;
+  }
+  .group-badge {
+    font-size: 9px;
+    padding: 2px 5px;
+    min-width: 22px;
+  }
+  .class-filter-container,
+  .type-filter-container,
+  .gain-loss-filter-container,
+  .group-filters {
+    gap: 5px;
+  }
+  .filter-btn {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  .filter-actions {
+    margin-top: 15px;
+  }
+  .clear-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-title {
+    font-size: 14px;
+  }
+  .filter-button {
+    font-size: 13px;
+    padding: 5px 9px;
+    margin: 0 1px;
+  }
+  .filter-btn {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+  .clear-btn {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+  .filter-actions {
+    margin-top: 20px;
+  }
 }
 </style>

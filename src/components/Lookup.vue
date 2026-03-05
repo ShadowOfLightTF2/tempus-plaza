@@ -1247,7 +1247,6 @@ export default {
       }
 
       try {
-        // Fetch both records and map info
         const [recordsResponse, infoResponse] = await Promise.all([
           fetch(`${API_BASE_URL}/maps/${mapId}/all-records`),
           fetch(`${API_BASE_URL}/maps/${mapId}/all-info`),
@@ -2288,7 +2287,7 @@ export default {
 .rating-filters {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
 }
 
@@ -2541,7 +2540,6 @@ export default {
     gap: 8px;
   }
 
-  /* Fix both search sections to center properly */
   .search-section {
     width: 100%;
     max-width: 100%;
@@ -2574,6 +2572,7 @@ export default {
     padding: 0;
     display: flex;
     justify-content: center;
+    margin-bottom: 20px;
   }
 
   .search-records-container .search-input-wrapper {
@@ -2881,7 +2880,101 @@ export default {
   margin-top: 2px;
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
+  .table-dark th {
+    padding: 12px 6px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .table-dark td {
+    padding: 5px 6px;
+    font-size: 13px;
+  }
+
+  .class-icon {
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+  }
+
+  .lookup-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .lookup-player-name {
+    font-size: 1.5rem;
+  }
+
+  .lookup-flag-icon {
+    width: 24px;
+  }
+
+  .lookup-stat-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 1075px) {
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table-dark th {
+    padding: 10px 5px;
+    font-size: 11px;
+  }
+
+  .table-dark td {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .lookup-banner-stats {
+    gap: 8px;
+  }
+
+  .lookup-avatar {
+    width: 65px;
+    height: 65px;
+  }
+
+  .lookup-player-name {
+    font-size: 1.5rem;
+  }
+
+  .lookup-flag-icon {
+    width: 18px;
+  }
+
+  .lookup-stat-value {
+    font-size: 1.25rem;
+  }
+
+  .lookup-stat-card {
+    min-width: 110px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .table {
+    margin-top: 20px;
+  }
+
+  .table-responsive {
+    border: none;
+  }
+
+  .table-container {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .lookup-banner-content {
     flex-direction: column;
     text-align: center;
@@ -2889,12 +2982,19 @@ export default {
   }
 
   .lookup-banner-left {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    gap: 16px;
   }
 
   .lookup-player-info {
-    align-items: center;
+    align-items: flex-start;
+  }
+
+  .lookup-player-name {
+    font-size: 1.5rem;
   }
 
   .lookup-banner-stats {
@@ -2904,22 +3004,7 @@ export default {
   }
 
   .lookup-stat-card {
-    min-width: 100px;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .lookup-player-name {
-    font-size: 1.25rem;
-  }
-
-  .lookup-avatar {
-    width: 64px;
-    height: 64px;
-  }
-
-  .lookup-stat-card {
-    min-width: 90px;
+    min-width: 120px;
     padding: 10px 16px;
   }
 
@@ -2927,6 +3012,7 @@ export default {
     font-size: 1.25rem;
   }
 }
+
 .lookup-map-banner {
   width: 100%;
   max-width: 1000px;

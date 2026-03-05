@@ -128,7 +128,7 @@
                   </div>
                   <div class="text-end align-items-center record-time-detail">
                     <div class="d-flex flex-column align-items-end">
-                      <div class="d-flex align-items-center gap-2">
+                      <div class="d-flex align-items-center gap-1">
                         <span
                           class="record-detail record-duration"
                           :class="record.rankClass"
@@ -267,7 +267,7 @@
               <button
                 v-if="shouldShowNextButton"
                 @click="nextPage"
-                class="btn btn-dark global-btn"
+                class="btn btn-dark global-btn next-btn"
               >
                 Next
               </button>
@@ -702,7 +702,7 @@ export default {
   white-space: nowrap;
 }
 .record-rank {
-  min-width: 40px;
+  min-width: 35px;
   text-align: right;
   white-space: nowrap;
 }
@@ -861,16 +861,10 @@ export default {
   padding: 8px;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   .record-time-detail {
     min-width: 0;
     flex-shrink: 1;
-  }
-  .placement-change-indicator {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    min-width: 0;
   }
   .placement-arrows {
     font-size: 0.8rem;
@@ -898,17 +892,119 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 14px;
   }
   .record-time-detail .d-flex.flex-column {
     align-items: flex-end;
     min-width: 0;
   }
+  .class-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .allruns-button-container,
+  .filter-button-container {
+    padding: 0 5px;
+  }
+  .global-btn {
+    font-size: 0.85rem;
+    padding: 5px 7px;
+    max-width: 120px;
+  }
+  .pagination-controls .global-btn,
+  .allruns-button-container .global-btn,
+  .filter-button-container .global-btn {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 992px) {
+  .record-map {
+    font-size: 11px;
+  }
+  .record-duration,
+  .record-rank,
+  .record-detail.record-date {
+    font-size: 0.65rem;
+  }
+  .class-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .list-group-item.record-item {
+    padding: 8px 10px;
+  }
+  .points-change {
+    font-size: 0.65rem;
+  }
+  .placement-arrows {
+    font-size: 0.7rem;
+  }
+  .toggle-btn {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+  .global-btn {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+  .card-header.tabs-header {
+    padding: 5px;
+  }
+  .allruns-button-container,
+  .filter-button-container {
+    padding: 0 2px;
+  }
+  .global-btn {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    max-width: 100px;
+  }
+  .pagination-controls .global-btn,
+  .allruns-button-container .global-btn,
+  .filter-button-container .global-btn {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 768px) {
   .record-map {
     font-size: 14px;
+  }
+  .record-duration,
+  .record-rank,
+  .record-detail.record-date {
+    font-size: 0.75rem;
   }
   .class-icon {
     width: 30px;
     height: 30px;
+  }
+  .points-change {
+    font-size: 0.75rem;
+  }
+  .placement-arrows {
+    font-size: 0.8rem;
+  }
+  .toggle-btn {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  .global-btn {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  .card-header.tabs-header {
+    padding: 14px;
+  }
+
+  .pagination-controls .global-btn,
+  .allruns-button-container .global-btn,
+  .filter-button-container .global-btn {
+    font-size: 0.9rem;
+    padding: 6px 8px;
   }
 }
 
@@ -921,11 +1017,39 @@ export default {
   .record-map,
   .record-duration,
   .record-rank {
-    font-size: 12px;
+    font-size: 13px;
+  }
+  .record-map {
+    color: var(--color-text-clickable);
+    font-size: 15px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow-x: scroll;
+    text-overflow: unset;
+    scrollbar-width: none;
+    cursor: grab;
+    min-width: 0;
+    max-width: 180px;
+  }
+  .record-map::-webkit-scrollbar {
+    display: none;
+  }
+  .record-class-map {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
   .class-icon {
-    width: 24px;
-    height: 24px;
+    width: 25px;
+    height: 25px;
+  }
+  .pagination-controls .global-btn,
+  .allruns-button-container .global-btn,
+  .filter-button-container .global-btn {
+    font-size: 0.8rem;
+    padding: 5px 7px;
   }
 }
 </style>

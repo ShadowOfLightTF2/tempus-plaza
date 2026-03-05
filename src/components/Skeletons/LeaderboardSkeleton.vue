@@ -10,9 +10,7 @@
       </div>
     </div>
     <hr class="row-divider" style="width: 100%" />
-    <div
-      class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-    >
+    <div class="tables-wrapper">
       <div
         v-for="tableClass in ['soldier', 'demoman']"
         :key="tableClass"
@@ -31,6 +29,9 @@
                   class="skeleton-line shimmer"
                   style="width: 60px; height: 13px"
                 />
+              </div>
+              <div class="group-cutoffs">
+                <div v-for="g in 4" :key="g" class="skeleton-cutoff shimmer" />
               </div>
             </div>
           </div>
@@ -150,6 +151,7 @@ export default {
   height: 40px;
   border-radius: 25px;
 }
+
 .row-divider {
   border: none;
   height: 2px;
@@ -208,6 +210,7 @@ export default {
 }
 .header-text {
   margin-left: 10px;
+  flex: 1;
 }
 .skeleton-icon {
   width: 56px;
@@ -217,6 +220,18 @@ export default {
 }
 .skeleton-line {
   border-radius: 4px;
+}
+
+.group-cutoffs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+.skeleton-cutoff {
+  width: 45px;
+  height: 48px;
+  border-radius: 8px;
 }
 
 .table-responsive {
@@ -275,11 +290,70 @@ export default {
   width: 100%;
 }
 
+@media (max-width: 1100px) and (min-width: 768px) {
+  .tables-wrapper {
+    gap: 16px;
+    overflow-x: hidden;
+  }
+  .table-container {
+    min-width: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+  }
+  .table-dark {
+    min-width: unset;
+    width: 100%;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .group-cutoffs {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .skeleton-cutoff {
+    width: 38px;
+    height: 42px;
+  }
+  .skeleton-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .table-dark th,
+  .table-dark td {
+    font-size: 12px;
+  }
+  .name-column {
+    max-width: 120px !important;
+  }
+}
+
 @media (max-width: 767.98px) {
   .tables-wrapper {
     flex-direction: column;
     align-items: center;
-    width: 115%;
+    gap: 24px;
+  }
+  .table-container {
+    width: 100%;
+  }
+  .table-dark {
+    min-width: unset;
+  }
+  .table-dark th,
+  .table-dark td {
+    font-size: 12px;
+  }
+  .group-cutoffs {
+    gap: 4px;
+  }
+  .skeleton-cutoff {
+    width: 40px;
+    height: 42px;
+  }
+  .name-column {
+    max-width: 0;
+    overflow: hidden;
   }
 }
 </style>

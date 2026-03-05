@@ -16,7 +16,7 @@
         </div>
         <div v-else>
           <div class="row card-row">
-            <div class="col-md-12 text-center mb-3 p-1">
+            <div class="col-12 text-center mb-3 p-1">
               <div class="stat-item">
                 <h4 class="card-title">Completion</h4>
                 <p class="card-text player-stats">
@@ -24,7 +24,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-6 text-center mb-3 p-1">
+            <div class="col-6 text-center mb-3 p-1">
               <div class="stat-item">
                 <h6 class="card-title">World records</h6>
                 <p class="card-text player-stats">
@@ -32,7 +32,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-6 text-center mb-3 p-1">
+            <div class="col-6 text-center mb-3 p-1">
               <div class="stat-item">
                 <h6 class="card-title">Top times</h6>
                 <p class="card-text player-stats">
@@ -40,7 +40,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-3 text-center p-1">
+            <div class="col-3 text-center p-1">
               <div class="stat-item">
                 <h6 class="card-title">G1</h6>
                 <p class="card-text player-stats">
@@ -48,7 +48,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-3 text-center p-1">
+            <div class="col-3 text-center p-1">
               <div class="stat-item">
                 <h6 class="card-title">G2</h6>
                 <p class="card-text player-stats">
@@ -56,7 +56,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-3 text-center p-1">
+            <div class="col-3 text-center p-1">
               <div class="stat-item">
                 <h6 class="card-title">G3</h6>
                 <p class="card-text player-stats">
@@ -64,7 +64,7 @@
                 </p>
               </div>
             </div>
-            <div class="col-md-3 text-center p-1">
+            <div class="col-3 text-center p-1">
               <div class="stat-item">
                 <h6 class="card-title">G4</h6>
                 <p class="card-text player-stats">
@@ -249,6 +249,124 @@ export default {
 
   .right-nav-bar {
     right: 1px;
+  }
+
+  .stat-block .card-text {
+    font-size: 1.2rem;
+  }
+
+  .section-header {
+    font-size: 17px;
+  }
+
+  .stat-type-label {
+    font-size: 0.9rem;
+  }
+
+  .stat-block .card-title {
+    font-size: 0.85rem;
+  }
+
+  .stat-item {
+    padding: 8px 6px;
+  }
+
+  .stat-block {
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .stat-block {
+    min-height: 290px;
+  }
+
+  .stat-block .card-text {
+    font-size: 1rem;
+  }
+
+  .section-header {
+    font-size: 15px;
+  }
+
+  .stat-type-label {
+    font-size: 0.8rem;
+  }
+
+  .stat-block .card-title {
+    font-size: 0.75rem;
+  }
+
+  .stat-item {
+    padding: 6px 4px;
+  }
+
+  .card-row {
+    padding: 0px 6px 8px 6px;
+  }
+}
+
+@media (max-width: 991px) {
+  .stat-block .card-text {
+    font-size: 0.85rem;
+  }
+
+  .section-header {
+    font-size: 13px;
+  }
+
+  .stat-type-label {
+    font-size: 0.72rem;
+  }
+
+  .stat-block .card-title {
+    font-size: 0.65rem;
+  }
+
+  .stat-item {
+    padding: 5px 3px;
+  }
+
+  .card-row {
+    padding: 0px 4px 6px 4px;
+  }
+
+  .stat-block {
+    min-height: unset;
+  }
+
+  .nav-bar {
+    width: 22px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .stat-block .card-text {
+    font-size: 1.4rem;
+  }
+  .section-header {
+    font-size: 20px;
+  }
+  .stat-type-label {
+    font-size: 1rem;
+  }
+  .stat-block .card-title {
+    font-size: 1rem;
+  }
+  .stat-item {
+    padding: 10px;
+  }
+  .card-row {
+    padding: 0px 15px 10px 15px;
+  }
+  .stat-block {
+    min-height: unset;
+    min-width: 250px;
+  }
+  .nav-bar {
+    width: 30px;
+    height: 50px;
   }
 }
 </style>

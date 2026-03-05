@@ -18,35 +18,22 @@
         <div class="table-container-wrapper">
           <div class="button-group">
             <button
-              :class="{ active: currentView === 'worldrecords' }"
-              @click="switchView('worldrecords')"
+              v-for="v in views"
+              :key="v.key"
+              :class="{ active: currentView === v.key }"
+              @click="switchView(v.key)"
               class="toggle-btn btn btn-dark update-button"
             >
-              <span class="btn-text">World Records</span>
-            </button>
-            <button
-              :class="{ active: currentView === 'toptimes' }"
-              @click="switchView('toptimes')"
-              class="toggle-btn btn btn-dark update-button"
-            >
-              <span class="btn-text">Top Times</span>
-            </button>
-            <button
-              :class="{ active: currentView === 'group1s' }"
-              @click="switchView('group1s')"
-              class="toggle-btn btn btn-dark update-button"
-            >
-              <span class="btn-text">Group 1s</span>
+              <span class="btn-text">{{ v.label }}</span>
             </button>
           </div>
           <ActivitySkeleton v-if="loading" />
           <div v-else class="table-container">
-            <!-- ─── WORLD RECORDS ─── -->
-            <div v-if="currentView === 'worldrecords'" class="activity-cards">
+            <div class="activity-cards">
               <div class="table-header-content">
-                <div class="table-header-icon">🏆</div>
+                <div class="table-header-icon">{{ activeView.icon }}</div>
                 <div class="table-header-text">
-                  <h3 class="table-header-title">Latest World Records</h3>
+                  <h3 class="table-header-title">{{ activeView.title }}</h3>
                 </div>
                 <div class="header-right">
                   <div class="filter-container">
@@ -79,33 +66,15 @@
                       <h6 class="filter-title text-light mb-2">Type</h6>
                       <div class="type-filter-container">
                         <button
-                          @click="toggleTypeFilter('map')"
+                          v-for="t in ['map', 'course', 'bonus']"
+                          :key="t"
+                          @click="toggleTypeFilter(t)"
                           :class="{
-                            active: filterOptions.selectedTypes.includes('map'),
+                            active: filterOptions.selectedTypes.includes(t),
                           }"
                           class="global-btn"
                         >
-                          Map
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('course')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('course'),
-                          }"
-                          class="global-btn"
-                        >
-                          Course
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('bonus')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('bonus'),
-                          }"
-                          class="global-btn"
-                        >
-                          Bonus
+                          {{ t.charAt(0).toUpperCase() + t.slice(1) }}
                         </button>
                       </div>
                     </div>
@@ -143,199 +112,9 @@
                   </div>
                 </div>
               </div>
-              <div
-                v-for="group in groupedWorldRecordsData"
-                :key="group.label"
-                class="day-group"
-              >
-                <div class="day-label">{{ group.label }}</div>
-                <div class="activity-cards-container">
-                  <div
-                    v-for="record in group.records"
-                    :key="record.id"
-                    class="activity-card fade-in"
-                  >
-                    <div class="activity-player-section">
-                      <SmartLink
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: record.player_id },
-                        }"
-                        class="player-link"
-                      >
-                        <img
-                          :src="record.avatar"
-                          alt="Avatar"
-                          class="player-avatar-large"
-                          onerror="this.src='/avatars/golly.jpg'"
-                        />
-                        <div class="player-details">
-                          <div class="player-name-large">
-                            {{ record.player }}
-                          </div>
-                        </div>
-                      </SmartLink>
-                      <img
-                        :src="`/icons/${record.class}.png`"
-                        alt="Class"
-                        class="class-icon-row"
-                      />
-                    </div>
-                    <SmartLink
-                      :to="{
-                        name: 'MapPage',
-                        params: { mapId: record.map_id },
-                      }"
-                      class="activity-map-section"
-                    >
-                      <div class="map-details">
-                        <div class="map-name-row">
-                          <HoverPreview :map-name="record.map">
-                            <span class="map-name-large">{{ record.map }}</span>
-                          </HoverPreview>
-                          <span
-                            v-if="record.recordType !== 'map'"
-                            class="map-type-badge"
-                          >
-                            <template v-if="record.recordType === 'course'"
-                              >🚩 C{{ record.index }}</template
-                            >
-                            <template v-else-if="record.recordType === 'bonus'"
-                              >⭐ B{{ record.index }}</template
-                            >
-                          </span>
-                        </div>
-                      </div>
-                    </SmartLink>
-                    <div class="activity-time-section">
-                      <div class="time-display">
-                        {{ record.time }}
-                        <span
-                          v-if="record.old_duration"
-                          class="improvement-text"
-                        >
-                          WR
-                          {{
-                            getImprovementText(
-                              record.duration,
-                              record.old_duration,
-                            )
-                          }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="activity-timeago-section">
-                      {{ getTimeAgo(record.date) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- ─── TOP TIMES ─── -->
-            <div v-if="currentView === 'toptimes'" class="activity-cards">
-              <div class="table-header-content">
-                <div class="table-header-icon">🥇</div>
-                <div class="table-header-text">
-                  <h3 class="table-header-title">Latest Top Times</h3>
-                </div>
-                <div class="header-right">
-                  <div class="filter-container">
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">Class</h6>
-                      <div class="class-filter-container">
-                        <button
-                          @click="toggleClassFilter('soldier')"
-                          :class="{
-                            active:
-                              filterOptions.selectedClasses.includes('soldier'),
-                          }"
-                          class="global-btn"
-                        >
-                          Soldier
-                        </button>
-                        <button
-                          @click="toggleClassFilter('demoman')"
-                          :class="{
-                            active:
-                              filterOptions.selectedClasses.includes('demoman'),
-                          }"
-                          class="global-btn"
-                        >
-                          Demoman
-                        </button>
-                      </div>
-                    </div>
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">Type</h6>
-                      <div class="type-filter-container">
-                        <button
-                          @click="toggleTypeFilter('map')"
-                          :class="{
-                            active: filterOptions.selectedTypes.includes('map'),
-                          }"
-                          class="global-btn"
-                        >
-                          Map
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('course')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('course'),
-                          }"
-                          class="global-btn"
-                        >
-                          Course
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('bonus')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('bonus'),
-                          }"
-                          class="global-btn"
-                        >
-                          Bonus
-                        </button>
-                      </div>
-                    </div>
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">
-                        Intended Class
-                      </h6>
-                      <div class="class-filter-container">
-                        <button
-                          @click="toggleIntendedClassFilter('soldier')"
-                          :class="{
-                            active:
-                              filterOptions.selectedIntendedClasses.includes(
-                                'soldier',
-                              ),
-                          }"
-                          class="global-btn"
-                        >
-                          Soldier
-                        </button>
-                        <button
-                          @click="toggleIntendedClassFilter('demoman')"
-                          :class="{
-                            active:
-                              filterOptions.selectedIntendedClasses.includes(
-                                'demoman',
-                              ),
-                          }"
-                          class="global-btn"
-                        >
-                          Demoman
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div
-                v-for="group in groupedTopTimesData"
+                v-for="group in groupedActiveData"
                 :key="group.label"
                 class="day-group"
               >
@@ -361,7 +140,7 @@
                           onerror="this.src='/avatars/golly.jpg'"
                         />
                         <div class="player-details">
-                          <div class="player-name-large">
+                          <div class="player-name-large" v-dragscroll>
                             {{ record.player }}
                           </div>
                         </div>
@@ -372,6 +151,7 @@
                         class="class-icon-row"
                       />
                     </div>
+
                     <SmartLink
                       :to="{
                         name: 'MapPage',
@@ -379,7 +159,7 @@
                       }"
                       class="activity-map-section"
                     >
-                      <div class="map-details">
+                      <div class="map-details" v-dragscroll>
                         <div class="map-name-row">
                           <HoverPreview :map-name="record.map">
                             <span class="map-name-large">{{ record.map }}</span>
@@ -398,6 +178,7 @@
                         </div>
                       </div>
                     </SmartLink>
+
                     <div class="activity-time-section">
                       <div class="rank-time-section">
                         <div class="time-display">
@@ -406,7 +187,7 @@
                             v-if="record.old_duration"
                             class="improvement-text"
                           >
-                            PR
+                            {{ activeView.improvementLabel }}
                             {{
                               getImprovementText(
                                 record.duration,
@@ -416,10 +197,12 @@
                           </span>
                         </div>
                         <div
+                          v-if="activeView.showRank"
                           class="rank-display"
                           :class="{
                             'placement-silver': record.rank === 2,
                             'placement-bronze': record.rank === 3,
+                            'rank-display-group': currentView === 'group1s',
                           }"
                         >
                           #{{ record.rank
@@ -430,206 +213,12 @@
                       </div>
                     </div>
                     <div class="activity-timeago-section">
-                      {{ getTimeAgo(record.date) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ─── GROUP 1S ─── -->
-            <div v-if="currentView === 'group1s'" class="activity-cards">
-              <div class="table-header-content">
-                <div class="table-header-icon">⏱️</div>
-                <div class="table-header-text">
-                  <h3 class="table-header-title">Latest Group 1s</h3>
-                </div>
-                <div class="header-right">
-                  <div class="filter-container">
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">Class</h6>
-                      <div class="class-filter-container">
-                        <button
-                          @click="toggleClassFilter('soldier')"
-                          :class="{
-                            active:
-                              filterOptions.selectedClasses.includes('soldier'),
-                          }"
-                          class="global-btn"
-                        >
-                          Soldier
-                        </button>
-                        <button
-                          @click="toggleClassFilter('demoman')"
-                          :class="{
-                            active:
-                              filterOptions.selectedClasses.includes('demoman'),
-                          }"
-                          class="global-btn"
-                        >
-                          Demoman
-                        </button>
-                      </div>
-                    </div>
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">Type</h6>
-                      <div class="type-filter-container">
-                        <button
-                          @click="toggleTypeFilter('map')"
-                          :class="{
-                            active: filterOptions.selectedTypes.includes('map'),
-                          }"
-                          class="global-btn"
-                        >
-                          Map
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('course')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('course'),
-                          }"
-                          class="global-btn"
-                        >
-                          Course
-                        </button>
-                        <button
-                          @click="toggleTypeFilter('bonus')"
-                          :class="{
-                            active:
-                              filterOptions.selectedTypes.includes('bonus'),
-                          }"
-                          class="global-btn"
-                        >
-                          Bonus
-                        </button>
-                      </div>
-                    </div>
-                    <div class="filter-group">
-                      <h6 class="filter-title text-light mb-2">
-                        Intended Class
-                      </h6>
-                      <div class="class-filter-container">
-                        <button
-                          @click="toggleIntendedClassFilter('soldier')"
-                          :class="{
-                            active:
-                              filterOptions.selectedIntendedClasses.includes(
-                                'soldier',
-                              ),
-                          }"
-                          class="global-btn"
-                        >
-                          Soldier
-                        </button>
-                        <button
-                          @click="toggleIntendedClassFilter('demoman')"
-                          :class="{
-                            active:
-                              filterOptions.selectedIntendedClasses.includes(
-                                'demoman',
-                              ),
-                          }"
-                          class="global-btn"
-                        >
-                          Demoman
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                v-for="group in groupedGroup1sData"
-                :key="group.label"
-                class="day-group"
-              >
-                <div class="day-label">{{ group.label }}</div>
-                <div class="activity-cards-container">
-                  <div
-                    v-for="record in group.records"
-                    :key="record.id"
-                    class="activity-card fade-in"
-                  >
-                    <div class="activity-player-section">
-                      <SmartLink
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: record.player_id },
-                        }"
-                        class="player-link"
-                      >
-                        <img
-                          :src="record.avatar"
-                          alt="Avatar"
-                          class="player-avatar-large"
-                          onerror="this.src='/avatars/golly.jpg'"
-                        />
-                        <div class="player-details">
-                          <div class="player-name-large">
-                            {{ record.player }}
-                          </div>
-                        </div>
-                      </SmartLink>
-                      <img
-                        :src="`/icons/${record.class}.png`"
-                        alt="Class"
-                        class="class-icon-row"
-                      />
-                    </div>
-                    <SmartLink
-                      :to="{
-                        name: 'MapPage',
-                        params: { mapId: record.map_id },
-                      }"
-                      class="activity-map-section"
-                    >
-                      <div class="map-details">
-                        <div class="map-name-row">
-                          <HoverPreview :map-name="record.map">
-                            <span class="map-name-large">{{ record.map }}</span>
-                          </HoverPreview>
-                          <span
-                            v-if="record.recordType !== 'map'"
-                            class="map-type-badge"
-                          >
-                            <template v-if="record.recordType === 'course'"
-                              >🚩 C{{ record.index }}</template
-                            >
-                            <template v-else-if="record.recordType === 'bonus'"
-                              >⭐ B{{ record.index }}</template
-                            >
-                          </span>
-                        </div>
-                      </div>
-                    </SmartLink>
-                    <div class="activity-time-section">
-                      <div class="rank-time-section">
-                        <div class="time-display">
-                          {{ record.time }}
-                          <span
-                            v-if="record.old_duration"
-                            class="improvement-text"
-                          >
-                            PR
-                            {{
-                              getImprovementText(
-                                record.duration,
-                                record.old_duration,
-                              )
-                            }}
-                          </span>
-                        </div>
-                        <div class="rank-display-group">
-                          #{{ record.rank
-                          }}<span v-if="record.old_rank" class="rank-change">{{
-                            getRankChange(record.rank, record.old_rank)
-                          }}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="activity-timeago-section">
-                      {{ getTimeAgo(record.date) }}
+                      <span class="timeago-long">{{
+                        getTimeAgo(record.date)
+                      }}</span>
+                      <span class="timeago-short">{{
+                        getTimeAgoShort(record.date)
+                      }}</span>
                     </div>
                   </div>
                 </div>
@@ -649,9 +238,66 @@ import ActivitySkeleton from "./Skeletons/ActivitySkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
+const VIEW_CONFIG = {
+  worldrecords: {
+    key: "worldrecords",
+    label: "World Records",
+    icon: "🏆",
+    title: "Latest World Records",
+    improvementLabel: "WR",
+    showRank: false,
+    activityType: "wr",
+  },
+  toptimes: {
+    key: "toptimes",
+    label: "Top Times",
+    icon: "🥇",
+    title: "Latest Top Times",
+    improvementLabel: "PR",
+    showRank: true,
+    activityType: "tt",
+  },
+  group1s: {
+    key: "group1s",
+    label: "Group 1s",
+    icon: "⏱️",
+    title: "Latest Group 1s",
+    improvementLabel: "PR",
+    showRank: true,
+    activityType: "g1",
+  },
+};
+
 export default {
   name: "Activity",
   components: { ActivitySkeleton },
+  directives: {
+    dragscroll: {
+      mounted(el) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        el.addEventListener("mousedown", (e) => {
+          isDown = true;
+          startX = e.pageX - el.offsetLeft;
+          scrollLeft = el.scrollLeft;
+          e.preventDefault();
+        });
+        el.addEventListener("mouseleave", () => {
+          isDown = false;
+        });
+        el.addEventListener("mouseup", () => {
+          isDown = false;
+        });
+        el.addEventListener("mousemove", (e) => {
+          if (!isDown) return;
+          const x = e.pageX - el.offsetLeft;
+          el.scrollLeft = scrollLeft - (x - startX);
+        });
+      },
+    },
+  },
   setup() {
     useHead({ title: "Tempus Plaza | Activity" });
   },
@@ -660,6 +306,7 @@ export default {
   },
   data() {
     return {
+      views: Object.values(VIEW_CONFIG),
       currentView: this.view,
       worldRecordsData: [],
       topTimesData: [],
@@ -675,23 +322,20 @@ export default {
     };
   },
   computed: {
-    filteredWorldRecordsData() {
-      return this.filterData(this.worldRecordsData);
+    activeView() {
+      return VIEW_CONFIG[this.currentView];
     },
-    filteredTopTimesData() {
-      return this.filterData(this.topTimesData);
+    activeData() {
+      const raw =
+        {
+          worldrecords: this.worldRecordsData,
+          toptimes: this.topTimesData,
+          group1s: this.group1sData,
+        }[this.currentView] ?? [];
+      return this.filterData(raw);
     },
-    filteredGroup1sData() {
-      return this.filterData(this.group1sData);
-    },
-    groupedWorldRecordsData() {
-      return this.groupByDate(this.filteredWorldRecordsData);
-    },
-    groupedTopTimesData() {
-      return this.groupByDate(this.filteredTopTimesData);
-    },
-    groupedGroup1sData() {
-      return this.groupByDate(this.filteredGroup1sData);
+    groupedActiveData() {
+      return this.groupByDate(this.activeData);
     },
   },
   watch: {
@@ -718,16 +362,28 @@ export default {
     },
     getTimeAgo(date) {
       const now = this.currentTime;
-      const recordDate = new Date(date);
-      const diffMs = now - recordDate;
+      const ms = typeof date === "number" ? date * 1000 : Date.parse(date);
+      const diffMs = now - ms;
       const diffMins = Math.floor(diffMs / 60000);
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
       if (diffMins < 1) return "Just now";
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffDays === 1) return "Yesterday";
-      if (diffDays < 7) return `${diffDays}d ago`;
+      if (diffMins < 60) return `${diffMins} minutes ago`;
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      if (diffDays === 1) return "1 day ago";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      return formatDate(date);
+    },
+    getTimeAgoShort(date) {
+      const now = this.currentTime;
+      const ms = typeof date === "number" ? date * 1000 : Date.parse(date);
+      const diffMs = now - ms;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      if (diffMins < 60) return `${diffMins}M ago`;
+      if (diffHours < 24) return `${diffHours}H ago`;
+      if (diffDays < 7) return `${diffDays}D ago`;
       return formatDate(date);
     },
     startUpdateTimer() {
@@ -1113,8 +769,7 @@ export default {
   align-items: center;
 }
 
-.rank-display,
-.rank-display-group {
+.rank-display {
   font-size: 0.9rem;
   font-weight: bold;
   color: var(--color-primary);
@@ -1122,7 +777,7 @@ export default {
   border-left: 1px solid var(--color-border-semi-soft);
 }
 
-.rank-display-group {
+.rank-display.rank-display-group {
   color: var(--color-text);
 }
 
@@ -1179,9 +834,76 @@ export default {
   letter-spacing: 0.02em;
 }
 
-@media (max-width: 767.98px) {
+.timeago-short {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .table-header-content {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-left: 0;
+    gap: 0.75rem;
+    margin-top: 5px;
+  }
+
+  .filter-container {
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-group {
+    align-items: center;
+  }
+}
+
+@media (max-width: 992px) {
+  .timeago-long {
+    display: none;
+  }
+  .timeago-short {
+    display: inline;
+  }
   .activity-card {
-    grid-template-columns: minmax(0, 150px) 1fr auto;
+    grid-template-columns: minmax(0, 150px) minmax(140px, 1fr) 210px 55px;
+  }
+  .activity-card .player-name-large,
+  .activity-card .map-name-large,
+  .activity-card .time-display,
+  .activity-card .rank-display,
+  .activity-card .map-type-badge,
+  .activity-card .rank-change,
+  .activity-card .improvement-text {
+    font-size: 0.72rem;
+  }
+  .activity-card .map-type-badge,
+  .activity-card .rank-change,
+  .activity-card .improvement-text {
+    font-size: 0.65rem;
+  }
+  .class-icon-row {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .class-icon-row {
+    width: 24px;
+    height: 24px;
+  }
+
+  .activity-card {
+    grid-template-columns: minmax(0, 130px) 1fr auto;
     grid-template-rows: auto;
     gap: 0.5rem;
   }
@@ -1189,6 +911,7 @@ export default {
   .activity-player-section {
     grid-column: 1;
     grid-row: 1;
+    overflow: hidden;
   }
 
   .activity-map-section {
@@ -1198,6 +921,7 @@ export default {
     border-top: none;
     padding-left: 0.75rem;
     padding-top: 0;
+    overflow: hidden;
   }
 
   .activity-time-section {
@@ -1213,23 +937,51 @@ export default {
     display: none;
   }
 
-  .table-header-content {
-    flex-wrap: wrap;
-    gap: 0.75rem;
+  .player-link {
+    overflow: hidden;
+    min-width: 0;
   }
 
-  .header-right {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-left: 0;
-    gap: 0.75rem;
+  .player-details {
+    overflow: hidden;
+    min-width: 0;
   }
 
-  .filter-container {
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
+  .map-details,
+  .map-name-row {
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .player-name-large {
+    white-space: nowrap;
+    overflow-x: scroll;
+    text-overflow: unset;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .map-details {
+    white-space: nowrap;
+    overflow-x: scroll;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .map-name-large {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .map-name-row {
+    overflow: visible;
+    min-width: max-content;
+  }
+
+  .player-name-large::-webkit-scrollbar,
+  .map-details::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-group {
@@ -1266,10 +1018,6 @@ export default {
     margin-bottom: 0.5rem;
   }
 
-  .activity-timeago-section {
-    display: none;
-  }
-
   .improvement-text {
     display: none;
   }
@@ -1284,19 +1032,19 @@ export default {
     align-items: flex-start;
   }
 
-  .rank-display,
-  .rank-display-group {
+  .rank-display {
     border-left: none;
     padding-left: 0;
-    font-size: 0.8rem;
   }
 
   .time-display {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 
-  .player-name-large,
-  .map-name-large {
+  .activity-card .player-name-large,
+  .activity-card .map-name-large,
+  .activity-card .time-display,
+  .activity-card .rank-display {
     font-size: 0.8rem;
   }
 }

@@ -548,7 +548,14 @@
                     <div class="section-content">
                       <div class="row g-4">
                         <!-- Map Soldier -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('demoman') &&
+                              !isIntendedClass('soldier'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-soldier"
                             :class="{ active: activeVideo === 'map-soldier' }"
@@ -586,7 +593,14 @@
                           </div>
                         </div>
                         <!-- Map Demoman -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('soldier') &&
+                              !isIntendedClass('demoman'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-demoman"
                             :class="{ active: activeVideo === 'map-demoman' }"
@@ -656,7 +670,14 @@
                       </h5>
                       <div class="row g-4">
                         <!-- Course Soldier -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('demoman') &&
+                              !isIntendedClass('soldier'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-soldier"
                             :class="{
@@ -700,7 +721,14 @@
                           </div>
                         </div>
                         <!-- Course Demoman -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('soldier') &&
+                              !isIntendedClass('demoman'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-demoman"
                             :class="{
@@ -776,7 +804,14 @@
                       </h5>
                       <div class="row g-4">
                         <!-- Bonus Soldier -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('demoman') &&
+                              !isIntendedClass('soldier'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-soldier"
                             :class="{
@@ -820,7 +855,14 @@
                           </div>
                         </div>
                         <!-- Bonus Demoman -->
-                        <div class="col-lg-6">
+                        <div
+                          class="col-lg-6"
+                          :class="{
+                            'order-mobile-last':
+                              isIntendedClass('soldier') &&
+                              !isIntendedClass('demoman'),
+                          }"
+                        >
                           <div
                             class="video-card video-card-demoman"
                             :class="{
@@ -970,7 +1012,12 @@
                     </div>
                   </div>
                 </div>
-                <Leaderboard :map-id="mapId" :type="type" :index="index" />
+                <Leaderboard
+                  :map-id="mapId"
+                  :type="type"
+                  :index="index"
+                  :intended-class="map ? map.intended_class : null"
+                />
               </div>
             </div>
           </div>
@@ -2326,6 +2373,9 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .order-mobile-last {
+    order: 1;
+  }
   .compact-ratings-grid {
     gap: 12px;
   }

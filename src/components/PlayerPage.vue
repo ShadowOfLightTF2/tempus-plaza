@@ -19,8 +19,8 @@
           :banner-colors="bannerColors"
           :loading="loading.ranks"
         />
-        <div class="row">
-          <div class="col-md-4">
+        <div class="row g-2 mt-3">
+          <div class="col-12 col-md-4 chart-col">
             <PointsChart
               title="Soldier Points History"
               chart-type="soldier"
@@ -28,7 +28,7 @@
               :loading="loading.points"
             />
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-md-4 chart-col">
             <PointsChart
               title="Overall Points History"
               chart-type="overall"
@@ -36,7 +36,7 @@
               :loading="loading.points"
             />
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-md-4 chart-col">
             <PointsChart
               title="Demoman Points History"
               chart-type="demoman"
@@ -45,13 +45,13 @@
             />
           </div>
         </div>
-        <div class="row main-content-wrapper">
-          <div class="col-md-3 stats-boxes">
+        <div class="row g-3 mt-2">
+          <div class="col-12 col-md-3 order-2 order-md-1">
             <div class="stats-container">
               <ClassStatsCard
                 class-type="soldier"
-                :current-stat-type="currentStatType.soldier"
-                :stats="stats[currentStatType.soldier]"
+                :current-stat-type="currentStatType['soldier']"
+                :stats="stats[currentStatType['soldier']]"
                 :loading="loading.stats"
                 @prev-stat="prevStatType('soldier')"
                 @next-stat="nextStatType('soldier')"
@@ -65,7 +65,7 @@
               />
             </div>
           </div>
-          <div class="col-md-6 tabs-container">
+          <div class="col-12 col-md-6 order-1 order-md-2">
             <RecordsSection
               :player-id="playerId"
               :recent-records="records.recentRecords"
@@ -74,12 +74,12 @@
               :next-update-countdown="nextUpdateCountdown"
             />
           </div>
-          <div class="col-md-3 stats-boxes">
+          <div class="col-12 col-md-3 order-3">
             <div class="stats-container">
               <ClassStatsCard
                 class-type="demoman"
-                :current-stat-type="currentStatType.demoman"
-                :stats="stats[currentStatType.demoman]"
+                :current-stat-type="currentStatType['demoman']"
+                :stats="stats[currentStatType['demoman']]"
                 :loading="loading.stats"
                 @prev-stat="prevStatType('demoman')"
                 @next-stat="nextStatType('demoman')"
@@ -93,34 +93,46 @@
               />
             </div>
           </div>
-          <div v-if="isCurrentUser || hasFavoriteMaps" class="map-section">
-            <div class="map-container">
-              <h4 class="map-section-title">Favourite Maps</h4>
-              <div class="map-grid">
-                <FavoriteMapCard
-                  v-for="(map, index) in displayedMaps"
-                  :key="map.id || index"
-                  :map="map"
-                  :index="index"
-                  :is-current-user="isCurrentUser"
-                  @open-search="openMapSearch"
-                  @navigate-to-map="goToRecords"
-                />
+        </div>
+        <div v-if="isCurrentUser || hasFavoriteMaps" class="row g-3 mt-3">
+          <div class="col-12">
+            <div class="map-section">
+              <div class="map-container">
+                <h4 class="map-section-title">Favourite Maps</h4>
+                <div class="map-grid">
+                  <FavoriteMapCard
+                    v-for="(map, index) in displayedMaps"
+                    :key="map.id || index"
+                    :map="map"
+                    :index="index"
+                    :is-current-user="isCurrentUser"
+                    @open-search="openMapSearch"
+                    @navigate-to-map="goToRecords"
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <RotwVideos :player-id="playerId" />
-          <AuthoredMaps :player-id="playerId" />
-          <MapSearchModal
-            :show="showMapSearch"
-            :search-results="mapSearchResults"
-            :has-map-at-current-index="hasMapAtCurrentIndex"
-            @close="cancelMapSearch"
-            @search="searchMap"
-            @select-map="selectMap"
-            @remove-map="removeMap"
-          />
         </div>
+        <div class="row g-3 mt-3">
+          <div class="col-12">
+            <RotwVideos :player-id="playerId" />
+          </div>
+        </div>
+        <div class="row g-3 mt-3">
+          <div class="col-12">
+            <AuthoredMaps :player-id="playerId" />
+          </div>
+        </div>
+        <MapSearchModal
+          :show="showMapSearch"
+          :search-results="mapSearchResults"
+          :has-map-at-current-index="hasMapAtCurrentIndex"
+          @close="cancelMapSearch"
+          @search="searchMap"
+          @select-map="selectMap"
+          @remove-map="removeMap"
+        />
       </div>
     </div>
   </div>
@@ -142,7 +154,6 @@ import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-
 export default {
   inject: ["profileUpdateTracker"],
   name: "PlayerPage",
@@ -330,16 +341,12 @@ export default {
     nextUpdateCountdown() {
       const now = this.currentTime;
       const nextUpdate = new Date(now);
-
       const nextHour = Math.ceil((now.getHours() + 1) / 2) * 2;
       nextUpdate.setHours(nextHour, 0, 0, 0);
-
       const diff = nextUpdate - now;
-
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
       if (hours > 0) {
         return `${hours}h ${minutes}m ${seconds}s`;
       } else if (minutes > 0) {
@@ -385,7 +392,6 @@ export default {
         { name: null, id: null, invisible: true },
         { name: null, id: null, invisible: true },
       ];
-
       this.favoriteMaps.forEach((map, index) => {
         if (index < 3) {
           if (map.name && map.name.trim() !== "") {
@@ -395,11 +401,9 @@ export default {
           }
         }
       });
-
       if (!this.isCurrentUser) {
         return displayArray.filter((map) => !map.invisible);
       }
-
       return displayArray;
     },
     isCurrentUser() {
@@ -540,14 +544,12 @@ export default {
           `${API_BASE_URL}/players/${playerId}/lost-records`,
         );
         const data = await response.json();
-
         this.changedPlacements = data.map((p) => {
           const old_rank = p.old_placement;
           const new_rank = p.new_placement;
           const points_change = p.points_change;
           const date = p.change_date;
           const isNewCompletion = old_rank === null || old_rank === undefined;
-
           return {
             ...p,
             class: p.record_type.split("_")[0],
@@ -585,7 +587,6 @@ export default {
       if (!steamId) {
         return "#";
       }
-
       const parts = steamId.split(":");
       if (parts.length === 3 && parts[0] === "STEAM_0") {
         const y = parseInt(parts[1]);
@@ -605,12 +606,10 @@ export default {
     },
     searchMap(query) {
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
-
       if (!query.trim()) {
         this.mapSearchResults = [];
         return;
       }
-
       this.debounceTimer = setTimeout(async () => {
         try {
           const response = await fetch(`${API_BASE_URL}/search/maps`, {
@@ -618,7 +617,6 @@ export default {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query }),
           });
-
           const data = await response.json();
           this.mapSearchResults = (data.maps || data || []).slice(0, 5);
         } catch (error) {
@@ -668,12 +666,10 @@ export default {
             "Content-Type": "application/json",
           },
         });
-
         if (!response.ok) {
           console.log("Response not ok:", response.status, response.statusText);
           return null;
         }
-
         const result = await response.json();
         return result.data;
       } catch (error) {
@@ -691,7 +687,6 @@ export default {
             method: "POST",
           },
         );
-
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
       } catch (error) {
@@ -708,10 +703,8 @@ export default {
             method: "DELETE",
           },
         );
-
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
-
         await this.fetchFavoriteMaps(this.playerId);
         this.cancelMapSearch();
       } catch (error) {
@@ -822,7 +815,6 @@ export default {
     },
     formatPointsChange(pointsChange) {
       const roundedPoints = Math.round(pointsChange * 100) / 100;
-
       if (roundedPoints > 0) return `+${roundedPoints.toFixed(2)}pts`;
       if (roundedPoints < 0) return `${roundedPoints.toFixed(2)}pts`;
       return "0.00pts";
@@ -972,7 +964,6 @@ export default {
       if (!favoriteMapData) {
         return;
       }
-
       let parsedMaps = [];
       if (typeof favoriteMapData === "string") {
         try {
@@ -984,7 +975,6 @@ export default {
       } else if (Array.isArray(favoriteMapData)) {
         parsedMaps = favoriteMapData;
       }
-
       if (Array.isArray(parsedMaps)) {
         parsedMaps.forEach((mapData) => {
           if (mapData.favorite_index >= 0 && mapData.favorite_index <= 2) {
@@ -1055,11 +1045,9 @@ export default {
         const response = await axios.get(
           `${API_BASE_URL}/players/${playerId}/recent-records`,
         );
-
         this.records.recentRecords = response.data.map((r) => {
           const hasDurationImprovement =
             r.old_duration != null && r.old_duration > r.duration;
-
           return {
             ...r,
             durationFormatted: this.formatDuration(r.duration),
@@ -1322,6 +1310,9 @@ export default {
 </script>
 
 <style scoped>
+.container > div {
+  width: 100%;
+}
 .return-button {
   background: var(--color-box);
   color: var(--color-text);
@@ -1490,6 +1481,11 @@ export default {
     font-size: 11px;
   }
 }
+@media (max-width: 991px) {
+  .chart-col :deep(.chart-container) {
+    margin-bottom: 8px;
+  }
+}
 @media (max-width: 567px) {
   .container {
     display: flex;
@@ -1511,9 +1507,6 @@ export default {
   }
   .map-container {
     width: 100%;
-    margin: 0 auto;
-  }
-  .main-content-wrapper {
     margin: 0 auto;
   }
   .stats-boxes,

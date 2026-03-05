@@ -36,9 +36,8 @@
                 <span class="kofi-icon">☕</span>
               </a>
             </div>
-
             <div class="donation-instructions">
-              <h3 class="instructions-title">📝 How to Get Your Perks</h3>
+              <h3 class="instructions-title">How to Get Your Perks</h3>
               <div class="instructions-content">
                 <p class="instructions-text">
                   While donating, simply include your
@@ -59,56 +58,8 @@
               </div>
             </div>
           </div>
-          <!-- <div class="perks-panel">
-            <h2 class="perks-title">
-              <span class="perks-icon"></span>
-              Donator Perks
-            </h2>
-
-            <div class="perks-grid">
-              <div class="perk-card">
-                <div class="perk-icon">🌈</div>
-                <h3 class="perk-title">Custom Banner Colors</h3>
-                <p class="perk-description">
-                  Choose from 10+ unique gradient combinations for your profile
-                  banner
-                </p>
-              </div>
-
-              <div class="perk-card">
-                <div class="perk-icon">👑</div>
-                <h3 class="perk-title">Golden Border & Badge</h3>
-                <p class="perk-description">
-                  Stand out with an animated golden border and exclusive
-                  "Donator" badge
-                </p>
-              </div>
-
-              <div class="perk-card">
-                <div class="perk-icon">💬</div>
-                <h3 class="perk-title">Donator Discord Role</h3>
-                <p class="perk-description">
-                  Special role in the Discord server
-                </p>
-              </div>
-
-              <div class="perk-card">
-                <div class="perk-icon">🌟</div>
-                <h3 class="perk-title">More to come</h3>
-                <p class="perk-description">More perks are on the way</p>
-              </div>
-            </div>
-
-            <div class="perks-note">
-              <p>
-                <span class="note-icon">ℹ️</span>
-                All cosmetic perks are permanent and when new features are
-                released, they will be available to all donators. You get all
-                perks with the minimum donation amount of €3,-.
-              </p>
-            </div>
-          </div> -->
         </div>
+
         <div class="preview-section">
           <h2 class="preview-title">{{ previewTitle }}</h2>
           <div v-if="loading" class="loading-message">
@@ -132,7 +83,7 @@
                 style="height: 100%; display: flex; align-items: center"
               >
                 <div
-                  class="col-md-4 d-flex flex-column align-items-center profile-left p-4"
+                  class="col-md-4 d-flex flex-column align-items-center profile-left p-3"
                 >
                   <div class="donator-badge">
                     <span class="badge-text">Donator</span>
@@ -140,19 +91,16 @@
                   <img
                     :src="player.avatar || '/avatars/default-avatar.jpg'"
                     alt="Avatar"
-                    class="rounded-circle avatar mb-3"
+                    class="rounded-circle avatar mb-2"
                   />
                   <div class="profile-info text-center">
                     <h1 class="player-name">{{ player.name }}</h1>
-                    <p class="rank-name mb-2">
-                      <span :class="playerRankInfo.color">
-                        {{ playerRankInfo.title }}
-                      </span>
+                    <p class="rank-name mb-1">
+                      <span :class="playerRankInfo.color">{{
+                        playerRankInfo.title
+                      }}</span>
                     </p>
-                    <p
-                      class="country mb-3"
-                      style="font-size: 10px; font-weight: bold; color: #d5d5d5"
-                    >
+                    <p class="country mb-2">
                       <img
                         :src="getFlagUrl(player.country_code)"
                         alt="flag"
@@ -163,9 +111,9 @@
                   </div>
                 </div>
                 <div class="col-md-8 d-flex align-items-center profile-right">
-                  <div class="row p-3 profile-overview">
+                  <div class="row p-2 profile-overview">
                     <div
-                      class="col-md-4 mb-3"
+                      class="col-md-4 mb-2"
                       v-for="(stat, statIndex) in playerStats"
                       :key="statIndex"
                     >
@@ -182,6 +130,7 @@
             </div>
           </div>
         </div>
+
         <div class="donators-carousel-section">
           <h2 class="donators-title">Our Amazing Donators</h2>
           <div v-if="donators.length" class="carousel-container">
@@ -217,13 +166,6 @@
             </div>
           </div>
         </div>
-        <!-- <div class="thank-you-section">
-          <h2 class="thank-you-title">Thank You!</h2>
-          <p class="thank-you-text">
-            Every donation, no matter the size, makes a real difference in
-            keeping Tempus Plaza running smoothly and continuously improving.
-          </p>
-        </div> -->
       </div>
     </div>
   </div>
@@ -233,30 +175,25 @@
 import { useHead } from "@vueuse/head";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-
 const cache = new Map();
 const cacheTimeout = 5 * 60 * 1000;
 
 async function cachedFetch(url, options = {}) {
   const cacheKey = `${url}-${JSON.stringify(options)}`;
   const cached = cache.get(cacheKey);
-
-  if (cached && Date.now() - cached.timestamp < cacheTimeout) {
+  if (cached && Date.now() - cached.timestamp < cacheTimeout)
     return cached.data;
-  }
-
   const response = await fetch(url, {
     credentials: "include",
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
-
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+  if (!response.ok) throw new Error("HTTP " + response.status);
   const data = await response.json();
   cache.set(cacheKey, { data, timestamp: Date.now() });
   return data;
 }
+
 const RANK_TITLES = (() => {
   const titles = [
     { range: [1, 1], male: "Emperor", female: "Empress" },
@@ -264,83 +201,35 @@ const RANK_TITLES = (() => {
     { range: [3, 3], male: "Archduke", female: "Archduchess" },
     { range: [4, 4], male: "Lord", female: "Lady" },
     { range: [5, 5], male: "Duke", female: "Duchess" },
-    { range: [6, 10], male: "Prince V", female: "Princess V" },
-    { range: [6, 10], male: "Prince IV", female: "Princess IV" },
-    { range: [6, 10], male: "Prince III", female: "Princess III" },
-    { range: [6, 10], male: "Prince II", female: "Princess II" },
     { range: [6, 10], male: "Prince I", female: "Princess I" },
-    { range: [11, 11], male: "Earl V", female: "Gearl V" },
-    { range: [12, 12], male: "Earl IV", female: "Gearl IV" },
-    { range: [13, 13], male: "Earl III", female: "Gearl III" },
-    { range: [14, 14], male: "Earl II", female: "Gearl II" },
-    { range: [15, 15], male: "Earl I", female: "Gearl I" },
-    { range: [16, 16], male: "Sir V", female: "Madam V" },
-    { range: [17, 17], male: "Sir IV", female: "Madam IV" },
-    { range: [18, 18], male: "Sir III", female: "Madam III" },
-    { range: [19, 19], male: "Sir II", female: "Madam II" },
-    { range: [20, 20], male: "Sir I", female: "Madam I" },
-    { range: [21, 21], male: "Count V", female: "Countess" },
-    { range: [22, 22], male: "Count IV", female: "Countess" },
-    { range: [23, 23], male: "Count III", female: "Countess" },
-    { range: [24, 24], male: "Count II", female: "Countess" },
-    { range: [25, 25], male: "Count I", female: "Countess" },
-    { range: [26, 30], male: "Baron V", female: "Baroness V" },
-    { range: [31, 35], male: "Baron IV", female: "Baroness IV" },
-    { range: [36, 40], male: "Baron III", female: "Baroness III" },
-    { range: [41, 45], male: "Baron II", female: "Baroness II" },
-    { range: [46, 50], male: "Baron I", female: "Baroness I" },
-    { range: [51, 60], male: "Knight V", female: "Dame V" },
-    { range: [61, 70], male: "Knight IV", female: "Dame IV" },
-    { range: [71, 80], male: "Knight III", female: "Dame III" },
-    { range: [81, 90], male: "Knight II", female: "Dame II" },
-    { range: [91, 100], male: "Knight I", female: "Dame I" },
-    { range: [101, 120], male: "Noble V", female: "Noblewoman V" },
-    { range: [121, 140], male: "Noble IV", female: "Noblewoman IV" },
-    { range: [141, 160], male: "Noble III", female: "Noblewoman III" },
-    { range: [161, 180], male: "Noble II", female: "Noblewoman II" },
-    { range: [181, 200], male: "Noble I", female: "Noblewoman I" },
-    { range: [201, 260], male: "Esquire V", female: "Esquire V" },
-    { range: [261, 320], male: "Esquire IV", female: "Esquire IV" },
-    { range: [321, 380], male: "Esquire III", female: "Esquire III" },
-    { range: [381, 440], male: "Esquire II", female: "Esquire II" },
-    { range: [441, 500], male: "Esquire I", female: "Esquire I" },
-    { range: [501, 600], male: "Jester V", female: "Jester V" },
-    { range: [601, 700], male: "Jester IV", female: "Jester IV" },
-    { range: [701, 800], male: "Jester III", female: "Jester III" },
-    { range: [801, 900], male: "Jester II", female: "Jester II" },
-    { range: [901, 1000], male: "Jester I", female: "Jester I" },
-    { range: [1001, 1300], male: "Plebeian V", female: "Plebeian V" },
-    { range: [1301, 1600], male: "Plebeian IV", female: "Plebeian IV" },
-    { range: [1601, 1900], male: "Plebeian III", female: "Plebeian III" },
-    { range: [1901, 2200], male: "Plebeian II", female: "Plebeian II" },
-    { range: [2201, 2500], male: "Plebeian I", female: "Plebeian I" },
-    { range: [2501, 2700], male: "Peasant V", female: "Peasant V" },
-    { range: [2701, 2900], male: "Peasant IV", female: "Peasant IV" },
-    { range: [2901, 3100], male: "Peasant III", female: "Peasant III" },
-    { range: [3101, 3300], male: "Peasant II", female: "Peasant II" },
-    { range: [3301, 3500], male: "Peasant I", female: "Peasant I" },
-    { range: [3501, 4000], male: "Peasant I", female: "Peasant I" },
-    { range: [4001, 5000], male: "Peasant I", female: "Peasant I" },
-    { range: [5001, 999999], male: "Peon", female: "Peon" },
+    { range: [11, 15], male: "Earl I", female: "Gearl I" },
+    { range: [16, 20], male: "Sir I", female: "Madam I" },
+    { range: [21, 25], male: "Count I", female: "Countess" },
+    { range: [26, 50], male: "Baron I", female: "Baroness I" },
+    { range: [51, 100], male: "Knight I", female: "Dame I" },
+    { range: [101, 200], male: "Noble I", female: "Noblewoman I" },
+    { range: [201, 500], male: "Esquire I", female: "Esquire I" },
+    { range: [501, 1000], male: "Jester I", female: "Jester I" },
+    { range: [1001, 2500], male: "Plebeian I", female: "Plebeian I" },
+    { range: [2501, 3500], male: "Peasant I", female: "Peasant I" },
+    { range: [3501, 999999], male: "Peon", female: "Peon" },
   ];
-
   return titles.map((title) => ({
     ...title,
-    maleColor: `rank-color-${title.male
-      .replace(/\s[IVX]+$/, "")
-      .toLowerCase()}`,
-    femaleColor: `rank-color-${(title.female === "Queen" ||
-    title.female === "Empress"
-      ? title.female
-      : title.female.replace(/\s[IVX]+$/, "")
-    ).toLowerCase()}`,
+    maleColor:
+      "rank-color-" + title.male.replace(/\s[IVX]+$/, "").toLowerCase(),
+    femaleColor:
+      "rank-color-" +
+      (title.female === "Queen" || title.female === "Empress"
+        ? title.female
+        : title.female.replace(/\s[IVX]+$/, "")
+      ).toLowerCase(),
   }));
 })();
+
 function getRankData(rank) {
   for (const title of RANK_TITLES) {
-    if (rank >= title.range[0] && rank <= title.range[1]) {
-      return title;
-    }
+    if (rank >= title.range[0] && rank <= title.range[1]) return title;
   }
   return {
     male: "Unranked",
@@ -349,6 +238,7 @@ function getRankData(rank) {
     femaleColor: "--color-peon",
   };
 }
+
 export default {
   name: "DonatePage",
   setup() {
@@ -357,8 +247,7 @@ export default {
       meta: [
         {
           name: "description",
-          content:
-            "Support Tempus Plaza and unlock exclusive donator perks including custom banner colors, priority support, and beta access.",
+          content: "Support Tempus Plaza and unlock exclusive donator perks.",
         },
       ],
     });
@@ -370,7 +259,6 @@ export default {
       playerId: null,
       player: {
         name: "Your Name Here",
-        rank: "King",
         country: "United States (US)",
         country_code: "us",
         avatar: null,
@@ -386,7 +274,7 @@ export default {
         rank_pref: "overall",
       },
       donators: [],
-      animationId: null,
+      duplicatedDonators: [],
     };
   },
   async mounted() {
@@ -394,14 +282,10 @@ export default {
       this.initializeUserData(),
       this.fetchDonators(),
     ]);
-
-    if (userResult.status === "rejected") {
+    if (userResult.status === "rejected")
       console.warn("Failed to load user data:", userResult.reason);
-    }
-    if (donatorsResult.status === "rejected") {
+    if (donatorsResult.status === "rejected")
       console.warn("Failed to load donators:", donatorsResult.reason);
-    }
-
     this.$nextTick(() => {
       this.startCarousel();
     });
@@ -411,16 +295,14 @@ export default {
   },
   computed: {
     formatNumber() {
-      return (num) => {
-        return num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
-      };
+      return (num) =>
+        num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
     },
     getFlagUrl() {
-      return (countryCode) => {
-        return `https://flagcdn.com/24x18/${(
-          countryCode || "us"
-        ).toLowerCase()}.png`;
-      };
+      return (countryCode) =>
+        "https://flagcdn.com/24x18/" +
+        (countryCode || "us").toLowerCase() +
+        ".png";
     },
     previewTitle() {
       return this.isLoggedIn
@@ -429,31 +311,25 @@ export default {
     },
     highestRank() {
       if (!this.isLoggedIn || !this.player.overall_rank) return 10;
-
       const { rank_pref, overall_rank, soldier_rank, demoman_rank } =
         this.player;
-
       if (rank_pref === "overall" && overall_rank) return overall_rank;
       if (rank_pref === "soldier" && soldier_rank) return soldier_rank;
       if (rank_pref === "demoman" && demoman_rank) return demoman_rank;
-
       return (
         Math.min(
           ...[overall_rank, soldier_rank, demoman_rank].filter(Boolean),
         ) || 10
       );
     },
-
     playerRankInfo() {
       const rankData = getRankData(this.highestRank);
       const isMale = this.player.gender === "male";
-
       return {
         title: isMale ? rankData.male : rankData.female,
         color: isMale ? rankData.maleColor : rankData.femaleColor,
       };
     },
-
     playerStats() {
       const stats = [
         {
@@ -493,18 +369,16 @@ export default {
           format: true,
         },
       ];
-
       return stats.map(
         ({ title, key, default: defaultVal, prefix = "", format = false }) => {
           let value = this.isLoggedIn
             ? this.player[key] || defaultVal
             : defaultVal;
           if (format) value = this.formatNumber(value);
-          return { title, value: `${prefix}${value}` };
+          return { title, value: prefix + value };
         },
       );
     },
-
     bannerColors() {
       return [
         ["var(--color-banner-red-1)", "var(--color-banner-red-2)"],
@@ -513,26 +387,6 @@ export default {
         ["var(--color-banner-cyan-1)", "var(--color-banner-cyan-2)"],
         ["var(--color-banner-orange-1)", "var(--color-banner-orange-2)"],
       ];
-    },
-
-    duplicatedDonators() {
-      if (!this.donators || !this.donators.length) return [];
-
-      const result = [];
-      const maxCopies = 3;
-
-      for (let i = 0; i < maxCopies; i++) {
-        for (let j = 0; j < this.donators.length; j++) {
-          const donator = this.donators[j];
-          result.push({
-            ...donator,
-            duplicateIndex: i,
-            id: `${donator.id || j}-${i}-${j}`,
-            playerId: donator.id || donator.playerId || j,
-          });
-        }
-      }
-      return result;
     },
   },
   methods: {
@@ -555,10 +409,9 @@ export default {
         this.loading = false;
       }
     },
-
     async fetchUser() {
       try {
-        const result = await cachedFetch(`${API_BASE_URL}/api/get-user`);
+        const result = await cachedFetch(API_BASE_URL + "/api/get-user");
         this.playerId = result.data?.playerid || null;
         return this.playerId;
       } catch (error) {
@@ -566,58 +419,53 @@ export default {
         return null;
       }
     },
-
     async fetchUserData(playerId) {
       if (!playerId) return;
       try {
-        const data = await cachedFetch(`${API_BASE_URL}/users/${playerId}`);
-        if (data?.length) {
+        const data = await cachedFetch(API_BASE_URL + "/users/" + playerId);
+        if (data?.length)
           Object.assign(this.player, {
             gender: data.gender || "male",
             rank_pref: data.rank_pref || "overall",
             donator: Boolean(data.donator),
             color: data.color || "blue",
           });
-        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     },
-
     async fetchPlayerData(playerId) {
       if (!playerId) return;
       try {
-        const data = await cachedFetch(`${API_BASE_URL}/players/${playerId}`);
+        const data = await cachedFetch(API_BASE_URL + "/players/" + playerId);
         if (data?.length) {
-          const playerData = data[0];
+          const p = data[0];
           Object.assign(this.player, {
-            ...playerData,
-            avatar: playerData.steam_avatar || "golly.jpg",
-            country: playerData.country || "United States (US)",
-            country_code: playerData.country_code || "us",
+            ...p,
+            avatar: p.steam_avatar || "golly.jpg",
+            country: p.country || "United States (US)",
+            country_code: p.country_code || "us",
           });
         }
       } catch (error) {
         console.error("Error fetching player data:", error);
       }
     },
-
     async fetchPlayerRanks(playerId) {
       if (!playerId) return;
       try {
         const data = await cachedFetch(
-          `${API_BASE_URL}/players/${playerId}/ranks`,
+          API_BASE_URL + "/players/" + playerId + "/ranks",
         );
         if (data?.length) {
-          const ranks = data[0];
+          const r = data[0];
           Object.assign(this.player, {
-            overall_rank: ranks.overall_rank || null,
-            soldier_rank: ranks.soldier_rank || null,
-            demoman_rank: ranks.demoman_rank || null,
-            overall_points:
-              (ranks.soldier_points || 0) + (ranks.demoman_points || 0),
-            soldier_points: ranks.soldier_points || null,
-            demoman_points: ranks.demoman_points || null,
+            overall_rank: r.overall_rank || null,
+            soldier_rank: r.soldier_rank || null,
+            demoman_rank: r.demoman_rank || null,
+            overall_points: (r.soldier_points || 0) + (r.demoman_points || 0),
+            soldier_points: r.soldier_points || null,
+            demoman_points: r.demoman_points || null,
           });
         }
       } catch (error) {
@@ -626,37 +474,33 @@ export default {
     },
     async fetchDonators() {
       try {
-        const data = await cachedFetch(`${API_BASE_URL}/users/get-donators`);
+        const data = await cachedFetch(API_BASE_URL + "/users/get-donators");
         this.donators = data || [];
+        const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+        for (let i = 0; i < 3; i++) {
+          shuffle(this.donators).forEach((d, j) => {
+            this.duplicatedDonators.push({
+              ...d,
+              id: `${d.id}-${i}-${j}`,
+              playerId: d.id || j,
+            });
+          });
+        }
       } catch (error) {
         console.error("Error fetching donators:", error);
       }
     },
     startCarousel() {
       if (!this.$refs.carouselTrack || !this.donators.length) return;
-
       const track = this.$refs.carouselTrack;
-      const cardWidth = 280;
-      const resetPosition = -(cardWidth * this.donators.length);
-      const speed = 50 / 60;
-
-      let carouselPosition = 0;
-
-      const animate = () => {
-        carouselPosition -= speed;
-        if (carouselPosition <= resetPosition) {
-          carouselPosition = 0;
-        }
-        track.style.transform = `translateX(${carouselPosition}px)`;
-        this.animationId = requestAnimationFrame(animate);
-      };
-
-      this.animationId = requestAnimationFrame(animate);
+      const cardWidth = 216;
+      const totalWidth = cardWidth * this.donators.length;
+      track.style.setProperty("--scroll-width", `${totalWidth}px`);
+      track.style.animationPlayState = "running";
     },
     stopCarousel() {
-      if (this.animationId) {
-        cancelAnimationFrame(this.animationId);
-        this.animationId = null;
+      if (this.$refs.carouselTrack) {
+        this.$refs.carouselTrack.style.animationPlayState = "paused";
       }
     },
   },
@@ -683,21 +527,19 @@ export default {
   margin: 30px 0;
   opacity: 0.6;
 }
-.page-subtitle {
-  color: var(--color-text-muted, #aaa);
-  font-size: 18px;
-  margin-top: 10px;
-  text-align: center;
-}
 
 .content-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   max-width: 1000px;
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .donation-section {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
@@ -793,112 +635,21 @@ export default {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .help-icon {
   font-size: 16px;
 }
 
-.perks-panel {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.perks-title {
-  color: var(--color-text, #fff);
-  font-size: 28px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-}
-
-.perks-icon {
-  font-size: 32px;
-}
-
-.perks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
-}
-
-.perk-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 25px;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.perk-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.perk-icon {
-  font-size: 36px;
-  margin-bottom: 15px;
-  display: block;
-}
-
-.perk-title {
-  color: var(--color-text, #fff);
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.perk-description {
-  color: var(--color-text-muted, #bbb);
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 15px;
-}
-
-.perk-tier {
-  background: linear-gradient(135deg, #ffd700, #ffed4a);
-  color: #000;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  display: inline-block;
-}
-
-.perks-note {
-  text-align: center;
-  padding: 20px;
-  background: rgba(0, 123, 255, 0.1);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 123, 255, 0.2);
-}
-
-.perks-note p {
-  color: var(--color-text-muted, #ddd);
-  font-size: 14px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.note-icon {
-  font-size: 16px;
+code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  color: #ffd700;
+  word-break: break-all;
 }
 
 .preview-section {
@@ -906,6 +657,7 @@ export default {
   flex-direction: column;
   align-items: center;
   margin-top: 40px;
+  width: 100%;
 }
 
 .preview-title {
@@ -917,10 +669,11 @@ export default {
 }
 
 .banner-container {
-  margin: 20px 0;
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto;
   perspective: 1000px;
 }
-
 .profile-banner {
   background: linear-gradient(
     135deg,
@@ -929,13 +682,11 @@ export default {
   );
   border: 1px solid rgba(42, 42, 42, 0.99);
   position: relative;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
-  margin-bottom: 20px;
-  border-radius: 12px;
+  margin-bottom: 14px;
   border: 2px solid gold;
   animation: goldenGlow 3s infinite;
-  max-width: 1000px;
   transition: all 0.3s ease;
 }
 
@@ -957,13 +708,14 @@ export default {
 
 .donator-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 7px;
+  left: 7px;
   background: gold;
   color: black;
-  padding: 5px 10px;
+  padding: 2px 7px;
   border-radius: 20px;
   font-weight: bold;
+  font-size: 9px;
   animation: pulse 2s infinite;
 }
 
@@ -979,18 +731,11 @@ export default {
   }
 }
 
-code {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-family: "Courier New", monospace;
-  color: #ffd700;
-}
-
 .avatar {
-  width: 96px;
-  height: 96px;
-  border: 3px solid gold;
+  width: 58px;
+  height: 58px;
+  border: 2px solid gold;
+  margin-top: 20px;
 }
 
 .player-name {
@@ -999,21 +744,27 @@ code {
   text-overflow: ellipsis;
   max-width: 100%;
   color: var(--color-text, #fff);
-  font-size: 1.25rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .rank-name {
   color: var(--color-text, #fff);
   font-weight: bold;
-  font-size: small;
-  margin-bottom: 10px;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.country {
+  font-size: 9px;
+  font-weight: bold;
+  color: #d5d5d5;
 }
 
 .flag-icon {
-  width: 18px;
-  height: 12px;
+  width: 14px;
+  height: 10px;
   vertical-align: middle;
   border-radius: 2px;
 }
@@ -1021,51 +772,27 @@ code {
 .banner-block {
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .banner-block .card-title {
   color: #aaa;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 10px;
+  margin-bottom: 1px;
 }
 
 .banner-block .card-text {
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .rank-card-body {
-  padding: 15px;
+  padding: 7px 5px;
 }
 
 .player-stats {
   color: var(--color-text, #fff) !important;
-}
-
-.thank-you-section {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0, 0.5);
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 100px;
-}
-
-.thank-you-title {
-  color: var(--color-text, #fff);
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.thank-you-text {
-  color: var(--color-text-muted, #bbb);
-  font-size: 16px;
-  line-height: 1.6;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .donators-carousel-section {
@@ -1104,17 +831,27 @@ code {
 
 .carousel-track {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   width: max-content;
-  animation: none;
+  will-change: transform;
+  animation: carousel-scroll 40s linear infinite paused;
+}
+
+@keyframes carousel-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--scroll-width)));
+  }
 }
 
 .donator-card {
   flex-shrink: 0;
-  width: 260px;
+  width: 200px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
@@ -1129,83 +866,171 @@ code {
 }
 
 .donator-avatar {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: 2px solid gold;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   object-fit: cover;
 }
 
 .donator-info {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .donator-name {
   color: var(--color-text, #fff);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .donator-country {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   margin: 0;
   color: var(--color-text-muted, #bbb);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .country-flag {
-  width: 20px;
-  height: 15px;
+  width: 18px;
+  height: 13px;
   border-radius: 2px;
   object-fit: cover;
 }
 
-.badge-icon {
-  font-size: 16px;
+@media (max-width: 768px) {
+  .profile-banner {
+    animation: none !important;
+    box-shadow: 0 0 10px gold;
+  }
+
+  .donator-badge {
+    animation: none !important;
+  }
+
+  .carousel-track {
+    animation-duration: 60s;
+  }
 }
 
 @media (max-width: 768px) {
-  .donator-card {
-    width: 220px;
-    padding: 20px;
+  .content-container {
+    padding: 0 10px;
   }
-
-  .donator-avatar {
-    width: 56px;
-    height: 56px;
+  .donation-panel {
+    padding: 20px 16px;
   }
-
-  .donator-name {
+  .donation-title {
+    font-size: 22px;
+  }
+  .donation-description {
+    font-size: 14px;
+  }
+  .kofi-button {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+  .donation-instructions {
+    padding: 16px;
+  }
+  .instructions-title {
     font-size: 16px;
   }
-
-  .donation-panel,
-  .perks-panel {
-    margin: 20px;
-    padding: 30px 20px;
+  .instructions-text {
+    font-size: 14px;
   }
-
-  .perks-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .player-id-help {
+    padding: 12px;
   }
-
-  .donation-title,
-  .perks-title {
-    font-size: 24px;
+  .banner-container {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
-
   .profile-banner {
-    margin: 10px;
+    max-width: 250px;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .player-name {
+    font-size: 0.7rem;
+  }
+  .rank-name {
+    font-size: 9px;
+  }
+  .banner-block .card-title {
+    font-size: 9px;
+  }
+  .banner-block .card-text {
+    font-size: 0.7rem;
+  }
+  .rank-card-body {
+    padding: 5px 4px;
+  }
+  .donators-title {
+    font-size: 22px;
+  }
+  .donator-card {
+    width: 160px;
+    padding: 14px;
+  }
+  .donator-name {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .donation-panel {
+    padding: 16px 10px;
+  }
+  .donation-title {
+    font-size: 20px;
+  }
+  .kofi-button {
+    padding: 12px 20px;
+    font-size: 14px;
+    width: 100%;
+    justify-content: center;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    margin-top: 14px;
+  }
+  .player-name {
+    font-size: 0.65rem;
+  }
+  .rank-name {
+    font-size: 8px;
+  }
+  .banner-block .card-title {
+    font-size: 8px;
+  }
+  .banner-block .card-text {
+    font-size: 0.65rem;
+  }
+  .rank-card-body {
+    padding: 4px 3px;
+  }
+  .donator-card {
+    width: 140px;
+    padding: 12px;
+  }
+  .donators-title {
+    font-size: 20px;
   }
 }
 </style>

@@ -84,10 +84,8 @@
       class="row-divider"
       style="width: 100%"
     />
-    <div
-      class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-    >
-      <div class="soldier-table-container">
+    <div class="tables-wrapper justify-content-center">
+      <div class="soldier-table-container" :style="{ order: soldierOrder }">
         <div class="table-wrapper">
           <div
             class="maps-header"
@@ -199,7 +197,7 @@
                     }"
                     class="name-cell align-middle player-name clickable name-column"
                   >
-                    {{ userRecord.soldier.name }}
+                    <div class="name-text">{{ userRecord.soldier.name }}</div>
                   </SmartLink>
                   <td
                     class="date-column"
@@ -266,7 +264,7 @@
                       'rank-3-name': entry.rank === 3,
                     }"
                   >
-                    {{ entry.name }}
+                    <div class="name-text">{{ entry.name }}</div>
                   </SmartLink>
                   <td
                     class="date-column"
@@ -309,7 +307,7 @@
           </div>
         </div>
       </div>
-      <div class="demoman-table-container">
+      <div class="demoman-table-container" :style="{ order: demomanOrder }">
         <div class="table-wrapper">
           <div
             class="maps-header"
@@ -421,7 +419,7 @@
                     }"
                     class="name-cell align-middle player-name clickable name-column"
                   >
-                    {{ userRecord.demoman.name }}
+                    <div class="name-text">{{ userRecord.demoman.name }}</div>
                   </SmartLink>
                   <td
                     class="date-column"
@@ -488,7 +486,7 @@
                       'rank-3-name': entry.rank === 3,
                     }"
                   >
-                    {{ entry.name }}
+                    <div class="name-text">{{ entry.name }}</div>
                   </SmartLink>
                   <td
                     class="date-column"
@@ -557,6 +555,7 @@ export default {
       validator: (val) => ["map", "course", "bonus"].includes(val),
     },
     index: { type: Number, default: null },
+    intendedClass: { type: Number, default: null },
   },
   setup() {
     const pageTitle = ref("Tempus Plaza");
@@ -603,6 +602,12 @@ export default {
     };
   },
   computed: {
+    soldierOrder() {
+      return this.intendedClass === 4 ? 1 : 0;
+    },
+    demomanOrder() {
+      return this.intendedClass === 4 ? 0 : 1;
+    },
     currentSoldierTier() {
       if (this.type === "map") return this.mapTiers.soldier.tier;
       if (this.type === "course" && this.index != null)
@@ -700,6 +705,9 @@ export default {
     await this.loadRecords(this.type, this.index);
   },
   watch: {
+    intendedClass(newVal) {
+      console.log("intendedClass changed:", newVal);
+    },
     mapId() {
       this.resetComponents();
       this.fetchMapData().then(() => this.loadRecords(this.type, this.index));
@@ -989,6 +997,9 @@ export default {
 </script>
 
 <style scoped>
+.align-items-center {
+  padding: 0;
+}
 .record-selector {
   display: flex;
   gap: 10px;
@@ -1284,11 +1295,74 @@ export default {
   color: #b3b3b3ce !important;
   font-weight: bold;
 }
-@media (max-width: 767.98px) {
+@media (min-width: 768px) {
+  .soldier-table-container,
+  .demoman-table-container {
+    order: unset !important;
+  }
+}
+@media (max-width: 1100px) and (min-width: 768px) {
   .tables-wrapper {
-    flex-direction: column;
+    gap: 16px;
+    overflow-x: hidden;
+  }
+  .soldier-table-container,
+  .demoman-table-container {
+    min-width: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+  }
+  .table-dark {
+    min-width: unset;
+    width: 100%;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .group-cutoffs {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .cutoff-box {
+    padding: 4px 6px;
+    min-width: 38px;
+  }
+  .cutoff-label {
+    font-size: 9px;
+  }
+  .cutoff-value {
+    font-size: 11px;
+  }
+  .class-icon {
+    width: 32px;
+    height: 32px;
+    margin: 5px;
+  }
+  .header-type {
+    font-size: 14px;
+  }
+  .header-tier-rating {
+    font-size: 12px;
+  }
+  .player-name,
+  .name-cell,
+  .name-column {
+    max-width: 120px !important;
+  }
+  .table-dark th,
+  .table-dark td {
+    font-size: 12px;
+  }
+}
+@media (max-width: 767.98px) {
+  .soldier-table-container,
+  .demoman-table-container {
+    width: 100%;
+  }
+  .tables-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
     align-items: center;
-    width: 115%;
   }
   .group-cutoffs {
     gap: 4px;
@@ -1302,6 +1376,22 @@ export default {
   }
   .cutoff-value {
     font-size: 11px;
+  }
+  .name-column {
+    max-width: 0;
+    overflow: hidden;
+  }
+  .name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .table-dark th,
+  .table-dark td {
+    font-size: 12px;
+  }
+  .table-dark {
+    min-width: unset;
   }
 }
 .category-container {
@@ -1484,5 +1574,38 @@ export default {
   color: var(--color-text-clickable);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .soldier-table-container::before {
+    width: 300px;
+    right: 20px;
+  }
+  .demoman-table-container::before {
+    width: 320px;
+    left: 20px;
+  }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+  .soldier-table-container::before {
+    width: 220px;
+    right: 10px;
+  }
+  .demoman-table-container::before {
+    width: 250px;
+    left: 10px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .soldier-table-container::before {
+    width: 300px;
+    right: 30px;
+  }
+  .demoman-table-container::before {
+    width: 320px;
+    left: 30px;
+  }
 }
 </style>

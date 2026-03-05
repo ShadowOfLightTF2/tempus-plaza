@@ -105,17 +105,6 @@
     </div>
     <nav class="navbar navbar-expand-xl bg-custom">
       <div class="container-fluid">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mx-auto">
             <li class="nav-item me-3">
@@ -465,8 +454,367 @@
             </div>
           </ul>
         </div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          @click.stop="toggleSidebar"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
       </div>
     </nav>
+    <div
+      class="sidebar-overlay"
+      :class="{ 'sidebar-overlay-open': sidebarOpen }"
+      @click="closeSidebar"
+    ></div>
+    <div
+      class="sidebar-drawer"
+      :class="{ 'sidebar-open': sidebarOpen }"
+      @click.stop
+    >
+      <div class="sidebar-header">
+        <span class="sidebar-brand">Tempus Plaza</span>
+        <button
+          class="sidebar-close-btn"
+          @click="closeSidebar"
+          aria-label="Close menu"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="sidebar-search-wrap" v-if="!isHomePage" @click.stop>
+        <div class="sidebar-search-input-wrapper">
+          <svg
+            class="sidebar-search-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search maps & players..."
+            class="sidebar-search-input"
+          />
+        </div>
+        <div
+          class="sidebar-search-results"
+          v-if="
+            searchQuery.trim() &&
+            (loadingMaps || loadingPlayers || searchResults)
+          "
+        >
+          <div class="search-section">
+            <h6>Maps</h6>
+            <div v-if="loadingMaps" class="loading-container">
+              <div class="loading-spinner"></div>
+              <span>Loading...</span>
+            </div>
+            <ul v-else-if="searchResults && searchResults.maps.length">
+              <SmartLink
+                v-for="map in searchResults.maps"
+                :key="map.id"
+                :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                tag="li"
+                class="search-result-item"
+                @click.native="
+                  handleSearchResultClick();
+                  closeSidebar();
+                "
+              >
+                {{ map.name || `Map ID: ${map.id}` }}
+              </SmartLink>
+            </ul>
+            <div v-else-if="!loadingMaps && searchResults" class="no-results">
+              No maps found
+            </div>
+          </div>
+          <div class="search-section">
+            <h6>Players</h6>
+            <div v-if="loadingPlayers" class="loading-container">
+              <div class="loading-spinner"></div>
+              <span>Loading...</span>
+            </div>
+            <ul v-else-if="searchResults && searchResults.players.length">
+              <SmartLink
+                v-for="player in searchResults.players"
+                :key="player.id"
+                :to="{ name: 'PlayerPage', params: { playerId: player.id } }"
+                tag="li"
+                class="search-result-item"
+                @click.native="
+                  handleSearchResultClick();
+                  closeSidebar();
+                "
+              >
+                {{ player.name || `Player ID: ${player.id}` }}
+              </SmartLink>
+            </ul>
+            <div
+              v-else-if="!loadingPlayers && searchResults"
+              class="no-results"
+            >
+              No players found
+            </div>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <router-link
+          to="/"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Home') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-house"></i><span>Home</span>
+        </router-link>
+        <router-link
+          to="/servers"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Servers') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-globe"></i><span>Servers</span>
+        </router-link>
+        <router-link
+          to="/activity"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Activity') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-graph-up"></i><span>Activity</span>
+        </router-link>
+        <router-link
+          to="/maps"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Maps') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-map"></i><span>Maps</span>
+        </router-link>
+        <router-link
+          to="/players"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Players') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-trophy"></i><span>Players</span>
+        </router-link>
+        <router-link
+          to="/compare"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Compare') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-bar-chart"></i><span>Compare</span>
+        </router-link>
+        <router-link
+          to="/lookup"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Lookup') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-search"></i><span>Lookup</span>
+        </router-link>
+        <router-link
+          to="/donate"
+          class="sidebar-nav-link"
+          :class="{ active: isNavItemActive('Donate') }"
+          @click.native="closeSidebar"
+        >
+          <i class="bi bi-heart"></i><span>Donate</span>
+        </router-link>
+      </nav>
+      <div class="sidebar-footer">
+        <button
+          v-if="!user || !user.steamid"
+          class="btn sidebar-login-btn"
+          @click="loginWithSteam"
+        >
+          <i class="bi bi-steam"></i> Login with Steam
+        </button>
+
+        <div v-if="user && user.steamid" class="sidebar-user-section">
+          <button
+            class="sidebar-user-toggle"
+            @click.stop="sidebarSettingsOpen = !sidebarSettingsOpen"
+          >
+            <img
+              :src="user.avatar"
+              alt="avatar"
+              class="sidebar-avatar"
+              v-if="user.avatar"
+            />
+            <span class="sidebar-username">{{ user.name }}</span>
+            <svg
+              class="sidebar-chevron"
+              :class="{ rotated: sidebarSettingsOpen }"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+
+          <div
+            v-if="sidebarSettingsOpen"
+            class="sidebar-settings-panel"
+            @click.stop
+          >
+            <SmartLink
+              tag="div"
+              :to="getPlayerRoute()"
+              class="sidebar-settings-item sidebar-settings-link"
+              @click.native="closeSidebar"
+            >
+              <i class="bi bi-person-circle"></i> My profile
+            </SmartLink>
+            <div class="sidebar-settings-divider"></div>
+            <div class="sidebar-settings-item">
+              <h6>Rank preference</h6>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="sb-preferenceOverall"
+                  name="sbRankPreference"
+                  v-model="rankPreference"
+                  value="overall"
+                  @change="updateUserPreferences"
+                />
+                <label class="form-check-label" for="sb-preferenceOverall"
+                  >Overall</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="sb-preferenceSoldier"
+                  name="sbRankPreference"
+                  v-model="rankPreference"
+                  value="soldier"
+                  @change="updateUserPreferences"
+                />
+                <label class="form-check-label" for="sb-preferenceSoldier"
+                  >Soldier</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="sb-preferenceDemoman"
+                  name="sbRankPreference"
+                  v-model="rankPreference"
+                  value="demoman"
+                  @change="updateUserPreferences"
+                />
+                <label class="form-check-label" for="sb-preferenceDemoman"
+                  >Demoman</label
+                >
+              </div>
+            </div>
+            <div class="sidebar-settings-divider"></div>
+            <div class="sidebar-settings-item">
+              <h6>Rank gender</h6>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="sb-genderMale"
+                  name="sbGender"
+                  v-model="gender"
+                  value="male"
+                  @change="updateUserPreferences"
+                />
+                <label class="form-check-label" for="sb-genderMale">Male</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="sb-genderFemale"
+                  name="sbGender"
+                  v-model="gender"
+                  value="female"
+                  @change="updateUserPreferences"
+                />
+                <label class="form-check-label" for="sb-genderFemale"
+                  >Female</label
+                >
+              </div>
+            </div>
+            <div class="sidebar-settings-divider"></div>
+            <div class="sidebar-settings-item" @click.stop>
+              <h6>Banner colour</h6>
+              <div class="color-picker-container position-relative">
+                <div
+                  v-for="(color, index) in colorOptions"
+                  :key="index"
+                  class="color-option-wrapper"
+                  @click="selectColor(color.value)"
+                >
+                  <input
+                    class="d-none"
+                    type="radio"
+                    :id="'sb-color-' + index"
+                    name="sbColorPreference"
+                    v-model="colorPreference"
+                    :value="color.value"
+                    @change="updateUserPreferences"
+                    :disabled="donator === 0"
+                  />
+                  <label
+                    class="color-swatch"
+                    :for="'sb-color-' + index"
+                    :class="{ selected: colorPreference === color.value }"
+                    :style="{ backgroundColor: color.color }"
+                  ></label>
+                </div>
+                <div v-if="showTooltip" class="supporter-tooltip" @click.stop>
+                  <div class="tooltip-content">
+                    <p>You need to become a supporter to select colors</p>
+                    <button @click="goToDonate" class="tooltip-button">
+                      Become a Supporter
+                    </button>
+                  </div>
+                  <div class="tooltip-arrow"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sidebar-settings-divider"></div>
+            <div class="sidebar-settings-item">
+              <a class="sidebar-logout-link" @click="logout" href="#"
+                ><i class="bi bi-box-arrow-right"></i> Logout</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <router-view />
     <footer class="footer">
       <div class="container-fluid">
@@ -530,6 +878,8 @@ export default {
       showTooltip: false,
       tooltipTimeout: null,
       colorPreference: "blue",
+      sidebarOpen: false,
+      sidebarSettingsOpen: false,
       colorOptions: [
         { value: "blue", color: "var(--color-banner-blue-1)" },
         { value: "red", color: "var(--color-banner-red-1)" },
@@ -564,12 +914,42 @@ export default {
     };
   },
   methods: {
+    checkNavbarOverflow() {
+      const nav = document.querySelector(".navbar-nav");
+      if (!nav) return;
+      const items = nav.querySelectorAll(
+        ".nav-item, .navbar-right, .user-section",
+      );
+      let hasOverflow = false;
+      let maxBottom = 0;
+      let minBottom = Infinity;
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        if (rect.bottom > maxBottom) maxBottom = rect.bottom;
+        if (rect.bottom < minBottom) minBottom = rect.bottom;
+      });
+      hasOverflow = maxBottom - minBottom > 10;
+      document
+        .querySelector(".navbar-nav")
+        ?.classList.toggle("nav-compact", hasOverflow);
+    },
+    toggleSidebar() {
+      this.sidebarOpen = !this.sidebarOpen;
+      document.body.style.overflow = this.sidebarOpen ? "hidden" : "";
+    },
+    closeSidebar() {
+      this.sidebarOpen = false;
+      this.sidebarSettingsOpen = false;
+      document.body.style.overflow = "";
+    },
     closeNavbar() {
       const navbarCollapse = document.getElementById("navbarNav");
-      const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-        toggle: false,
-      });
-      bsCollapse.hide();
+      if (navbarCollapse) {
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+          toggle: false,
+        });
+        bsCollapse.hide();
+      }
     },
     handleSearchResultClick() {
       this.closeNavbar();
@@ -669,7 +1049,6 @@ export default {
         }
 
         const data = await response.json();
-        //console.log("Auth status response:", data);
         return data.isAuthenticated;
       } catch (error) {
         console.error("Error checking auth status:", error);
@@ -692,7 +1071,6 @@ export default {
         }
 
         const result = await response.json();
-        //console.log("User data response:", result);
         return result.data;
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -822,18 +1200,27 @@ export default {
     this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
   },
   beforeDestroy() {
+    window.removeEventListener("resize", this.checkNavbarOverflow);
     clearInterval(this.updateInterval);
     clearTimeout(this.debounceTimer);
+    document.body.style.overflow = "";
   },
   watch: {
+    currentUser() {
+      this.$nextTick(() => this.checkNavbarOverflow());
+    },
     searchQuery() {
       this.debouncedSearch();
     },
+    $route() {
+      this.closeSidebar();
+    },
   },
   async mounted() {
+    this.$nextTick(() => this.checkNavbarOverflow());
+    window.addEventListener("resize", this.checkNavbarOverflow);
     try {
       const isAuthenticated = await this.checkAuthStatus();
-      //console.log("Auth check result:", isAuthenticated);
 
       if (isAuthenticated) {
         const userData = await this.fetchUserData();
@@ -860,12 +1247,6 @@ export default {
       this.debounceTimer = setTimeout(() => {
         this.showLoginPopup = true;
       }, 1000);
-    }
-  },
-  beforeDestroy() {
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = null;
     }
   },
 };
@@ -1244,49 +1625,9 @@ body {
   border-color: var(--color-border) !important;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1199px) {
   .navbar-collapse {
-    background: var(--color-dark);
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .navbar-nav {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .navbar-nav .nav-item {
-    margin-bottom: 0.5rem;
-    width: 100%;
-    text-align: center;
-  }
-
-  .navbar-nav .nav-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .navbar {
-    font-size: medium;
-  }
-
-  .navbar-right {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  .user-section {
-    align-self: center;
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    display: none !important;
   }
 
   .footer {
@@ -1311,27 +1652,332 @@ body {
 </style>
 
 <style scoped>
-@media (max-width: 1199px) {
-  .search-container {
-    width: 100%;
-    margin: 1rem 0;
-    display: flex;
-    justify-content: center;
-    margin-right: 0 !important;
-    margin-bottom: 1rem;
-    width: 100%;
-  }
-  .search-input {
-    width: 100%;
-    max-width: 300px;
-  }
-  .search-results-dropdown {
-    width: 90vw;
-    max-width: 300px;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 50px !important;
-  }
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.sidebar-overlay-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.sidebar-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  z-index: 10001;
+  background: linear-gradient(
+    160deg,
+    rgba(17, 22, 30, 0.98) 0%,
+    rgba(25, 38, 60, 0.98) 100%
+  );
+  border-left: 1px solid rgba(74, 111, 165, 0.3);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.sidebar-drawer.sidebar-open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(74, 111, 165, 0.2);
+  min-height: 64px;
+}
+
+.sidebar-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.sidebar-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.sidebar-search-wrap {
+  padding: 1rem 1.25rem 0.5rem;
+  position: relative;
+}
+
+.sidebar-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #888;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: 9px 10px 9px 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(74, 111, 165, 0.3) !important;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.25s ease;
+  outline: none;
+}
+.sidebar-search-input:focus {
+  border-color: var(--color-primary, #4a7fc0) !important;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 128, 192, 0.18);
+}
+.sidebar-search-input::placeholder {
+  color: #666;
+}
+
+.sidebar-search-results {
+  background: var(--color-box, #1a2233);
+  border: 1px solid rgba(68, 68, 68, 0.4);
+  border-radius: 10px;
+  margin-top: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.sidebar-search-results ul {
+  list-style: none;
+  padding: 6px;
+  margin: 0;
+}
+.sidebar-search-results li {
+  padding: 9px 12px;
+  border-radius: 7px;
+  margin-bottom: 3px;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.sidebar-search-results li:hover {
+  background: linear-gradient(
+    to right,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.25)
+  );
+  transform: translateX(3px);
+}
+.sidebar-search-results h6 {
+  margin: 10px 12px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  gap: 2px;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+}
+.sidebar-nav-link i {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+  opacity: 0.85;
+}
+.sidebar-nav-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff !important;
+  border-color: rgba(74, 111, 165, 0.25);
+  transform: translateX(3px);
+}
+.sidebar-nav-link.active {
+  background: linear-gradient(
+    to right,
+    rgba(74, 111, 165, 0.35),
+    rgba(74, 111, 165, 0.15)
+  );
+  color: #ffffff !important;
+  border-color: var(--color-primary, #4a7fc0);
+}
+
+.sidebar-footer {
+  padding: 1rem 1.25rem 1.5rem;
+  border-top: 1px solid rgba(74, 111, 165, 0.2);
+}
+
+.sidebar-login-btn {
+  width: 100%;
+  background: #1b2838;
+  color: #ffffff !important;
+  border: 1px solid rgba(74, 111, 165, 0.4) !important;
+  border-radius: 10px !important;
+  padding: 0.7rem 1rem !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+.sidebar-login-btn:hover {
+  background: #2a3f5f;
+  border-color: var(--color-primary) !important;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid var(--color-primary, #4a7fc0);
+  flex-shrink: 0;
+}
+.sidebar-username {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+.sidebar-user-section {
+  width: 100%;
+}
+.sidebar-user-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(74, 111, 165, 0.25);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sidebar-user-toggle:hover {
+  background: rgba(74, 111, 165, 0.15);
+  border-color: rgba(74, 111, 165, 0.5);
+}
+.sidebar-chevron {
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.sidebar-chevron.rotated {
+  transform: rotate(180deg);
+}
+.sidebar-settings-panel {
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(74, 111, 165, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sidebar-settings-item {
+  padding: 0.65rem 1rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+.sidebar-settings-item h6 {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.sidebar-settings-item .form-check {
+  margin-left: 4px;
+  margin-bottom: 2px;
+}
+.sidebar-settings-item .form-check-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+}
+.sidebar-settings-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+.sidebar-settings-link:hover {
+  background: rgba(74, 111, 165, 0.2);
+}
+.sidebar-settings-divider {
+  height: 1px;
+  background: rgba(74, 111, 165, 0.15);
+}
+.sidebar-logout-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 100, 100, 0.85) !important;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.sidebar-logout-link:hover {
+  color: #ff6b6b !important;
 }
 .update-banner {
   background: linear-gradient(135deg, #ff6b35, #f7931e);
@@ -1627,7 +2273,7 @@ body {
   z-index: 2;
 }
 .search-input {
-  width: 200px;
+  width: 260px;
   padding: 8px 8px 8px 40px;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid transparent !important;
@@ -1724,6 +2370,7 @@ body {
 .navbar-toggler {
   border: none;
   padding: 0.25rem 0.5rem;
+  margin-left: auto;
 }
 .navbar-toggler:focus {
   box-shadow: none;
@@ -1732,19 +2379,17 @@ body {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-@media (max-width: 1420px) {
-  .nav-link {
-    padding: 8px 9px !important;
-    font-size: 0.85rem;
-  }
-  .nav-item.me-3 {
-    margin-right: 0.2rem !important;
-  }
-  .search-input {
-    width: 140px;
-  }
-  .search-container {
-    margin-right: 6px !important;
-  }
+.navbar-nav.nav-compact .nav-link {
+  padding: 8px 9px !important;
+  font-size: 0.85rem;
+}
+.navbar-nav.nav-compact .nav-item.me-3 {
+  margin-right: 0.2rem !important;
+}
+.navbar-nav.nav-compact .search-input {
+  width: 180px;
+}
+.navbar-nav.nav-compact .search-container {
+  margin-right: 6px !important;
 }
 </style>

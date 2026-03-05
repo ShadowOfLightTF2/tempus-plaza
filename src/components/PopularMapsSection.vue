@@ -327,7 +327,6 @@ export default {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   will-change: transform;
-
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
@@ -503,7 +502,13 @@ export default {
   color: var(--color-text);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1001px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 851px) {
   .grid {
     grid-template-columns: 1fr;
   }
