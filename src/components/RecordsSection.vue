@@ -862,6 +862,9 @@ export default {
 }
 
 @media (max-width: 1200px) {
+  .date-header h5 {
+    font-size: 1.15rem;
+  }
   .record-time-detail {
     min-width: 0;
     flex-shrink: 1;
@@ -920,6 +923,9 @@ export default {
 }
 
 @media (max-width: 992px) {
+  .date-header h5 {
+    font-size: 1rem;
+  }
   .record-map {
     font-size: 11px;
   }
@@ -1014,14 +1020,22 @@ export default {
     font-size: 0.8rem !important;
     padding: 10px !important;
   }
+  .date-header h5 {
+    font-size: 1rem;
+  }
   .record-map,
   .record-duration,
   .record-rank {
-    font-size: 13px;
+    font-size: 12px;
+  }
+  .duration-delta {
+    font-size: 11px;
+  }
+  .record-detail.record-date {
+    font-size: 10px;
   }
   .record-map {
     color: var(--color-text-clickable);
-    font-size: 15px;
     font-weight: bold;
     white-space: nowrap;
     overflow-x: scroll;
@@ -1042,8 +1056,8 @@ export default {
     overflow: hidden;
   }
   .class-icon {
-    width: 25px;
-    height: 25px;
+    width: 22px;
+    height: 22px;
   }
   .pagination-controls .global-btn,
   .allruns-button-container .global-btn,

@@ -32,9 +32,7 @@
               Servers
             </button>
           </div>
-
           <ServersSkeleton v-if="loading" :view="currentView" />
-
           <div v-else class="table-container">
             <div v-if="currentView === 'topplayers'" class="top-players-cards">
               <div class="table-header-content topplayers-header">
@@ -60,7 +58,7 @@
                 <div
                   v-for="(player, index) in topPlayersData"
                   :key="player.player_id"
-                  class="player-card fade-in"
+                  class="player-card"
                   :class="{ 'min-mode': minMode }"
                 >
                   <div class="ranks-section">
@@ -159,7 +157,7 @@
                     class="map-info-section"
                     :style="
                       !minMode && !failedMapImages.has(player.current_map)
-                        ? `background-image: url('/map-backgrounds/medium/${player.current_map}.jpg')`
+                        ? `background-image: url('/map-backgrounds/medium/${player.current_map}.webp')`
                         : ''
                     "
                   >
@@ -210,7 +208,6 @@
                 </div>
               </div>
             </div>
-
             <div v-if="currentView === 'servers'" class="table-wrapper">
               <div class="table-header-content">
                 <div class="table-header-top">
@@ -460,10 +457,10 @@ export default {
       currentView: "topplayers",
       loading: false,
       failedMapImages: new Set(),
-      isMobile: window.innerWidth <= 1200,
+      isMobile: window.innerWidth <= 992,
       manualMinMode: localStorage.getItem("minMode") === "true",
       minMode:
-        window.innerWidth <= 1200
+        window.innerWidth <= 992
           ? true
           : localStorage.getItem("minMode") === "true",
       topPlayersData: [],
@@ -554,7 +551,7 @@ export default {
       localStorage.setItem("minMode", this.manualMinMode);
     },
     handleResize() {
-      this.isMobile = window.innerWidth <= 1200;
+      this.isMobile = window.innerWidth <= 992;
       this.minMode = this.isMobile ? true : this.manualMinMode;
     },
     handleStorageChange(event) {
@@ -850,7 +847,6 @@ export default {
   color: var(--color-text);
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-weight: 500;
   font-size: 0.85rem;
 }
@@ -1179,7 +1175,6 @@ export default {
   padding: 1rem;
 }
 
-/* ── Top Players cards ── */
 .top-players-cards {
   width: 100%;
   border-radius: 0 0 8px 8px;
@@ -1205,7 +1200,6 @@ export default {
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--color-border-soft);
   border-radius: 8px;
-  transition: all 0.2s ease;
 }
 
 .player-card:hover {
@@ -1470,7 +1464,7 @@ export default {
 
 @media (max-width: 1400px) {
   .player-card:not(.min-mode) {
-    grid-template-columns: 0.6fr 1.8fr 1.8fr 1.8fr;
+    grid-template-columns: 0.4fr 1.3fr 1.8fr 1.8fr;
   }
 
   .player-avatar-large {
@@ -1514,12 +1508,68 @@ export default {
 }
 
 @media (max-width: 1199px) {
+  .player-card:not(.min-mode) {
+    grid-template-columns: 0.4fr 1.3fr 1.6fr 1.6fr;
+  }
+
+  .player-avatar-large {
+    width: 34px;
+    height: 34px;
+  }
+
   .player-name-large {
-    max-width: 130px;
+    font-size: 0.88rem;
+    max-width: 120px;
+    width: auto;
+  }
+
+  .player-country {
+    font-size: 0.75rem;
+  }
+
+  .map-name-large {
+    font-size: 0.85rem;
+  }
+
+  .class-icon-medium {
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+  }
+
+  .class-icon-medium.dual-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .server-name-large {
+    font-size: 0.72rem;
+  }
+
+  .server-info-section .global-btn {
+    padding: 0.28rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .player-info-section {
+    padding-left: 0.75rem;
+  }
+
+  .map-info-section {
+    padding-left: 0.75rem;
+  }
+
+  .rank-value {
+    font-size: 0.85rem;
+  }
+
+  .class-icon-small {
+    width: 16px;
+    height: 16px;
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 992px) {
   .player-card {
     grid-template-columns: 1fr;
     gap: 0.8rem;

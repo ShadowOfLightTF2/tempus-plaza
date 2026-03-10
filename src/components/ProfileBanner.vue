@@ -56,7 +56,6 @@
               @error="handleImageError"
             />
             {{ player.country }}
-            <span class="country-code">({{ player.country_code }})</span>
           </p>
         </div>
       </div>
@@ -261,11 +260,6 @@ export default {
   font-weight: 600;
   color: #c8c8c8;
   margin: 0;
-}
-
-.country-code {
-  opacity: 0.65;
-  font-weight: 400;
 }
 
 .flag-icon {

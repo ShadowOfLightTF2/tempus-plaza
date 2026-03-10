@@ -279,7 +279,8 @@ export default {
       const pointsKey = `${this.chartType}_points`;
       const rankKey = `${this.chartType}_rank`;
 
-      const filteredData = sortedData.filter((point, index) => {
+      // First, deduplicate consecutive identical points
+      const deduplicatedData = sortedData.filter((point, index) => {
         if (index === 0) return true;
         const prev = sortedData[index - 1];
         return (
@@ -287,6 +288,37 @@ export default {
           point[rankKey] !== prev[rankKey]
         );
       });
+
+      // Interval-based downsampling per time range (in seconds)
+      const intervalMap = {
+        month: 3 * 24 * 60 * 60, // every 3 days
+        "3months": 7 * 24 * 60 * 60, // every 1 week
+        "6months": 14 * 24 * 60 * 60, // every 2 weeks
+        year: 30 * 24 * 60 * 60, // every ~1 month
+        all: 30 * 24 * 60 * 60, // every ~1 month
+      };
+
+      const interval = intervalMap[this.selectedTimeRange];
+
+      let filteredData;
+      if (interval) {
+        const result = [];
+        for (let i = 0; i < deduplicatedData.length; i++) {
+          const point = deduplicatedData[i];
+          const isLast = i === deduplicatedData.length - 1;
+          if (result.length === 0 || isLast) {
+            result.push(point);
+          } else {
+            const lastKept = result[result.length - 1];
+            if (point.date - lastKept.date >= interval) {
+              result.push(point);
+            }
+          }
+        }
+        filteredData = result;
+      } else {
+        filteredData = deduplicatedData;
+      }
 
       const label =
         this.chartType.charAt(0).toUpperCase() + this.chartType.slice(1);
@@ -365,7 +397,6 @@ export default {
   font-weight: 500;
   font-size: 0.9rem;
   min-width: 0;
-  /* Prevent text from wrapping or overflowing */
   white-space: nowrap;
   overflow: hidden;
 }

@@ -42,7 +42,7 @@
               <div
                 class="card-bg"
                 :style="{
-                  backgroundImage: `url('/map-backgrounds/medium/${map.name}.jpg')`,
+                  backgroundImage: `url('/map-backgrounds/medium/${map.name}.webp')`,
                 }"
               ></div>
               <div class="card-inner">
@@ -121,7 +121,7 @@
               <div
                 class="card-bg"
                 :style="{
-                  backgroundImage: `url('/map-backgrounds/medium/${map.name}.jpg')`,
+                  backgroundImage: `url('/map-backgrounds/medium/${map.name}.webp')`,
                 }"
               ></div>
               <div class="card-inner">

@@ -118,23 +118,22 @@ export default {
         const response = await axios.get(
           `${API_BASE_URL}/players/${playerId}/rotw-videos`,
         );
-
         const uniqueVideos = response.data.filter(
           (video, index, self) =>
             index === self.findIndex((v) => v.video_id === video.video_id),
         );
-
         this.rotwVideos = uniqueVideos.map((video) => ({
           ...video,
           formatted_upload_date: this.formatUploadDate(video.uploaded_at),
         }));
-
         this.visibleRotwVideos = this.rotwVideos.slice(
           0,
           this.rotwVideosPerPage,
         );
+        this.$emit("has-content", this.rotwVideos.length > 0);
       } catch (error) {
         console.error("Error fetching ROTW videos:", error);
+        this.$emit("has-content", false);
       }
     },
     loadMoreRotwVideos() {

@@ -1,7 +1,5 @@
 <template>
-  <LeaderboardSkeleton v-if="loading" />
   <div
-    v-else
     class="container d-flex flex-column align-items-center"
     style="z-index: 1"
   >
@@ -163,120 +161,119 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-if="userRecord.soldier && userRecord.soldier.rank > 1"
-                  class="fade-in"
-                  style="border-bottom: 2px solid var(--color-border)"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(userRecord.soldier.placement)"
+                <LeaderboardSkeleton v-if="loading" />
+                <template v-else>
+                  <tr
+                    v-if="userRecord.soldier && userRecord.soldier.rank > 1"
+                    class="fade-in"
+                    style="border-bottom: 2px solid var(--color-border)"
                   >
-                    <span v-if="userRecord.soldier.rank === 2">🥈</span>
-                    <span v-else-if="userRecord.soldier.rank === 3">🥉</span>
-                    {{ userRecord.soldier.rank }}
-                  </td>
-                  <td class="duration-column">
-                    <a
-                      v-if="userRecord.soldier.demo_id"
-                      :href="`https://tempus2.xyz/demos/${userRecord.soldier.demo_id}`"
-                      target="_blank"
-                      class="demo-link"
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(userRecord.soldier.placement)"
                     >
-                      {{ formatDuration(userRecord.soldier.duration) }}
-                    </a>
-                    <span v-else>{{
-                      formatDuration(userRecord.soldier.duration)
-                    }}</span>
-                  </td>
-                  <SmartLink
-                    tag="td"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: userRecord.soldier.id },
-                    }"
-                    class="name-cell align-middle player-name clickable name-column"
-                  >
-                    <div class="name-text">{{ userRecord.soldier.name }}</div>
-                  </SmartLink>
-                  <td
-                    class="date-column"
-                    :title="
-                      new Date(userRecord.soldier.date * 1000)
-                        .toLocaleDateString('en-CA')
-                        .replace(/-/g, '/')
-                    "
-                  >
-                    {{ formatDate(userRecord.soldier.date) }}
-                  </td>
-                </tr>
-                <tr v-if="loading">
-                  <td colspan="4" class="text-center">
-                    <div class="spinner-border text-light" role="status">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr v-else-if="error" class="text-center">
-                  <td colspan="4" class="alert alert-danger">{{ error }}</td>
-                </tr>
-                <tr
-                  v-else-if="!loading && displayedSoldierEntries.length === 0"
-                  class="text-center"
-                >
-                  <td colspan="4" style="color: var(--color-text-soft)">
-                    No one has completed this.
-                  </td>
-                </tr>
-                <tr
-                  v-else
-                  v-for="(entry, index) in displayedSoldierEntries"
-                  :key="'soldier-' + index"
-                  class="fade-in"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(entry.placement)"
-                  >
-                    <span v-if="entry.rank === 1">🥇</span>
-                    <span v-else-if="entry.rank === 2">🥈</span>
-                    <span v-else-if="entry.rank === 3">🥉</span>
-                    {{ entry.rank }}
-                  </td>
-                  <td class="duration-column">
-                    <a
-                      v-if="entry.demo_id"
-                      :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
-                      target="_blank"
-                      class="demo-link"
+                      <span v-if="userRecord.soldier.rank === 2">🥈</span>
+                      <span v-else-if="userRecord.soldier.rank === 3">🥉</span>
+                      {{ userRecord.soldier.rank }}
+                    </td>
+                    <td class="duration-column">
+                      <a
+                        v-if="userRecord.soldier.demo_id"
+                        :href="`https://tempus2.xyz/demos/${userRecord.soldier.demo_id}`"
+                        target="_blank"
+                        class="demo-link"
+                      >
+                        {{ formatDuration(userRecord.soldier.duration) }}
+                      </a>
+                      <span v-else>{{
+                        formatDuration(userRecord.soldier.duration)
+                      }}</span>
+                    </td>
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: userRecord.soldier.id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
                     >
-                      {{ formatDuration(entry.duration) }}
-                    </a>
-                    <span v-else>{{ formatDuration(entry.duration) }}</span>
-                  </td>
-                  <SmartLink
-                    tag="td"
-                    :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
-                    class="name-cell align-middle player-name clickable name-column"
-                    :class="{
-                      'rank-1-name': entry.rank === 1,
-                      'rank-2-name': entry.rank === 2,
-                      'rank-3-name': entry.rank === 3,
-                    }"
+                      <div class="name-text">{{ userRecord.soldier.name }}</div>
+                    </SmartLink>
+                    <td
+                      class="date-column"
+                      :title="
+                        new Date(userRecord.soldier.date * 1000)
+                          .toLocaleDateString('en-CA')
+                          .replace(/-/g, '/')
+                      "
+                    >
+                      {{ formatDate(userRecord.soldier.date) }}
+                    </td>
+                  </tr>
+                  <tr v-if="error" class="text-center">
+                    <td colspan="4" class="alert alert-danger">{{ error }}</td>
+                  </tr>
+                  <tr
+                    v-else-if="displayedSoldierEntries.length === 0"
+                    class="text-center"
                   >
-                    <div class="name-text">{{ entry.name }}</div>
-                  </SmartLink>
-                  <td
-                    class="date-column"
-                    :title="
-                      new Date(entry.date * 1000)
-                        .toLocaleDateString('en-CA')
-                        .replace(/-/g, '/')
-                    "
+                    <td colspan="4" style="color: var(--color-text-soft)">
+                      No one has completed this.
+                    </td>
+                  </tr>
+                  <tr
+                    v-else
+                    v-for="(entry, index) in displayedSoldierEntries"
+                    :key="'soldier-' + index"
+                    class="fade-in"
                   >
-                    {{ formatDate(entry.date) }}
-                  </td>
-                </tr>
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(entry.placement)"
+                    >
+                      <span v-if="entry.rank === 1">🥇</span>
+                      <span v-else-if="entry.rank === 2">🥈</span>
+                      <span v-else-if="entry.rank === 3">🥉</span>
+                      {{ entry.rank }}
+                    </td>
+                    <td class="duration-column">
+                      <a
+                        v-if="entry.demo_id"
+                        :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                        target="_blank"
+                        class="demo-link"
+                      >
+                        {{ formatDuration(entry.duration) }}
+                      </a>
+                      <span v-else>{{ formatDuration(entry.duration) }}</span>
+                    </td>
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: entry.id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
+                      :class="{
+                        'rank-1-name': entry.rank === 1,
+                        'rank-2-name': entry.rank === 2,
+                        'rank-3-name': entry.rank === 3,
+                      }"
+                    >
+                      <div class="name-text">{{ entry.name }}</div>
+                    </SmartLink>
+                    <td
+                      class="date-column"
+                      :title="
+                        new Date(entry.date * 1000)
+                          .toLocaleDateString('en-CA')
+                          .replace(/-/g, '/')
+                      "
+                    >
+                      {{ formatDate(entry.date) }}
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -385,120 +382,119 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-if="userRecord.demoman && userRecord.demoman.rank > 1"
-                  class="fade-in"
-                  style="border-bottom: 2px solid var(--color-border)"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(userRecord.demoman.placement)"
+                <LeaderboardSkeleton v-if="loading" />
+                <template v-else>
+                  <tr
+                    v-if="userRecord.demoman && userRecord.demoman.rank > 1"
+                    class="fade-in"
+                    style="border-bottom: 2px solid var(--color-border)"
                   >
-                    <span v-if="userRecord.demoman.rank === 2">🥈</span>
-                    <span v-else-if="userRecord.demoman.rank === 3">🥉</span>
-                    {{ userRecord.demoman.rank }}
-                  </td>
-                  <td class="duration-column">
-                    <a
-                      v-if="userRecord.demoman.demo_id"
-                      :href="`https://tempus2.xyz/demos/${userRecord.demoman.demo_id}`"
-                      target="_blank"
-                      class="demo-link"
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(userRecord.demoman.placement)"
                     >
-                      {{ formatDuration(userRecord.demoman.duration) }}
-                    </a>
-                    <span v-else>{{
-                      formatDuration(userRecord.demoman.duration)
-                    }}</span>
-                  </td>
-                  <SmartLink
-                    tag="td"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: userRecord.demoman.id },
-                    }"
-                    class="name-cell align-middle player-name clickable name-column"
-                  >
-                    <div class="name-text">{{ userRecord.demoman.name }}</div>
-                  </SmartLink>
-                  <td
-                    class="date-column"
-                    :title="
-                      new Date(userRecord.demoman.date * 1000)
-                        .toLocaleDateString('en-CA')
-                        .replace(/-/g, '/')
-                    "
-                  >
-                    {{ formatDate(userRecord.demoman.date) }}
-                  </td>
-                </tr>
-                <tr v-if="loading">
-                  <td colspan="4" class="text-center">
-                    <div class="spinner-border text-light" role="status">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr v-else-if="error" class="text-center">
-                  <td colspan="4" class="alert alert-danger">{{ error }}</td>
-                </tr>
-                <tr
-                  v-else-if="displayedDemomanEntries.length === 0"
-                  class="text-center"
-                >
-                  <td colspan="4" style="color: var(--color-text-soft)">
-                    No one has completed this.
-                  </td>
-                </tr>
-                <tr
-                  v-else
-                  v-for="(entry, index) in displayedDemomanEntries"
-                  :key="'demoman-' + index"
-                  class="fade-in"
-                >
-                  <td
-                    class="rank-column"
-                    :class="getPlacementClass(entry.placement)"
-                  >
-                    <span v-if="entry.rank === 1">🥇</span>
-                    <span v-else-if="entry.rank === 2">🥈</span>
-                    <span v-else-if="entry.rank === 3">🥉</span>
-                    {{ entry.rank }}
-                  </td>
-                  <td class="duration-column">
-                    <a
-                      v-if="entry.demo_id"
-                      :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
-                      target="_blank"
-                      class="demo-link"
+                      <span v-if="userRecord.demoman.rank === 2">🥈</span>
+                      <span v-else-if="userRecord.demoman.rank === 3">🥉</span>
+                      {{ userRecord.demoman.rank }}
+                    </td>
+                    <td class="duration-column">
+                      <a
+                        v-if="userRecord.demoman.demo_id"
+                        :href="`https://tempus2.xyz/demos/${userRecord.demoman.demo_id}`"
+                        target="_blank"
+                        class="demo-link"
+                      >
+                        {{ formatDuration(userRecord.demoman.duration) }}
+                      </a>
+                      <span v-else>{{
+                        formatDuration(userRecord.demoman.duration)
+                      }}</span>
+                    </td>
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: userRecord.demoman.id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
                     >
-                      {{ formatDuration(entry.duration) }}
-                    </a>
-                    <span v-else>{{ formatDuration(entry.duration) }}</span>
-                  </td>
-                  <SmartLink
-                    tag="td"
-                    :to="{ name: 'PlayerPage', params: { playerId: entry.id } }"
-                    class="name-cell align-middle player-name clickable name-column"
-                    :class="{
-                      'rank-1-name': entry.rank === 1,
-                      'rank-2-name': entry.rank === 2,
-                      'rank-3-name': entry.rank === 3,
-                    }"
+                      <div class="name-text">{{ userRecord.demoman.name }}</div>
+                    </SmartLink>
+                    <td
+                      class="date-column"
+                      :title="
+                        new Date(userRecord.demoman.date * 1000)
+                          .toLocaleDateString('en-CA')
+                          .replace(/-/g, '/')
+                      "
+                    >
+                      {{ formatDate(userRecord.demoman.date) }}
+                    </td>
+                  </tr>
+                  <tr v-if="error" class="text-center">
+                    <td colspan="4" class="alert alert-danger">{{ error }}</td>
+                  </tr>
+                  <tr
+                    v-else-if="displayedDemomanEntries.length === 0"
+                    class="text-center"
                   >
-                    <div class="name-text">{{ entry.name }}</div>
-                  </SmartLink>
-                  <td
-                    class="date-column"
-                    :title="
-                      new Date(entry.date * 1000)
-                        .toLocaleDateString('en-CA')
-                        .replace(/-/g, '/')
-                    "
+                    <td colspan="4" style="color: var(--color-text-soft)">
+                      No one has completed this.
+                    </td>
+                  </tr>
+                  <tr
+                    v-else
+                    v-for="(entry, index) in displayedDemomanEntries"
+                    :key="'demoman-' + index"
+                    class="fade-in"
                   >
-                    {{ formatDate(entry.date) }}
-                  </td>
-                </tr>
+                    <td
+                      class="rank-column"
+                      :class="getPlacementClass(entry.placement)"
+                    >
+                      <span v-if="entry.rank === 1">🥇</span>
+                      <span v-else-if="entry.rank === 2">🥈</span>
+                      <span v-else-if="entry.rank === 3">🥉</span>
+                      {{ entry.rank }}
+                    </td>
+                    <td class="duration-column">
+                      <a
+                        v-if="entry.demo_id"
+                        :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                        target="_blank"
+                        class="demo-link"
+                      >
+                        {{ formatDuration(entry.duration) }}
+                      </a>
+                      <span v-else>{{ formatDuration(entry.duration) }}</span>
+                    </td>
+                    <SmartLink
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: entry.id },
+                      }"
+                      class="name-cell align-middle player-name clickable name-column"
+                      :class="{
+                        'rank-1-name': entry.rank === 1,
+                        'rank-2-name': entry.rank === 2,
+                        'rank-3-name': entry.rank === 3,
+                      }"
+                    >
+                      <div class="name-text">{{ entry.name }}</div>
+                    </SmartLink>
+                    <td
+                      class="date-column"
+                      :title="
+                        new Date(entry.date * 1000)
+                          .toLocaleDateString('en-CA')
+                          .replace(/-/g, '/')
+                      "
+                    >
+                      {{ formatDate(entry.date) }}
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>

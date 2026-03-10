@@ -7,63 +7,78 @@
           <div class="skeleton skeleton-title"></div>
           <div class="skeleton skeleton-subtitle"></div>
         </div>
-        <div class="skeleton skeleton-checkbox min-mode-skel"></div>
+        <div
+          v-if="!isMobile"
+          class="skeleton skeleton-checkbox min-mode-skel"
+        ></div>
       </div>
-      <div class="players-cards-container" :class="{ 'min-mode': isMinMode }">
+      <div class="players-cards-container" :class="{ 'min-mode': minMode }">
         <div
           v-for="n in 20"
           :key="n"
           class="player-card"
-          :class="{ 'min-mode': isMinMode }"
+          :class="{ 'min-mode': minMode }"
         >
+          <!-- Ranks section -->
           <div class="ranks-section">
             <div class="player-ranks">
-              <template v-if="!isMinMode">
+              <template v-if="!minMode">
                 <div class="skeleton skeleton-rank"></div>
                 <div class="skeleton skeleton-rank"></div>
               </template>
               <template v-else>
-                <div class="skeleton skeleton-rank"></div>
+                <div class="skeleton skeleton-rank rank-min"></div>
               </template>
             </div>
           </div>
+
+          <!-- Player info section -->
           <div class="player-info-section">
             <div class="player-link-skel">
-              <div
-                v-if="!isMinMode"
-                class="skeleton skeleton-avatar-large"
-              ></div>
+              <div v-if="!minMode" class="skeleton skeleton-avatar-large"></div>
               <div class="player-details">
                 <div class="name-row-skel">
                   <div
-                    v-if="isMinMode"
+                    v-if="minMode"
                     class="skeleton skeleton-avatar-small"
                   ></div>
                   <div class="skeleton skeleton-player-name"></div>
                 </div>
                 <div
-                  v-if="!isMinMode"
+                  v-if="!minMode"
                   class="skeleton skeleton-player-country"
                 ></div>
               </div>
             </div>
           </div>
+
+          <!-- Map info section -->
           <div class="map-info-section">
             <div class="map-details-skel">
               <div
                 class="skeleton skeleton-class-icon"
-                :class="{ small: isMinMode }"
+                :class="{ small: minMode }"
               ></div>
-              <div class="skeleton skeleton-map-name"></div>
+              <div
+                class="skeleton skeleton-map-name"
+                :class="{ 'map-name-min': minMode }"
+              ></div>
             </div>
           </div>
-          <div class="server-info-section">
-            <div class="skeleton skeleton-server-name"></div>
+
+          <!-- Server info section: stacked in full-mode, row in min-mode, hidden on mobile min-mode -->
+          <div class="server-info-section" :class="{ 'min-mode': minMode }">
+            <div
+              class="skeleton skeleton-server-name"
+              :class="{ 'server-name-min': minMode }"
+            ></div>
             <div class="skeleton skeleton-btn"></div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Servers table skeleton -->
     <div v-else class="table-wrapper">
       <div class="table-header-content">
         <div class="table-header-top">
@@ -155,22 +170,37 @@ export default {
   data() {
     return {
       windowWidth: window.innerWidth,
+      // Mirror parent: read saved preference from localStorage
+      manualMinMode: localStorage.getItem("minMode") === "true",
     };
   },
   computed: {
-    isMinMode() {
-      return this.windowWidth <= 1200;
+    isMobile() {
+      return this.windowWidth <= 992;
+    },
+    // Mirrors parent logic exactly:
+    // - On mobile (≤992px): always min-mode
+    // - On desktop: respect localStorage preference
+    minMode() {
+      return this.isMobile ? true : this.manualMinMode;
     },
   },
   mounted() {
     window.addEventListener("resize", this.onResize);
+    window.addEventListener("storage", this.onStorageChange);
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.onResize);
+    window.removeEventListener("storage", this.onStorageChange);
   },
   methods: {
     onResize() {
       this.windowWidth = window.innerWidth;
+    },
+    onStorageChange(event) {
+      if (event.key === "minMode") {
+        this.manualMinMode = event.newValue === "true";
+      }
     },
   },
 };
@@ -222,10 +252,15 @@ export default {
   height: 28px;
   border-radius: 6px;
 }
+.skeleton-rank.rank-min {
+  width: 44px;
+  height: 24px;
+}
 .skeleton-avatar-large {
   width: 54px;
   height: 54px;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 .skeleton-avatar-small {
   width: 24px;
@@ -253,6 +288,10 @@ export default {
 .skeleton-map-name {
   width: 120px;
   height: 1rem;
+}
+.skeleton-map-name.map-name-min {
+  width: 90px;
+  height: 0.85rem;
 }
 .skeleton-server-name {
   width: 80%;
@@ -390,6 +429,7 @@ export default {
 }
 
 .player-card.min-mode {
+  grid-template-columns: 65px minmax(100px, 200px) minmax(110px, auto) auto;
   padding: 0.2rem 0.4rem;
   gap: 1rem;
 }
@@ -417,6 +457,8 @@ export default {
 
 .player-card.min-mode .player-info-section {
   min-height: unset;
+  padding-left: 0;
+  border-right: 1px solid var(--color-border-soft);
 }
 
 .player-link-skel {
@@ -468,9 +510,19 @@ export default {
   padding: 0.5rem;
 }
 
-.player-card.min-mode .server-info-section {
+.server-info-section.min-mode {
   flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
   padding-left: 1rem;
+}
+
+.skeleton-server-name.server-name-min {
+  flex: 1;
+  min-width: 60px;
+  height: 0.75rem;
+  margin-bottom: 0;
 }
 
 .table-wrapper {
@@ -566,13 +618,40 @@ export default {
   width: 12%;
 }
 
-@media (max-width: 1200px) {
-  .min-mode-skel {
-    display: none;
+@media (max-width: 1400px) {
+  .player-card:not(.min-mode) {
+    grid-template-columns: 0.4fr 1.3fr 1.8fr 1.8fr;
+  }
+  .skeleton-avatar-large {
+    width: 40px;
+    height: 40px;
+  }
+  .skeleton-player-name {
+    width: 100px;
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199px) {
+  .player-card:not(.min-mode) {
+    grid-template-columns: 0.4fr 1.3fr 1.6fr 1.6fr;
+  }
+  .skeleton-avatar-large {
+    width: 34px;
+    height: 34px;
+  }
+  .skeleton-player-name {
+    width: 80px;
+  }
+  .skeleton-class-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .skeleton-map-name {
+    width: 90px;
+  }
+}
+
+@media (max-width: 992px) {
   .player-card:not(.min-mode) {
     grid-template-columns: 1fr;
     gap: 0.8rem;
@@ -597,6 +676,8 @@ export default {
     border-bottom: 1px solid var(--color-border-soft);
     padding-left: 0;
     padding-bottom: 0.8rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .player-card:not(.min-mode) .server-info-section {
@@ -614,6 +695,7 @@ export default {
   .player-card.min-mode .ranks-section {
     border-right: 1px solid var(--color-border-soft);
     padding: 0 0.5rem;
+    justify-content: center;
   }
 
   .player-card.min-mode .player-info-section {
@@ -628,12 +710,16 @@ export default {
     padding: 0 0.5rem 0 0;
   }
 
-  .player-card.min-mode .server-info-section {
+  .player-card.min-mode .server-info-section.min-mode {
     display: none;
   }
 }
 
 @media (max-width: 767.98px) {
+  .player-card.min-mode {
+    grid-template-columns: 65px minmax(100px, 150px) minmax(110px, auto) auto;
+  }
+
   .topplayers-header {
     flex-direction: column !important;
     align-items: center !important;

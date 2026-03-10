@@ -29,7 +29,7 @@
             :style="{
               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${
                 map?.name || mapName
-              }.jpg')`,
+              }.webp')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }"
@@ -156,7 +156,7 @@
               background: `
                 linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                 radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                url('/map-backgrounds/${map.name}.jpg') center/cover no-repeat
+                url('/map-backgrounds/${map.name}.webp') center/cover no-repeat
               `,
               backgroundBlendMode: 'multiply, normal, normal',
               backgroundSize: 'cover, cover, cover',

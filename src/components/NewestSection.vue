@@ -19,7 +19,7 @@
             <div
               class="card-bg"
               :style="{
-                backgroundImage: `url('/map-backgrounds/medium/${currentMap.name}.jpg')`,
+                backgroundImage: `url('/map-backgrounds/${currentMap.name}.webp')`,
               }"
             ></div>
             <div class="card-inner">

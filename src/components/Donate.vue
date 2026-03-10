@@ -21,7 +21,7 @@
               <p class="donation-description">
                 Donations are not necessary or needed in order to keep plaza
                 running. If you still would like to support me that is very much
-                appreciated. Tempus Plaza is not associated or affiliated with
+                appreciated! Tempus Plaza is not associated or affiliated with
                 Tempus and donations will not go towards Tempus itself.
               </p>
             </div>
@@ -59,78 +59,29 @@
             </div>
           </div>
         </div>
-
         <div class="preview-section">
-          <h2 class="preview-title">{{ previewTitle }}</h2>
+          <h2 class="preview-title">
+            Donating unlocks different profile banner colours
+          </h2>
+          <p class="preview-subtitle">
+            This is what your profile could look like with donator perks!
+          </p>
           <div v-if="loading" class="loading-message">
             Loading your profile data...
           </div>
           <div v-else class="banner-container">
-            <div
-              v-for="index in 4"
+            <ProfileBanner
+              v-for="index in 3"
               :key="index"
-              class="profile-banner"
-              :style="{
-                background: `linear-gradient(135deg, ${
-                  bannerColors[(index - 1) % bannerColors.length][0]
-                }, ${bannerColors[(index - 1) % bannerColors.length][1]})`,
-                transform: index % 2 === 0 ? 'rotate(-1deg)' : 'rotate(1deg)',
-                opacity: 0.8 + (index - 1) * 0.05,
-              }"
-            >
-              <div
-                class="row g-0"
-                style="height: 100%; display: flex; align-items: center"
-              >
-                <div
-                  class="col-md-4 d-flex flex-column align-items-center profile-left p-3"
-                >
-                  <div class="donator-badge">
-                    <span class="badge-text">Donator</span>
-                  </div>
-                  <img
-                    :src="player.avatar || '/avatars/default-avatar.jpg'"
-                    alt="Avatar"
-                    class="rounded-circle avatar mb-2"
-                  />
-                  <div class="profile-info text-center">
-                    <h1 class="player-name">{{ player.name }}</h1>
-                    <p class="rank-name mb-1">
-                      <span :class="playerRankInfo.color">{{
-                        playerRankInfo.title
-                      }}</span>
-                    </p>
-                    <p class="country mb-2">
-                      <img
-                        :src="getFlagUrl(player.country_code)"
-                        alt="flag"
-                        class="flag-icon"
-                      />
-                      {{ player.country || "United States (US)" }}
-                    </p>
-                  </div>
-                </div>
-                <div class="col-md-8 d-flex align-items-center profile-right">
-                  <div class="row p-2 profile-overview">
-                    <div
-                      class="col-md-4 mb-2"
-                      v-for="(stat, statIndex) in playerStats"
-                      :key="statIndex"
-                    >
-                      <div class="card banner-block h-100">
-                        <div class="rank-card-body text-center">
-                          <h5 class="card-title">{{ stat.title }}</h5>
-                          <p class="card-text player-stats">{{ stat.value }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              :player="previewPlayer"
+              :playerRankInfo="playerRankInfo"
+              :bannerColors="
+                bannerColorPairs[(index - 1) % bannerColorPairs.length]
+              "
+              :loading="false"
+            />
           </div>
         </div>
-
         <div class="donators-carousel-section">
           <h2 class="donators-title">Our Amazing Donators</h2>
           <div v-if="donators.length" class="carousel-container">
@@ -173,6 +124,7 @@
 
 <script>
 import { useHead } from "@vueuse/head";
+import ProfileBanner from "@/components/ProfileBanner.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const cache = new Map();
@@ -238,16 +190,16 @@ function getRankData(rank) {
     femaleColor: "--color-peon",
   };
 }
-
 export default {
   name: "DonatePage",
+  components: { ProfileBanner },
   setup() {
     useHead({
       title: "Tempus Plaza | Support",
       meta: [
         {
           name: "description",
-          content: "Support Tempus Plaza and unlock exclusive donator perks.",
+          content: "Support Tempus Plaza",
         },
       ],
     });
@@ -259,11 +211,11 @@ export default {
       playerId: null,
       player: {
         name: "Your Name Here",
-        country: "United States (US)",
+        country: "United States",
         country_code: "us",
-        avatar: null,
+        steam_avatar: null,
         gender: "male",
-        donator: false,
+        donator: true,
         color: "blue",
         overall_rank: 10,
         soldier_rank: 12,
@@ -294,20 +246,15 @@ export default {
     this.stopCarousel();
   },
   computed: {
-    formatNumber() {
-      return (num) =>
-        num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
-    },
     getFlagUrl() {
       return (countryCode) =>
         "https://flagcdn.com/24x18/" +
         (countryCode || "us").toLowerCase() +
         ".png";
     },
-    previewTitle() {
-      return this.isLoggedIn
-        ? "Your Profile with Donator Perks"
-        : "Preview: Profile with Donator Perks";
+    // Player object passed to ProfileBanner — always show donator=true for preview
+    previewPlayer() {
+      return { ...this.player, donator: true };
     },
     highestRank() {
       if (!this.isLoggedIn || !this.player.overall_rank) return 10;
@@ -330,62 +277,24 @@ export default {
         color: isMale ? rankData.maleColor : rankData.femaleColor,
       };
     },
-    playerStats() {
-      const stats = [
-        {
-          title: "Overall Rank",
-          key: "overall_rank",
-          default: 10,
-          prefix: "#",
-        },
-        {
-          title: "Soldier Rank",
-          key: "soldier_rank",
-          default: 12,
-          prefix: "#",
-        },
-        {
-          title: "Demoman Rank",
-          key: "demoman_rank",
-          default: 15,
-          prefix: "#",
-        },
-        {
-          title: "Overall Points",
-          key: "overall_points",
-          default: 1200,
-          format: true,
-        },
-        {
-          title: "Soldier Points",
-          key: "soldier_points",
-          default: 600,
-          format: true,
-        },
-        {
-          title: "Demoman Points",
-          key: "demoman_points",
-          default: 600,
-          format: true,
-        },
-      ];
-      return stats.map(
-        ({ title, key, default: defaultVal, prefix = "", format = false }) => {
-          let value = this.isLoggedIn
-            ? this.player[key] || defaultVal
-            : defaultVal;
-          if (format) value = this.formatNumber(value);
-          return { title, value: prefix + value };
-        },
-      );
-    },
-    bannerColors() {
+    bannerColorPairs() {
       return [
-        ["var(--color-banner-red-1)", "var(--color-banner-red-2)"],
-        ["var(--color-banner-purple-1)", "var(--color-banner-purple-2)"],
-        ["var(--color-banner-teal-1)", "var(--color-banner-teal-2)"],
-        ["var(--color-banner-cyan-1)", "var(--color-banner-cyan-2)"],
-        ["var(--color-banner-orange-1)", "var(--color-banner-orange-2)"],
+        {
+          color1: "var(--color-banner-red-1)",
+          color2: "var(--color-banner-red-2)",
+        },
+        {
+          color1: "var(--color-banner-purple-1)",
+          color2: "var(--color-banner-purple-2)",
+        },
+        {
+          color1: "var(--color-banner-teal-1)",
+          color2: "var(--color-banner-teal-2)",
+        },
+        {
+          color1: "var(--color-banner-cyan-1)",
+          color2: "var(--color-banner-cyan-2)",
+        },
       ];
     },
   },
@@ -442,8 +351,8 @@ export default {
           const p = data[0];
           Object.assign(this.player, {
             ...p,
-            avatar: p.steam_avatar || "golly.jpg",
-            country: p.country || "United States (US)",
+            steam_avatar: p.steam_avatar || "golly.jpg",
+            country: p.country || "United States",
             country_code: p.country_code || "us",
           });
         }
@@ -662,137 +571,31 @@ code {
 
 .preview-title {
   color: var(--color-text, #fff);
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
   text-align: center;
   margin-bottom: 30px;
 }
 
+.preview-subtitle {
+  color: var(--color-text-muted, #bbb);
+  font-size: 15px;
+  text-align: center;
+  margin-top: -20px;
+  margin-bottom: 10px;
+}
+
 .banner-container {
   width: 100%;
-  max-width: 700px;
-  margin: 20px auto;
-  perspective: 1000px;
-}
-.profile-banner {
-  background: linear-gradient(
-    135deg,
-    var(--color-banner-blue-1),
-    var(--color-banner-blue-2)
-  );
-  border: 1px solid rgba(42, 42, 42, 0.99);
-  position: relative;
-  border-radius: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  margin-bottom: 14px;
-  border: 2px solid gold;
-  animation: goldenGlow 3s infinite;
-  transition: all 0.3s ease;
-}
-
-.profile-banner:hover {
-  transform: scale(1.02) !important;
-}
-
-@keyframes goldenGlow {
-  0% {
-    box-shadow: 0 0 5px gold;
-  }
-  50% {
-    box-shadow: 0 0 20px gold;
-  }
-  100% {
-    box-shadow: 0 0 5px gold;
-  }
-}
-
-.donator-badge {
-  position: absolute;
-  top: 7px;
-  left: 7px;
-  background: gold;
-  color: black;
-  padding: 2px 7px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 9px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
-  }
-}
-
-.avatar {
-  width: 58px;
-  height: 58px;
-  border: 2px solid gold;
-  margin-top: 20px;
-}
-
-.player-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
-  color: var(--color-text, #fff);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.rank-name {
-  color: var(--color-text, #fff);
-  font-weight: bold;
-  font-size: 10px;
-  margin-bottom: 4px;
-}
-
-.country {
-  font-size: 9px;
-  font-weight: bold;
-  color: #d5d5d5;
-}
-
-.flag-icon {
-  width: 14px;
-  height: 10px;
-  vertical-align: middle;
-  border-radius: 2px;
-}
-
-.banner-block {
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  border-radius: 8px;
-}
-
-.banner-block .card-title {
-  color: #aaa;
-  font-weight: 600;
-  font-size: 10px;
-  margin-bottom: 1px;
-}
-
-.banner-block .card-text {
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.rank-card-body {
-  padding: 7px 5px;
-}
-
-.player-stats {
-  color: var(--color-text, #fff) !important;
+.banner-container :deep(.profile-banner):hover {
+  transform: scale(1.01) !important;
 }
 
 .donators-carousel-section {
@@ -907,15 +710,6 @@ code {
 }
 
 @media (max-width: 768px) {
-  .profile-banner {
-    animation: none !important;
-    box-shadow: 0 0 10px gold;
-  }
-
-  .donator-badge {
-    animation: none !important;
-  }
-
   .carousel-track {
     animation-duration: 60s;
   }
@@ -952,33 +746,6 @@ code {
   }
   .banner-container {
     max-width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .profile-banner {
-    max-width: 250px;
-    width: 100%;
-    margin-bottom: 0;
-  }
-  .avatar {
-    width: 44px;
-    height: 44px;
-  }
-  .player-name {
-    font-size: 0.7rem;
-  }
-  .rank-name {
-    font-size: 9px;
-  }
-  .banner-block .card-title {
-    font-size: 9px;
-  }
-  .banner-block .card-text {
-    font-size: 0.7rem;
-  }
-  .rank-card-body {
-    padding: 5px 4px;
   }
   .donators-title {
     font-size: 22px;
@@ -1004,26 +771,6 @@ code {
     font-size: 14px;
     width: 100%;
     justify-content: center;
-  }
-  .avatar {
-    width: 36px;
-    height: 36px;
-    margin-top: 14px;
-  }
-  .player-name {
-    font-size: 0.65rem;
-  }
-  .rank-name {
-    font-size: 8px;
-  }
-  .banner-block .card-title {
-    font-size: 8px;
-  }
-  .banner-block .card-text {
-    font-size: 0.65rem;
-  }
-  .rank-card-body {
-    padding: 4px 3px;
   }
   .donator-card {
     width: 140px;

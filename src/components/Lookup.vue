@@ -86,7 +86,7 @@
         v-else-if="mapId"
         class="lookup-map-banner"
         :style="{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }"

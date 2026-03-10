@@ -2,6 +2,21 @@
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
+    <transition name="toast-fade">
+      <div
+        v-if="toast.visible"
+        class="toast-notification"
+        :class="'toast-' + toast.type"
+      >
+        <span class="toast-icon">
+          <span v-if="toast.type === 'warning'">⚠️</span>
+          <span v-else-if="toast.type === 'error'">❌</span>
+          <span v-else>ℹ️</span>
+        </span>
+        {{ toast.message }}
+      </div>
+    </transition>
+
     <div class="container py-4 d-flex" style="margin-bottom: 10rem !important">
       <div
         v-if="playerNotFound"
@@ -114,14 +129,20 @@
             </div>
           </div>
         </div>
-        <div class="row g-3 mt-3">
+        <div v-show="hasRotwVideos" class="row g-3 mt-2">
           <div class="col-12">
-            <RotwVideos :player-id="playerId" />
+            <RotwVideos
+              :player-id="playerId"
+              @has-content="hasRotwVideos = $event"
+            />
           </div>
         </div>
-        <div class="row g-3 mt-3">
+        <div v-show="hasAuthoredMaps" class="row g-3 mt-2">
           <div class="col-12">
-            <AuthoredMaps :player-id="playerId" />
+            <AuthoredMaps
+              :player-id="playerId"
+              @has-content="hasAuthoredMaps = $event"
+            />
           </div>
         </div>
         <MapSearchModal
@@ -186,6 +207,14 @@ export default {
     AuthoredMaps,
   },
   data: () => ({
+    hasRotwVideos: false,
+    hasAuthoredMaps: false,
+    toast: {
+      visible: false,
+      message: "",
+      type: "info",
+    },
+    _toastTimer: null,
     currentTime: new Date(),
     updateTimer: null,
     debounceTimer: null,
@@ -450,6 +479,8 @@ export default {
             shared: true,
             "Latest runs": true,
           };
+          this.hasRotwVideos = false;
+          this.hasAuthoredMaps = false;
           this.currentPage = 1;
           this.currentStatType.soldier = "total";
           this.currentStatType.demoman = "total";
@@ -657,6 +688,13 @@ export default {
         this.classWarningTimeout = null;
       }
     },
+    showToast(message, type = "info") {
+      this.toast = { message, type, visible: true };
+      if (this._toastTimer) clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => {
+        this.toast.visible = false;
+      }, 3000);
+    },
     async fetchUser() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/get-user`, {
@@ -687,10 +725,28 @@ export default {
             method: "POST",
           },
         );
-        if (!response.ok)
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (
+            response.status === 409 ||
+            errorData.code === "ER_DUP_ENTRY" ||
+            (errorData.message && errorData.message.includes("Duplicate"))
+          ) {
+            this.showToast(
+              "This map is already in your favourites!",
+              "warning",
+            );
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
+        }
       } catch (error) {
+        if (error.message && error.message.includes("already")) {
+          this.showToast("This map is already in your favourites!", "warning");
+          return;
+        }
         console.error("Failed to update favorite map:", error);
+        this.showToast("Failed to update favourite map.", "error");
       }
     },
     async removeMap() {
@@ -906,7 +962,7 @@ export default {
       return `https://flagcdn.com/24x18/${validCode}.png`;
     },
     handleImageError(event) {
-      event.target.src = "/icons/default-flag.jpg";
+      event.target.src = "/icons/default-flag.webp";
     },
     returnToAllPlayers() {
       this.$router.push({ name: "Players" });
@@ -1304,12 +1360,54 @@ export default {
   },
   beforeDestroy() {
     clearTimeout(this.debounceTimer);
+    if (this._toastTimer) clearTimeout(this._toastTimer);
     this._cachedRankInfo = null;
   },
 };
 </script>
 
 <style scoped>
+.toast-notification {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast-warning {
+  background: rgba(255, 190, 60, 0.15);
+  border: 1px solid rgba(255, 190, 60, 0.5);
+  color: #ffd070;
+}
+.toast-error {
+  background: rgba(220, 60, 60, 0.15);
+  border: 1px solid rgba(220, 60, 60, 0.5);
+  color: #ff8080;
+}
+.toast-info {
+  background: rgba(60, 140, 255, 0.15);
+  border: 1px solid rgba(60, 140, 255, 0.5);
+  color: #80b8ff;
+}
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+}
 .container > div {
   width: 100%;
 }

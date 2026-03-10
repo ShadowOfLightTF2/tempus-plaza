@@ -127,10 +127,8 @@
         </div>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <PlayersSkeleton v-if="loading && initialLoad" />
-      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+      <div v-if="error" class="alert alert-danger">{{ error }}</div>
       <div
-        v-else
         class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
       >
         <div class="soldier-table-container">
@@ -169,160 +167,167 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-if="
-                      userRankSoldier &&
-                      (!displayedSoldierPlayers.some(
-                        (p) => p.player_id === currentUserId,
-                      ) ||
-                        userRankSoldier.rank > 50)
-                    "
-                    class="fade-in user-rank-row"
-                    style="border-bottom: 2px solid var(--color-border)"
-                  >
-                    <td class="rank-column">#{{ userRankSoldier.rank }}</td>
-                    <SmartLink
+                  <template v-if="initialLoad">
+                    <PlayersSkeleton />
+                  </template>
+                  <template v-else>
+                    <tr
                       v-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem !== 'Total'
+                        userRankSoldier &&
+                        (!displayedSoldierPlayers.some(
+                          (p) => p.player_id === currentUserId,
+                        ) ||
+                          userRankSoldier.rank > 50)
                       "
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRankSoldier.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
+                      class="fade-in user-rank-row"
+                      style="border-bottom: 2px solid var(--color-border)"
                     >
-                      <img
-                        :src="userRankSoldier.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ userRankSoldier.name }}
-                    </SmartLink>
-                    <td
-                      v-else-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem === 'Total'
-                      "
-                      class="country-cell align-middle fancy-hover clickable name-column"
-                      @click="selectCountryFromSearch(userRankSoldier)"
+                      <td class="rank-column">#{{ userRankSoldier.rank }}</td>
+                      <SmartLink
+                        v-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem !== 'Total'
+                        "
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRankSoldier.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="userRankSoldier.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ userRankSoldier.name }}
+                      </SmartLink>
+                      <td
+                        v-else-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem === 'Total'
+                        "
+                        class="country-cell align-middle fancy-hover clickable name-column"
+                        @click="selectCountryFromSearch(userRankSoldier)"
+                      >
+                        <img
+                          :src="userRankSoldier.flag"
+                          alt="Country Flag"
+                          class="flag"
+                          @error="handleError"
+                        />
+                        {{ userRankSoldier.name }}
+                      </td>
+                      <SmartLink
+                        v-else
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRankSoldier.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="userRankSoldier.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ userRankSoldier.name }}
+                      </SmartLink>
+                      <td
+                        class="points-column"
+                        :class="{
+                          'percentage-column':
+                            selectedCategory === 'completion',
+                        }"
+                      >
+                        {{
+                          selectedCategory === "completion"
+                            ? userRankSoldier.amount + "%"
+                            : userRankSoldier.amount
+                                .toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                      </td>
+                    </tr>
+                    <tr
+                      v-for="(player, index) in displayedSoldierPlayers"
+                      :key="'soldier-' + player.id"
+                      class="fade-in"
                     >
-                      <img
-                        :src="userRankSoldier.flag"
-                        alt="Country Flag"
-                        class="flag"
-                        @error="handleError"
-                      />
-                      {{ userRankSoldier.name }}
-                    </td>
-                    <SmartLink
-                      v-else
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRankSoldier.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="userRankSoldier.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ userRankSoldier.name }}
-                    </SmartLink>
-                    <td
-                      class="points-column"
-                      :class="{
-                        'percentage-column': selectedCategory === 'completion',
-                      }"
-                    >
-                      {{
-                        selectedCategory === "completion"
-                          ? userRankSoldier.amount + "%"
-                          : userRankSoldier.amount
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }}
-                    </td>
-                  </tr>
-                  <tr
-                    v-for="(player, index) in displayedSoldierPlayers"
-                    :key="'soldier-' + player.id"
-                    class="fade-in"
-                  >
-                    <td class="rank-column">#{{ index + 1 }}</td>
-                    <SmartLink
-                      v-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem !== 'Total'
-                      "
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: player.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="player.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </SmartLink>
-                    <td
-                      v-else-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem === 'Total'
-                      "
-                      class="country-cell align-middle fancy-hover clickable name-column"
-                      @click="selectCountryFromSearch(player)"
-                    >
-                      <img
-                        :src="player.flag"
-                        alt="Country Flag"
-                        class="flag"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </td>
-                    <SmartLink
-                      v-else
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: player.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="player.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </SmartLink>
-                    <td
-                      class="points-column"
-                      :class="{
-                        'percentage-column': selectedCategory === 'completion',
-                      }"
-                    >
-                      {{
-                        selectedCategory === "completion"
-                          ? player.percentage + "%"
-                          : player.amount
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }}
-                    </td>
-                  </tr>
+                      <td class="rank-column">#{{ index + 1 }}</td>
+                      <SmartLink
+                        v-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem !== 'Total'
+                        "
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="player.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </SmartLink>
+                      <td
+                        v-else-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem === 'Total'
+                        "
+                        class="country-cell align-middle fancy-hover clickable name-column"
+                        @click="selectCountryFromSearch(player)"
+                      >
+                        <img
+                          :src="player.flag"
+                          alt="Country Flag"
+                          class="flag"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </td>
+                      <SmartLink
+                        v-else
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="player.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </SmartLink>
+                      <td
+                        class="points-column"
+                        :class="{
+                          'percentage-column':
+                            selectedCategory === 'completion',
+                        }"
+                      >
+                        {{
+                          selectedCategory === "completion"
+                            ? player.percentage + "%"
+                            : player.amount
+                                .toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                      </td>
+                    </tr>
+                  </template>
                 </tbody>
               </table>
             </div>
@@ -392,161 +397,167 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- User's Rank Row for Demoman -->
-                  <tr
-                    v-if="
-                      userRankDemoman &&
-                      (!displayedDemomanPlayers.some(
-                        (p) => p.player_id === currentUserId,
-                      ) ||
-                        userRankDemoman.rank > 50)
-                    "
-                    class="fade-in user-rank-row"
-                    style="border-bottom: 2px solid var(--color-border)"
-                  >
-                    <td class="rank-column">#{{ userRankDemoman.rank }}</td>
-                    <SmartLink
+                  <template v-if="initialLoad">
+                    <PlayersSkeleton />
+                  </template>
+                  <template v-else>
+                    <tr
                       v-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem !== 'Total'
+                        userRankDemoman &&
+                        (!displayedDemomanPlayers.some(
+                          (p) => p.player_id === currentUserId,
+                        ) ||
+                          userRankDemoman.rank > 50)
                       "
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRankDemoman.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
+                      class="fade-in user-rank-row"
+                      style="border-bottom: 2px solid var(--color-border)"
                     >
-                      <img
-                        :src="userRankDemoman.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ userRankDemoman.name }}
-                    </SmartLink>
-                    <td
-                      v-else-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem === 'Total'
-                      "
-                      class="country-cell align-middle fancy-hover clickable name-column"
-                      @click="selectCountryFromSearch(userRankDemoman)"
+                      <td class="rank-column">#{{ userRankDemoman.rank }}</td>
+                      <SmartLink
+                        v-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem !== 'Total'
+                        "
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRankDemoman.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="userRankDemoman.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ userRankDemoman.name }}
+                      </SmartLink>
+                      <td
+                        v-else-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem === 'Total'
+                        "
+                        class="country-cell align-middle fancy-hover clickable name-column"
+                        @click="selectCountryFromSearch(userRankDemoman)"
+                      >
+                        <img
+                          :src="userRankDemoman.flag"
+                          alt="Country Flag"
+                          class="flag"
+                          @error="handleError"
+                        />
+                        {{ userRankDemoman.name }}
+                      </td>
+                      <SmartLink
+                        v-else
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRankDemoman.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="userRankDemoman.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ userRankDemoman.name }}
+                      </SmartLink>
+                      <td
+                        class="points-column"
+                        :class="{
+                          'percentage-column':
+                            selectedCategory === 'completion',
+                        }"
+                      >
+                        {{
+                          selectedCategory === "completion"
+                            ? userRankDemoman.amount + "%"
+                            : userRankDemoman.amount
+                                .toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                      </td>
+                    </tr>
+                    <tr
+                      v-for="(player, index) in displayedDemomanPlayers"
+                      :key="'demoman-' + player.id"
+                      class="fade-in"
                     >
-                      <img
-                        :src="userRankDemoman.flag"
-                        alt="Country Flag"
-                        class="flag"
-                        @error="handleError"
-                      />
-                      {{ userRankDemoman.name }}
-                    </td>
-                    <SmartLink
-                      v-else
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRankDemoman.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="userRankDemoman.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ userRankDemoman.name }}
-                    </SmartLink>
-                    <td
-                      class="points-column"
-                      :class="{
-                        'percentage-column': selectedCategory === 'completion',
-                      }"
-                    >
-                      {{
-                        selectedCategory === "completion"
-                          ? userRankDemoman.amount + "%"
-                          : userRankDemoman.amount
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }}
-                    </td>
-                  </tr>
-                  <tr
-                    v-for="(player, index) in displayedDemomanPlayers"
-                    :key="'demoman-' + player.id"
-                    class="fade-in"
-                  >
-                    <td class="rank-column">#{{ index + 1 }}</td>
-                    <SmartLink
-                      v-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem !== 'Total'
-                      "
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: player.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="player.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </SmartLink>
-                    <td
-                      v-else-if="
-                        selectedCategory === 'countries' &&
-                        selectedItem === 'Total'
-                      "
-                      class="country-cell align-middle fancy-hover clickable name-column"
-                      @click="selectCountryFromSearch(player)"
-                    >
-                      <img
-                        :src="player.flag"
-                        alt="Country Flag"
-                        class="flag"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </td>
-                    <SmartLink
-                      v-else
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: player.player_id },
-                      }"
-                      class="name-cell align-middle fancy-hover clickable name-column"
-                    >
-                      <img
-                        :src="player.steam_avatar"
-                        alt="Steam Avatar"
-                        class="avatar"
-                        @error="handleError"
-                      />
-                      {{ player.name }}
-                    </SmartLink>
-                    <td
-                      class="points-column"
-                      :class="{
-                        'percentage-column': selectedCategory === 'completion',
-                      }"
-                    >
-                      {{
-                        selectedCategory === "completion"
-                          ? player.percentage + "%"
-                          : player.amount
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }}
-                    </td>
-                  </tr>
+                      <td class="rank-column">#{{ index + 1 }}</td>
+                      <SmartLink
+                        v-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem !== 'Total'
+                        "
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="player.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </SmartLink>
+                      <td
+                        v-else-if="
+                          selectedCategory === 'countries' &&
+                          selectedItem === 'Total'
+                        "
+                        class="country-cell align-middle fancy-hover clickable name-column"
+                        @click="selectCountryFromSearch(player)"
+                      >
+                        <img
+                          :src="player.flag"
+                          alt="Country Flag"
+                          class="flag"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </td>
+                      <SmartLink
+                        v-else
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: player.player_id },
+                        }"
+                        class="name-cell align-middle fancy-hover clickable name-column"
+                      >
+                        <img
+                          :src="player.steam_avatar"
+                          alt="Steam Avatar"
+                          class="avatar"
+                          @error="handleError"
+                        />
+                        {{ player.name }}
+                      </SmartLink>
+                      <td
+                        class="points-column"
+                        :class="{
+                          'percentage-column':
+                            selectedCategory === 'completion',
+                        }"
+                      >
+                        {{
+                          selectedCategory === "completion"
+                            ? player.percentage + "%"
+                            : player.amount
+                                .toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                      </td>
+                    </tr>
+                  </template>
                 </tbody>
               </table>
             </div>
@@ -1311,8 +1322,8 @@ export default {
 }
 
 .class-icon {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   margin: 8px;
 }
 
@@ -1467,6 +1478,12 @@ export default {
     padding: 12px 18px;
     font-size: 14px;
   }
+
+  .class-icon {
+    width: 38px;
+    height: 38px;
+    margin: 6px;
+  }
 }
 
 @media (max-width: 992px) {
@@ -1512,8 +1529,8 @@ export default {
     font-size: 14px;
   }
   .class-icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 }
 

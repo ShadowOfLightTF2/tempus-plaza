@@ -1313,7 +1313,7 @@ body {
 .nav-link {
   color: #ffffff !important;
   font-weight: bold !important;
-  border-radius: 30px;
+  border-radius: 10px;
   padding: 10px 15px !important;
   border: 2px solid transparent !important;
 }
@@ -1326,8 +1326,12 @@ body {
 
 .nav-link.active {
   color: var(--color-text);
-  border-color: var(--color-primary, #007bff) !important;
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary, #4a7fc0) !important;
+  background: linear-gradient(
+    to right,
+    rgba(74, 111, 165, 0.35),
+    rgba(74, 111, 165, 0.15)
+  );
 }
 .bg-custom {
   background: linear-gradient(
@@ -1373,7 +1377,7 @@ body {
 .login-button {
   color: #ffffff !important;
   font-weight: bold !important;
-  border-radius: 30px !important;
+  border-radius: 10px !important;
   padding: 10px 15px !important;
   border: 2px solid transparent !important;
 }
@@ -2093,7 +2097,7 @@ body {
 .dropdown-toggle {
   color: #ffffff !important;
   font-weight: bold !important;
-  border-radius: 30px !important;
+  border-radius: 10px !important;
   padding: 10px 15px !important;
   border: 2px solid transparent !important;
   background: transparent !important;

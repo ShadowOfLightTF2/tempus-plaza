@@ -29,42 +29,112 @@
               <div class="skeleton skeleton-filter-btn"></div>
             </div>
           </div>
+          <div class="filter-group mode-toggle-group desktop-only">
+            <div class="skeleton skeleton-filter-label"></div>
+            <div class="skeleton skeleton-checkbox"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="activity-cards-container">
-      <div v-for="i in 20" :key="i" class="activity-card">
-        <!-- Player section -->
-        <div class="activity-player-section">
-          <div class="player-link-skel">
-            <div class="skeleton skeleton-avatar"></div>
-            <div class="skeleton skeleton-player-name"></div>
+    <!-- Day group -->
+    <div class="day-group">
+      <div class="skeleton skeleton-day-label"></div>
+      <div class="activity-cards-container">
+        <div
+          v-for="i in 20"
+          :key="i"
+          class="activity-card-base"
+          :class="isMinMode ? 'is-min-mode' : 'is-normal-mode'"
+        >
+          <!-- CLASS SECTION (normal mode only) -->
+          <div class="card-class-section">
+            <div class="skeleton skeleton-class-icon-normal"></div>
           </div>
-          <div class="skeleton skeleton-class-icon"></div>
-        </div>
 
-        <!-- Map section -->
-        <div class="activity-map-section">
-          <div class="map-details-skel">
-            <div class="map-name-row-skel">
-              <div class="skeleton skeleton-map-name"></div>
-              <div class="skeleton skeleton-map-badge"></div>
+          <!-- PLAYER SECTION -->
+          <div class="card-player-section">
+            <!-- min mode: class icon inline -->
+            <div
+              v-if="isMinMode"
+              class="skeleton skeleton-class-icon-row"
+            ></div>
+            <div class="player-link-skel">
+              <div
+                class="skeleton"
+                :class="
+                  isMinMode ? 'skeleton-avatar-small' : 'skeleton-avatar-large'
+                "
+              ></div>
+              <div class="player-details-skel">
+                <div
+                  class="skeleton skeleton-player-name"
+                  :class="
+                    isMinMode
+                      ? 'skeleton-player-name--min'
+                      : 'skeleton-player-name--normal'
+                  "
+                ></div>
+                <div v-if="!isMinMode" class="skeleton skeleton-country"></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Time section -->
-        <div class="activity-time-section">
-          <div class="rank-time-skel">
-            <div class="skeleton skeleton-time"></div>
-            <div class="skeleton skeleton-rank"></div>
+          <!-- MAP SECTION -->
+          <div class="card-map-section">
+            <div class="map-details-skel">
+              <div class="map-name-row-skel">
+                <div
+                  class="skeleton skeleton-map-name"
+                  :class="
+                    isMinMode
+                      ? 'skeleton-map-name--min'
+                      : 'skeleton-map-name--normal'
+                  "
+                ></div>
+                <div class="skeleton skeleton-map-badge"></div>
+              </div>
+            </div>
+            <!-- min mode: intended class + tier/rating on right -->
+            <div v-if="isMinMode" class="min-mode-meta-skel">
+              <div class="skeleton skeleton-intended-class-icon"></div>
+              <div class="skeleton skeleton-tier-badge"></div>
+            </div>
+            <!-- normal mode: intended class + tier/rating top-right -->
+            <div v-if="!isMinMode" class="normal-map-top-right-skel">
+              <div class="skeleton skeleton-intended-class-icon-normal"></div>
+              <div class="skeleton skeleton-tier-badge"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- Time-ago section -->
-        <div class="activity-timeago-section">
-          <div class="skeleton skeleton-time-ago"></div>
+          <!-- TIME SECTION -->
+          <div class="card-time-section">
+            <div
+              class="time-rank-row-skel"
+              :class="
+                isMinMode
+                  ? 'time-rank-row-skel--min'
+                  : 'time-rank-row-skel--normal'
+              "
+            >
+              <div
+                class="skeleton skeleton-time"
+                :class="
+                  isMinMode ? 'skeleton-time--min' : 'skeleton-time--normal'
+                "
+              ></div>
+              <div class="skeleton skeleton-rank"></div>
+            </div>
+            <div
+              v-if="!isMinMode"
+              class="skeleton skeleton-timeago-normal"
+            ></div>
+          </div>
+
+          <!-- TIMEAGO SECTION (min mode only) -->
+          <div v-if="isMinMode" class="card-timeago-section">
+            <div class="skeleton skeleton-time-ago"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -74,6 +144,35 @@
 <script>
 export default {
   name: "ActivitySkeleton",
+  data() {
+    return {
+      isMinMode:
+        window.innerWidth <= 992
+          ? true
+          : localStorage.getItem("activityMinMode") === "true",
+    };
+  },
+  mounted() {
+    window.addEventListener("resize", this.handleResize);
+    window.addEventListener("storage", this.handleStorageChange);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener("storage", this.handleStorageChange);
+  },
+  methods: {
+    handleResize() {
+      const mobile = window.innerWidth <= 992;
+      this.isMinMode = mobile
+        ? true
+        : localStorage.getItem("activityMinMode") === "true";
+    },
+    handleStorageChange(event) {
+      if (event.key === "activityMinMode" && window.innerWidth > 992) {
+        this.isMinMode = event.newValue === "true";
+      }
+    },
+  },
 };
 </script>
 
@@ -123,12 +222,12 @@ export default {
 
 .header-text {
   flex-shrink: 0;
-  margin-left: 1rem;
+  margin-left: 0.5rem;
 }
 
 .skeleton-header-title {
   width: 200px;
-  height: 24px;
+  height: 28px;
 }
 
 .header-right {
@@ -154,7 +253,6 @@ export default {
 .skeleton-filter-label {
   width: 70px;
   height: 14px;
-  border-radius: 4px;
 }
 
 .class-filter-container,
@@ -170,11 +268,28 @@ export default {
   border-radius: 6px;
 }
 
-/* ── Cards ── */
+.skeleton-checkbox {
+  width: 110px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+/* ── Day group ── */
 .activity-cards {
   width: 100%;
   border-radius: 0 0 8px 8px;
   overflow: hidden;
+}
+
+.day-group {
+  width: 100%;
+}
+
+.skeleton-day-label {
+  width: 60px;
+  height: 20px;
+  border-radius: 4px;
+  margin: 0.75rem 1rem 0.35rem;
 }
 
 .activity-cards-container {
@@ -185,25 +300,67 @@ export default {
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* Match the real card's grid exactly */
-.activity-card {
+/* ── Card base ── */
+.activity-card-base {
   display: grid;
-  grid-template-columns: minmax(0, 250px) 1fr 250px 100px;
-  padding: 0.5rem;
-  gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border-soft);
   border-radius: 8px;
-  min-height: 44px;
+  overflow: hidden;
+}
+
+.activity-card-base.is-min-mode {
+  grid-template-columns: minmax(0, 250px) 1fr 250px 100px;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  min-height: 0;
   align-items: center;
 }
 
-/* Player */
-.activity-player-section {
+.activity-card-base.is-normal-mode {
+  grid-template-columns: 0.2fr 1.2fr 2fr 1.5fr;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  min-height: 75px;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Class section ── */
+.card-class-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.is-min-mode .card-class-section {
+  display: none;
+}
+
+.skeleton-class-icon-normal {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+/* ── Player section ── */
+.card-player-section {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   overflow: hidden;
+  border-right: 1px solid var(--color-border-soft);
+}
+
+.is-normal-mode .card-player-section {
+  padding-left: 0.5rem;
+}
+
+.skeleton-class-icon-row {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .player-link-skel {
@@ -215,42 +372,76 @@ export default {
   min-width: 0;
 }
 
-.skeleton-avatar {
+.is-normal-mode .player-link-skel {
+  gap: 1rem;
+}
+
+.skeleton-avatar-small {
   width: 24px;
   height: 24px;
   border-radius: 4px;
   flex-shrink: 0;
 }
 
+.skeleton-avatar-large {
+  width: 54px;
+  height: 54px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.player-details-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow: hidden;
+  flex: 1;
+}
+
 .skeleton-player-name {
   height: 14px;
   border-radius: 4px;
+}
+
+.skeleton-player-name--min {
   width: 100px;
 }
-
-.skeleton-class-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-left: auto;
+.skeleton-player-name--normal {
+  width: 130px;
 }
 
-/* Map */
-.activity-map-section {
+.skeleton-country {
+  width: 80px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+/* ── Map section ── */
+.card-map-section {
   display: flex;
   align-items: center;
-  border-left: 1px solid var(--color-border-soft);
-  padding-left: 0.75rem;
+  gap: 0.75rem;
+  border-radius: 8px;
   overflow: hidden;
+  position: relative;
+}
+
+.is-min-mode .card-map-section {
+  padding-left: 0.75rem;
+}
+
+.is-normal-mode .card-map-section {
+  padding: 0 0.75rem 0 1.5rem;
+  align-self: stretch;
 }
 
 .map-details-skel {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  width: 100%;
+  gap: 0.15rem;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .map-name-row-skel {
@@ -262,36 +453,107 @@ export default {
 .skeleton-map-name {
   height: 14px;
   border-radius: 4px;
-  width: 130px;
+  flex-shrink: 1;
+}
+
+.skeleton-map-name--min {
+  width: 120px;
+}
+.skeleton-map-name--normal {
+  width: 160px;
 }
 
 .skeleton-map-badge {
   width: 32px;
-  height: 14px;
+  height: 18px;
   border-radius: 4px;
   flex-shrink: 0;
 }
 
-/* Time */
-.activity-time-section {
+/* min mode meta (right side of map section) */
+.min-mode-meta-skel {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-right: 0.5rem;
+}
+
+.skeleton-intended-class-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.skeleton-tier-badge {
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* normal mode top-right */
+.normal-map-top-right-skel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.skeleton-intended-class-icon-normal {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+/* ── Time section ── */
+.card-time-section {
+  display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
   border-left: 1px solid var(--color-border-soft);
+}
+
+.is-min-mode .card-time-section {
+  align-items: flex-start;
   padding-left: 0.75rem;
+  white-space: nowrap;
   overflow: hidden;
 }
 
-.rank-time-skel {
+.is-normal-mode .card-time-section {
+  align-items: center;
+  padding: 0.5rem 1rem;
+  text-align: center;
+}
+
+.time-rank-row-skel {
   display: flex;
   align-items: center;
+}
+
+.time-rank-row-skel--min {
+  flex-direction: row;
   gap: 12px;
+}
+.time-rank-row-skel--normal {
+  flex-direction: row;
+  gap: 0.75rem;
 }
 
 .skeleton-time {
-  width: 80px;
   height: 14px;
   border-radius: 4px;
+}
+.skeleton-time--min {
+  width: 80px;
+}
+.skeleton-time--normal {
+  width: 90px;
 }
 
 .skeleton-rank {
@@ -300,8 +562,15 @@ export default {
   border-radius: 4px;
 }
 
-/* Time-ago */
-.activity-timeago-section {
+.skeleton-timeago-normal {
+  width: 70px;
+  height: 11px;
+  border-radius: 4px;
+  opacity: 0.65;
+}
+
+/* ── Timeago section (min mode) ── */
+.card-timeago-section {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,7 +584,7 @@ export default {
   border-radius: 4px;
 }
 
-/* ── 1200px: header wraps ── */
+/* ── 1200px ── */
 @media (max-width: 1200px) {
   .table-header-content {
     flex-wrap: wrap;
@@ -339,79 +608,100 @@ export default {
   .filter-group {
     align-items: center;
   }
-}
 
-/* ── 992px: compact grid, shorter time-ago ── */
-@media (max-width: 992px) {
-  .activity-timeago-section {
-    /* hide long; only short visible — mirror real component */
-    display: none;
+  .activity-card-base.is-normal-mode {
+    min-height: 62px;
+    gap: 0.4rem;
+    padding: 0.25rem 0.5rem;
   }
-  .activity-card {
-    grid-template-columns: minmax(0, 150px) minmax(140px, 1fr) 210px;
+  .skeleton-avatar-large {
+    width: 40px;
+    height: 40px;
   }
-  .skeleton-player-name {
-    width: 75px;
-  }
-  .skeleton-map-name {
+  .skeleton-player-name--normal {
     width: 100px;
   }
-  .skeleton-time {
-    width: 65px;
+  .skeleton-map-name--normal {
+    width: 120px;
+  }
+  .skeleton-class-icon-normal {
+    width: 28px;
+    height: 28px;
+  }
+  .skeleton-intended-class-icon-normal {
+    width: 22px;
+    height: 22px;
+  }
+
+  .activity-card-base.is-min-mode {
+    grid-template-columns: minmax(0, 200px) 1fr 250px 100px;
+  }
+}
+
+/* ── 992px ── */
+@media (max-width: 992px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .activity-card-base.is-min-mode {
+    grid-template-columns: minmax(0, 150px) minmax(140px, 1fr) 210px 55px;
+  }
+
+  .skeleton-player-name--min {
+    width: 75px;
+  }
+  .skeleton-map-name--min {
+    width: 90px;
+  }
+  .skeleton-time--min {
+    width: 60px;
   }
   .skeleton-rank {
     width: 28px;
   }
+
+  .min-mode-meta-skel {
+    display: none;
+  }
 }
 
-/* ── 768px mobile: 3-col grid, no time-ago col ── */
+/* ── 768px ── */
 @media (max-width: 767.98px) {
-  .activity-card {
+  .activity-card-base.is-min-mode {
     grid-template-columns: minmax(0, 130px) 1fr auto;
-    grid-template-rows: auto;
-    gap: 0.5rem;
   }
 
-  .activity-player-section {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .activity-map-section {
-    grid-column: 2;
-    grid-row: 1;
-    border-top: none;
-    padding-top: 0;
-  }
-  .activity-time-section {
-    grid-column: 3;
-    grid-row: 1;
-    border-top: none;
-    padding-top: 0;
-  }
-  .activity-timeago-section {
+  /* hide the timeago column on mobile */
+  .card-timeago-section {
     display: none;
   }
 
-  .rank-time-skel {
+  .skeleton-player-name--min {
+    width: 65px;
+  }
+  .skeleton-map-name--min {
+    width: 80px;
+  }
+  .skeleton-time--min {
+    width: 50px;
+  }
+  .skeleton-rank {
+    width: 22px;
+  }
+  .skeleton-map-badge {
+    width: 26px;
+  }
+
+  /* stack time + rank vertically on mobile */
+  .time-rank-row-skel--min {
     flex-direction: column;
     gap: 4px;
     align-items: flex-start;
   }
 
-  .skeleton-player-name {
-    width: 70px;
-  }
-  .skeleton-map-name {
-    width: 90px;
-  }
-  .skeleton-time {
-    width: 55px;
-  }
-  .skeleton-rank {
-    width: 24px;
-  }
-  .skeleton-map-badge {
-    width: 26px;
+  .is-min-mode .card-time-section {
+    border-left: 1px solid var(--color-border-soft);
   }
 
   .filter-group {

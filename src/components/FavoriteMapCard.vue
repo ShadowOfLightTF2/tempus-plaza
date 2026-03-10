@@ -118,7 +118,7 @@ export default {
     backgroundStyle() {
       if (!this.map.name) return {};
       return {
-        backgroundImage: `url('/map-backgrounds/medium/${this.map.name}.jpg')`,
+        backgroundImage: `url('/map-backgrounds/medium/${this.map.name}.webp')`,
       };
     },
   },

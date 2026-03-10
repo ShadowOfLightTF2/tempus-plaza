@@ -625,7 +625,7 @@
           <div
             class="selected-map-card"
             :style="{
-              '--map-bg-url': `url('/map-backgrounds/${selectedMap.name}.jpg')`,
+              '--map-bg-url': `url('/map-backgrounds/${selectedMap.name}.webp')`,
             }"
           >
             <h3>{{ selectedMap.name }}</h3>

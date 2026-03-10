@@ -48,7 +48,6 @@
             }}
           </h3>
         </div>
-
         <div class="card-body">
           <div class="class-tiers">
             <div class="tier-section">
@@ -172,7 +171,7 @@ export default {
     imagePath() {
       return `/map-backgrounds/medium/${
         this.currentView === "maps" ? this.item.name : this.item.map_name
-      }.jpg`;
+      }.webp`;
     },
   },
   mounted() {

@@ -19,7 +19,7 @@
           <div
             class="card-bg"
             :style="{
-              backgroundImage: `url('/map-backgrounds/medium/${map.map_name}.jpg')`,
+              backgroundImage: `url('/map-backgrounds/medium/${map.map_name}.webp')`,
             }"
           ></div>
           <div class="card-inner">
@@ -245,13 +245,14 @@ export default {
             date_added: this.formatDate2(map.date_added),
           }))
           .sort((a, b) => b.map_id - a.map_id);
-
         this.visibleAuthoredMaps = this.authoredMaps.slice(
           0,
           this.authoredMapsPerPage,
         );
+        this.$emit("has-content", this.authoredMaps.length > 0);
       } catch (error) {
         console.error("Error fetching authored maps:", error);
+        this.$emit("has-content", false);
       }
     },
     formatDate2(unixTimestamp) {
