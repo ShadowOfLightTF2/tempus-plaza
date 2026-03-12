@@ -624,7 +624,7 @@ export default {
 }
 
 .card-map-name {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.5px;
@@ -947,7 +947,7 @@ export default {
   }
 
   .card-map-name {
-    font-size: 1.3rem;
+    font-size: 1.8rem;
   }
 }
 </style>

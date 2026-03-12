@@ -9,6 +9,7 @@ import MapPage from './components/MapPage.vue';
 import Compare from './components/Compare.vue';
 import Lookup from './components/Lookup.vue';
 import Donate from './components/Donate.vue';
+import History from './components/History.vue';
 
 const routes = [
   {
@@ -66,6 +67,11 @@ const routes = [
     path: '/lookup',
     name: 'Lookup',
     component: Lookup,
+  },
+  {
+    path: '/history',
+    name: 'History',
+    component: History,
   },
   {
     path: '/compare/:playerId1?/:playerId2?/:mapId?',

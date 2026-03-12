@@ -847,8 +847,8 @@ export default {
   font-weight: bold;
 }
 .class-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 .tabs-header .btn-group {
   width: 100%;
