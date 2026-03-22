@@ -558,7 +558,7 @@ export default {
     useHead({ title: pageTitle });
     return {
       updateTitle: (mapName) => {
-        pageTitle.value = `Tempus Plaza | ${mapName}`;
+        pageTitle.value = `${mapName} | Tempus Plaza`;
       },
     };
   },

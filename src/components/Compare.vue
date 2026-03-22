@@ -759,7 +759,7 @@ export default {
   },
   setup() {
     useHead({
-      title: "Tempus Plaza | Head to Head",
+      title: "Head to Head | Tempus Plaza",
     });
   },
   data: () => ({

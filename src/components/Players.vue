@@ -145,7 +145,17 @@
                     categoryDisplayNames[selectedCategory] ||
                     capitalize(selectedCategory)
                   }}
-                  - {{ selectedItem }}
+                  -
+                  {{ selectedItem }}
+                  <img
+                    v-if="
+                      selectedCategory === 'countries' &&
+                      selectedCountry &&
+                      selectedItem !== 'Total'
+                    "
+                    :src="selectedCountry.flag"
+                    class="flag"
+                  />
                 </p>
               </div>
             </div>
@@ -371,7 +381,17 @@
                     categoryDisplayNames[selectedCategory] ||
                     capitalize(selectedCategory)
                   }}
-                  - {{ selectedItem }}
+                  -
+                  {{ selectedItem }}
+                  <img
+                    v-if="
+                      selectedCategory === 'countries' &&
+                      selectedCountry &&
+                      selectedItem !== 'Total'
+                    "
+                    :src="selectedCountry.flag"
+                    class="flag"
+                  />
                 </p>
               </div>
             </div>
@@ -603,7 +623,7 @@ export default {
   components: { PlayersSkeleton },
   setup() {
     useHead({
-      title: "Tempus Plaza | Players",
+      title: "Leaderboards | Tempus Plaza",
     });
   },
   data: () => ({
@@ -671,14 +691,17 @@ export default {
       });
     } else {
       this.selectedCategory = category;
-      this.selectedItem = item;
       if (category === "countries" && item !== "Total") {
         const foundCountry = this.allCountries.find(
-          (c) => c.name.toLowerCase() === item.toLowerCase(),
+          (c) =>
+            c.name.replace(/\s+/g, "").toLowerCase() === item.toLowerCase(),
         );
         if (foundCountry) {
           this.selectedCountry = foundCountry;
+          this.selectedItem = foundCountry.name;
         }
+      } else {
+        this.selectedItem = this.normalizeItemFromRoute(item);
       }
     }
     this.fetchDataForCurrentSelection(0, "both");
@@ -698,6 +721,9 @@ export default {
     },
   },
   methods: {
+    normalizeItemFromRoute(item) {
+      return item.replace(/(\D)(\d)/, "$1 $2"); // "Group1" → "Group 1"
+    },
     async fetchUserRank() {
       if (!this.currentUserId) {
         this.userRankSoldier = null;
@@ -992,10 +1018,19 @@ export default {
     },
 
     selectCountryFromSearch(country) {
-      this.selectedCountry = country;
+      const foundCountry = this.allCountries.find(
+        (c) =>
+          c.code.toLowerCase() ===
+          (country.code || country.player_id || "").toLowerCase(),
+      );
+      if (foundCountry) {
+        this.selectedCountry = foundCountry;
+      } else {
+        this.selectedCountry = country;
+      }
       this.showCountryDropdown = false;
       this.resetCountryFilter();
-      this.selectItem("countries", country.name);
+      this.selectItem("countries", this.selectedCountry.name);
     },
     resetCountryFilter() {
       this.filteredCountries = [...this.allCountries];
@@ -1127,7 +1162,13 @@ export default {
       const defaultItem = this.dropdowns[category][0];
       this.$router.push({
         name: "Players",
-        params: { category: category, item: defaultItem },
+        params: {
+          category: category,
+          item:
+            category === "countries" && this.selectedCountry
+              ? this.selectedCountry.name
+              : defaultItem.replace(/\s+/g, ""),
+        },
       });
       this.selectItem(category, defaultItem);
     },
@@ -1151,7 +1192,13 @@ export default {
 
       this.$router.push({
         name: "Players",
-        params: { category: category, item: item },
+        params: {
+          category: category,
+          item:
+            category === "countries" && this.selectedCountry
+              ? this.selectedCountry.name
+              : item.replace(/\s+/g, ""),
+        },
       });
     },
     hasCountSubmenu(cat) {
@@ -1198,19 +1245,23 @@ export default {
       handler: function (params) {
         if (params.category && params.item) {
           this.selectedCategory = params.category;
-          this.selectedItem = params.item;
           if (params.category === "countries" && params.item !== "Total") {
             const foundCountry = this.allCountries.find(
-              (c) => c.name.toLowerCase() === params.item.toLowerCase(),
+              (c) =>
+                c.name.replace(/\s+/g, "").toLowerCase() ===
+                params.item.toLowerCase(),
             );
             if (foundCountry) {
               this.selectedCountry = foundCountry;
+              this.selectedItem = foundCountry.name;
             }
+          } else {
+            this.selectedItem = this.normalizeItemFromRoute(params.item);
           }
           this.fetchDataForCurrentSelection(0, "both");
         }
       },
-      immediate: true,
+      immediate: false,
     },
   },
 };

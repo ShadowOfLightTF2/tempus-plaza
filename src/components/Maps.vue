@@ -176,7 +176,7 @@
             Explore and filter maps, courses, and bonuses
           </p>
         </div>
-        <hr class="row-divider" style="width: 75%" />
+        <hr class="divider" style="width: 75%" />
         <div class="filter-section">
           <div class="filter-content">
             <div
@@ -413,7 +413,7 @@
             </div>
           </div>
         </div>
-        <hr class="row-divider" style="width: 75%" />
+        <hr class="divider" style="width: 75%" />
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
         <div v-else class="table-container">
           <div class="table-header-section">
@@ -625,9 +625,41 @@
                 </tr>
               </tbody>
             </table>
+            <div
+              v-if="filteredAndSortedItems.length === 0 && !loading"
+              class="no-results"
+            >
+              <span>😕</span>
+              <p>No maps found matching your search.</p>
+              <button
+                @click="
+                  clearAllFilters();
+                  searchQuery = '';
+                "
+                class="filter-btn"
+              >
+                Clear filters
+              </button>
+            </div>
           </div>
           <div v-else class="grid-container">
             <div class="maps-grid">
+              <div
+                v-if="filteredAndSortedItems.length === 0 && !loading"
+                class="no-results no-results-grid"
+              >
+                <span>😕</span>
+                <p>No maps found matching your search.</p>
+                <button
+                  @click="
+                    clearAllFilters();
+                    searchQuery = '';
+                  "
+                  class="filter-btn"
+                >
+                  Clear filters
+                </button>
+              </div>
               <template v-if="loading">
                 <div
                   v-for="i in 24"
@@ -685,7 +717,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     useHead({
-      title: "Tempus Plaza | Maps",
+      title: "Maps | Tempus Plaza",
     });
     return { route, router };
   },
@@ -1785,7 +1817,7 @@ export default {
   width: 120px;
 }
 
-.row-divider {
+.divider {
   border: none;
   height: 2px;
   background: linear-gradient(
@@ -2105,6 +2137,30 @@ export default {
 
 .description-text i {
   color: #6c757d;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text);
+  opacity: 0.7;
+  gap: 12px;
+}
+
+.no-results span {
+  font-size: 3rem;
+}
+
+.no-results p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.no-results-grid {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 768px) {

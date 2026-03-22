@@ -6,16 +6,16 @@
       <div class="container hero">
         <h1>Tempus Plaza</h1>
         <div class="search-container" @click.stop>
-          <div class="search-box">
+          <div class="search-box" :class="{ 'is-focused': isInputFocused }">
             <div class="search-icon-container">
               <svg
                 class="search-icon"
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="2.5"
               >
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.35-4.35"></path>
@@ -25,66 +25,147 @@
               type="text"
               v-model="searchQuery"
               @input="onSearch"
-              @focus="onSearch"
-              placeholder="Search for players or maps..."
+              @focus="
+                isInputFocused = true;
+                onSearch();
+              "
+              @blur="isInputFocused = false"
+              placeholder="Search players or maps..."
               class="search-input"
             />
-            <button class="search-btn" @click="performSearch">Search</button>
-          </div>
-          <div
-            class="search-results-dropdown"
-            v-if="
-              searchQuery.trim() &&
-              (loadingMaps || loadingPlayers || searchResults)
-            "
-          >
-            <div class="search-section">
-              <h6>Maps</h6>
-              <div v-if="loadingMaps" class="loading-container">
-                <div class="loading-spinner"></div>
-                <span>Loading maps...</span>
-              </div>
-              <ul v-else-if="searchResults && searchResults.maps.length">
-                <SmartLink
-                  v-for="map in searchResults.maps"
-                  :key="map.id"
-                  :to="{ name: 'MapPage', params: { mapId: map.id } }"
-                  tag="li"
-                  class="search-result-item"
-                >
-                  {{ map.name || `Map ID: ${map.id}` }}
-                </SmartLink>
-              </ul>
-              <div v-else-if="!loadingMaps && searchResults" class="no-results">
-                No maps found
-              </div>
-            </div>
-            <div class="search-section">
-              <h6>Players</h6>
-              <div v-if="loadingPlayers" class="loading-container">
-                <div class="loading-spinner"></div>
-                <span>Loading players...</span>
-              </div>
-              <ul v-else-if="searchResults && searchResults.players.length">
-                <SmartLink
-                  v-for="player in searchResults.players"
-                  :key="player.id"
-                  :to="{ name: 'PlayerPage', params: { playerId: player.id } }"
-                  tag="li"
-                  class="search-result-item"
-                >
-                  {{ player.name || `Player ID: ${player.id}` }}
-                </SmartLink>
-              </ul>
-              <div
-                v-else-if="!loadingPlayers && searchResults"
-                class="no-results"
+            <button
+              v-if="searchQuery"
+              class="clear-btn"
+              @mousedown.prevent="clearSearch"
+              aria-label="Clear search"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
               >
-                No players found
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <Transition name="dropdown">
+            <div
+              class="search-results-dropdown"
+              v-if="
+                searchQuery.trim() &&
+                (loadingMaps || loadingPlayers || searchResults)
+              "
+            >
+              <div class="search-section">
+                <div class="section-label">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <polygon
+                      points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
+                    ></polygon>
+                  </svg>
+                  Maps
+                </div>
+                <div v-if="loadingMaps" class="loading-row">
+                  <span class="skeleton skeleton-icon"></span>
+                  <span class="skeleton skeleton-text"></span>
+                </div>
+                <ul v-else-if="searchResults && searchResults.maps.length">
+                  <HoverPreview
+                    v-for="map in searchResults.maps"
+                    :key="map.id"
+                    :mapName="map.name"
+                    style="display: block"
+                  >
+                    <SmartLink
+                      :to="{ name: 'MapPage', params: { mapId: map.id } }"
+                      tag="li"
+                      class="result-item map-item"
+                    >
+                      <span class="item-name">{{
+                        map.name || `Map ID: ${map.id}`
+                      }}</span>
+                    </SmartLink>
+                  </HoverPreview>
+                </ul>
+                <div
+                  v-else-if="!loadingMaps && searchResults"
+                  class="empty-state"
+                >
+                  No maps found
+                </div>
+              </div>
+              <div class="section-divider"></div>
+              <div class="search-section">
+                <div class="section-label">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  Players
+                </div>
+                <div v-if="loadingPlayers" class="loading-rows">
+                  <div v-for="n in 3" :key="n" class="loading-row">
+                    <span class="skeleton skeleton-avatar"></span>
+                    <span class="skeleton skeleton-text"></span>
+                  </div>
+                </div>
+                <ul v-else-if="searchResults && searchResults.players.length">
+                  <SmartLink
+                    v-for="player in searchResults.players"
+                    :key="player.id"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: player.id },
+                    }"
+                    tag="li"
+                    class="result-item player-item"
+                  >
+                    <div class="player-avatar-wrapper">
+                      <img
+                        v-if="player.steam_avatar"
+                        :src="player.steam_avatar"
+                        :alt="player.name"
+                        class="player-avatar"
+                        @error="handleAvatarError"
+                      />
+                      <div v-else class="player-avatar-fallback">
+                        {{ (player.name || "?")[0].toUpperCase() }}
+                      </div>
+                    </div>
+                    <span class="item-name">{{
+                      player.name || `Player ID: ${player.id}`
+                    }}</span>
+                  </SmartLink>
+                </ul>
+                <div
+                  v-else-if="!loadingPlayers && searchResults"
+                  class="empty-state"
+                >
+                  No players found
+                </div>
               </div>
             </div>
-          </div>
+          </Transition>
         </div>
+
         <NewestSection />
         <div>
           <TopPlayersSection />
@@ -99,8 +180,8 @@
 
 <script>
 import { useHead } from "@vueuse/head";
-import DOMPurify from "dompurify";
 import axios from "axios";
+import HoverPreview from "./HoverPreview.vue";
 import TopPlayersSection from "./TopPlayersSection.vue";
 import TierRatingChangesSection from "./TierRatingChangesSection.vue";
 import PopularMapsSection from "./PopularMapsSection.vue";
@@ -112,6 +193,7 @@ const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 export default {
   name: "Home",
   components: {
+    HoverPreview,
     NewestSection,
     TopPlayersSection,
     TierRatingChangesSection,
@@ -119,7 +201,7 @@ export default {
     YoutubeSection,
   },
   setup() {
-    useHead({ title: "Tempus Plaza | Home" });
+    useHead({ title: "Tempus Plaza" });
   },
   data() {
     return {
@@ -128,6 +210,7 @@ export default {
       loadingMaps: false,
       loadingPlayers: false,
       debounceTimer: null,
+      isInputFocused: false,
       latestTierChange: null,
       latestYoutubeVideo: null,
     };
@@ -143,6 +226,17 @@ export default {
       this.searchResults = null;
       this.loadingMaps = false;
       this.loadingPlayers = false;
+    },
+    clearSearch() {
+      this.searchQuery = "";
+      this.searchResults = null;
+      this.loadingMaps = false;
+      this.loadingPlayers = false;
+    },
+    handleAvatarError(e) {
+      e.target.style.display = "none";
+      e.target.nextElementSibling &&
+        (e.target.nextElementSibling.style.display = "flex");
     },
     async fetchMaps(query) {
       const response = await axios.post(`${API_BASE_URL}/search/maps`, {
@@ -166,8 +260,7 @@ export default {
         .then((results) => {
           this.searchResults.maps = (results.maps || []).slice(0, 5);
         })
-        .catch((error) => {
-          console.error("Error fetching maps:", error);
+        .catch(() => {
           this.searchResults.maps = [];
         })
         .finally(() => {
@@ -178,15 +271,14 @@ export default {
         .then((results) => {
           this.searchResults.players = (results.players || []).slice(0, 20);
         })
-        .catch((error) => {
-          console.error("Error fetching players:", error);
+        .catch(() => {
           this.searchResults.players = [];
         })
         .finally(() => {
           this.loadingPlayers = false;
         });
     },
-    debouncedSearch() {
+    onSearch() {
       clearTimeout(this.debounceTimer);
       if (!this.searchQuery.trim()) {
         this.searchResults = null;
@@ -198,18 +290,17 @@ export default {
       this.loadingPlayers = true;
       this.debounceTimer = setTimeout(() => {
         this.fetchSearchResults();
-      }, 500);
+      }, 400);
     },
   },
   beforeUnmount() {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
-      this.debounceTimer = null;
     }
   },
   watch: {
     searchQuery() {
-      this.debouncedSearch();
+      this.onSearch();
     },
   },
 };
@@ -221,13 +312,11 @@ export default {
   margin: 0 auto;
   padding: 0 20px;
 }
-
 .container.hero {
   max-width: 1600px;
 }
-
 .hero {
-  padding: 50px 0 100px 0;
+  padding: 50px 0 100px;
   text-align: center;
   position: relative;
 }
@@ -254,189 +343,269 @@ export default {
 .search-container {
   margin: 20px auto;
   position: relative;
-  max-width: 600px;
+  max-width: 560px;
 }
 
 .search-box {
   display: flex;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 30px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
-
-.search-box:hover,
-.search-box:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 15px 45px rgba(102, 126, 234, 0.4),
-    0 0 60px rgba(102, 126, 234, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.12);
+.search-box.is-focused,
+.search-box:hover {
+  border-color: rgba(102, 126, 234, 0.6);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15),
+    0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 .search-icon-container {
+  padding: 0 12px 0 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding-left: 15px;
+  flex-shrink: 0;
 }
-
 .search-icon {
-  width: 20px;
-  height: 20px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .search-input {
   flex: 1;
-  padding: 20px 15px;
+  padding: 16px 0;
   background: transparent;
   border: none;
-  color: #ffffff;
-  font-size: 16px;
+  color: #fff;
+  font-size: 15px;
   outline: none;
+  min-width: 0;
+}
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
 }
 
-.search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+.clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 14px;
+  color: rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.clear-btn:hover {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .search-results-dropdown {
   position: absolute;
-  background: var(--color-box);
-  border: 1px solid rgba(68, 68, 68, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  min-width: 500px;
-  max-height: 500px;
-  overflow-y: auto;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  min-width: 420px;
+  background: rgba(18, 20, 30, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
   z-index: 1000;
-  margin-top: 8px;
 }
 
-.search-results-dropdown ul {
-  list-style: none;
-  padding: 8px;
-  margin: 0;
+.dropdown-enter-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dropdown-leave-active {
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-6px);
 }
 
-.search-results-dropdown li {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  background: var(--color-box);
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  transition: all 0.2s ease;
+.search-section {
+  padding: 8px 0;
+}
+
+.section-label {
   display: flex;
-  align-items: left;
-}
-
-.search-results-dropdown li:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-  transform: translateX(4px);
-}
-
-.search-results-dropdown li:last-child {
-  margin-bottom: 0;
-}
-
-.search-results-dropdown h6 {
-  display: flex;
-  align-items: left;
-  margin: 12px 16px 8px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.search-btn {
-  padding: 20px 30px;
-  background: linear-gradient(
-    135deg,
-    var(--color-primary) 0%,
-    var(--color-primary-dark) 100%
-  );
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px 6px;
+  font-size: 10px;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.search-btn:hover {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-dark) 0%,
-    var(--color-primary) 100%
-  );
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+.section-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 14px;
 }
 
-.loading-container {
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 4px 8px 8px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  color: #fff;
+}
+.result-item:hover {
+  background: rgba(102, 126, 234, 0.15);
+}
+.result-item:active {
+  background: rgba(102, 126, 234, 0.25);
+}
+
+.map-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  color: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.player-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+.player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.player-avatar-fallback {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.5),
+    rgba(154, 176, 255, 0.3)
+  );
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.item-name {
   font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-right: 10px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.no-results {
-  padding: 8px 12px;
-  color: #999;
-  font-size: 0.9rem;
+.empty-state {
+  padding: 10px 14px 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.25);
   font-style: italic;
 }
 
+.loading-rows {
+  padding: 4px 8px 8px;
+}
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  display: block;
+}
+.skeleton-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.skeleton-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.skeleton-text {
+  flex: 1;
+  height: 14px;
+  max-width: 160px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.search-results-dropdown :deep(.hover-preview-wrapper) {
+  display: block;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
-  .search-container {
-    width: 95% !important;
-  }
-
-  .search-results-dropdown {
-    width: 90vw;
-    max-width: 300px;
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 150px;
-  }
-
   .hero h1 {
     font-size: 2.5rem;
+  }
+  .search-container {
+    width: 95%;
+  }
+  .search-results-dropdown {
+    min-width: unset;
+    width: 90vw;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .dropdown-enter-from,
+  .dropdown-leave-to {
+    transform: translateX(-50%) translateY(-6px);
   }
 }
 </style>

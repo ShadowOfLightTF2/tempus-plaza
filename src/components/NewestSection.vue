@@ -175,6 +175,14 @@
               </div>
             </div>
           </SmartLink>
+          <div v-else class="news-card skeleton-card">
+            <div class="skeleton-badge"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-line wide"></div>
+              <div class="skeleton-line medium"></div>
+              <div class="skeleton-line narrow"></div>
+            </div>
+          </div>
           <div
             v-if="latestVideo"
             class="news-card video-card"
@@ -217,15 +225,7 @@
               </div>
             </div>
           </div>
-          <div v-if="loadingMap" class="news-card skeleton-card">
-            <div class="skeleton-badge"></div>
-            <div class="skeleton-content">
-              <div class="skeleton-line wide"></div>
-              <div class="skeleton-line medium"></div>
-              <div class="skeleton-line narrow"></div>
-            </div>
-          </div>
-          <div v-if="loadingVideo" class="news-card skeleton-card">
+          <div v-else class="news-card skeleton-card">
             <div class="skeleton-thumb"></div>
             <div class="skeleton-content">
               <div class="skeleton-line wide"></div>
@@ -370,8 +370,6 @@ export default {
   margin: 48px auto 20px;
   padding: 0 20px;
   max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .divider-line {
@@ -388,7 +386,6 @@ export default {
 .divider-icon {
   font-size: 0.65rem;
   color: rgba(102, 126, 234, 0.7);
-  letter-spacing: 0.1em;
   border: 1px solid rgba(102, 126, 234, 0.3);
   padding: 5px 9px;
   border-radius: 4px;
@@ -511,7 +508,7 @@ export default {
   height: 45px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   border: 2px solid rgba(74, 111, 165, 0.3);
 }
 .author-class-icon.dual-icon {

@@ -444,7 +444,7 @@ export default {
   name: "Servers",
   components: { ServersSkeleton },
   setup() {
-    useHead({ title: "Tempus Plaza | Servers" });
+    useHead({ title: "Servers | Tempus Plaza" });
   },
   props: {
     view: {
@@ -778,7 +778,7 @@ export default {
       return "status-low";
     },
     connectToServer(ip, port) {
-      window.open(`steam://connect/${ip}:${port}`, "_blank");
+      window.location.href = `steam://connect/${ip}:${port}`;
     },
     switchView(view) {
       if (this.currentView === view) return;
@@ -1296,7 +1296,7 @@ export default {
   white-space: nowrap;
   text-overflow: ellipsis;
   color: var(--color-text-clickable);
-  display: flex;
+  display: block;
   align-items: center;
   max-width: 250px;
 }
@@ -1368,6 +1368,10 @@ export default {
   font-size: 1.1rem;
   font-weight: bold;
   color: var(--color-text-clickable);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 235px;
 }
 
 .player-card.min-mode .map-name-large {
@@ -1658,6 +1662,9 @@ export default {
   }
   .player-card.min-mode .server-name-large {
     display: none;
+  }
+  .player-card.min-mode .player-name-large {
+    max-width: 200px;
   }
 }
 

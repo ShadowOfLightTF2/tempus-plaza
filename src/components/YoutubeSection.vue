@@ -155,7 +155,6 @@ export default {
 .divider-icon {
   font-size: 0.65rem;
   color: rgba(102, 126, 234, 0.7);
-  letter-spacing: 0.1em;
   border: 1px solid rgba(102, 126, 234, 0.3);
   padding: 5px 9px;
   border-radius: 4px;

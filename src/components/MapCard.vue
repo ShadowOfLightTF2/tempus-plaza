@@ -470,11 +470,11 @@ export default {
 }
 
 .author-class-icon {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 50%;
-  padding: 8px;
+  padding: 5px;
   border: 2px solid rgba(74, 111, 165, 0.3);
 }
 

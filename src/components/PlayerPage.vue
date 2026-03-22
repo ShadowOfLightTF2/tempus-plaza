@@ -169,8 +169,8 @@ import MapSearchModal from "./MapSearchModal.vue";
 import RotwVideos from "./RotwVideos.vue";
 import AuthoredMaps from "./AuthoredMaps.vue";
 import axios from "axios";
-import PointsChart from "./PointsChart.vue";
-import { ref } from "vue";
+import { ref, defineAsyncComponent } from "vue";
+const PointsChart = defineAsyncComponent(() => import("./PointsChart.vue"));
 import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
@@ -179,13 +179,13 @@ export default {
   inject: ["profileUpdateTracker"],
   name: "PlayerPage",
   setup() {
-    const pageTitle = ref("Tempus Plaza | Player");
+    const pageTitle = ref("Tempus Plaza");
     useHead({
       title: pageTitle,
     });
     return {
       updateTitle: (playerName) => {
-        pageTitle.value = `Tempus Plaza | ${playerName}`;
+        pageTitle.value = `${playerName} | Tempus Plaza`;
       },
     };
   },

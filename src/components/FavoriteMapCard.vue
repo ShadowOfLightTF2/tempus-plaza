@@ -251,7 +251,7 @@ export default {
 
 .map-name {
   color: white;
-  font-size: 16px;
+  font-size: 1.3rem;
   font-weight: bold;
   margin: 0;
   text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.4);

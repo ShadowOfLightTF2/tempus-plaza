@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main pages -->
+  <url><loc>https://tempusplaza.com/</loc></url>
+  <url><loc>https://tempusplaza.com/maps</loc></url>
+  <url><loc>https://tempusplaza.com/lookup</loc></url>
+  <url><loc>https://tempusplaza.com/compare</loc></url>
+  <url><loc>https://tempusplaza.com/donate</loc></url>
+
+  <!-- Servers -->
+  <url><loc>https://tempusplaza.com/servers</loc></url>
+  <url><loc>https://tempusplaza.com/servers/servers</loc></url>
+  <url><loc>https://tempusplaza.com/servers/topplayers</loc></url>
+
+  <!-- Activity -->
+  <url><loc>https://tempusplaza.com/activity</loc></url>
+  <url><loc>https://tempusplaza.com/activity/worldrecords</loc></url>
+  <url><loc>https://tempusplaza.com/activity/toptimes</loc></url>
+  <url><loc>https://tempusplaza.com/activity/group1s</loc></url>
+
+  <!-- Players - Points -->
+  <url><loc>https://tempusplaza.com/players</loc></url>
+  <url><loc>https://tempusplaza.com/players/points/Total</loc></url>
+  <url><loc>https://tempusplaza.com/players/points/Maps</loc></url>
+  <url><loc>https://tempusplaza.com/players/points/Courses</loc></url>
+  <url><loc>https://tempusplaza.com/players/points/Bonuses</loc></url>
+
+  <!-- Players - World Records -->
+  <url><loc>https://tempusplaza.com/players/wrs/Total</loc></url>
+  <url><loc>https://tempusplaza.com/players/wrs/Maps</loc></url>
+  <url><loc>https://tempusplaza.com/players/wrs/Courses</loc></url>
+  <url><loc>https://tempusplaza.com/players/wrs/Bonuses</loc></url>
+
+  <!-- Players - Top Times -->
+  <url><loc>https://tempusplaza.com/players/tts/Total</loc></url>
+  <url><loc>https://tempusplaza.com/players/tts/Maps</loc></url>
+  <url><loc>https://tempusplaza.com/players/tts/Courses</loc></url>
+  <url><loc>https://tempusplaza.com/players/tts/Bonuses</loc></url>
+
+  <!-- Players - Groups -->
+  <url><loc>https://tempusplaza.com/players/groups/Groups</loc></url>
+  <url><loc>https://tempusplaza.com/players/groups/Group1</loc></url>
+  <url><loc>https://tempusplaza.com/players/groups/Group2</loc></url>
+  <url><loc>https://tempusplaza.com/players/groups/Group3</loc></url>
+  <url><loc>https://tempusplaza.com/players/groups/Group4</loc></url>
+
+  <!-- Players - Ratings -->
+  <url><loc>https://tempusplaza.com/players/ratings/Rating1</loc></url>
+  <url><loc>https://tempusplaza.com/players/ratings/Rating2</loc></url>
+  <url><loc>https://tempusplaza.com/players/ratings/Rating3</loc></url>
+
+  <!-- Players - Tiers -->
+  <url><loc>https://tempusplaza.com/players/tiers/Tier1</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier2</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier3</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier4</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier5</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier6</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier7</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier8</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier9</loc></url>
+  <url><loc>https://tempusplaza.com/players/tiers/Tier10</loc></url>
+
+  <!-- Players - Completion -->
+  <url><loc>https://tempusplaza.com/players/completion/Total</loc></url>
+  <url><loc>https://tempusplaza.com/players/completion/Maps</loc></url>
+  <url><loc>https://tempusplaza.com/players/completion/Courses</loc></url>
+  <url><loc>https://tempusplaza.com/players/completion/Bonuses</loc></url>
+
+  <!-- Players - Countries -->
+  <url><loc>https://tempusplaza.com/players/countries/Total</loc></url>
+</urlset>

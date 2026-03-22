@@ -1982,6 +1982,11 @@ export default {
   font-size: 0.9rem;
 }
 
+.author-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .author-avatar {
   width: 56px;
   height: 56px;
@@ -2492,6 +2497,7 @@ export default {
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .load-more-btn:hover {

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://tempusplaza.com/maps-sitemap.php</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://tempusplaza.com/players-sitemap.php</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://tempusplaza.com/static-sitemap.xml</loc>
+  </sitemap>
+</sitemapindex>

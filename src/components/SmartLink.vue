@@ -1,8 +1,7 @@
 <template>
   <component
     :is="tag"
-    :href="href"
-    :to="to"
+    :href="resolvedHref"
     @click="handleClick"
     @auxclick="handleAuxClick"
     @mousedown="handleMouseDown"
@@ -15,13 +14,22 @@
 <script>
 export default {
   name: "SmartLink",
-
   props: {
     href: String,
     to: [String, Object],
     tag: {
       type: String,
       default: "a",
+    },
+  },
+  computed: {
+    resolvedHref() {
+      if (this.href) return this.href;
+      if (this.to) {
+        const route = this.$router.resolve(this.to);
+        return route.href;
+      }
+      return null;
     },
   },
 
