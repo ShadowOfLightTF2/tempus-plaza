@@ -262,13 +262,22 @@ export default {
     this.startUpdateTimer();
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
+    this.refreshInterval = setInterval(this.silentRefresh, 60000);
   },
   beforeUnmount() {
     if (this.updateTimer) clearInterval(this.updateTimer);
     window.removeEventListener("resize", this.handleResize);
     window.removeEventListener("storage", this.handleStorageChange);
+    clearInterval(this.refreshInterval);
   },
   methods: {
+    async silentRefresh() {
+      try {
+        await this.fetchRecordsData();
+      } catch (error) {
+        console.error("Error refreshing data:", error);
+      }
+    },
     toggleMinMode() {
       this.manualMinMode = !this.manualMinMode;
       this.minMode = this.manualMinMode;

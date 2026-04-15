@@ -166,7 +166,7 @@ export default {
       default: false,
     },
   },
-  emits: ["update:filter-options", "clear-filters"],
+  emits: ["update:filter-options", "clear-filters", "filter-changed"],
   methods: {
     toggleFilter(filterType, value) {
       const mapping = {
@@ -186,6 +186,7 @@ export default {
       }
 
       this.$emit("update:filter-options", updatedOptions);
+      this.$emit("filter-changed");
     },
     toggleUnchangedFilter() {
       const updatedOptions = {
@@ -193,6 +194,7 @@ export default {
         selectedUnchanged: !this.filterOptions.selectedUnchanged,
       };
       this.$emit("update:filter-options", updatedOptions);
+      this.$emit("filter-changed");
     },
     clearAllFilters() {
       this.$emit("clear-filters");

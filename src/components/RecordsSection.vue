@@ -61,6 +61,7 @@
       :filter-options="filterOptions"
       :show-change-filters="activeRecordsTab === 'changed-placements'"
       @update:filter-options="filterOptions = $event"
+      @filter-changed="currentPage = 1"
       @clear-filters="clearAllFilters"
     />
     <div

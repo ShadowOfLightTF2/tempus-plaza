@@ -1919,6 +1919,9 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease, border-color 0.35s ease;
+  will-change: transform;
 }
 
 .video-card:hover {

@@ -844,15 +844,33 @@ export default {
 
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter((item) => {
-          const name =
-            this.currentView === "maps"
-              ? item.name
-              : `${item.map_name} (${this.currentView
-                  .slice(0, 1)
-                  .toUpperCase()}${item.index})`;
-          return name.toLowerCase().includes(query);
-        });
+
+        const getScore = (name) => {
+          const n = name.toLowerCase();
+          if (n === query) return 0;
+          if (n.startsWith(query)) return 1;
+          const underscoreIdx = n.indexOf("_" + query);
+          if (underscoreIdx !== -1) return 2;
+          if (n.includes(query)) return 3;
+          return 99;
+        };
+
+        filtered = filtered
+          .map((item) => {
+            const name =
+              this.currentView === "maps"
+                ? item.name
+                : `${item.map_name} (${this.currentView
+                    .slice(0, 1)
+                    .toUpperCase()}${item.index})`;
+            return { item, score: getScore(name) };
+          })
+          .filter(({ score }) => score < 99)
+          .sort(
+            (a, b) =>
+              a.score - b.score || a.item.name?.localeCompare(b.item.name),
+          )
+          .map(({ item }) => item);
       }
 
       return filtered;
@@ -860,37 +878,17 @@ export default {
     filteredAndSortedItems() {
       let items = this.filteredItems.slice();
 
-      // if (this.currentLayout === "grid") {
-      //   return items.sort((a, b) => {
-      //     const nameA =
-      //       this.currentView === "maps"
-      //         ? a.name
-      //         : `${a.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
-      //             a.index
-      //           })`;
-      //     const nameB =
-      //       this.currentView === "maps"
-      //         ? b.name
-      //         : `${b.map_name} (${this.currentView.slice(0, 1).toUpperCase()}${
-      //             b.index
-      //           })`;
-      //     return nameA.localeCompare(nameB);
-      //   });
-      // }
-
       if (this.currentLayout === "grid") {
         return items.sort((a, b) => {
+          if (this.searchQuery) return 0;
+
           if (this.currentView === "maps") {
             const dateA = a.date_added * 1000;
             const dateB = b.date_added * 1000;
             return dateB - dateA;
           } else {
             const nameComparison = a.map_name.localeCompare(b.map_name);
-            if (nameComparison !== 0) {
-              return nameComparison;
-            }
-
-            // If map names are the same, sort by index
+            if (nameComparison !== 0) return nameComparison;
             return a.index - b.index;
           }
         });

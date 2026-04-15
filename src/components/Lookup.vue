@@ -14,7 +14,7 @@
       </div>
       <hr class="row-divider" style="width: 75%" />
       <div
-        v-if="playerId"
+        v-if="playerId && !loading"
         class="lookup-player-banner"
         :style="{
           background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
@@ -45,8 +45,30 @@
                 />
                 {{ playerCountry }} ({{ playerCountryCode }})
               </p>
+              <a
+                :href="`https://tempus-demos.xyz/user/${playerSteamId}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="lookup-demos-btn"
+                title="View tempus-demos.xyz profile"
+                @click.stop
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+                Demos
+              </a>
             </div>
           </div>
+
           <div v-if="playerRankInfo" class="lookup-banner-stats">
             <div class="lookup-stat-card">
               <span class="lookup-stat-label">Overall</span>
@@ -76,14 +98,10 @@
               }}</span>
             </div>
           </div>
-          <div v-else-if="loadingRankInfo" class="loading-ranks">
-            <div class="loading-spinner"></div>
-            <span>Loading...</span>
-          </div>
         </SmartLink>
       </div>
       <div
-        v-else-if="mapId"
+        v-else-if="mapId && !loading"
         class="lookup-map-banner"
         :style="{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.webp')`,
@@ -192,10 +210,6 @@
             <span class="secondary-stat"
               >Added {{ formatMapDate(mapInfo.map.date_added) }}</span
             >
-          </div>
-          <div v-else-if="loading" class="loading-ranks">
-            <div class="loading-spinner"></div>
-            <span>Loading...</span>
           </div>
         </SmartLink>
       </div>
@@ -686,9 +700,36 @@
         </div>
       </div>
       <hr class="row-divider" style="width: 75%" />
-      <div v-if="loading" class="text-center">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading records...</span>
+      <div v-if="loading" class="table-container">
+        <div class="table-responsive">
+          <table class="table table-dark">
+            <thead>
+              <tr>
+                <th>{{ playerId ? "Map" : "Player" }}</th>
+                <th>Type</th>
+                <th>Class</th>
+                <th>T</th>
+                <th>R</th>
+                <th>Time</th>
+                <th>Rank</th>
+                <th>Completion</th>
+                <th>Percentile</th>
+                <th>Points</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="n in 25" :key="'skel-' + n" class="skeleton-row">
+                <td v-for="col in 12" :key="col">
+                  <span
+                    class="table-skeleton"
+                    :style="{ width: getSkeletonWidth(col) }"
+                  ></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
@@ -926,6 +967,7 @@ export default {
     playerAvatar: null,
     playerCountry: null,
     playerCountryCode: null,
+    playerSteamId: null,
     bannerColors: {
       color1: "rgba(74, 111, 165, 0.4)",
       color2: "rgba(74, 111, 165, 0.2)",
@@ -974,7 +1016,6 @@ export default {
     cachedRecords: { records: [], courseRecords: [], bonusRecords: [] },
     validPlacements: [],
     displayCount: 300,
-    // New: focus state tracker
     lookupSearchFocused: false,
   }),
   computed: {
@@ -1123,7 +1164,6 @@ export default {
     playerId(newPlayerId) {
       if (newPlayerId) {
         this.fetchRecords();
-        this.fetchPlayerRankInfo(newPlayerId);
       }
     },
     mapId(newMapId) {
@@ -1147,8 +1187,7 @@ export default {
         this.playerId = to.params.playerId;
         this.mapId = null;
         this.selectedMapName = null;
-        this.findPlayerName(this.playerId);
-        this.fetchPlayerRankInfo(this.playerId);
+        this.mapInfo = null;
         this.fetchRecords();
       } else if (to.params.mapId && to.params.mapId !== from.params.mapId) {
         this.mapId = to.params.mapId;
@@ -1158,7 +1197,6 @@ export default {
         this.playerCountry = null;
         this.playerCountryCode = null;
         this.playerRankInfo = null;
-        this.findMapName(this.mapId);
         this.fetchMapRecords();
       }
     },
@@ -1187,18 +1225,10 @@ export default {
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
       this.mapId = null;
-      this.selectedMapName = null;
-      await this.findPlayerName(this.playerId);
-      await this.fetchPlayerRankInfo(this.playerId);
       await this.fetchRecords();
     } else if (this.$route.params.mapId) {
       this.mapId = this.$route.params.mapId;
       this.playerId = null;
-      this.selectedPlayerName = null;
-      this.playerAvatar = null;
-      this.playerCountry = null;
-      this.playerCountryCode = null;
-      await this.findMapName(this.mapId);
       await this.fetchMapRecords();
     } else if (
       this.playerId &&
@@ -1206,7 +1236,6 @@ export default {
       !this.$route.params.mapId
     ) {
       this.selectedPlayerName = this.playerName;
-      await this.fetchPlayerRankInfo(this.playerId);
       await this.fetchRecords();
       this.$router.push({
         name: "LookupPlayer",
@@ -1215,6 +1244,37 @@ export default {
     }
   },
   methods: {
+    convertSteamId(steamId) {
+      if (!steamId) return "#";
+      const parts = steamId.split(":");
+      if (parts.length === 3 && parts[0] === "STEAM_0") {
+        const y = parseInt(parts[1]);
+        const z = parseInt(parts[2]);
+        return (
+          BigInt(z) * BigInt(2) +
+          BigInt(y) +
+          BigInt("76561197960265728")
+        ).toString();
+      }
+      return "#";
+    },
+    getSkeletonWidth(col) {
+      const widths = [
+        "250px",
+        "50px",
+        "50px",
+        "28px",
+        "28px",
+        "70px",
+        "50px",
+        "60px",
+        "60px",
+        "50px",
+        "80px",
+        "28px",
+      ];
+      return widths[col - 1] || "60px";
+    },
     handleAvatarError(e) {
       e.target.style.display = "none";
       if (e.target.nextElementSibling)
@@ -1300,22 +1360,6 @@ export default {
       const year = date.getFullYear();
       return `${month}/${year}`;
     },
-    async fetchPlayerRankInfo(playerId) {
-      this.loadingRankInfo = true;
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/ranks`,
-        );
-        if (!response.ok) throw new Error("Failed to fetch rank info");
-        const data = await response.json();
-        this.playerRankInfo = data[0] || null;
-      } catch (error) {
-        console.error("Error fetching player rank info:", error);
-        this.playerRankInfo = null;
-      } finally {
-        this.loadingRankInfo = false;
-      }
-    },
     async fetchMapRecords() {
       this.loading = true;
       this.error = null;
@@ -1343,8 +1387,9 @@ export default {
           recordsResponse.json(),
           infoResponse.json(),
         ]);
-        this.cachedMapRecords = mapRecords;
         this.mapInfo = mapInfoData;
+        this.selectedMapName = mapInfoData.map?.name || "Unknown Map";
+        this.cachedMapRecords = mapRecords;
         this.cachedRecords = {
           records: [
             ...(mapRecords.soldier_map || []).map((r) =>
@@ -1458,18 +1503,6 @@ export default {
         name: record.name || null,
       };
     },
-    async findMapName(mapId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/maps/${mapId}/all-info`);
-        const data = await response.json();
-        this.selectedMapName = data.map?.name || "Unknown Map";
-        this.mapInfo = data;
-      } catch (error) {
-        console.error("Error fetching map name:", error);
-        this.selectedMapName = "Unknown Map";
-        this.mapInfo = null;
-      }
-    },
     setSortColumn(column) {
       if (this.sortByCategory === column) {
         this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
@@ -1509,14 +1542,6 @@ export default {
       if (placement <= 10) return "";
       if (placement <= 15) return "(G" + (placement - 10) + ")";
       return placement;
-    },
-    async findPlayerName(playerId) {
-      const response = await fetch(`${API_BASE_URL}/players/${playerId}`);
-      const data = await response.json();
-      this.selectedPlayerName = data[0].name;
-      this.playerAvatar = data[0].steam_avatar;
-      this.playerCountry = data[0].country;
-      this.playerCountryCode = data[0].country_code;
     },
     getFlagImageUrl(countryCode) {
       if (!countryCode) return "";
@@ -1615,18 +1640,22 @@ export default {
       this.playerId = playerId;
       this.mapId = null;
       this.selectedMapName = null;
+      this.mapInfo = null;
       this.selectedPlayerName = this.searchResults.players.find(
         (p) => p.id === playerId,
       )?.name;
       this.searchQuery = "";
       this.searchResults = null;
-      this.fetchPlayerRankInfo(playerId);
       this.$router.push({ name: "LookupPlayer", params: { playerId } });
     },
     selectMap(mapId, mapName) {
       this.mapId = mapId;
       this.playerId = null;
       this.selectedPlayerName = null;
+      this.playerAvatar = null;
+      this.playerCountry = null;
+      this.playerCountryCode = null;
+      this.playerRankInfo = null;
       this.selectedMapName = mapName;
       this.searchQuery = "";
       this.searchResults = null;
@@ -1642,17 +1671,40 @@ export default {
         return;
       }
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/all-records`,
-        );
-        if (!response.ok) {
-          if (response.status === 404) throw new Error("Player not found");
-          if (response.status === 403) throw new Error("Access denied");
-          throw new Error(`Failed to fetch records (${response.status})`);
+        const [recordsResponse, playerInfoResponse, ranksResponse] =
+          await Promise.all([
+            fetch(`${API_BASE_URL}/players/${playerId}/all-records`),
+            fetch(`${API_BASE_URL}/players/${playerId}`),
+            fetch(`${API_BASE_URL}/players/${playerId}/ranks`),
+          ]);
+
+        if (!recordsResponse.ok) {
+          if (recordsResponse.status === 404)
+            throw new Error("Player not found");
+          if (recordsResponse.status === 403) throw new Error("Access denied");
+          throw new Error(
+            `Failed to fetch records (${recordsResponse.status})`,
+          );
         }
-        const allRecords = await response.json();
+
+        const [allRecords, playerInfoData, ranksData] = await Promise.all([
+          recordsResponse.json(),
+          playerInfoResponse.ok ? playerInfoResponse.json() : null,
+          ranksResponse.ok ? ranksResponse.json() : null,
+        ]);
+
+        if (playerInfoData?.[0]) {
+          this.selectedPlayerName = playerInfoData[0].name;
+          this.playerAvatar = playerInfoData[0].steam_avatar;
+          this.playerCountry = playerInfoData[0].country;
+          this.playerCountryCode = playerInfoData[0].country_code;
+          this.playerSteamId = this.convertSteamId(playerInfoData[0].steamid);
+        }
+        this.playerRankInfo = ranksData?.[0] || null;
+
         if (!Array.isArray(allRecords))
           throw new Error("Invalid data format received");
+
         this.cachedRecords = {
           records: allRecords.filter((r) => r.type === "map"),
           courseRecords: allRecords.filter((r) => r.type === "course"),
@@ -2400,12 +2452,6 @@ export default {
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
-.spinner-border {
-  color: white;
-  font-weight: bold;
-  width: 3rem;
-  height: 3rem;
-}
 .alert-danger {
   background: rgba(220, 53, 69, 0.1);
   border: 1px solid rgba(220, 53, 69, 0.3);
@@ -2468,8 +2514,9 @@ export default {
   max-width: 1000px;
   margin: 20px auto;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
 }
 .lookup-banner-content {
   display: flex;
@@ -2562,6 +2609,31 @@ export default {
   color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
   margin-top: 2px;
+}
+
+.lookup-demos-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  max-width: 90px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  z-index: 10;
+}
+
+.lookup-demos-btn:hover {
+  background: rgba(74, 111, 165, 0.55);
+  border-color: rgba(74, 111, 165, 0.8);
+  color: #fff;
 }
 
 .lookup-map-banner {
@@ -2694,6 +2766,38 @@ export default {
 .stat-separator {
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.75rem;
+}
+
+.skeleton-row td {
+  padding: 10px 12px !important;
+}
+.table-skeleton {
+  display: inline-block;
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 300% 100%;
+  animation: table-shimmer 1.6s ease-in-out infinite;
+  vertical-align: middle;
+}
+@keyframes table-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.skeleton-row:nth-child(odd) td {
+  background: rgba(119, 119, 119, 0.05) !important;
+}
+.skeleton-row:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 @media (max-width: 767.98px) {

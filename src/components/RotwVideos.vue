@@ -15,23 +15,23 @@
             'rotw-card-left': index % 2 === 0,
             'rotw-card-right': index % 2 !== 0,
           }"
+          :style="{ '--delay': index * 60 + 'ms' }"
           @click.stop="
             toggleRotwVideo(video.video_id, index % 2 === 0 ? 'left' : 'right')
           "
         >
           <div class="rotw-video-embed">
-            <div class="video-scale-wrapper">
-              <iframe
-                :src="`https://www.youtube.com/embed/${video.video_id}`"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                :style="{
-                  pointerEvents:
-                    activeRotwVideo === video.video_id ? 'auto' : 'none',
-                }"
-              ></iframe>
-            </div>
+            <iframe
+              :src="`https://www.youtube.com/embed/${video.video_id}`"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              :style="{
+                pointerEvents:
+                  activeRotwVideo === video.video_id ? 'auto' : 'none',
+              }"
+            ></iframe>
+            <div class="thumbnail-shimmer"></div>
           </div>
           <div class="rotw-video-info">
             <h5>{{ video.map_name }}</h5>
@@ -209,25 +209,30 @@ export default {
   transform: scale(1.416);
 }
 .rotw-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
-  transition: all 0.3s ease;
-  min-width: 300px;
-  max-width: 750px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
   cursor: pointer;
   position: relative;
   z-index: 1;
-  overflow: hidden;
+  min-width: 300px;
+  max-width: 750px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
 }
 .rotw-card:hover {
-  background: var(--color-primary-dark);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.35);
 }
 .rotw-card-active {
   z-index: 100;
   position: relative;
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.35);
   background: var(--color-primary-dark);
 }
 .rotw-card-active.rotw-card-left {
@@ -236,16 +241,11 @@ export default {
 .rotw-card-active.rotw-card-right {
   transform: translateX(-52%) scale(1.8);
 }
-.rotw-card-active .video-scale-wrapper iframe {
-  pointer-events: auto;
-}
 .rotw-video-embed {
   position: relative;
   width: 100%;
-  height: 0;
-  padding-bottom: 56.25%;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 8px;
 }
 .rotw-video-embed iframe {
   position: absolute;
@@ -253,39 +253,20 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 8px;
-}
-.video-scale-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform: scale(0.75);
-  transform-origin: top left;
-  transition: transform 0.4s ease;
-}
-
-.rotw-card:hover .video-scale-wrapper {
-  transform: scale(0.78);
-}
-
-.video-scale-wrapper iframe {
-  width: calc(100% / 0.75);
-  height: calc(100% / 0.75);
-  border-radius: 8px;
+  border: none;
+  display: block;
 }
 .rotw-video-info {
-  padding-top: 10px;
+  padding: 16px 18px 18px;
   text-align: center;
 }
 .rotw-video-info h5 {
-  margin: 0;
+  margin: 0 0 6px;
   color: var(--color-text);
   font-size: 1.1rem;
 }
 .rotw-video-info p {
-  margin: 5px 0 0;
+  margin: 0;
   color: #aaa;
   font-size: 0.9rem;
 }

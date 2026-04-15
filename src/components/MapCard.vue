@@ -466,7 +466,7 @@ export default {
   right: 12px;
   z-index: 2;
   display: flex;
-  gap: 8px;
+  gap: 5px;
 }
 
 .author-class-icon {

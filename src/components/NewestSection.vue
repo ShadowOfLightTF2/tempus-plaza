@@ -317,7 +317,7 @@ export default {
         );
         const data = response.data;
         const maps = Array.isArray(data) ? data : [data];
-        this.newestMaps = maps.map((entry) => {
+        const mapped = maps.map((entry) => {
           if (entry.map) {
             entry.map.tags = entry.tags || [];
             return entry;
@@ -325,6 +325,8 @@ export default {
           entry.tags = entry.tags || [];
           return { map: entry, authors: [], tags: entry.tags };
         });
+
+        this.newestMaps = mapped.sort(() => Math.random() - 0.5);
       } catch (error) {
         console.error("Error fetching newest maps:", error);
       } finally {
@@ -501,7 +503,7 @@ export default {
   right: 12px;
   z-index: 2;
   display: flex;
-  gap: 8px;
+  gap: 5px;
 }
 .author-class-icon {
   width: 45px;
@@ -512,8 +514,8 @@ export default {
   border: 2px solid rgba(74, 111, 165, 0.3);
 }
 .author-class-icon.dual-icon {
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   padding: 6px;
 }
 

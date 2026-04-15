@@ -1411,8 +1411,9 @@ export default {
     },
   },
   created() {
-    this.checkUpdateStatus();
-    this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
+    // Theres no 2 hour update anymore so this isnt needed
+    //this.checkUpdateStatus();
+    //this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.checkNavbarOverflow);

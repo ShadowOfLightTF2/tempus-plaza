@@ -1199,7 +1199,11 @@ export default {
       const newKey = `new_${cls}_${field}`;
       const newToOld = {};
       group.forEach((item) => {
-        if (item[newKey] != null && item[oldKey] != null) {
+        if (
+          item[newKey] != null &&
+          item[oldKey] != null &&
+          item[newKey] !== item[oldKey]
+        ) {
           newToOld[item[newKey]] = item[oldKey];
         }
       });

@@ -539,10 +539,12 @@ export default {
   mounted() {
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
+    this.refreshInterval = setInterval(this.silentRefresh, 60000);
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.handleResize);
     window.removeEventListener("storage", this.handleStorageChange);
+    clearInterval(this.refreshInterval);
   },
   methods: {
     toggleMinMode() {
@@ -652,6 +654,16 @@ export default {
         console.error("Error fetching data:", error);
       } finally {
         this.loading = false;
+      }
+    },
+    async silentRefresh() {
+      try {
+        await Promise.all([
+          this.fetchTopPlayersData(),
+          this.fetchServersData(),
+        ]);
+      } catch (error) {
+        console.error("Error refreshing data:", error);
       }
     },
     sortServersByPlayers() {

@@ -694,7 +694,7 @@ export default {
       if (category === "countries" && item !== "Total") {
         const foundCountry = this.allCountries.find(
           (c) =>
-            c.name.replace(/\s+/g, "").toLowerCase() === item.toLowerCase(),
+            c.name.replace(/\s+/g, "-").toLowerCase() === item.toLowerCase(),
         );
         if (foundCountry) {
           this.selectedCountry = foundCountry;
@@ -722,7 +722,7 @@ export default {
   },
   methods: {
     normalizeItemFromRoute(item) {
-      return item.replace(/(\D)(\d)/, "$1 $2"); // "Group1" → "Group 1"
+      return item.replace(/-/g, " ");
     },
     async fetchUserRank() {
       if (!this.currentUserId) {
@@ -1166,12 +1166,13 @@ export default {
           category: category,
           item:
             category === "countries" && this.selectedCountry
-              ? this.selectedCountry.name
+              ? this.selectedCountry.name.replace(/\s+/g, "-")
               : defaultItem.replace(/\s+/g, ""),
         },
       });
       this.selectItem(category, defaultItem);
     },
+
     async selectItem(category, item) {
       this.initialLoad = true;
       this.points = !item.includes("(count)");
@@ -1188,18 +1189,19 @@ export default {
       this.currentSoldierIndex = 50;
       this.currentDemomanIndex = 50;
 
-      await this.fetchDataForCurrentSelection(0, "both");
-
+      this._internalNavigation = true;
       this.$router.push({
         name: "Players",
         params: {
           category: category,
           item:
             category === "countries" && this.selectedCountry
-              ? this.selectedCountry.name
-              : item.replace(/\s+/g, ""),
+              ? this.selectedCountry.name.replace(/\s+/g, "-")
+              : item.replace(/\s+/g, "-"),
         },
       });
+
+      await this.fetchDataForCurrentSelection(0, "both");
     },
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
@@ -1243,12 +1245,16 @@ export default {
   watch: {
     "$route.params": {
       handler: function (params) {
+        if (this._internalNavigation) {
+          this._internalNavigation = false;
+          return;
+        }
         if (params.category && params.item) {
           this.selectedCategory = params.category;
           if (params.category === "countries" && params.item !== "Total") {
             const foundCountry = this.allCountries.find(
               (c) =>
-                c.name.replace(/\s+/g, "").toLowerCase() ===
+                c.name.replace(/\s+/g, "-").toLowerCase() ===
                 params.item.toLowerCase(),
             );
             if (foundCountry) {
