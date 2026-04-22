@@ -1179,6 +1179,7 @@ export default {
           else placements.push(10 + Number(group));
         });
         this.validPlacements = placements;
+        if (oldVal !== undefined) this.updateUrl();
       },
       immediate: true,
     },
@@ -1221,6 +1222,7 @@ export default {
       this.playerId = null;
       this.playerName = null;
     }
+    this.parseUrlFilters();
 
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
@@ -1244,6 +1246,101 @@ export default {
     }
   },
   methods: {
+    parseUrlFilters() {
+      const q = this.$route.query;
+
+      const parseInts = (param, allowed) => {
+        if (!param) return [];
+        const vals = Array.isArray(param) ? param : param.split(",");
+        return vals
+          .map((v) => parseInt(v))
+          .filter((v) => !isNaN(v) && allowed.includes(v));
+      };
+
+      const parseStrs = (param, allowed) => {
+        if (!param) return [];
+        const vals = Array.isArray(param) ? param : param.split(",");
+        return vals.filter((v) => allowed.includes(v));
+      };
+
+      this.selectedSoldierTiers = parseInts(q.st, this.availableTiers);
+      this.selectedSoldierRatings = parseInts(q.sr, this.availableRatings);
+      this.selectedDemomanTiers = parseInts(q.dt, this.availableTiers);
+      this.selectedDemomanRatings = parseInts(q.dr, this.availableRatings);
+      this.selectedIntendedClasses = parseInts(q.ic, [3, 4]);
+      this.selectedClasses = parseStrs(q.cls, ["soldier", "demoman"]);
+      this.selectedTypes = parseStrs(q.typ, ["map", "course", "bonus"]);
+      this.selectedGroups = parseStrs(q.grp, [
+        "WR",
+        "TT",
+        "BT",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+      ]);
+
+      const allowedStatus = ["completed", "incomplete"];
+      if (q.sts) {
+        this.selectedStatus = parseStrs(q.sts, allowedStatus);
+      }
+
+      if (
+        q.srt &&
+        [
+          "time",
+          "rank",
+          "points",
+          "percentage",
+          "duration",
+          "tier",
+          "rating",
+          "completion",
+          "map",
+        ].includes(q.srt)
+      ) {
+        this.sortByCategory = q.srt;
+      }
+      if (q.dir && ["asc", "desc"].includes(q.dir)) {
+        this.sortDirection = q.dir;
+      }
+    },
+    updateUrl() {
+      const q = {};
+
+      if (this.selectedSoldierTiers.length)
+        q.st = this.selectedSoldierTiers.join(",");
+      if (this.selectedSoldierRatings.length)
+        q.sr = this.selectedSoldierRatings.join(",");
+      if (this.selectedDemomanTiers.length)
+        q.dt = this.selectedDemomanTiers.join(",");
+      if (this.selectedDemomanRatings.length)
+        q.dr = this.selectedDemomanRatings.join(",");
+      if (this.selectedIntendedClasses.length)
+        q.ic = this.selectedIntendedClasses.join(",");
+      if (this.selectedClasses.length) q.cls = this.selectedClasses.join(",");
+      if (this.selectedTypes.length) q.typ = this.selectedTypes.join(",");
+      if (this.selectedGroups.length) q.grp = this.selectedGroups.join(",");
+
+      const defaultStatus = ["completed"];
+      const statusChanged = !(
+        this.selectedStatus.length === defaultStatus.length &&
+        this.selectedStatus.every((s) => defaultStatus.includes(s))
+      );
+      if (statusChanged) q.sts = this.selectedStatus.join(",");
+
+      if (this.sortByCategory !== "time") q.srt = this.sortByCategory;
+      if (this.sortDirection !== "asc") q.dir = this.sortDirection;
+
+      this.$router
+        .replace({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: q,
+        })
+        .catch(() => {});
+    },
     convertSteamId(steamId) {
       if (!steamId) return "#";
       const parts = steamId.split(":");
@@ -1510,8 +1607,11 @@ export default {
         this.sortByCategory = column;
         this.sortDirection = "asc";
       }
+      this.updateUrl();
     },
-    onFilterChange() {},
+    onFilterChange() {
+      this.updateUrl();
+    },
     toggleClass(classOption) {
       this.selectedClasses = this.selectedClasses.includes(classOption)
         ? this.selectedClasses.filter((c) => c !== classOption)
@@ -1739,6 +1839,13 @@ export default {
       this.sortByCategory = "time";
       this.sortDirection = "desc";
       this.recordSearchQuery = "";
+      this.$router
+        .replace({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: {},
+        })
+        .catch(() => {});
     },
     formatDuration(unixTimestamp) {
       return formatDuration(unixTimestamp);

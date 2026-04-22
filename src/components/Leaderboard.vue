@@ -226,6 +226,9 @@
                     v-for="(entry, index) in displayedSoldierEntries"
                     :key="'soldier-' + index"
                     class="fade-in"
+                    :class="{
+                      'current-user-row': playerId && entry.id === playerId,
+                    }"
                   >
                     <td
                       class="rank-column"
@@ -283,24 +286,30 @@
             </div>
           </div>
           <div v-else class="maps-footer">
-            <button
+            <div
               v-if="
                 displayedSoldierEntries.length < selectedSoldierRecords.length
               "
-              @click="showMoreSoldierEntries"
-              class="btn btn-dark update-button"
-              style="
-                background: linear-gradient(
-                  to bottom,
-                  rgba(74, 111, 165, 0.5),
-                  rgba(74, 111, 165, 0.3)
-                );
-                font-weight: bold;
-                width: 100%;
-              "
+              class="show-more-footer"
             >
-              Show more
-            </button>
+              <div class="load-size-selector">
+                <span class="load-size-label">Load</span>
+                <div class="load-size-toggle">
+                  <button
+                    v-for="size in loadSizeOptions"
+                    :key="'sol-size-' + size"
+                    class="load-size-btn"
+                    :class="{ active: loadSize === size }"
+                    @click="loadSize = size"
+                  >
+                    {{ size }}
+                  </button>
+                </div>
+              </div>
+              <button @click="showMoreSoldierEntries" class="update-button">
+                Show more
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -447,6 +456,9 @@
                     v-for="(entry, index) in displayedDemomanEntries"
                     :key="'demoman-' + index"
                     class="fade-in"
+                    :class="{
+                      'current-user-row': playerId && entry.id === playerId,
+                    }"
                   >
                     <td
                       class="rank-column"
@@ -504,24 +516,30 @@
             </div>
           </div>
           <div v-else class="maps-footer">
-            <button
+            <div
               v-if="
                 displayedDemomanEntries.length < selectedDemomanRecords.length
               "
-              @click="showMoreDemomanEntries"
-              class="btn btn-dark update-button"
-              style="
-                background: linear-gradient(
-                  to bottom,
-                  rgba(74, 111, 165, 0.5),
-                  rgba(74, 111, 165, 0.3)
-                );
-                font-weight: bold;
-                width: 100%;
-              "
+              class="show-more-footer"
             >
-              Show more
-            </button>
+              <div class="load-size-selector">
+                <span class="load-size-label">Load</span>
+                <div class="load-size-toggle">
+                  <button
+                    v-for="size in loadSizeOptions"
+                    :key="'dem-size-' + size"
+                    class="load-size-btn"
+                    :class="{ active: loadSize === size }"
+                    @click="loadSize = size"
+                  >
+                    {{ size }}
+                  </button>
+                </div>
+              </div>
+              <button @click="showMoreDemomanEntries" class="update-button">
+                Show more
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -595,6 +613,9 @@ export default {
       error: null,
       playerId: null,
       userRecord: { soldier: null, demoman: null },
+      // Load size selector
+      loadSize: 50,
+      loadSizeOptions: [50, 100, 200],
     };
   },
   computed: {
@@ -868,7 +889,10 @@ export default {
         const capClass = capitalizeFirstLetter(classType);
         if (offset === 0) this[`selected${capClass}Records`] = res.data;
         else {
-          this[`selected${capClass}Records`].splice(offset, offset + 50);
+          this[`selected${capClass}Records`].splice(
+            offset,
+            offset + this.loadSize,
+          );
           this[`selected${capClass}Records`] = [
             ...this[`selected${capClass}Records`],
             ...res.data,
@@ -927,8 +951,9 @@ export default {
         "soldier",
         index,
         this.soldierDisplayCount + this.soldierOffset,
+        this.loadSize + 1,
       );
-      this.soldierOffset += 50;
+      this.soldierOffset += this.loadSize;
     },
     showMoreDemomanEntries() {
       let type = this.selectedTypePill.toLowerCase();
@@ -942,8 +967,9 @@ export default {
         "demoman",
         index,
         this.demomanDisplayCount + this.demomanOffset,
+        this.loadSize + 1,
       );
-      this.demomanOffset += 50;
+      this.demomanOffset += this.loadSize;
     },
     goTo(type, index) {
       this.$router.push({
@@ -1026,15 +1052,12 @@ export default {
   font-weight: bold;
   padding: 5px 7px;
 }
-.table-dark tr:nth-child(odd) .name-cell:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-}
+
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
+}
+.current-user-row td {
+  background: var(--color-primary-dark) !important;
 }
 .table-dark tr .name-cell.rank-1-name,
 .table-dark tr .name-cell.rank-2-name,
@@ -1229,30 +1252,105 @@ export default {
   white-space: nowrap;
   text-align: right;
 }
-.player-name:hover {
+.table-dark tbody tr:hover td {
   background: linear-gradient(
     to bottom,
     rgba(74, 111, 165, 0.5),
     rgba(74, 111, 165, 0.3)
-  );
+  ) !important;
+  cursor: pointer;
 }
 .clickable {
   cursor: pointer;
 }
 .maps-footer {
   z-index: 10;
-}
-.update-button {
-  position: relative;
-  z-index: 10;
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
+  overflow: hidden;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+}
+.show-more-footer {
+  display: flex;
+  align-items: stretch;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.load-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(30, 50, 80, 0.6);
+  padding: 8px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+.load-size-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 7px;
+  white-space: nowrap;
+}
+.load-size-toggle {
+  display: flex;
+  gap: 3px;
+}
+.load-size-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.load-size-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--color-text);
+}
+.load-size-btn.active {
+  background: rgba(74, 111, 165, 0.55);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(74, 111, 165, 0.45);
+}
+/* ── end load-size ── */
+.update-button {
+  flex: 1;
+  display: block;
+  border: none;
+  border-radius: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
+  color: var(--color-text);
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  position: relative;
+  z-index: 10;
   pointer-events: auto;
 }
 .update-button:hover {
-  background: var(--color-row) !important;
+  background: rgba(74, 111, 165, 0.65) !important;
+}
+.maps-footer > .update-button {
+  width: 100%;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 .class-icon {
   width: 40px;
@@ -1388,6 +1486,13 @@ export default {
   }
   .table-dark {
     min-width: unset;
+  }
+  .load-size-label {
+    display: none;
+  }
+  .load-size-btn {
+    font-size: 11px;
+    padding: 3px 6px;
   }
 }
 .category-container {

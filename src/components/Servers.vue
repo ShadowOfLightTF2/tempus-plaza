@@ -521,9 +521,6 @@ export default {
     },
   },
   watch: {
-    $route(to) {
-      if (to.params.view) this.currentView = to.params.view;
-    },
     serversData: {
       handler() {
         this.extractAvailableRanks();
@@ -531,10 +528,10 @@ export default {
       immediate: true,
     },
   },
+
   async created() {
     await this.fetchData();
-    const { view } = this.$route.params;
-    if (view) this.currentView = view;
+    this.parseUrlFilters();
   },
   mounted() {
     window.addEventListener("resize", this.handleResize);
@@ -547,6 +544,53 @@ export default {
     clearInterval(this.refreshInterval);
   },
   methods: {
+    parseUrlFilters() {
+      const q = this.$route.query;
+
+      const viewParam = this.$route.params.view;
+      if (viewParam && ["topplayers", "servers"].includes(viewParam)) {
+        this.currentView = viewParam;
+      }
+
+      if (q.region) {
+        const validRegions = [
+          "all",
+          ...this.availableRegions.map((r) => r.key),
+        ];
+        if (validRegions.includes(q.region)) this.selectedRegion = q.region;
+      }
+
+      if (q.types) {
+        const validTypes = this.availableServerTypes.map((t) => t.key);
+        const parsed = q.types.split(",").filter((t) => validTypes.includes(t));
+        this.selectedServerTypes = parsed.length ? parsed : ["all"];
+      }
+
+      if (q.excl) {
+        const validTypes = this.availableServerTypes.map((t) => t.key);
+        this.excludedServerTypes = q.excl
+          .split(",")
+          .filter((t) => validTypes.includes(t));
+      }
+    },
+    updateUrl() {
+      const q = {};
+
+      if (this.currentView !== "topplayers") q.view = this.currentView;
+      if (this.selectedRegion !== "all") q.region = this.selectedRegion;
+      if (!this.selectedServerTypes.includes("all"))
+        q.types = this.selectedServerTypes.join(",");
+      if (this.excludedServerTypes.length)
+        q.excl = this.excludedServerTypes.join(",");
+
+      this.$router
+        .replace({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: q,
+        })
+        .catch(() => {});
+    },
     toggleMinMode() {
       this.manualMinMode = !this.manualMinMode;
       this.minMode = this.manualMinMode;
@@ -581,6 +625,7 @@ export default {
     filterByRegion(region) {
       this.selectedRegion = region;
       this.expandedServerId = null;
+      this.updateUrl();
     },
     toggleServerType(serverType) {
       if (serverType === "all") {
@@ -609,6 +654,7 @@ export default {
         }
       }
       this.expandedServerId = null;
+      this.updateUrl();
     },
     matchesServerType(serverName, type) {
       const name = serverName.toLowerCase();
