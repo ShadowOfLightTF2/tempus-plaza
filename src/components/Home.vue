@@ -30,8 +30,10 @@
                 onSearch();
               "
               @blur="isInputFocused = false"
+              @keydown="onKeydown"
               placeholder="Search players or maps..."
               class="search-input"
+              autocomplete="off"
             />
             <button
               v-if="searchQuery"
@@ -59,6 +61,7 @@
                 searchQuery.trim() &&
                 (loadingMaps || loadingPlayers || searchResults)
               "
+              ref="dropdownRef"
             >
               <div class="search-section">
                 <div class="section-label">
@@ -82,7 +85,7 @@
                 </div>
                 <ul v-else-if="searchResults && searchResults.maps.length">
                   <HoverPreview
-                    v-for="map in searchResults.maps"
+                    v-for="(map, i) in searchResults.maps"
                     :key="map.id"
                     :mapName="map.name"
                     style="display: block"
@@ -91,6 +94,10 @@
                       :to="{ name: 'MapPage', params: { mapId: map.id } }"
                       tag="li"
                       class="result-item map-item"
+                      :class="{ 'is-highlighted': highlightedIndex === i }"
+                      :data-result-index="i"
+                      @mouseenter="highlightedIndex = i"
+                      @mouseleave="highlightedIndex = -1"
                     >
                       <span class="item-name">{{
                         map.name || `Map ID: ${map.id}`
@@ -129,7 +136,7 @@
                 </div>
                 <ul v-else-if="searchResults && searchResults.players.length">
                   <SmartLink
-                    v-for="player in searchResults.players"
+                    v-for="(player, i) in searchResults.players"
                     :key="player.id"
                     :to="{
                       name: 'PlayerPage',
@@ -137,6 +144,12 @@
                     }"
                     tag="li"
                     class="result-item player-item"
+                    :class="{
+                      'is-highlighted': highlightedIndex === mapCount + i,
+                    }"
+                    :data-result-index="mapCount + i"
+                    @mouseenter="highlightedIndex = mapCount + i"
+                    @mouseleave="highlightedIndex = -1"
                   >
                     <div class="player-avatar-wrapper">
                       <img
@@ -213,7 +226,36 @@ export default {
       isInputFocused: false,
       latestTierChange: null,
       latestYoutubeVideo: null,
+      highlightedIndex: -1,
     };
+  },
+  computed: {
+    mapCount() {
+      return this.searchResults?.maps?.length ?? 0;
+    },
+    playerCount() {
+      return this.searchResults?.players?.length ?? 0;
+    },
+    totalResults() {
+      return this.mapCount + this.playerCount;
+    },
+    highlightedResult() {
+      if (this.highlightedIndex < 0 || !this.searchResults) return null;
+      if (this.highlightedIndex < this.mapCount) {
+        return {
+          type: "map",
+          item: this.searchResults.maps[this.highlightedIndex],
+        };
+      }
+      const playerIndex = this.highlightedIndex - this.mapCount;
+      if (playerIndex < this.playerCount) {
+        return {
+          type: "player",
+          item: this.searchResults.players[playerIndex],
+        };
+      }
+      return null;
+    },
   },
   methods: {
     onTierDataLoaded(latestChange) {
@@ -226,17 +268,69 @@ export default {
       this.searchResults = null;
       this.loadingMaps = false;
       this.loadingPlayers = false;
+      this.highlightedIndex = -1;
     },
     clearSearch() {
       this.searchQuery = "";
       this.searchResults = null;
       this.loadingMaps = false;
       this.loadingPlayers = false;
+      this.highlightedIndex = -1;
     },
     handleAvatarError(e) {
       e.target.style.display = "none";
       e.target.nextElementSibling &&
         (e.target.nextElementSibling.style.display = "flex");
+    },
+    onKeydown(e) {
+      if (!this.searchResults || this.totalResults === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this.highlightedIndex =
+          this.highlightedIndex < this.totalResults - 1
+            ? this.highlightedIndex + 1
+            : 0;
+        this.scrollHighlightedIntoView();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this.highlightedIndex =
+          this.highlightedIndex > 0
+            ? this.highlightedIndex - 1
+            : this.totalResults - 1;
+        this.scrollHighlightedIntoView();
+      } else if (e.key === "Enter" && this.highlightedIndex >= 0) {
+        e.preventDefault();
+        this.navigateToHighlighted();
+      } else if (e.key === "Escape") {
+        this.closeDropdown();
+      }
+    },
+    scrollHighlightedIntoView() {
+      this.$nextTick(() => {
+        const dropdown = this.$refs.dropdownRef;
+        if (!dropdown) return;
+        const el = dropdown.querySelector(
+          `[data-result-index="${this.highlightedIndex}"]`,
+        );
+        if (el) el.scrollIntoView({ block: "nearest" });
+      });
+    },
+    navigateToHighlighted() {
+      const result = this.highlightedResult;
+      if (!result) return;
+      if (result.type === "map") {
+        this.$router.push({
+          name: "MapPage",
+          params: { mapId: result.item.id },
+        });
+      } else {
+        this.$router.push({
+          name: "PlayerPage",
+          params: { playerId: result.item.id },
+        });
+      }
+      this.closeDropdown();
     },
     async fetchMaps(query) {
       const response = await axios.post(`${API_BASE_URL}/search/maps`, {
@@ -253,6 +347,7 @@ export default {
     async fetchSearchResults() {
       const query = this.searchQuery.trim();
       this.searchResults = { maps: [], players: [] };
+      this.highlightedIndex = -1;
       this.loadingMaps = true;
       this.loadingPlayers = true;
 
@@ -284,6 +379,7 @@ export default {
         this.searchResults = null;
         this.loadingMaps = false;
         this.loadingPlayers = false;
+        this.highlightedIndex = -1;
         return;
       }
       this.loadingMaps = true;
@@ -294,9 +390,7 @@ export default {
     },
   },
   beforeUnmount() {
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-    }
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
   },
   watch: {
     searchQuery() {
@@ -476,6 +570,10 @@ ul {
 }
 .result-item:active {
   background: rgba(102, 126, 234, 0.25);
+}
+.result-item.is-highlighted {
+  background: rgba(102, 126, 234, 0.2);
+  outline: 1px solid rgba(102, 126, 234, 0.35);
 }
 
 .map-icon {

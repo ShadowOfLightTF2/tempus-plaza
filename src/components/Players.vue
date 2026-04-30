@@ -3,7 +3,7 @@
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
     @click="closeDropdown"
   >
-    <div class="container py-4 d-flex flex-column align-items-center">
+    <div class="w-95 mx-auto py-4 d-flex flex-column align-items-center">
       <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
@@ -14,714 +14,714 @@
             View the top players in various categories
           </p>
         </div>
-      </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div class="category-tabs-container">
-        <div class="category-tabs">
-          <button
-            v-for="cat in categoryNames"
-            :key="cat"
-            class="category-tab"
-            :class="{ active: selectedCategory === cat }"
-            @click="selectCategory(cat)"
+        <hr class="row-divider" style="width: 100%" />
+        <div class="category-tabs-container">
+          <div class="category-tabs">
+            <button
+              v-for="cat in categoryNames"
+              :key="cat"
+              class="category-tab"
+              :class="{ active: selectedCategory === cat }"
+              @click="selectCategory(cat)"
+            >
+              {{ categoryDisplayNames[cat] || capitalize(cat) }}
+            </button>
+          </div>
+        </div>
+        <div class="subcategory-container">
+          <div class="subcategory-pills">
+            <template v-if="hasCountSubmenu(selectedCategory)">
+              <div class="pill-row">
+                <button
+                  v-for="item in dropdowns[selectedCategory]"
+                  :key="item"
+                  class="subcategory-pill"
+                  :class="{ active: selectedItem === item && points }"
+                  @click="selectItem(selectedCategory, item)"
+                >
+                  {{ item }}
+                </button>
+              </div>
+              <div class="pill-row">
+                <button
+                  v-for="item in getCountItems(selectedCategory)"
+                  :key="item + '-count'"
+                  class="subcategory-pill count-pill"
+                  :class="{
+                    active: selectedItem === item + ' (count)' && !points,
+                  }"
+                  @click="selectItem(selectedCategory, item + ' (count)')"
+                >
+                  {{ item }} <span class="count-badge">count</span>
+                </button>
+              </div>
+            </template>
+            <template v-else>
+              <div class="pill-row">
+                <button
+                  v-for="item in dropdowns[selectedCategory]"
+                  :key="item"
+                  class="subcategory-pill"
+                  :class="{ active: selectedItem === item }"
+                  @click="selectItem(selectedCategory, item)"
+                >
+                  {{ item }}
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+        <hr
+          v-if="selectedCategory === 'countries'"
+          class="row-divider"
+          style="width: 100%"
+        />
+        <div
+          v-if="selectedCategory === 'countries'"
+          class="search-container"
+          @click.stop
+        >
+          <div class="search-box">
+            <div class="search-icon-container">
+              <svg
+                class="search-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </div>
+            <input
+              v-model="searchQuery"
+              @input="filterCountries"
+              @focus="
+                showCountryDropdown = true;
+                resetCountryFilter();
+              "
+              type="text"
+              class="search-input"
+              placeholder="Search for a country..."
+            />
+          </div>
+          <div
+            v-if="showCountryDropdown && filteredCountries.length > 0"
+            class="search-results-dropdown"
           >
-            {{ categoryDisplayNames[cat] || capitalize(cat) }}
+            <ul>
+              <li
+                v-for="country in filteredCountries.slice(0, 20)"
+                :key="country.code"
+                @click="selectCountryFromSearch(country)"
+                class="search-result-item"
+              >
+                <img
+                  :src="country.flag || '/icons/default-flag.jpg'"
+                  :alt="country.name"
+                  class="flag-icon"
+                />
+                {{ country.name }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <hr class="row-divider" style="width: 100%" />
+        <div class="d-flex justify-content-center mb-3">
+          <button
+            class="toggle-overall-btn"
+            :class="{ active: showOverallTable }"
+            @click="showOverallTable = !showOverallTable"
+          >
+            <span v-if="showOverallTable">Hide Overall</span>
+            <span v-else>Show Overall</span>
           </button>
         </div>
-      </div>
-      <div class="subcategory-container">
-        <div class="subcategory-pills">
-          <template v-if="hasCountSubmenu(selectedCategory)">
-            <div class="pill-row">
-              <button
-                v-for="item in dropdowns[selectedCategory]"
-                :key="item"
-                class="subcategory-pill"
-                :class="{ active: selectedItem === item && points }"
-                @click="selectItem(selectedCategory, item)"
-              >
-                {{ item }}
-              </button>
-            </div>
-            <div class="pill-row">
-              <button
-                v-for="item in getCountItems(selectedCategory)"
-                :key="item + '-count'"
-                class="subcategory-pill count-pill"
-                :class="{
-                  active: selectedItem === item + ' (count)' && !points,
-                }"
-                @click="selectItem(selectedCategory, item + ' (count)')"
-              >
-                {{ item }} <span class="count-badge">count</span>
-              </button>
-            </div>
-          </template>
-          <template v-else>
-            <div class="pill-row">
-              <button
-                v-for="item in dropdowns[selectedCategory]"
-                :key="item"
-                class="subcategory-pill"
-                :class="{ active: selectedItem === item }"
-                @click="selectItem(selectedCategory, item)"
-              >
-                {{ item }}
-              </button>
-            </div>
-          </template>
-        </div>
-      </div>
-      <hr
-        v-if="selectedCategory === 'countries'"
-        class="row-divider"
-        style="width: 75%"
-      />
-      <div
-        v-if="selectedCategory === 'countries'"
-        class="search-container"
-        @click.stop
-      >
-        <div class="search-box">
-          <div class="search-icon-container">
-            <svg
-              class="search-icon"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-          </div>
-          <input
-            v-model="searchQuery"
-            @input="filterCountries"
-            @focus="
-              showCountryDropdown = true;
-              resetCountryFilter();
-            "
-            type="text"
-            class="search-input"
-            placeholder="Search for a country..."
-          />
-        </div>
+        <div v-if="error" class="alert alert-danger">{{ error }}</div>
         <div
-          v-if="showCountryDropdown && filteredCountries.length > 0"
-          class="search-results-dropdown"
+          class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
+          :class="{ 'two-tables': !showOverallTable }"
         >
-          <ul>
-            <li
-              v-for="country in filteredCountries.slice(0, 20)"
-              :key="country.code"
-              @click="selectCountryFromSearch(country)"
-              class="search-result-item"
-            >
-              <img
-                :src="country.flag || '/icons/default-flag.jpg'"
-                :alt="country.name"
-                class="flag-icon"
-              />
-              {{ country.name }}
-            </li>
-          </ul>
-        </div>
-      </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div class="d-flex justify-content-center mb-3">
-        <button
-          class="toggle-overall-btn"
-          :class="{ active: showOverallTable }"
-          @click="showOverallTable = !showOverallTable"
-        >
-          <span v-if="showOverallTable">Hide Overall</span>
-          <span v-else>Show Overall</span>
-        </button>
-      </div>
-      <div v-if="error" class="alert alert-danger">{{ error }}</div>
-      <div
-        class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
-        :class="{ 'two-tables': !showOverallTable }"
-      >
-        <div class="soldier-table-container">
-          <div class="table-wrapper">
-            <div class="header-content">
-              <img
-                src="/icons/soldier.png"
-                alt="Soldier Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-title">
-                  {{
-                    categoryDisplayNames[selectedCategory] ||
-                    capitalize(selectedCategory)
-                  }}
-                  -
-                  {{ selectedItem }}
-                  <img
-                    v-if="
-                      selectedCategory === 'countries' &&
-                      selectedCountry &&
-                      selectedItem !== 'Total'
-                    "
-                    :src="selectedCountry.flag"
-                    class="flag"
-                  />
-                </p>
+          <div class="soldier-table-container">
+            <div class="table-wrapper">
+              <div class="header-content">
+                <img
+                  src="/icons/soldier.png"
+                  alt="Soldier Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-title">
+                    {{
+                      categoryDisplayNames[selectedCategory] ||
+                      capitalize(selectedCategory)
+                    }}
+                    -
+                    {{ selectedItem }}
+                    <img
+                      v-if="
+                        selectedCategory === 'countries' &&
+                        selectedCountry &&
+                        selectedItem !== 'Total'
+                      "
+                      :src="selectedCountry.flag"
+                      class="flag"
+                    />
+                  </p>
+                </div>
               </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>
-                      {{
-                        points
-                          ? "Points"
-                          : selectedCategory === "completion"
-                          ? "Percentage"
-                          : "Count"
-                      }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-if="firstLoad">
-                    <PlayersSkeleton />
-                  </template>
-                  <template v-else>
-                    <tr
-                      v-if="userRankSoldier"
-                      class="fade-in user-rank-row"
-                      style="border-bottom: 2px solid var(--color-border)"
-                    >
-                      <td class="rank-column">#{{ userRankSoldier.rank }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(userRankSoldier)"
-                      >
-                        <img
-                          :src="userRankSoldier.flag"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ userRankSoldier.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: userRankSoldier.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="userRankSoldier.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ userRankSoldier.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
-                        :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
-                        }"
-                      >
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Player</th>
+                      <th>
                         {{
-                          selectedCategory === "completion"
-                            ? userRankSoldier.amount + "%"
-                            : (userRankSoldier.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          points
+                            ? "Points"
+                            : selectedCategory === "completion"
+                            ? "Percentage"
+                            : "Count"
                         }}
-                      </td>
+                      </th>
                     </tr>
-                    <tr
-                      v-for="(player, index) in displayedSoldierPlayers"
-                      :key="'soldier-' + index"
-                      class="fade-in"
-                      :class="{
-                        'current-user-row':
-                          currentUserId && player.player_id === currentUserId,
-                      }"
-                    >
-                      <td class="rank-column">#{{ index + 1 }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(player)"
+                  </thead>
+                  <tbody>
+                    <template v-if="firstLoad">
+                      <PlayersSkeleton />
+                    </template>
+                    <template v-else>
+                      <tr
+                        v-if="userRankSoldier"
+                        class="fade-in user-rank-row"
+                        style="border-bottom: 2px solid var(--color-border)"
                       >
-                        <img
-                          :src="player.flag || '/icons/default-flag.jpg'"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: player.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="player.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
+                        <td class="rank-column">#{{ userRankSoldier.rank }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(userRankSoldier)"
+                        >
+                          <img
+                            :src="userRankSoldier.flag"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ userRankSoldier.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: userRankSoldier.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="userRankSoldier.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ userRankSoldier.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? userRankSoldier.amount + "%"
+                              : (userRankSoldier.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                      <tr
+                        v-for="(player, index) in displayedSoldierPlayers"
+                        :key="'soldier-' + index"
+                        class="fade-in"
                         :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
+                          'current-user-row':
+                            currentUserId && player.player_id === currentUserId,
                         }"
                       >
-                        {{
-                          selectedCategory === "completion"
-                            ? player.percentage + "%"
-                            : (player.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-            <div class="players-footer">
-              <button
-                class="btn btn-dark update-button"
-                style="
-                  background: linear-gradient(
-                    to bottom,
-                    rgba(74, 111, 165, 0.5),
-                    rgba(74, 111, 165, 0.3)
-                  );
-                  font-weight: bold;
-                  width: 100%;
-                "
-                @click="loadMoreSoldiers"
-                :disabled="loadingSoldiers"
-              >
-                <span v-if="!loadingSoldiers">Show more</span>
-                <span
-                  v-else
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              </button>
+                        <td class="rank-column">#{{ index + 1 }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(player)"
+                        >
+                          <img
+                            :src="player.flag || '/icons/default-flag.jpg'"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: player.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="player.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? player.percentage + "%"
+                              : (player.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="players-footer">
+                <button
+                  class="btn btn-dark update-button"
+                  style="
+                    background: linear-gradient(
+                      to bottom,
+                      rgba(74, 111, 165, 0.5),
+                      rgba(74, 111, 165, 0.3)
+                    );
+                    font-weight: bold;
+                    width: 100%;
+                  "
+                  @click="loadMoreSoldiers"
+                  :disabled="loadingSoldiers"
+                >
+                  <span v-if="!loadingSoldiers">Show more</span>
+                  <span
+                    v-else
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="demoman-table-container">
-          <div class="table-wrapper">
-            <div class="header-content">
-              <img
-                src="/icons/demoman.png"
-                alt="Demoman Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-title">
-                  {{
-                    categoryDisplayNames[selectedCategory] ||
-                    capitalize(selectedCategory)
-                  }}
-                  -
-                  {{ selectedItem }}
-                  <img
-                    v-if="
-                      selectedCategory === 'countries' &&
-                      selectedCountry &&
-                      selectedItem !== 'Total'
-                    "
-                    :src="selectedCountry.flag"
-                    class="flag"
-                  />
-                </p>
+          <div class="demoman-table-container">
+            <div class="table-wrapper">
+              <div class="header-content">
+                <img
+                  src="/icons/demoman.png"
+                  alt="Demoman Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-title">
+                    {{
+                      categoryDisplayNames[selectedCategory] ||
+                      capitalize(selectedCategory)
+                    }}
+                    -
+                    {{ selectedItem }}
+                    <img
+                      v-if="
+                        selectedCategory === 'countries' &&
+                        selectedCountry &&
+                        selectedItem !== 'Total'
+                      "
+                      :src="selectedCountry.flag"
+                      class="flag"
+                    />
+                  </p>
+                </div>
               </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>
-                      {{
-                        points
-                          ? selectedCategory === "countries"
-                            ? selectedItem === "Player Count"
-                              ? "Players"
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Player</th>
+                      <th>
+                        {{
+                          points
+                            ? selectedCategory === "countries"
+                              ? selectedItem === "Player Count"
+                                ? "Players"
+                                : "Points"
                               : "Points"
-                            : "Points"
-                          : selectedCategory === "completion"
-                          ? "Percentage"
-                          : "Count"
-                      }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-if="firstLoad">
-                    <PlayersSkeleton />
-                  </template>
-                  <template v-else>
-                    <tr
-                      v-if="userRankDemoman"
-                      class="fade-in user-rank-row"
-                      style="border-bottom: 2px solid var(--color-border)"
-                    >
-                      <td class="rank-column">#{{ userRankDemoman.rank }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(userRankDemoman)"
-                      >
-                        <img
-                          :src="userRankDemoman.flag"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ userRankDemoman.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: userRankDemoman.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="userRankDemoman.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ userRankDemoman.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
-                        :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
-                        }"
-                      >
-                        {{
-                          selectedCategory === "completion"
-                            ? userRankDemoman.amount + "%"
-                            : (userRankDemoman.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            : selectedCategory === "completion"
+                            ? "Percentage"
+                            : "Count"
                         }}
-                      </td>
+                      </th>
                     </tr>
-                    <tr
-                      v-for="(player, index) in displayedDemomanPlayers"
-                      :key="'demoman-' + index"
-                      class="fade-in"
-                      :class="{
-                        'current-user-row':
-                          currentUserId && player.player_id === currentUserId,
-                      }"
-                    >
-                      <td class="rank-column">#{{ index + 1 }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(player)"
+                  </thead>
+                  <tbody>
+                    <template v-if="firstLoad">
+                      <PlayersSkeleton />
+                    </template>
+                    <template v-else>
+                      <tr
+                        v-if="userRankDemoman"
+                        class="fade-in user-rank-row"
+                        style="border-bottom: 2px solid var(--color-border)"
                       >
-                        <img
-                          :src="player.flag"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: player.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="player.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
+                        <td class="rank-column">#{{ userRankDemoman.rank }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(userRankDemoman)"
+                        >
+                          <img
+                            :src="userRankDemoman.flag"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ userRankDemoman.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: userRankDemoman.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="userRankDemoman.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ userRankDemoman.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? userRankDemoman.amount + "%"
+                              : (userRankDemoman.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                      <tr
+                        v-for="(player, index) in displayedDemomanPlayers"
+                        :key="'demoman-' + index"
+                        class="fade-in"
                         :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
+                          'current-user-row':
+                            currentUserId && player.player_id === currentUserId,
                         }"
                       >
-                        {{
-                          selectedCategory === "completion"
-                            ? player.percentage + "%"
-                            : (player.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-            <div class="players-footer">
-              <button
-                class="btn btn-dark update-button"
-                style="
-                  background: linear-gradient(
-                    to bottom,
-                    rgba(74, 111, 165, 0.5),
-                    rgba(74, 111, 165, 0.3)
-                  );
-                  font-weight: bold;
-                  width: 100%;
-                "
-                @click="loadMoreDemomen"
-                :disabled="loadingDemomen"
-              >
-                <span v-if="!loadingDemomen">Show more</span>
-                <span
-                  v-else
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="overall-table-container" v-show="showOverallTable">
-          <div class="table-wrapper">
-            <div class="header-content">
-              <img
-                src="/icons/overall.png"
-                alt="Combined Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-title">
-                  {{
-                    categoryDisplayNames[selectedCategory] ||
-                    capitalize(selectedCategory)
-                  }}
-                  - {{ selectedItem }}
-                  <img
-                    v-if="
-                      selectedCategory === 'countries' &&
-                      selectedCountry &&
-                      selectedItem !== 'Total'
-                    "
-                    :src="selectedCountry.flag"
-                    class="flag"
-                  />
-                </p>
+                        <td class="rank-column">#{{ index + 1 }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(player)"
+                        >
+                          <img
+                            :src="player.flag"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: player.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="player.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? player.percentage + "%"
+                              : (player.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="players-footer">
+                <button
+                  class="btn btn-dark update-button"
+                  style="
+                    background: linear-gradient(
+                      to bottom,
+                      rgba(74, 111, 165, 0.5),
+                      rgba(74, 111, 165, 0.3)
+                    );
+                    font-weight: bold;
+                    width: 100%;
+                  "
+                  @click="loadMoreDemomen"
+                  :disabled="loadingDemomen"
+                >
+                  <span v-if="!loadingDemomen">Show more</span>
+                  <span
+                    v-else
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                </button>
               </div>
             </div>
-            <div class="table-responsive">
-              <table class="table table-dark">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>
-                      {{
-                        points
-                          ? "Points"
-                          : selectedCategory === "completion"
-                          ? "Percentage"
-                          : "Count"
-                      }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-if="firstLoad">
-                    <PlayersSkeleton />
-                  </template>
-                  <template v-else>
-                    <tr
-                      v-if="userRankOverall"
-                      class="fade-in user-rank-row"
-                      style="border-bottom: 2px solid var(--color-border)"
-                    >
-                      <td class="rank-column">#{{ userRankOverall.rank }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(userRankOverall)"
-                      >
-                        <img
-                          :src="userRankOverall.flag"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ userRankOverall.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: userRankOverall.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="userRankOverall.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ userRankOverall.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
-                        :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
-                        }"
-                      >
+          </div>
+          <div class="overall-table-container" v-show="showOverallTable">
+            <div class="table-wrapper">
+              <div class="header-content">
+                <img
+                  src="/icons/overall.png"
+                  alt="Combined Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-title">
+                    {{
+                      categoryDisplayNames[selectedCategory] ||
+                      capitalize(selectedCategory)
+                    }}
+                    - {{ selectedItem }}
+                    <img
+                      v-if="
+                        selectedCategory === 'countries' &&
+                        selectedCountry &&
+                        selectedItem !== 'Total'
+                      "
+                      :src="selectedCountry.flag"
+                      class="flag"
+                    />
+                  </p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Player</th>
+                      <th>
                         {{
-                          selectedCategory === "completion"
-                            ? userRankOverall.amount + "%"
-                            : (userRankOverall.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          points
+                            ? "Points"
+                            : selectedCategory === "completion"
+                            ? "Percentage"
+                            : "Count"
                         }}
-                      </td>
+                      </th>
                     </tr>
-                    <tr
-                      v-for="(player, index) in displayedOverallPlayers"
-                      :key="'overall-' + index"
-                      class="fade-in"
-                      :class="{
-                        'current-user-row':
-                          currentUserId && player.player_id === currentUserId,
-                      }"
-                    >
-                      <td class="rank-column">#{{ index + 1 }}</td>
-                      <td
-                        v-if="
-                          selectedCategory === 'countries' &&
-                          selectedItem === 'Total'
-                        "
-                        class="country-cell align-middle fancy-hover clickable name-column"
-                        @click="selectCountryFromSearch(player)"
+                  </thead>
+                  <tbody>
+                    <template v-if="firstLoad">
+                      <PlayersSkeleton />
+                    </template>
+                    <template v-else>
+                      <tr
+                        v-if="userRankOverall"
+                        class="fade-in user-rank-row"
+                        style="border-bottom: 2px solid var(--color-border)"
                       >
-                        <img
-                          :src="player.flag"
-                          alt="Country Flag"
-                          class="flag"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </td>
-                      <SmartLink
-                        v-else
-                        tag="td"
-                        :to="{
-                          name: 'PlayerPage',
-                          params: { playerId: player.player_id },
-                        }"
-                        class="name-cell align-middle fancy-hover clickable name-column"
-                      >
-                        <img
-                          :src="player.steam_avatar"
-                          class="avatar"
-                          @error="handleError"
-                        />
-                        {{ player.name }}
-                      </SmartLink>
-                      <td
-                        class="points-column"
+                        <td class="rank-column">#{{ userRankOverall.rank }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(userRankOverall)"
+                        >
+                          <img
+                            :src="userRankOverall.flag"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ userRankOverall.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: userRankOverall.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="userRankOverall.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ userRankOverall.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? userRankOverall.amount + "%"
+                              : (userRankOverall.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                      <tr
+                        v-for="(player, index) in displayedOverallPlayers"
+                        :key="'overall-' + index"
+                        class="fade-in"
                         :class="{
-                          'percentage-column':
-                            selectedCategory === 'completion',
+                          'current-user-row':
+                            currentUserId && player.player_id === currentUserId,
                         }"
                       >
-                        {{
-                          selectedCategory === "completion"
-                            ? player.percentage + "%"
-                            : (player.amount ?? 0)
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-            <div class="players-footer">
-              <button
-                class="btn btn-dark update-button"
-                style="
-                  background: linear-gradient(
-                    to bottom,
-                    rgba(74, 111, 165, 0.5),
-                    rgba(74, 111, 165, 0.3)
-                  );
-                  font-weight: bold;
-                  width: 100%;
-                "
-                @click="loadMoreOverall"
-                :disabled="loadingOverall"
-              >
-                <span v-if="!loadingOverall">Show more</span>
-                <span
-                  v-else
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              </button>
+                        <td class="rank-column">#{{ index + 1 }}</td>
+                        <td
+                          v-if="
+                            selectedCategory === 'countries' &&
+                            selectedItem === 'Total'
+                          "
+                          class="country-cell align-middle fancy-hover clickable name-column"
+                          @click="selectCountryFromSearch(player)"
+                        >
+                          <img
+                            :src="player.flag"
+                            alt="Country Flag"
+                            class="flag"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </td>
+                        <SmartLink
+                          v-else
+                          tag="td"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: player.player_id },
+                          }"
+                          class="name-cell align-middle fancy-hover clickable name-column"
+                        >
+                          <img
+                            :src="player.steam_avatar"
+                            class="avatar"
+                            @error="handleError"
+                          />
+                          {{ player.name }}
+                        </SmartLink>
+                        <td
+                          class="points-column"
+                          :class="{
+                            'percentage-column':
+                              selectedCategory === 'completion',
+                          }"
+                        >
+                          {{
+                            selectedCategory === "completion"
+                              ? player.percentage + "%"
+                              : (player.amount ?? 0)
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }}
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="players-footer">
+                <button
+                  class="btn btn-dark update-button"
+                  style="
+                    background: linear-gradient(
+                      to bottom,
+                      rgba(74, 111, 165, 0.5),
+                      rgba(74, 111, 165, 0.3)
+                    );
+                    font-weight: bold;
+                    width: 100%;
+                  "
+                  @click="loadMoreOverall"
+                  :disabled="loadingOverall"
+                >
+                  <span v-if="!loadingOverall">Show more</span>
+                  <span
+                    v-else
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1427,6 +1427,10 @@ export default {
 </script>
 
 <style scoped>
+.content-container {
+  max-width: 1320px;
+  width: 100%;
+}
 .header-content {
   border-radius: 10px 10px 0 0;
   display: flex;

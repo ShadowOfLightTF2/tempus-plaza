@@ -420,6 +420,9 @@ export default {
 }
 
 @media (max-width: 900px) {
+  .section-header {
+    font-size: 16px;
+  }
   .time-range-buttons {
     gap: 0.3rem;
     padding: 5px 8px 15px 8px;

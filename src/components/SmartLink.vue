@@ -2,6 +2,7 @@
   <component
     :is="tag"
     :href="resolvedHref"
+    :rel="relAttr"
     @click="handleClick"
     @auxclick="handleAuxClick"
     @mousedown="handleMouseDown"
@@ -17,10 +18,8 @@ export default {
   props: {
     href: String,
     to: [String, Object],
-    tag: {
-      type: String,
-      default: "a",
-    },
+    tag: { type: String, default: "a" },
+    nofollow: { type: Boolean, default: false },
   },
   computed: {
     resolvedHref() {
@@ -29,6 +28,10 @@ export default {
         const route = this.$router.resolve(this.to);
         return route.href;
       }
+      return null;
+    },
+    relAttr() {
+      if (this.nofollow) return "nofollow";
       return null;
     },
   },

@@ -12,7 +12,7 @@
           Compare records and stats between two players
         </p>
       </div>
-      <hr class="row-divider" style="width: 75%" />
+      <hr class="row-divider" style="width: 100%" />
       <div class="search-section">
         <div class="search-container" @click.stop>
           <div class="search-input-wrapper">
@@ -218,7 +218,7 @@
           </div>
         </div>
       </div>
-      <hr class="row-divider" style="width: 75%" />
+      <hr class="row-divider" style="width: 100%" />
       <div
         class="loading-indicator"
         v-if="loadingStats.playerTwo || loadingStats.playerOne"
@@ -557,7 +557,7 @@
           !loadingStats.playerTwo
         "
         class="row-divider"
-        style="width: 75%"
+        style="width: 100%"
         margin-top="50px"
       />
       <div

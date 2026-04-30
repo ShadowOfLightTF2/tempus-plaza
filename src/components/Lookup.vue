@@ -2,942 +2,988 @@
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="container py-4 d-flex flex-column align-items-center">
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">🔍</span>
-          Lookup Players and Maps
-        </h1>
-        <p class="page-subtitle">
-          Search and filter through player or map records
-        </p>
-      </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div
-        v-if="playerId && !loading"
-        class="lookup-player-banner"
-        :style="{
-          background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
-        }"
-      >
-        <SmartLink
-          tag="div"
-          :to="{ name: 'PlayerPage', params: { playerId: playerId } }"
-          class="lookup-banner-content fancy-hover"
+    <div class="w-95 mx-auto py-4 d-flex flex-column align-items-center">
+      <div class="content-container">
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">🔍</span>
+            Lookup Players and Maps
+          </h1>
+          <p class="page-subtitle">
+            Search and filter through player or map records
+          </p>
+        </div>
+        <hr class="row-divider" style="width: 100%" />
+        <div
+          v-if="playerId && !loading"
+          class="lookup-player-banner"
+          :style="{
+            background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
+          }"
         >
-          <div class="lookup-banner-left">
-            <img
-              :src="playerAvatar || '/avatars/golly.jpg'"
-              alt="Avatar"
-              class="lookup-avatar"
-              onerror="this.src='/avatars/golly.jpg'"
-            />
-            <div class="lookup-player-info">
+          <SmartLink
+            tag="div"
+            :to="{ name: 'PlayerPage', params: { playerId: playerId } }"
+            class="lookup-banner-content fancy-hover"
+          >
+            <div class="lookup-banner-left">
+              <img
+                :src="playerAvatar || '/avatars/golly.jpg'"
+                alt="Avatar"
+                class="lookup-avatar"
+                onerror="this.src='/avatars/golly.jpg'"
+              />
+              <div class="lookup-player-info">
+                <h2
+                  class="lookup-player-name"
+                  v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+                ></h2>
+                <p v-if="playerCountry" class="lookup-country">
+                  <img
+                    :src="getFlagImageUrl(playerCountryCode)"
+                    alt="flag"
+                    class="lookup-flag-icon"
+                  />
+                  {{ playerCountry }} ({{ playerCountryCode }})
+                </p>
+                <a
+                  :href="`https://tempus-demos.xyz/user/${playerSteamId}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="lookup-demos-btn"
+                  title="View tempus-demos.xyz profile"
+                  @click.stop
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                    <rect
+                      x="1"
+                      y="5"
+                      width="15"
+                      height="14"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                  </svg>
+                  Demos
+                </a>
+              </div>
+            </div>
+
+            <div v-if="playerRankInfo" class="lookup-banner-stats">
+              <div class="lookup-stat-card">
+                <span class="lookup-stat-label">Overall</span>
+                <span class="lookup-stat-value"
+                  >#{{ playerRankInfo.overall_rank }}</span
+                >
+                <span class="lookup-stat-points">{{
+                  playerRankInfo.overall_points.toLocaleString()
+                }}</span>
+              </div>
+              <div class="lookup-stat-card">
+                <span class="lookup-stat-label">Soldier</span>
+                <span class="lookup-stat-value"
+                  >#{{ playerRankInfo.soldier_rank }}</span
+                >
+                <span class="lookup-stat-points">{{
+                  playerRankInfo.soldier_points.toLocaleString()
+                }}</span>
+              </div>
+              <div class="lookup-stat-card">
+                <span class="lookup-stat-label">Demoman</span>
+                <span class="lookup-stat-value"
+                  >#{{ playerRankInfo.demoman_rank }}</span
+                >
+                <span class="lookup-stat-points">{{
+                  playerRankInfo.demoman_points.toLocaleString()
+                }}</span>
+              </div>
+            </div>
+          </SmartLink>
+        </div>
+        <div
+          v-else-if="mapId && !loading"
+          class="lookup-map-banner"
+          :style="{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }"
+        >
+          <SmartLink
+            tag="div"
+            :to="{ name: 'MapPage', params: { mapId: mapId } }"
+            class="lookup-banner-content fancy-hover"
+          >
+            <div class="lookup-map-main">
               <h2
-                class="lookup-player-name"
-                v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+                class="lookup-map-name"
+                v-html="sanitize(selectedMapName) || 'Selected Map'"
               ></h2>
-              <p v-if="playerCountry" class="lookup-country">
-                <img
-                  :src="getFlagImageUrl(playerCountryCode)"
-                  alt="flag"
-                  class="lookup-flag-icon"
-                />
-                {{ playerCountry }} ({{ playerCountryCode }})
-              </p>
-              <a
-                :href="`https://tempus-demos.xyz/user/${playerSteamId}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="lookup-demos-btn"
-                title="View tempus-demos.xyz profile"
-                @click.stop
+              <div class="map-primary-info">
+                <div class="map-tiers">
+                  <div class="tier-group">
+                    <img
+                      src="/icons/soldier.png"
+                      alt="Soldier"
+                      class="tier-class-icon"
+                    />
+                    <span class="tier-text"
+                      >T{{ mapInfo?.map.soldier_tier }}</span
+                    >
+                    <span class="rating-text"
+                      >R{{ mapInfo?.map.soldier_rating }}</span
+                    >
+                  </div>
+                  <span class="tier-divider">•</span>
+                  <div class="tier-group">
+                    <img
+                      src="/icons/demoman.png"
+                      alt="Demoman"
+                      class="tier-class-icon"
+                    />
+                    <span class="tier-text"
+                      >T{{ mapInfo?.map.demoman_tier }}</span
+                    >
+                    <span class="rating-text"
+                      >R{{ mapInfo?.map.demoman_rating }}</span
+                    >
+                  </div>
+                </div>
+                <div
+                  v-if="mapInfo?.map.intended_class"
+                  :class="[
+                    'intended-class-display',
+                    { 'no-circle': mapInfo.map.intended_class === 5 },
+                  ]"
+                >
+                  <div
+                    v-if="mapInfo.map.intended_class === 5"
+                    class="both-classes"
+                  >
+                    <div class="class-circle">
+                      <img
+                        src="/icons/soldier.png"
+                        alt="Soldier"
+                        class="intended-class-icon"
+                      />
+                    </div>
+                    <div class="class-circle">
+                      <img
+                        src="/icons/demoman.png"
+                        alt="Demoman"
+                        class="intended-class-icon"
+                      />
+                    </div>
+                  </div>
+                  <img
+                    v-else-if="mapInfo.map.intended_class === 3"
+                    src="/icons/soldier.png"
+                    alt="Soldier"
+                    class="intended-class-icon"
+                  />
+                  <img
+                    v-else-if="mapInfo.map.intended_class === 4"
+                    src="/icons/demoman.png"
+                    alt="Demoman"
+                    class="intended-class-icon"
+                  />
+                </div>
+              </div>
+            </div>
+            <div v-if="mapInfo" class="lookup-map-secondary">
+              <span class="secondary-stat"
+                >{{ mapInfo.map.course_count }} courses</span
+              >
+              <span class="stat-separator">•</span>
+              <span class="secondary-stat"
+                >{{ mapInfo.map.bonus_count }} bonuses</span
+              >
+              <span class="stat-separator">•</span>
+              <span class="secondary-stat"
+                >{{ mapInfo.map.soldier_completion_count }} [S]
+                completions</span
+              >
+              <span class="stat-separator">•</span>
+              <span class="secondary-stat"
+                >{{ mapInfo.map.demoman_completion_count }} [D]
+                completions</span
+              >
+              <span class="stat-separator">•</span>
+              <span class="secondary-stat"
+                >Added {{ formatMapDate(mapInfo.map.date_added) }}</span
+              >
+            </div>
+          </SmartLink>
+        </div>
+
+        <div class="search-section">
+          <div class="lookup-search-container" @click.stop>
+            <div
+              class="lookup-search-box"
+              :class="{ 'is-focused': lookupSearchFocused }"
+            >
+              <div class="lookup-search-icon-wrap">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  class="lookup-search-icon-svg"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+              </div>
+              <input
+                type="text"
+                v-model="searchQuery"
+                @input="onSearch"
+                @focus="lookupSearchFocused = true"
+                @blur="lookupSearchFocused = false"
+                @keydown="onLookupKeydown"
+                placeholder="Search for players or maps..."
+                class="lookup-search-input"
+                autocomplete="off"
+              />
+              <button
+                v-if="searchQuery"
+                class="lookup-search-clear"
+                @mousedown.prevent="
+                  searchQuery = '';
+                  searchResults = null;
+                  showLoading = false;
+                  lookupHighlightedIndex = -1;
+                "
+                aria-label="Clear search"
               >
                 <svg
-                  width="14"
-                  height="14"
+                  width="13"
+                  height="13"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2.5"
                 >
-                  <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-                Demos
-              </a>
+              </button>
             </div>
-          </div>
 
-          <div v-if="playerRankInfo" class="lookup-banner-stats">
-            <div class="lookup-stat-card">
-              <span class="lookup-stat-label">Overall</span>
-              <span class="lookup-stat-value"
-                >#{{ playerRankInfo.overall_rank }}</span
-              >
-              <span class="lookup-stat-points">{{
-                playerRankInfo.overall_points.toLocaleString()
-              }}</span>
-            </div>
-            <div class="lookup-stat-card">
-              <span class="lookup-stat-label">Soldier</span>
-              <span class="lookup-stat-value"
-                >#{{ playerRankInfo.soldier_rank }}</span
-              >
-              <span class="lookup-stat-points">{{
-                playerRankInfo.soldier_points.toLocaleString()
-              }}</span>
-            </div>
-            <div class="lookup-stat-card">
-              <span class="lookup-stat-label">Demoman</span>
-              <span class="lookup-stat-value"
-                >#{{ playerRankInfo.demoman_rank }}</span
-              >
-              <span class="lookup-stat-points">{{
-                playerRankInfo.demoman_points.toLocaleString()
-              }}</span>
-            </div>
-          </div>
-        </SmartLink>
-      </div>
-      <div
-        v-else-if="mapId && !loading"
-        class="lookup-map-banner"
-        :style="{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${mapInfo?.map.name}.webp')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }"
-      >
-        <SmartLink
-          tag="div"
-          :to="{ name: 'MapPage', params: { mapId: mapId } }"
-          class="lookup-banner-content fancy-hover"
-        >
-          <div class="lookup-map-main">
-            <h2
-              class="lookup-map-name"
-              v-html="sanitize(selectedMapName) || 'Selected Map'"
-            ></h2>
-            <div class="map-primary-info">
-              <div class="map-tiers">
-                <div class="tier-group">
-                  <img
-                    src="/icons/soldier.png"
-                    alt="Soldier"
-                    class="tier-class-icon"
-                  />
-                  <span class="tier-text"
-                    >T{{ mapInfo?.map.soldier_tier }}</span
-                  >
-                  <span class="rating-text"
-                    >R{{ mapInfo?.map.soldier_rating }}</span
-                  >
-                </div>
-                <span class="tier-divider">•</span>
-                <div class="tier-group">
-                  <img
-                    src="/icons/demoman.png"
-                    alt="Demoman"
-                    class="tier-class-icon"
-                  />
-                  <span class="tier-text"
-                    >T{{ mapInfo?.map.demoman_tier }}</span
-                  >
-                  <span class="rating-text"
-                    >R{{ mapInfo?.map.demoman_rating }}</span
-                  >
-                </div>
-              </div>
+            <Transition name="lookup-dropdown">
               <div
-                v-if="mapInfo?.map.intended_class"
-                :class="[
-                  'intended-class-display',
-                  { 'no-circle': mapInfo.map.intended_class === 5 },
-                ]"
+                class="lookup-search-results-dropdown"
+                ref="lookupDropdownRef"
+                v-if="
+                  searchQuery.trim() &&
+                  (showLoading ||
+                    (searchResults &&
+                      (searchResults.players.length ||
+                        searchResults.maps.length)))
+                "
               >
-                <div
-                  v-if="mapInfo.map.intended_class === 5"
-                  class="both-classes"
-                >
-                  <div class="class-circle">
-                    <img
-                      src="/icons/soldier.png"
-                      alt="Soldier"
-                      class="intended-class-icon"
-                    />
-                  </div>
-                  <div class="class-circle">
-                    <img
-                      src="/icons/demoman.png"
-                      alt="Demoman"
-                      class="intended-class-icon"
-                    />
-                  </div>
-                </div>
-                <img
-                  v-else-if="mapInfo.map.intended_class === 3"
-                  src="/icons/soldier.png"
-                  alt="Soldier"
-                  class="intended-class-icon"
-                />
-                <img
-                  v-else-if="mapInfo.map.intended_class === 4"
-                  src="/icons/demoman.png"
-                  alt="Demoman"
-                  class="intended-class-icon"
-                />
-              </div>
-            </div>
-          </div>
-          <div v-if="mapInfo" class="lookup-map-secondary">
-            <span class="secondary-stat"
-              >{{ mapInfo.map.course_count }} courses</span
-            >
-            <span class="stat-separator">•</span>
-            <span class="secondary-stat"
-              >{{ mapInfo.map.bonus_count }} bonuses</span
-            >
-            <span class="stat-separator">•</span>
-            <span class="secondary-stat"
-              >{{ mapInfo.map.soldier_completion_count }} [S] completions</span
-            >
-            <span class="stat-separator">•</span>
-            <span class="secondary-stat"
-              >{{ mapInfo.map.demoman_completion_count }} [D] completions</span
-            >
-            <span class="stat-separator">•</span>
-            <span class="secondary-stat"
-              >Added {{ formatMapDate(mapInfo.map.date_added) }}</span
-            >
-          </div>
-        </SmartLink>
-      </div>
-
-      <div class="search-section">
-        <div class="lookup-search-container" @click.stop>
-          <div
-            class="lookup-search-box"
-            :class="{ 'is-focused': lookupSearchFocused }"
-          >
-            <div class="lookup-search-icon-wrap">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                class="lookup-search-icon-svg"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-            </div>
-            <input
-              type="text"
-              v-model="searchQuery"
-              @input="onSearch"
-              @focus="lookupSearchFocused = true"
-              @blur="lookupSearchFocused = false"
-              placeholder="Search for players or maps..."
-              class="lookup-search-input"
-            />
-            <button
-              v-if="searchQuery"
-              class="lookup-search-clear"
-              @mousedown.prevent="
-                searchQuery = '';
-                searchResults = null;
-                showLoading = false;
-              "
-              aria-label="Clear search"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-
-          <Transition name="lookup-dropdown">
-            <div
-              class="lookup-search-results-dropdown"
-              v-if="
-                searchQuery.trim() &&
-                (showLoading ||
-                  (searchResults &&
-                    (searchResults.players.length ||
-                      searchResults.maps.length)))
-              "
-            >
-              <div v-if="showLoading">
-                <div class="lookup-search-section">
-                  <div class="lookup-section-label">
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                    >
-                      <polygon
-                        points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
-                      ></polygon>
-                    </svg>
-                    Maps
-                  </div>
-                  <div class="lookup-loading-row">
-                    <span class="lookup-skeleton lookup-skeleton-text"></span>
-                  </div>
-                </div>
-                <div class="lookup-section-divider"></div>
-                <div class="lookup-search-section">
-                  <div class="lookup-section-label">
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                    >
-                      <path
-                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                      ></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    Players
-                  </div>
-                  <div class="lookup-loading-rows">
-                    <div v-for="n in 3" :key="n" class="lookup-loading-row">
-                      <span
-                        class="lookup-skeleton lookup-skeleton-avatar"
-                      ></span>
+                <div v-if="showLoading">
+                  <div class="lookup-search-section">
+                    <div class="lookup-section-label">
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <polygon
+                          points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
+                        ></polygon>
+                      </svg>
+                      Maps
+                    </div>
+                    <div class="lookup-loading-row">
                       <span class="lookup-skeleton lookup-skeleton-text"></span>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div v-else>
-                <div
-                  v-if="searchResults.maps && searchResults.maps.length"
-                  class="lookup-search-section"
-                >
-                  <div class="lookup-section-label">
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                    >
-                      <polygon
-                        points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
-                      ></polygon>
-                    </svg>
-                    Maps
-                  </div>
-                  <ul>
-                    <HoverPreview
-                      v-for="map in searchResults.maps"
-                      :key="'map-' + map.id"
-                      :mapName="map.name"
-                      style="display: block"
-                    >
-                      <li
-                        class="lookup-result-item"
-                        @click="selectMap(map.id, map.name)"
+                  <div class="lookup-section-divider"></div>
+                  <div class="lookup-search-section">
+                    <div class="lookup-section-label">
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
                       >
+                        <path
+                          d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                        ></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      Players
+                    </div>
+                    <div class="lookup-loading-rows">
+                      <div v-for="n in 3" :key="n" class="lookup-loading-row">
+                        <span
+                          class="lookup-skeleton lookup-skeleton-avatar"
+                        ></span>
+                        <span
+                          class="lookup-skeleton lookup-skeleton-text"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else>
+                  <div
+                    v-if="searchResults.maps && searchResults.maps.length"
+                    class="lookup-search-section"
+                  >
+                    <div class="lookup-section-label">
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <polygon
+                          points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
+                        ></polygon>
+                      </svg>
+                      Maps
+                    </div>
+                    <ul>
+                      <HoverPreview
+                        v-for="(map, i) in searchResults.maps"
+                        :key="'map-' + map.id"
+                        :mapName="map.name"
+                        style="display: block"
+                      >
+                        <li
+                          class="lookup-result-item"
+                          :class="{
+                            'is-highlighted': lookupHighlightedIndex === i,
+                          }"
+                          :data-result-index="i"
+                          @click="selectMap(map.id, map.name)"
+                          @mouseenter="lookupHighlightedIndex = i"
+                          @mouseleave="lookupHighlightedIndex = -1"
+                        >
+                          <span
+                            class="lookup-result-name"
+                            v-html="sanitize(map.name) || `Map ID: ${map.id}`"
+                          ></span>
+                        </li>
+                      </HoverPreview>
+                    </ul>
+                  </div>
+                  <div
+                    v-if="
+                      searchResults.maps &&
+                      searchResults.maps.length &&
+                      searchResults.players &&
+                      searchResults.players.length
+                    "
+                    class="lookup-section-divider"
+                  ></div>
+                  <div
+                    v-if="searchResults.players && searchResults.players.length"
+                    class="lookup-search-section"
+                  >
+                    <div class="lookup-section-label">
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <path
+                          d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                        ></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      Players
+                    </div>
+                    <ul>
+                      <li
+                        v-for="(player, i) in searchResults.players"
+                        :key="'player-' + player.id"
+                        class="lookup-result-item"
+                        :class="{
+                          'is-highlighted':
+                            lookupHighlightedIndex === lookupMapCount + i,
+                        }"
+                        :data-result-index="lookupMapCount + i"
+                        @click="selectPlayer(player.id)"
+                        @mouseenter="
+                          lookupHighlightedIndex = lookupMapCount + i
+                        "
+                        @mouseleave="lookupHighlightedIndex = -1"
+                      >
+                        <div class="lookup-player-avatar-wrapper">
+                          <img
+                            v-if="player.steam_avatar"
+                            :src="player.steam_avatar"
+                            :alt="player.name"
+                            class="lookup-player-avatar"
+                            @error="handleAvatarError"
+                          />
+                          <div v-else class="lookup-player-avatar-fallback">
+                            {{ (player.name || "?")[0].toUpperCase() }}
+                          </div>
+                        </div>
                         <span
                           class="lookup-result-name"
-                          v-html="sanitize(map.name) || `Map ID: ${map.id}`"
+                          v-html="
+                            sanitize(player.name) || `Player ID: ${player.id}`
+                          "
                         ></span>
                       </li>
-                    </HoverPreview>
-                  </ul>
-                </div>
-                <div
-                  v-if="
-                    searchResults.maps &&
-                    searchResults.maps.length &&
-                    searchResults.players &&
-                    searchResults.players.length
-                  "
-                  class="lookup-section-divider"
-                ></div>
-                <div
-                  v-if="searchResults.players && searchResults.players.length"
-                  class="lookup-search-section"
-                >
-                  <div class="lookup-section-label">
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                    >
-                      <path
-                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                      ></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    Players
+                    </ul>
                   </div>
-                  <ul>
-                    <li
-                      v-for="player in searchResults.players"
-                      :key="'player-' + player.id"
-                      class="lookup-result-item"
-                      @click="selectPlayer(player.id)"
-                    >
-                      <div class="lookup-player-avatar-wrapper">
-                        <img
-                          v-if="player.steam_avatar"
-                          :src="player.steam_avatar"
-                          :alt="player.name"
-                          class="lookup-player-avatar"
-                          @error="handleAvatarError"
-                        />
-                        <div v-else class="lookup-player-avatar-fallback">
-                          {{ (player.name || "?")[0].toUpperCase() }}
-                        </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+          <div
+            v-if="
+              searchResults &&
+              (searchResults.players.length || searchResults.maps.length)
+            "
+            class="dropdown-overlay"
+            @click="
+              searchResults = null;
+              lookupHighlightedIndex = -1;
+            "
+            style="
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              z-index: 999;
+              background: transparent;
+            "
+          ></div>
+        </div>
+        <hr class="row-divider" style="width: 100%" />
+        <div class="filter-section">
+          <div class="filter-content">
+            <div
+              class="filter-columns"
+              style="flex-direction: column; gap: 20px"
+            >
+              <div
+                class="filter-row"
+                style="display: flex; gap: 40px; justify-content: center"
+              >
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Soldier tiers</h6>
+                    <div class="tier-filter-container">
+                      <div class="tier-filters">
+                        <label
+                          v-for="tier in availableTiers"
+                          :key="'soldier-tier-' + tier"
+                          class="tier-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="tier"
+                            v-model="selectedSoldierTiers"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`tier-badge tier-${tier}`">{{
+                            tier
+                          }}</span>
+                        </label>
                       </div>
-                      <span
-                        class="lookup-result-name"
-                        v-html="
-                          sanitize(player.name) || `Player ID: ${player.id}`
-                        "
-                      ></span>
-                    </li>
-                  </ul>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </Transition>
-        </div>
-        <div
-          v-if="
-            searchResults &&
-            (searchResults.players.length || searchResults.maps.length)
-          "
-          class="dropdown-overlay"
-          @click="searchResults = null"
-          style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 999;
-            background: transparent;
-          "
-        ></div>
-      </div>
-
-      <hr class="row-divider" style="width: 75%" />
-      <div class="filter-section">
-        <div class="filter-content">
-          <div class="filter-columns" style="flex-direction: column; gap: 20px">
-            <div
-              class="filter-row"
-              style="display: flex; gap: 40px; justify-content: center"
-            >
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title mb-2">Soldier tiers</h6>
-                  <div class="tier-filter-container">
-                    <div class="tier-filters">
-                      <label
-                        v-for="tier in availableTiers"
-                        :key="'soldier-tier-' + tier"
-                        class="tier-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="tier"
-                          v-model="selectedSoldierTiers"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`tier-badge tier-${tier}`">{{
-                          tier
-                        }}</span>
-                      </label>
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Demoman tiers</h6>
+                    <div class="tier-filter-container">
+                      <div class="tier-filters">
+                        <label
+                          v-for="tier in availableTiers"
+                          :key="'demo-tier-' + tier"
+                          class="tier-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="tier"
+                            v-model="selectedDemomanTiers"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`tier-badge tier-${tier}`">{{
+                            tier
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title mb-2">Demoman tiers</h6>
-                  <div class="tier-filter-container">
-                    <div class="tier-filters">
-                      <label
-                        v-for="tier in availableTiers"
-                        :key="'demo-tier-' + tier"
-                        class="tier-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="tier"
-                          v-model="selectedDemomanTiers"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`tier-badge tier-${tier}`">{{
-                          tier
-                        }}</span>
-                      </label>
+              <div
+                class="filter-row responsive-ratings-row"
+                style="
+                  display: flex;
+                  gap: 40px;
+                  justify-content: center;
+                  align-items: flex-start;
+                  width: 100%;
+                "
+              >
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Soldier ratings</h6>
+                    <div class="rating-filter-container">
+                      <div class="rating-filters">
+                        <label
+                          v-for="rating in availableRatings"
+                          :key="'soldier-rating-' + rating"
+                          class="rating-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="rating"
+                            v-model="selectedSoldierRatings"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`rating-badge rating-${rating}`">{{
+                            rating
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div
-              class="filter-row responsive-ratings-row"
-              style="
-                display: flex;
-                gap: 40px;
-                justify-content: center;
-                align-items: flex-start;
-                width: 100%;
-              "
-            >
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title mb-2">Soldier ratings</h6>
-                  <div class="rating-filter-container">
-                    <div class="rating-filters">
-                      <label
-                        v-for="rating in availableRatings"
-                        :key="'soldier-rating-' + rating"
-                        class="rating-checkbox"
+                <div class="filter-column intended-class-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Intended Class</h6>
+                    <div class="intended-class-buttons">
+                      <button
+                        v-for="cls in availableIntendedClasses"
+                        :key="cls.id"
+                        @click="toggleIntendedClass(cls.id)"
+                        :class="{
+                          active: selectedIntendedClasses.includes(cls.id),
+                        }"
+                        class="intended-class-btn"
                       >
-                        <input
-                          type="checkbox"
-                          :value="rating"
-                          v-model="selectedSoldierRatings"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`rating-badge rating-${rating}`">{{
-                          rating
-                        }}</span>
-                      </label>
+                        <img :src="cls.icon" :alt="cls.label" />
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="filter-column intended-class-column">
-                <div class="filter-group">
-                  <h6 class="filter-title mb-2">Intended Class</h6>
-                  <div class="intended-class-buttons">
-                    <button
-                      v-for="cls in availableIntendedClasses"
-                      :key="cls.id"
-                      @click="toggleIntendedClass(cls.id)"
-                      :class="{
-                        active: selectedIntendedClasses.includes(cls.id),
-                      }"
-                      class="intended-class-btn"
-                    >
-                      <img :src="cls.icon" :alt="cls.label" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="filter-column">
-                <div class="filter-group">
-                  <h6 class="filter-title mb-2">Demoman ratings</h6>
-                  <div class="rating-filter-container">
-                    <div class="rating-filters">
-                      <label
-                        v-for="rating in availableRatings"
-                        :key="'demo-rating-' + rating"
-                        class="rating-checkbox"
-                      >
-                        <input
-                          type="checkbox"
-                          :value="rating"
-                          v-model="selectedDemomanRatings"
-                          @change="onFilterChange"
-                        />
-                        <span :class="`rating-badge rating-${rating}`">{{
-                          rating
-                        }}</span>
-                      </label>
+                <div class="filter-column">
+                  <div class="filter-group">
+                    <h6 class="filter-title mb-2">Demoman ratings</h6>
+                    <div class="rating-filter-container">
+                      <div class="rating-filters">
+                        <label
+                          v-for="rating in availableRatings"
+                          :key="'demo-rating-' + rating"
+                          class="rating-checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="rating"
+                            v-model="selectedDemomanRatings"
+                            @change="onFilterChange"
+                          />
+                          <span :class="`rating-badge rating-${rating}`">{{
+                            rating
+                          }}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="filter-group">
-            <h6 class="filter-title mb-2">Placement</h6>
-            <div class="group-filter-container">
-              <div class="group-filters">
-                <label class="group-checkbox">
-                  <input
-                    type="checkbox"
-                    value="WR"
-                    v-model="selectedGroups"
-                    @change="onFilterChange"
-                  />
-                  <span class="group-badge group-wr">WR</span>
-                </label>
-                <label class="group-checkbox">
-                  <input
-                    type="checkbox"
-                    value="TT"
-                    v-model="selectedGroups"
-                    @change="onFilterChange"
-                  />
-                  <span class="group-badge group-tt">TT</span>
-                </label>
-                <label
-                  v-for="group in availableGroups"
-                  :key="'group-' + group"
-                  class="group-checkbox"
-                >
-                  <input
-                    type="checkbox"
-                    :value="group"
-                    v-model="selectedGroups"
-                    @change="onFilterChange"
-                  />
-                  <span :class="`group-badge group-${group}`"
-                    >G{{ group }}</span
+            <div class="filter-group">
+              <h6 class="filter-title mb-2">Placement</h6>
+              <div class="group-filter-container">
+                <div class="group-filters">
+                  <label class="group-checkbox">
+                    <input
+                      type="checkbox"
+                      value="WR"
+                      v-model="selectedGroups"
+                      @change="onFilterChange"
+                    />
+                    <span class="group-badge group-wr">WR</span>
+                  </label>
+                  <label class="group-checkbox">
+                    <input
+                      type="checkbox"
+                      value="TT"
+                      v-model="selectedGroups"
+                      @change="onFilterChange"
+                    />
+                    <span class="group-badge group-tt">TT</span>
+                  </label>
+                  <label
+                    v-for="group in availableGroups"
+                    :key="'group-' + group"
+                    class="group-checkbox"
                   >
-                </label>
-                <label class="group-checkbox">
-                  <input
-                    type="checkbox"
-                    value="BT"
-                    v-model="selectedGroups"
-                    @change="onFilterChange"
-                  />
-                  <span class="group-badge group-bt">BT</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="filter-columns">
-            <div class="filter-group">
-              <h6 class="filter-title mb-2">Class</h6>
-              <div class="class-filter-container">
-                <div
-                  v-for="classOption in ['soldier', 'demoman']"
-                  :key="classOption"
-                  class="class-checkbox"
-                  :class="{ selected: selectedClasses.includes(classOption) }"
-                  @click="toggleClass(classOption)"
-                >
-                  <span>{{ classOption }}</span>
+                    <input
+                      type="checkbox"
+                      :value="group"
+                      v-model="selectedGroups"
+                      @change="onFilterChange"
+                    />
+                    <span :class="`group-badge group-${group}`"
+                      >G{{ group }}</span
+                    >
+                  </label>
+                  <label class="group-checkbox">
+                    <input
+                      type="checkbox"
+                      value="BT"
+                      v-model="selectedGroups"
+                      @change="onFilterChange"
+                    />
+                    <span class="group-badge group-bt">BT</span>
+                  </label>
                 </div>
               </div>
             </div>
-            <div class="filter-group">
-              <h6 class="filter-title mb-2">Type</h6>
-              <div class="type-filter-container">
-                <div
-                  v-for="typeOption in ['map', 'course', 'bonus']"
-                  :key="typeOption"
-                  class="type-checkbox"
-                  :class="{ selected: selectedTypes.includes(typeOption) }"
-                  @click="toggleType(typeOption)"
-                >
-                  <span>{{ typeOption }}</span>
+            <div class="filter-columns">
+              <div class="filter-group">
+                <h6 class="filter-title mb-2">Class</h6>
+                <div class="class-filter-container">
+                  <div
+                    v-for="classOption in ['soldier', 'demoman']"
+                    :key="classOption"
+                    class="class-checkbox"
+                    :class="{ selected: selectedClasses.includes(classOption) }"
+                    @click="toggleClass(classOption)"
+                  >
+                    <span>{{ classOption }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-group">
+                <h6 class="filter-title mb-2">Type</h6>
+                <div class="type-filter-container">
+                  <div
+                    v-for="typeOption in ['map', 'course', 'bonus']"
+                    :key="typeOption"
+                    class="type-checkbox"
+                    :class="{ selected: selectedTypes.includes(typeOption) }"
+                    @click="toggleType(typeOption)"
+                  >
+                    <span>{{ typeOption }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="filter-actions">
-            <div class="filter-group">
-              <h6 class="filter-title mb-2">Status</h6>
-              <div class="status-filter-container">
-                <div
-                  v-for="statusOption in ['completed', 'incomplete']"
-                  :key="statusOption"
-                  class="status-checkbox"
-                  :class="{ selected: selectedStatus.includes(statusOption) }"
-                  @click="toggleStatus(statusOption)"
-                >
-                  <span>{{ statusOption }}</span>
+            <div class="filter-actions">
+              <div class="filter-group">
+                <h6 class="filter-title mb-2">Status</h6>
+                <div class="status-filter-container">
+                  <div
+                    v-for="statusOption in ['completed', 'incomplete']"
+                    :key="statusOption"
+                    class="status-checkbox"
+                    :class="{ selected: selectedStatus.includes(statusOption) }"
+                    @click="toggleStatus(statusOption)"
+                  >
+                    <span>{{ statusOption }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="filter-group clear-filter">
+              <div class="filter-group clear-filter">
+                <button
+                  type="button"
+                  @click="clearAllFilters"
+                  class="btn btn-secondary clear-filters-btn"
+                >
+                  Clear filters
+                </button>
+                <span class="filter-count"
+                  >Displaying {{ filteredSortedItems.length }} of
+                  {{ totalRecordsLength() }} records</span
+                >
+              </div>
               <button
-                type="button"
-                @click="clearAllFilters"
-                class="btn btn-secondary clear-filters-btn"
+                @click="downloadAsCSV"
+                class="btn btn-success"
+                style="margin-left: 10px"
               >
-                Clear filters
+                <span class="download-button">Download CSV</span>
               </button>
-              <span class="filter-count"
-                >Displaying {{ filteredSortedItems.length }} of
-                {{ totalRecordsLength() }} records</span
-              >
             </div>
-            <button
-              @click="downloadAsCSV"
-              class="btn btn-success"
-              style="margin-left: 10px"
-            >
-              <span class="download-button">Download CSV</span>
-            </button>
           </div>
         </div>
-      </div>
-      <hr class="row-divider" style="width: 75%" />
-      <div v-if="loading" class="table-container">
-        <div class="table-responsive">
-          <table class="table table-dark">
-            <thead>
-              <tr>
-                <th>{{ playerId ? "Map" : "Player" }}</th>
-                <th>Type</th>
-                <th>Class</th>
-                <th>T</th>
-                <th>R</th>
-                <th>Time</th>
-                <th>Rank</th>
-                <th>Completion</th>
-                <th>Percentile</th>
-                <th>Points</th>
-                <th>Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="n in 25" :key="'skel-' + n" class="skeleton-row">
-                <td v-for="col in 12" :key="col">
-                  <span
-                    class="table-skeleton"
-                    :style="{ width: getSkeletonWidth(col) }"
-                  ></span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-      <div v-else class="records-container">
-        <div
-          v-if="playerId != null || mapId != null"
-          class="search-records-container"
-        >
-          <div class="search-input-wrapper">
-            <svg
-              class="search-icon"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="M21 21l-4.35-4.35"></path>
-            </svg>
-            <input
-              type="text"
-              v-model="recordSearchQuery"
-              :placeholder="playerId ? 'Search map...' : 'Search player...'"
-              class="search-records-input"
-            />
-          </div>
-        </div>
-        <div v-if="playerId != null || mapId != null" class="table-container">
+        <hr class="row-divider" style="width: 100%" />
+        <div v-if="loading" class="table-container">
           <div class="table-responsive">
             <table class="table table-dark">
               <thead>
                 <tr>
-                  <th @click="setSortColumn('map')" class="sortable-header">
-                    {{ playerId ? "Map" : "Player" }}
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'map'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
+                  <th>{{ playerId ? "Map" : "Player" }}</th>
                   <th>Type</th>
                   <th>Class</th>
-                  <th @click="setSortColumn('tier')" class="sortable-header">
-                    T
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'tier'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th @click="setSortColumn('rating')" class="sortable-header">
-                    R
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'rating'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th
-                    @click="setSortColumn('duration')"
-                    class="sortable-header"
-                  >
-                    Time
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'duration'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th @click="setSortColumn('rank')" class="sortable-header">
-                    Rank
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'rank'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th
-                    @click="setSortColumn('completion')"
-                    class="sortable-header"
-                  >
-                    Completion
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'completion'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th
-                    @click="setSortColumn('percentage')"
-                    class="sortable-header"
-                  >
-                    Percentile
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'percentage'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th @click="setSortColumn('points')" class="sortable-header">
-                    Points
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'points'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
-                  <th @click="setSortColumn('time')" class="sortable-header">
-                    Date
-                    <span
-                      class="sort-indicator"
-                      v-if="sortByCategory === 'time'"
-                      >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
-                    >
-                  </th>
+                  <th>T</th>
+                  <th>R</th>
+                  <th>Time</th>
+                  <th>Rank</th>
+                  <th>Completion</th>
+                  <th>Percentile</th>
+                  <th>Points</th>
+                  <th>Date</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="record in filteredRecords"
-                  :key="record.id"
-                  class="fade-in"
-                >
-                  <SmartLink
-                    v-if="playerId"
-                    tag="td"
-                    :to="{ name: 'MapPage', params: { mapId: record.map_id } }"
-                    class="fancy-hover"
-                  >
-                    <HoverPreview :map-name="record.map_name">{{
-                      record.map_name
-                    }}</HoverPreview>
-                  </SmartLink>
-                  <SmartLink
-                    v-else-if="mapId"
-                    tag="td"
-                    :to="{
-                      name: 'PlayerPage',
-                      params: { playerId: record.player_id },
-                    }"
-                    class="fancy-hover"
-                  >
-                    {{ record.name || "Unknown Player" }}
-                  </SmartLink>
-                  <td>
-                    {{ getRecordType(record.type) }}{{ formatIndex(record) }}
-                  </td>
-                  <td>
-                    <img
-                      :src="`/icons/${record.class}.png`"
-                      :alt="`${record.class}`"
-                      class="class-icon"
-                    />
-                  </td>
-                  <td>T{{ record.tier }}</td>
-                  <td>R{{ record.rating }}</td>
-                  <td>
-                    {{
-                      record.duration !== null
-                        ? formatDuration(record.duration)
-                        : ""
-                    }}
-                  </td>
-                  <td :class="getRankColorClass(record.placement)">
-                    {{ record.rank !== null ? record.rank : "" }}
-                    {{
-                      record.placement !== null
-                        ? formatPlacement(record.placement)
-                        : ""
-                    }}
-                  </td>
-                  <td>{{ record.completion_count }}</td>
-                  <td>
-                    {{
-                      record.rank && record.completion_count
-                        ? (
-                            (record.rank / record.completion_count) *
-                            100
-                          ).toFixed(1) + "%"
-                        : ""
-                    }}
-                  </td>
-                  <td>{{ record.points !== null ? record.points : "" }}</td>
-                  <td class="text-small">
-                    {{
-                      record.date !== null
-                        ? formatDate(new Date(record.date * 1000))
-                        : ""
-                    }}
-                  </td>
-                  <td class="text-center">
-                    {{ record.duration !== null ? "✓" : "X" }}
+                <tr v-for="n in 25" :key="'skel-' + n" class="skeleton-row">
+                  <td v-for="col in 12" :key="col">
+                    <span
+                      class="table-skeleton"
+                      :style="{ width: getSkeletonWidth(col) }"
+                    ></span>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="maps-footer">
-            <button
-              v-if="displayCount < filteredSortedItems.length"
-              @click="showMore"
-              class="btn btn-dark update-button show-more-btn"
-            >
-              Show more
-            </button>
+        </div>
+        <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-else class="records-container">
+          <div
+            v-if="playerId != null || mapId != null"
+            class="search-records-container"
+          >
+            <div class="search-input-wrapper">
+              <svg
+                class="search-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M21 21l-4.35-4.35"></path>
+              </svg>
+              <input
+                type="text"
+                v-model="recordSearchQuery"
+                :placeholder="playerId ? 'Search map...' : 'Search player...'"
+                class="search-records-input"
+              />
+            </div>
+          </div>
+          <div v-if="playerId != null || mapId != null" class="table-container">
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th @click="setSortColumn('map')" class="sortable-header">
+                      {{ playerId ? "Map" : "Player" }}
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'map'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th>Type</th>
+                    <th>Class</th>
+                    <th @click="setSortColumn('tier')" class="sortable-header">
+                      T
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'tier'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      @click="setSortColumn('rating')"
+                      class="sortable-header"
+                    >
+                      R
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'rating'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      @click="setSortColumn('duration')"
+                      class="sortable-header"
+                    >
+                      Time
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'duration'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th @click="setSortColumn('rank')" class="sortable-header">
+                      Rank
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'rank'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      @click="setSortColumn('completion')"
+                      class="sortable-header"
+                    >
+                      Completion
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'completion'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      @click="setSortColumn('percentage')"
+                      class="sortable-header"
+                    >
+                      Percentile
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'percentage'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      @click="setSortColumn('points')"
+                      class="sortable-header"
+                    >
+                      Points
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'points'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th @click="setSortColumn('time')" class="sortable-header">
+                      Date
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'time'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="record in filteredRecords"
+                    :key="record.id"
+                    class="fade-in"
+                  >
+                    <SmartLink
+                      v-if="playerId"
+                      tag="td"
+                      :to="{
+                        name: 'MapPage',
+                        params: { mapId: record.map_id },
+                      }"
+                      class="fancy-hover"
+                    >
+                      <HoverPreview :map-name="record.map_name">{{
+                        record.map_name
+                      }}</HoverPreview>
+                    </SmartLink>
+                    <SmartLink
+                      v-else-if="mapId"
+                      tag="td"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: record.player_id },
+                      }"
+                      class="fancy-hover"
+                    >
+                      {{ record.name || "Unknown Player" }}
+                    </SmartLink>
+                    <td>
+                      {{ getRecordType(record.type) }}{{ formatIndex(record) }}
+                    </td>
+                    <td>
+                      <img
+                        :src="`/icons/${record.class}.png`"
+                        :alt="`${record.class}`"
+                        class="class-icon"
+                      />
+                    </td>
+                    <td>T{{ record.tier }}</td>
+                    <td>R{{ record.rating }}</td>
+                    <td>
+                      {{
+                        record.duration !== null
+                          ? formatDuration(record.duration)
+                          : ""
+                      }}
+                    </td>
+                    <td :class="getRankColorClass(record.placement)">
+                      {{ record.rank !== null ? record.rank : "" }}
+                      {{
+                        record.placement !== null
+                          ? formatPlacement(record.placement)
+                          : ""
+                      }}
+                    </td>
+                    <td>{{ record.completion_count }}</td>
+                    <td>
+                      {{
+                        record.rank && record.completion_count
+                          ? (
+                              (record.rank / record.completion_count) *
+                              100
+                            ).toFixed(1) + "%"
+                          : ""
+                      }}
+                    </td>
+                    <td>{{ record.points !== null ? record.points : "" }}</td>
+                    <td class="text-small">
+                      {{
+                        record.date !== null
+                          ? formatDate(new Date(record.date * 1000))
+                          : ""
+                      }}
+                    </td>
+                    <td class="text-center">
+                      {{ record.duration !== null ? "✓" : "X" }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="maps-footer">
+              <button
+                v-if="displayCount < filteredSortedItems.length"
+                @click="showMore"
+                class="btn btn-dark update-button show-more-btn"
+              >
+                Show more
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1017,8 +1063,18 @@ export default {
     validPlacements: [],
     displayCount: 300,
     lookupSearchFocused: false,
+    lookupHighlightedIndex: -1,
   }),
   computed: {
+    lookupMapCount() {
+      return this.searchResults?.maps?.length ?? 0;
+    },
+    lookupPlayerCount() {
+      return this.searchResults?.players?.length ?? 0;
+    },
+    lookupTotalResults() {
+      return this.lookupMapCount + this.lookupPlayerCount;
+    },
     filteredSortedItems() {
       let recordsToFilter = [];
 
@@ -1162,9 +1218,7 @@ export default {
   },
   watch: {
     playerId(newPlayerId) {
-      if (newPlayerId) {
-        this.fetchRecords();
-      }
+      if (newPlayerId) this.fetchRecords();
     },
     mapId(newMapId) {
       if (newMapId) this.fetchMapRecords();
@@ -1246,9 +1300,54 @@ export default {
     }
   },
   methods: {
+    onLookupKeydown(e) {
+      if (!this.searchResults || this.lookupTotalResults === 0) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this.lookupHighlightedIndex =
+          this.lookupHighlightedIndex < this.lookupTotalResults - 1
+            ? this.lookupHighlightedIndex + 1
+            : 0;
+        this.scrollLookupHighlightedIntoView();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this.lookupHighlightedIndex =
+          this.lookupHighlightedIndex > 0
+            ? this.lookupHighlightedIndex - 1
+            : this.lookupTotalResults - 1;
+        this.scrollLookupHighlightedIntoView();
+      } else if (e.key === "Enter" && this.lookupHighlightedIndex >= 0) {
+        e.preventDefault();
+        this.navigateLookupHighlighted();
+      } else if (e.key === "Escape") {
+        this.searchResults = null;
+        this.lookupHighlightedIndex = -1;
+      }
+    },
+    scrollLookupHighlightedIntoView() {
+      this.$nextTick(() => {
+        const dropdown = this.$refs.lookupDropdownRef;
+        if (!dropdown) return;
+        const el = dropdown.querySelector(
+          `[data-result-index="${this.lookupHighlightedIndex}"]`,
+        );
+        if (el) el.scrollIntoView({ block: "nearest" });
+      });
+    },
+    navigateLookupHighlighted() {
+      if (this.lookupHighlightedIndex < this.lookupMapCount) {
+        const map = this.searchResults.maps[this.lookupHighlightedIndex];
+        if (map) this.selectMap(map.id, map.name);
+      } else {
+        const player =
+          this.searchResults.players[
+            this.lookupHighlightedIndex - this.lookupMapCount
+          ];
+        if (player) this.selectPlayer(player.id);
+      }
+    },
     parseUrlFilters() {
       const q = this.$route.query;
-
       const parseInts = (param, allowed) => {
         if (!param) return [];
         const vals = Array.isArray(param) ? param : param.split(",");
@@ -1256,13 +1355,11 @@ export default {
           .map((v) => parseInt(v))
           .filter((v) => !isNaN(v) && allowed.includes(v));
       };
-
       const parseStrs = (param, allowed) => {
         if (!param) return [];
         const vals = Array.isArray(param) ? param : param.split(",");
         return vals.filter((v) => allowed.includes(v));
       };
-
       this.selectedSoldierTiers = parseInts(q.st, this.availableTiers);
       this.selectedSoldierRatings = parseInts(q.sr, this.availableRatings);
       this.selectedDemomanTiers = parseInts(q.dt, this.availableTiers);
@@ -1280,12 +1377,8 @@ export default {
         "4",
         "5",
       ]);
-
       const allowedStatus = ["completed", "incomplete"];
-      if (q.sts) {
-        this.selectedStatus = parseStrs(q.sts, allowedStatus);
-      }
-
+      if (q.sts) this.selectedStatus = parseStrs(q.sts, allowedStatus);
       if (
         q.srt &&
         [
@@ -1302,13 +1395,10 @@ export default {
       ) {
         this.sortByCategory = q.srt;
       }
-      if (q.dir && ["asc", "desc"].includes(q.dir)) {
-        this.sortDirection = q.dir;
-      }
+      if (q.dir && ["asc", "desc"].includes(q.dir)) this.sortDirection = q.dir;
     },
     updateUrl() {
       const q = {};
-
       if (this.selectedSoldierTiers.length)
         q.st = this.selectedSoldierTiers.join(",");
       if (this.selectedSoldierRatings.length)
@@ -1322,17 +1412,14 @@ export default {
       if (this.selectedClasses.length) q.cls = this.selectedClasses.join(",");
       if (this.selectedTypes.length) q.typ = this.selectedTypes.join(",");
       if (this.selectedGroups.length) q.grp = this.selectedGroups.join(",");
-
       const defaultStatus = ["completed"];
       const statusChanged = !(
         this.selectedStatus.length === defaultStatus.length &&
         this.selectedStatus.every((s) => defaultStatus.includes(s))
       );
       if (statusChanged) q.sts = this.selectedStatus.join(",");
-
       if (this.sortByCategory !== "time") q.srt = this.sortByCategory;
       if (this.sortDirection !== "asc") q.dir = this.sortDirection;
-
       this.$router
         .replace({
           name: this.$route.name,
@@ -1698,6 +1785,7 @@ export default {
       } else {
         this.showLoading = false;
         this.searchResults = null;
+        this.lookupHighlightedIndex = -1;
         return;
       }
       clearTimeout(this.debounceTimer);
@@ -1722,9 +1810,11 @@ export default {
               playersResponse.json(),
               mapsResponse.json(),
             ]);
-            const players = (playersData.players || []).slice(0, 10);
-            const maps = (mapsData.maps || []).slice(0, 3);
-            this.searchResults = { players, maps };
+            this.searchResults = {
+              players: (playersData.players || []).slice(0, 10),
+              maps: (mapsData.maps || []).slice(0, 3),
+            };
+            this.lookupHighlightedIndex = -1;
           } catch (error) {
             console.error("Error fetching search results:", error);
           } finally {
@@ -1733,6 +1823,7 @@ export default {
         } else {
           this.searchResults = null;
           this.showLoading = false;
+          this.lookupHighlightedIndex = -1;
         }
       }, 400);
     },
@@ -1746,6 +1837,7 @@ export default {
       )?.name;
       this.searchQuery = "";
       this.searchResults = null;
+      this.lookupHighlightedIndex = -1;
       this.$router.push({ name: "LookupPlayer", params: { playerId } });
     },
     selectMap(mapId, mapName) {
@@ -1759,6 +1851,7 @@ export default {
       this.selectedMapName = mapName;
       this.searchQuery = "";
       this.searchResults = null;
+      this.lookupHighlightedIndex = -1;
       this.$router.push({ name: "LookupMap", params: { mapId } });
     },
     async fetchRecords() {
@@ -1777,7 +1870,6 @@ export default {
             fetch(`${API_BASE_URL}/players/${playerId}`),
             fetch(`${API_BASE_URL}/players/${playerId}/ranks`),
           ]);
-
         if (!recordsResponse.ok) {
           if (recordsResponse.status === 404)
             throw new Error("Player not found");
@@ -1786,13 +1878,11 @@ export default {
             `Failed to fetch records (${recordsResponse.status})`,
           );
         }
-
         const [allRecords, playerInfoData, ranksData] = await Promise.all([
           recordsResponse.json(),
           playerInfoResponse.ok ? playerInfoResponse.json() : null,
           ranksResponse.ok ? ranksResponse.json() : null,
         ]);
-
         if (playerInfoData?.[0]) {
           this.selectedPlayerName = playerInfoData[0].name;
           this.playerAvatar = playerInfoData[0].steam_avatar;
@@ -1801,10 +1891,8 @@ export default {
           this.playerSteamId = this.convertSteamId(playerInfoData[0].steamid);
         }
         this.playerRankInfo = ranksData?.[0] || null;
-
         if (!Array.isArray(allRecords))
           throw new Error("Invalid data format received");
-
         this.cachedRecords = {
           records: allRecords.filter((r) => r.type === "map"),
           courseRecords: allRecords.filter((r) => r.type === "course"),
@@ -1858,11 +1946,16 @@ export default {
 </script>
 
 <style scoped>
+.content-container {
+  max-width: 1320px;
+  width: 100%;
+}
 .search-section {
   width: 100%;
-  max-width: 560px;
-  margin-top: 20px;
-  position: relative;
+  max-width: 500px;
+  margin: 0 auto 25px auto;
+  display: flex;
+  justify-content: center;
 }
 
 .lookup-search-container {
@@ -2005,7 +2098,10 @@ export default {
 .lookup-result-item:active {
   background: rgba(102, 126, 234, 0.25);
 }
-
+.lookup-result-item.is-highlighted {
+  background: rgba(102, 126, 234, 0.2);
+  outline: 1px solid rgba(102, 126, 234, 0.35);
+}
 .lookup-player-avatar-wrapper {
   position: relative;
   flex-shrink: 0;
@@ -2147,6 +2243,7 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   width: fit-content;
   max-width: 100%;
+  margin: auto;
 }
 .filter-content {
   display: flex;
@@ -2750,6 +2847,7 @@ export default {
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   position: relative;
+  margin: 20px auto;
 }
 .lookup-map-banner::before {
   content: "";

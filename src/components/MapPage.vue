@@ -2,516 +2,538 @@
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div class="container py-4">
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">🔍</span>
-          Map Page
-        </h1>
-        <p class="page-subtitle">Records and information about the map</p>
-      </div>
-      <hr class="row-divider" style="width: 100%" />
-      <div
-        v-if="mapNotFound"
-        class="alert alert-warning map-not-found text-center"
-      >
-        <p class="mb-3">No map found</p>
-        <button @click="returnToAllMaps" class="btn return-button">
-          Return to all maps
-        </button>
-      </div>
-      <div v-else>
-        <div class="map-name-container">
-          <SmartLink
-            tag="div"
-            :to="{ name: 'LookupMap', params: { mapId: mapId } }"
-            class="lookup-map-banner fancy-hover"
-            :style="{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${
-                map?.name || mapName
-              }.webp')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }"
-          >
-            <div class="lookup-banner-content">
-              <div class="lookup-map-main">
-                <h1
-                  class="lookup-map-name"
-                  v-html="mapName || 'Selected Map'"
-                ></h1>
-                <div v-if="map" class="map-primary-info">
-                  <div class="map-tiers">
-                    <div class="tier-group">
-                      <img
-                        src="/icons/soldier.png"
-                        alt="Soldier"
-                        class="tier-class-icon"
-                      />
-                      <span class="tier-text">T{{ map.soldier_tier }}</span>
-                      <span class="rating-text">R{{ map.soldier_rating }}</span>
-                    </div>
-                    <span class="tier-divider">•</span>
-                    <div class="tier-group">
-                      <img
-                        src="/icons/demoman.png"
-                        alt="Demoman"
-                        class="tier-class-icon"
-                      />
-                      <span class="tier-text">T{{ map.demoman_tier }}</span>
-                      <span class="rating-text">R{{ map.demoman_rating }}</span>
-                    </div>
-                  </div>
-                  <div
-                    v-if="map.intended_class"
-                    :class="[
-                      'intended-class-display',
-                      { 'no-circle': map.intended_class === 5 },
-                    ]"
-                  >
-                    <div v-if="map.intended_class === 5" class="both-classes">
-                      <div class="class-circle">
+    <div class="w-95 mx-auto d-flex flex-column align-items-center py-4">
+      <div class="content-container">
+        <div class="page-header">
+          <h1 class="page-title">
+            <span class="title-icon">🔍</span>
+            Map Page
+          </h1>
+          <p class="page-subtitle">Records and information about the map</p>
+        </div>
+        <hr class="row-divider" style="width: 100%" />
+        <div
+          v-if="mapNotFound"
+          class="alert alert-warning map-not-found text-center"
+        >
+          <p class="mb-3">No map found</p>
+          <button @click="returnToAllMaps" class="btn return-button">
+            Return to all maps
+          </button>
+        </div>
+        <div v-else class="w-100">
+          <div class="map-name-container">
+            <SmartLink
+              tag="div"
+              :to="{ name: 'LookupMap', params: { mapId: mapId } }"
+              class="lookup-map-banner fancy-hover"
+              :style="{
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${
+                  map?.name || mapName
+                }.webp')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }"
+            >
+              <div class="lookup-banner-content">
+                <div class="lookup-map-main">
+                  <h1
+                    class="lookup-map-name"
+                    v-html="mapName || 'Selected Map'"
+                  ></h1>
+                  <div v-if="map" class="map-primary-info">
+                    <div class="map-tiers">
+                      <div class="tier-group">
                         <img
                           src="/icons/soldier.png"
                           alt="Soldier"
-                          class="intended-class-icon"
+                          class="tier-class-icon"
                         />
+                        <span class="tier-text">T{{ map.soldier_tier }}</span>
+                        <span class="rating-text"
+                          >R{{ map.soldier_rating }}</span
+                        >
                       </div>
-                      <div class="class-circle">
+                      <span class="tier-divider">•</span>
+                      <div class="tier-group">
                         <img
                           src="/icons/demoman.png"
                           alt="Demoman"
-                          class="intended-class-icon"
+                          class="tier-class-icon"
                         />
+                        <span class="tier-text">T{{ map.demoman_tier }}</span>
+                        <span class="rating-text"
+                          >R{{ map.demoman_rating }}</span
+                        >
                       </div>
                     </div>
-                    <img
-                      v-else-if="isIntendedClass('soldier')"
-                      src="/icons/soldier.png"
-                      alt="Soldier"
-                      class="intended-class-icon"
-                    />
-                    <img
-                      v-else-if="isIntendedClass('demoman')"
-                      src="/icons/demoman.png"
-                      alt="Demoman"
-                      class="intended-class-icon"
-                    />
+                    <div
+                      v-if="map.intended_class"
+                      :class="[
+                        'intended-class-display',
+                        { 'no-circle': map.intended_class === 5 },
+                      ]"
+                    >
+                      <div v-if="map.intended_class === 5" class="both-classes">
+                        <div class="class-circle">
+                          <img
+                            src="/icons/soldier.png"
+                            alt="Soldier"
+                            class="intended-class-icon"
+                          />
+                        </div>
+                        <div class="class-circle">
+                          <img
+                            src="/icons/demoman.png"
+                            alt="Demoman"
+                            class="intended-class-icon"
+                          />
+                        </div>
+                      </div>
+                      <img
+                        v-else-if="isIntendedClass('soldier')"
+                        src="/icons/soldier.png"
+                        alt="Soldier"
+                        class="intended-class-icon"
+                      />
+                      <img
+                        v-else-if="isIntendedClass('demoman')"
+                        src="/icons/demoman.png"
+                        alt="Demoman"
+                        class="intended-class-icon"
+                      />
+                    </div>
                   </div>
                 </div>
+                <div v-if="map" class="lookup-map-secondary">
+                  <span class="secondary-stat"
+                    >{{ map.course_count }} courses</span
+                  >
+                  <span class="stat-separator">•</span>
+                  <span class="secondary-stat"
+                    >{{ map.bonus_count }} bonuses</span
+                  >
+                  <span class="stat-separator">•</span>
+                  <span class="secondary-stat"
+                    >{{ map.soldier_completion_count }} [S] completions</span
+                  >
+                  <span class="stat-separator">•</span>
+                  <span class="secondary-stat"
+                    >{{ map.demoman_completion_count }} [D] completions</span
+                  >
+                  <span class="stat-separator">•</span>
+                  <span class="secondary-stat"
+                    >Added {{ formatDate(map.date_added) }}</span
+                  >
+                </div>
+                <div v-else class="loading-ranks">
+                  <div class="loading-spinner"></div>
+                  <span>Loading...</span>
+                </div>
+                <a
+                  :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
+                  class="download-btn"
+                  :download="`${mapName}.bsp.bz2`"
+                  title="Download Map"
+                  @click.stop
+                >
+                  <i class="bi bi-download"></i>
+                </a>
               </div>
-              <div v-if="map" class="lookup-map-secondary">
-                <span class="secondary-stat"
-                  >{{ map.course_count }} courses</span
-                >
-                <span class="stat-separator">•</span>
-                <span class="secondary-stat"
-                  >{{ map.bonus_count }} bonuses</span
-                >
-                <span class="stat-separator">•</span>
-                <span class="secondary-stat"
-                  >{{ map.soldier_completion_count }} [S] completions</span
-                >
-                <span class="stat-separator">•</span>
-                <span class="secondary-stat"
-                  >{{ map.demoman_completion_count }} [D] completions</span
-                >
-                <span class="stat-separator">•</span>
-                <span class="secondary-stat"
-                  >Added {{ formatDate(map.date_added) }}</span
-                >
-              </div>
-              <div v-else class="loading-ranks">
-                <div class="loading-spinner"></div>
-                <span>Loading...</span>
-              </div>
-              <a
-                :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
-                class="download-btn"
-                :download="`${mapName}.bsp.bz2`"
-                title="Download Map"
-                @click.stop
-              >
-                <i class="bi bi-download"></i>
-              </a>
-            </div>
-          </SmartLink>
-        </div>
-        <hr class="row-divider" style="width: 100%" />
-        <div class="collapsible-header" @click="toggleMapBanner">
-          <h5 class="video-section-title mb-0">
-            🗺️ More Map Information
-            <i
-              class="bi"
-              :class="showMapBanner ? 'bi-chevron-up' : 'bi-chevron-down'"
-              style="margin-left: auto"
-            ></i>
-          </h5>
-        </div>
-        <div v-if="showMapBanner" class="collapsible-content">
-          <div
-            v-if="map"
-            class="card map-banner mb-4"
-            :style="{
-              background: `
+            </SmartLink>
+          </div>
+          <hr class="row-divider" style="width: 100%" />
+          <div class="collapsible-header" @click="toggleMapBanner">
+            <h5 class="video-section-title mb-0">
+              🗺️ More Map Information
+              <i
+                class="bi"
+                :class="showMapBanner ? 'bi-chevron-up' : 'bi-chevron-down'"
+                style="margin-left: auto"
+              ></i>
+            </h5>
+          </div>
+          <div v-if="showMapBanner" class="collapsible-content">
+            <div
+              v-if="map"
+              class="card map-banner mb-4"
+              :style="{
+                background: `
                 linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
                 radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
                 url('/map-backgrounds/${map.name}.webp') center/cover no-repeat
               `,
-              backgroundBlendMode: 'multiply, normal, normal',
-              backgroundSize: 'cover, cover, cover',
-              backgroundPosition: 'center, center, center',
-            }"
-          >
-            <div class="row g-0 banner-content">
-              <div class="col-md-12 d-flex flex-column align-items-center p-4">
-                <div class="map-info text-center w-100">
-                  <div class="row map-overview w-100">
-                    <div class="col-lg-3 col-md-6">
-                      <div
-                        class="card stat-block h-100"
-                        :class="{
-                          'stat-block-highlighted': isIntendedClass('soldier'),
-                        }"
-                      >
-                        <div class="card-body text-center p-3">
-                          <div class="stat-icon mb-2">
-                            <i class="bi bi-bar-chart"></i>
-                          </div>
-                          <h5 class="card-title mb-2">Soldier Tier</h5>
-                          <p
-                            class="card-text main-tier-color stat-value"
-                            :class="'tier-' + map.soldier_tier"
-                          >
-                            T{{ map.soldier_tier }}
-                          </p>
-                          <div class="completion-count">
-                            <i class="bi bi-check-circle me-1"></i>
-                            {{ map.soldier_completion_count || 0 }} completions
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                      <div
-                        class="card stat-block h-100"
-                        :class="{
-                          'stat-block-highlighted': isIntendedClass('soldier'),
-                        }"
-                      >
-                        <div class="card-body text-center p-3">
-                          <div class="stat-icon mb-2">
-                            <i class="bi bi-star-fill"></i>
-                          </div>
-                          <h5 class="card-title mb-2">Soldier Rating</h5>
-                          <p
-                            class="card-text main-rating-color stat-value"
-                            :class="'rating-' + map.soldier_rating"
-                          >
-                            R{{ map.soldier_rating }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                      <div
-                        class="card stat-block h-100"
-                        :class="{
-                          'stat-block-highlighted': isIntendedClass('demoman'),
-                        }"
-                      >
-                        <div class="card-body text-center p-3">
-                          <div class="stat-icon mb-2">
-                            <i class="bi bi-bar-chart"></i>
-                          </div>
-                          <h5 class="card-title mb-2">Demoman Tier</h5>
-                          <p
-                            class="card-text main-tier-color stat-value"
-                            :class="'tier-' + map.demoman_tier"
-                          >
-                            T{{ map.demoman_tier }}
-                          </p>
-                          <div class="completion-count">
-                            <i class="bi bi-check-circle me-1"></i>
-                            {{ map.demoman_completion_count || 0 }} completions
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                      <div
-                        class="card stat-block h-100"
-                        :class="{
-                          'stat-block-highlighted': isIntendedClass('demoman'),
-                        }"
-                      >
-                        <div class="card-body text-center p-3">
-                          <div class="stat-icon mb-2">
-                            <i class="bi bi-star-fill"></i>
-                          </div>
-                          <h5 class="card-title mb-2">Demoman Rating</h5>
-                          <p
-                            class="card-text main-rating-color stat-value"
-                            :class="'rating-' + map.demoman_rating"
-                          >
-                            R{{ map.demoman_rating }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <hr class="row-divider" style="width: 85%" />
-                  <div class="row w-100" v-if="courses.length > 0">
-                    <div class="col-md-12">
-                      <h2 class="section-header mb-4">
-                        <i class="me-2"></i>🚩 Courses
-                      </h2>
-                      <div class="courses-block">
+                backgroundBlendMode: 'multiply, normal, normal',
+                backgroundSize: 'cover, cover, cover',
+                backgroundPosition: 'center, center, center',
+              }"
+            >
+              <div class="row g-0 banner-content">
+                <div
+                  class="col-md-12 d-flex flex-column align-items-center p-4"
+                >
+                  <div class="map-info text-center w-100">
+                    <div class="row map-overview w-100">
+                      <div class="col-lg-3 col-md-6">
                         <div
-                          v-for="course in courses"
-                          :key="course.id"
-                          class="course-item"
+                          class="card stat-block h-100"
+                          :class="{
+                            'stat-block-highlighted':
+                              isIntendedClass('soldier'),
+                          }"
                         >
-                          <div class="card stat-block h-100">
-                            <div class="card-body text-center p-3">
-                              <h5 class="card-title mb-3">
-                                Course {{ course.index }}
-                              </h5>
-                              <div class="compact-ratings-grid">
-                                <div class="rating-section">
-                                  <div class="rating-label">Soldier</div>
-                                  <div class="rating-pills">
-                                    <span
-                                      class="rating-pill tier-color"
-                                      :class="'tier-' + course.soldier_tier"
-                                    >
-                                      T{{ course.soldier_tier }}
-                                    </span>
-                                    <span
-                                      class="rating-pill rating-color"
-                                      :class="'rating-' + course.soldier_rating"
-                                    >
-                                      R{{ course.soldier_rating }}
-                                    </span>
-                                  </div>
-                                  <div class="completion-count-small">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    {{ course.soldier_completion_count || 0 }}
-                                  </div>
-                                </div>
-                                <div class="rating-section">
-                                  <div class="rating-label">Demoman</div>
-                                  <div class="rating-pills">
-                                    <span
-                                      class="rating-pill tier-color"
-                                      :class="'tier-' + course.demoman_tier"
-                                    >
-                                      T{{ course.demoman_tier }}
-                                    </span>
-                                    <span
-                                      class="rating-pill rating-color"
-                                      :class="'rating-' + course.demoman_rating"
-                                    >
-                                      R{{ course.demoman_rating }}
-                                    </span>
-                                  </div>
-                                  <div class="completion-count-small">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    {{ course.demoman_completion_count || 0 }}
-                                  </div>
-                                </div>
-                              </div>
+                          <div class="card-body text-center p-3">
+                            <div class="stat-icon mb-2">
+                              <i class="bi bi-bar-chart"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Soldier Tier</h5>
+                            <p
+                              class="card-text main-tier-color stat-value"
+                              :class="'tier-' + map.soldier_tier"
+                            >
+                              T{{ map.soldier_tier }}
+                            </p>
+                            <div class="completion-count">
+                              <i class="bi bi-check-circle me-1"></i>
+                              {{ map.soldier_completion_count || 0 }}
+                              completions
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                  <hr
-                    class="row-divider"
-                    style="width: 85%"
-                    v-if="courses.length > 0"
-                  />
-                  <div class="row w-100" v-if="bonuses.length > 0">
-                    <div class="col-md-12">
-                      <h2 class="section-header mb-4">⭐ Bonuses</h2>
-                      <div class="bonuses-block">
+                      <div class="col-lg-3 col-md-6">
                         <div
-                          v-for="bonus in bonuses"
-                          :key="bonus.id"
-                          class="bonus-item"
+                          class="card stat-block h-100"
+                          :class="{
+                            'stat-block-highlighted':
+                              isIntendedClass('soldier'),
+                          }"
                         >
-                          <div class="card stat-block h-100">
-                            <div class="card-body text-center p-3">
-                              <h5 class="card-title mb-3">
-                                Bonus {{ bonus.index }}
-                              </h5>
-                              <div class="compact-ratings-grid">
-                                <div class="rating-section">
-                                  <div class="rating-label">Soldier</div>
-                                  <div class="rating-pills">
-                                    <span
-                                      class="rating-pill tier-color"
-                                      :class="'tier-' + bonus.soldier_tier"
-                                    >
-                                      T{{ bonus.soldier_tier }}
-                                    </span>
-                                    <span
-                                      class="rating-pill rating-color"
-                                      :class="'rating-' + bonus.soldier_rating"
-                                    >
-                                      R{{ bonus.soldier_rating }}
-                                    </span>
-                                  </div>
-                                  <div class="completion-count-small">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    {{ bonus.soldier_completion_count || 0 }}
-                                  </div>
-                                </div>
-                                <div class="rating-section">
-                                  <div class="rating-label">Demoman</div>
-                                  <div class="rating-pills">
-                                    <span
-                                      class="rating-pill tier-color"
-                                      :class="'tier-' + bonus.demoman_tier"
-                                    >
-                                      T{{ bonus.demoman_tier }}
-                                    </span>
-                                    <span
-                                      class="rating-pill rating-color"
-                                      :class="'rating-' + bonus.demoman_rating"
-                                    >
-                                      R{{ bonus.demoman_rating }}
-                                    </span>
-                                  </div>
-                                  <div class="completion-count-small">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    {{ bonus.demoman_completion_count || 0 }}
-                                  </div>
-                                </div>
-                              </div>
+                          <div class="card-body text-center p-3">
+                            <div class="stat-icon mb-2">
+                              <i class="bi bi-star-fill"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Soldier Rating</h5>
+                            <p
+                              class="card-text main-rating-color stat-value"
+                              :class="'rating-' + map.soldier_rating"
+                            >
+                              R{{ map.soldier_rating }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6">
+                        <div
+                          class="card stat-block h-100"
+                          :class="{
+                            'stat-block-highlighted':
+                              isIntendedClass('demoman'),
+                          }"
+                        >
+                          <div class="card-body text-center p-3">
+                            <div class="stat-icon mb-2">
+                              <i class="bi bi-bar-chart"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Demoman Tier</h5>
+                            <p
+                              class="card-text main-tier-color stat-value"
+                              :class="'tier-' + map.demoman_tier"
+                            >
+                              T{{ map.demoman_tier }}
+                            </p>
+                            <div class="completion-count">
+                              <i class="bi bi-check-circle me-1"></i>
+                              {{ map.demoman_completion_count || 0 }}
+                              completions
                             </div>
                           </div>
                         </div>
                       </div>
+                      <div class="col-lg-3 col-md-6">
+                        <div
+                          class="card stat-block h-100"
+                          :class="{
+                            'stat-block-highlighted':
+                              isIntendedClass('demoman'),
+                          }"
+                        >
+                          <div class="card-body text-center p-3">
+                            <div class="stat-icon mb-2">
+                              <i class="bi bi-star-fill"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Demoman Rating</h5>
+                            <p
+                              class="card-text main-rating-color stat-value"
+                              :class="'rating-' + map.demoman_rating"
+                            >
+                              R{{ map.demoman_rating }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <hr
-                    class="row-divider"
-                    style="width: 85%"
-                    v-if="bonuses.length > 0"
-                  />
-                  <div class="row w-100">
-                    <div class="col-md-12">
-                      <h2 class="section-header mb-4">
-                        <i class="bi bi-people-fill me-2"></i>Authors
-                      </h2>
-                      <div class="authors-wrapper">
-                        <div class="authors-block">
+                    <hr class="row-divider" style="width: 85%" />
+                    <div class="row w-100" v-if="courses.length > 0">
+                      <div class="col-md-12">
+                        <h2 class="section-header mb-4">
+                          <i class="me-2"></i>🚩 Courses
+                        </h2>
+                        <div class="courses-block">
                           <div
-                            v-for="author in authors"
-                            :key="author.author_id"
-                            class="author-card"
+                            v-for="course in courses"
+                            :key="course.id"
+                            class="course-item"
                           >
-                            <div class="author-avatar-wrapper">
-                              <SmartLink
-                                v-if="author.player && author.player.id"
-                                :to="{
-                                  name: 'PlayerPage',
-                                  params: { playerId: author.player.id },
-                                  hash: '#authored-maps',
-                                }"
-                              >
+                            <div class="card stat-block h-100">
+                              <div class="card-body text-center p-3">
+                                <h5 class="card-title mb-3">
+                                  Course {{ course.index }}
+                                </h5>
+                                <div class="compact-ratings-grid">
+                                  <div class="rating-section">
+                                    <div class="rating-label">Soldier</div>
+                                    <div class="rating-pills">
+                                      <span
+                                        class="rating-pill tier-color"
+                                        :class="'tier-' + course.soldier_tier"
+                                      >
+                                        T{{ course.soldier_tier }}
+                                      </span>
+                                      <span
+                                        class="rating-pill rating-color"
+                                        :class="
+                                          'rating-' + course.soldier_rating
+                                        "
+                                      >
+                                        R{{ course.soldier_rating }}
+                                      </span>
+                                    </div>
+                                    <div class="completion-count-small">
+                                      <i class="bi bi-check-circle me-1"></i>
+                                      {{ course.soldier_completion_count || 0 }}
+                                    </div>
+                                  </div>
+                                  <div class="rating-section">
+                                    <div class="rating-label">Demoman</div>
+                                    <div class="rating-pills">
+                                      <span
+                                        class="rating-pill tier-color"
+                                        :class="'tier-' + course.demoman_tier"
+                                      >
+                                        T{{ course.demoman_tier }}
+                                      </span>
+                                      <span
+                                        class="rating-pill rating-color"
+                                        :class="
+                                          'rating-' + course.demoman_rating
+                                        "
+                                      >
+                                        R{{ course.demoman_rating }}
+                                      </span>
+                                    </div>
+                                    <div class="completion-count-small">
+                                      <i class="bi bi-check-circle me-1"></i>
+                                      {{ course.demoman_completion_count || 0 }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="row-divider"
+                      style="width: 85%"
+                      v-if="courses.length > 0"
+                    />
+                    <div class="row w-100" v-if="bonuses.length > 0">
+                      <div class="col-md-12">
+                        <h2 class="section-header mb-4">⭐ Bonuses</h2>
+                        <div class="bonuses-block">
+                          <div
+                            v-for="bonus in bonuses"
+                            :key="bonus.id"
+                            class="bonus-item"
+                          >
+                            <div class="card stat-block h-100">
+                              <div class="card-body text-center p-3">
+                                <h5 class="card-title mb-3">
+                                  Bonus {{ bonus.index }}
+                                </h5>
+                                <div class="compact-ratings-grid">
+                                  <div class="rating-section">
+                                    <div class="rating-label">Soldier</div>
+                                    <div class="rating-pills">
+                                      <span
+                                        class="rating-pill tier-color"
+                                        :class="'tier-' + bonus.soldier_tier"
+                                      >
+                                        T{{ bonus.soldier_tier }}
+                                      </span>
+                                      <span
+                                        class="rating-pill rating-color"
+                                        :class="
+                                          'rating-' + bonus.soldier_rating
+                                        "
+                                      >
+                                        R{{ bonus.soldier_rating }}
+                                      </span>
+                                    </div>
+                                    <div class="completion-count-small">
+                                      <i class="bi bi-check-circle me-1"></i>
+                                      {{ bonus.soldier_completion_count || 0 }}
+                                    </div>
+                                  </div>
+                                  <div class="rating-section">
+                                    <div class="rating-label">Demoman</div>
+                                    <div class="rating-pills">
+                                      <span
+                                        class="rating-pill tier-color"
+                                        :class="'tier-' + bonus.demoman_tier"
+                                      >
+                                        T{{ bonus.demoman_tier }}
+                                      </span>
+                                      <span
+                                        class="rating-pill rating-color"
+                                        :class="
+                                          'rating-' + bonus.demoman_rating
+                                        "
+                                      >
+                                        R{{ bonus.demoman_rating }}
+                                      </span>
+                                    </div>
+                                    <div class="completion-count-small">
+                                      <i class="bi bi-check-circle me-1"></i>
+                                      {{ bonus.demoman_completion_count || 0 }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="row-divider"
+                      style="width: 85%"
+                      v-if="bonuses.length > 0"
+                    />
+                    <div class="row w-100">
+                      <div class="col-md-12">
+                        <h2 class="section-header mb-4">
+                          <i class="bi bi-people-fill me-2"></i>Authors
+                        </h2>
+                        <div class="authors-wrapper">
+                          <div class="authors-block">
+                            <div
+                              v-for="author in authors"
+                              :key="author.author_id"
+                              class="author-card"
+                            >
+                              <div class="author-avatar-wrapper">
+                                <SmartLink
+                                  v-if="author.player && author.player.id"
+                                  :to="{
+                                    name: 'PlayerPage',
+                                    params: { playerId: author.player.id },
+                                    hash: '#authored-maps',
+                                  }"
+                                >
+                                  <img
+                                    :src="
+                                      author &&
+                                      author.player &&
+                                      author.player.steam_avatar
+                                        ? `${author.player.steam_avatar}`
+                                        : '/avatars/default-avatar.jpg'
+                                    "
+                                    alt="Author Avatar"
+                                    class="author-avatar"
+                                  />
+                                </SmartLink>
                                 <img
-                                  :src="
-                                    author &&
-                                    author.player &&
-                                    author.player.steam_avatar
-                                      ? `${author.player.steam_avatar}`
-                                      : '/avatars/default-avatar.jpg'
-                                  "
-                                  alt="Author Avatar"
+                                  v-else
+                                  src="/avatars/default-avatar.jpg"
+                                  alt="Default Author Avatar"
                                   class="author-avatar"
                                 />
-                              </SmartLink>
-                              <img
-                                v-else
-                                src="/avatars/default-avatar.jpg"
-                                alt="Default Author Avatar"
-                                class="author-avatar"
-                              />
+                              </div>
+                              <h6 class="author-name mt-2">
+                                <SmartLink
+                                  v-if="author.player && author.player.id"
+                                  :to="{
+                                    name: 'PlayerPage',
+                                    params: { playerId: author.player.id },
+                                    hash: '#authored-maps',
+                                  }"
+                                >
+                                  {{
+                                    author.author_name
+                                      ? author.author_name
+                                      : "Unknown Author"
+                                  }}
+                                </SmartLink>
+                                <span v-else>
+                                  {{
+                                    author.author_name
+                                      ? author.author_name
+                                      : "Unknown Author"
+                                  }}
+                                </span>
+                              </h6>
                             </div>
-                            <h6 class="author-name mt-2">
-                              <SmartLink
-                                v-if="author.player && author.player.id"
-                                :to="{
-                                  name: 'PlayerPage',
-                                  params: { playerId: author.player.id },
-                                  hash: '#authored-maps',
-                                }"
-                              >
-                                {{
-                                  author.author_name
-                                    ? author.author_name
-                                    : "Unknown Author"
-                                }}
-                              </SmartLink>
-                              <span v-else>
-                                {{
-                                  author.author_name
-                                    ? author.author_name
-                                    : "Unknown Author"
-                                }}
-                              </span>
-                            </h6>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="map-date-wrapper">
-                    <p class="map-date-added">
-                      <i class="bi bi-calendar-plus me-2"></i>
-                      Added on: {{ formatDate(map.date_added) }}
-                    </p>
-                  </div>
-                  <hr class="row-divider" style="width: 85%" />
-                  <!-- <div class="row w-100" v-if="mapTags && mapTags.length > 0"> -->
-                  <div class="row w-100">
-                    <div class="col-md-12">
-                      <h2 class="section-header mb-4">
-                        <i class="bi bi-tags-fill me-2"></i>Tags
-                      </h2>
-                      <div class="tags-wrapper">
-                        <div class="tags-block">
-                          <div
-                            v-for="tag in mapTags"
-                            :key="tag.id"
-                            class="tag-chip"
-                            :style="{
-                              backgroundColor: tag.color + '20',
-                              borderColor: tag.color,
-                            }"
-                          >
-                            <i
-                              class="bi bi-tag-fill me-1"
-                              :style="{ color: tag.color }"
-                            ></i>
-                            {{ tag.name }}
-                          </div>
-                          <div
-                            class="tag-chip-default"
-                            @click="showTagModal = true"
-                            :style="{
-                              backgroundColor: '#ffffff20',
-                              borderColor: 'white',
-                            }"
-                          >
-                            <i
-                              class="bi bi-tag-fill me-1"
-                              :style="{ color: 'white' }"
-                              >Vote for tag(s)</i
+                    <div class="map-date-wrapper">
+                      <p class="map-date-added">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        Added on: {{ formatDate(map.date_added) }}
+                      </p>
+                    </div>
+                    <hr class="row-divider" style="width: 85%" />
+                    <!-- <div class="row w-100" v-if="mapTags && mapTags.length > 0"> -->
+                    <div class="row w-100">
+                      <div class="col-md-12">
+                        <h2 class="section-header mb-4">
+                          <i class="bi bi-tags-fill me-2"></i>Tags
+                        </h2>
+                        <div class="tags-wrapper">
+                          <div class="tags-block">
+                            <div
+                              v-for="tag in mapTags"
+                              :key="tag.id"
+                              class="tag-chip"
+                              :style="{
+                                backgroundColor: tag.color + '20',
+                                borderColor: tag.color,
+                              }"
                             >
+                              <i
+                                class="bi bi-tag-fill me-1"
+                                :style="{ color: tag.color }"
+                              ></i>
+                              {{ tag.name }}
+                            </div>
+                            <div
+                              class="tag-chip-default"
+                              @click="showTagModal = true"
+                              :style="{
+                                backgroundColor: '#ffffff20',
+                                borderColor: 'white',
+                              }"
+                            >
+                              <i
+                                class="bi bi-tag-fill me-1"
+                                :style="{ color: 'white' }"
+                                >Vote for tag(s)</i
+                              >
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -521,118 +543,118 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="row main-content-wrapper">
-          <div class="col-md-12 map-details">
-            <div class="card map-videos mb-4">
-              <div class="card-body p-4">
-                <!-- Map WR Videos -->
-                <div class="collapsible-header" @click="toggleMapVideos">
-                  <h5 class="video-section-title mb-0">
-                    🌍 Map WR Videos
-                    <i
-                      class="bi"
-                      :class="
-                        showMapVideos ? 'bi-chevron-up' : 'bi-chevron-down'
-                      "
-                      style="margin-left: auto"
-                    ></i>
-                  </h5>
-                </div>
-                <div
-                  v-if="showMapVideos"
-                  class="collapsible-content"
-                  @click.self="clearActive"
-                >
-                  <div class="video-section mb-3">
-                    <div class="section-content">
-                      <div class="row g-4">
-                        <!-- Map Soldier -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('demoman') &&
-                              !isIntendedClass('soldier'),
-                          }"
-                        >
+          <div class="row main-content-wrapper">
+            <div class="col-md-12 map-details">
+              <div class="card map-videos mb-4">
+                <div class="card-body p-4">
+                  <!-- Map WR Videos -->
+                  <div class="collapsible-header" @click="toggleMapVideos">
+                    <h5 class="video-section-title mb-0">
+                      🌍 Map WR Videos
+                      <i
+                        class="bi"
+                        :class="
+                          showMapVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                        "
+                        style="margin-left: auto"
+                      ></i>
+                    </h5>
+                  </div>
+                  <div
+                    v-if="showMapVideos"
+                    class="collapsible-content"
+                    @click.self="clearActive"
+                  >
+                    <div class="video-section mb-3">
+                      <div class="section-content">
+                        <div class="row g-4">
+                          <!-- Map Soldier -->
                           <div
-                            class="video-card video-card-soldier"
-                            :class="{ active: activeVideo === 'map-soldier' }"
-                            @click.stop="toggleCard('map-soldier')"
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('demoman') &&
+                                !isIntendedClass('soldier'),
+                            }"
                           >
-                            <h5 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Soldier
-                              record
-                            </h5>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  map &&
-                                  map.soldier_video &&
-                                  map.soldier_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="toggleCard('map-soldier')"
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    map.soldier_video
+                            <div
+                              class="video-card video-card-soldier"
+                              :class="{ active: activeVideo === 'map-soldier' }"
+                              @click.stop="toggleCard('map-soldier')"
+                            >
+                              <h5 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Soldier
+                                record
+                              </h5>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    map &&
+                                    map.soldier_video &&
+                                    map.soldier_video !== 'null'
                                   "
-                                  frameborder="0"
-                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
+                                  class="video-scale-wrapper"
+                                  @click.stop="toggleCard('map-soldier')"
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      map.soldier_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <!-- Map Demoman -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('soldier') &&
-                              !isIntendedClass('demoman'),
-                          }"
-                        >
+                          <!-- Map Demoman -->
                           <div
-                            class="video-card video-card-demoman"
-                            :class="{ active: activeVideo === 'map-demoman' }"
-                            @click.stop="toggleCard('map-demoman')"
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('soldier') &&
+                                !isIntendedClass('demoman'),
+                            }"
                           >
-                            <h5 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Demoman
-                              record
-                            </h5>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  map &&
-                                  map.demoman_video &&
-                                  map.demoman_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="toggleCard('map-demoman')"
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    map.demoman_video
+                            <div
+                              class="video-card video-card-demoman"
+                              :class="{ active: activeVideo === 'map-demoman' }"
+                              @click.stop="toggleCard('map-demoman')"
+                            >
+                              <h5 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Demoman
+                                record
+                              </h5>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    map &&
+                                    map.demoman_video &&
+                                    map.demoman_video !== 'null'
                                   "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
+                                  class="video-scale-wrapper"
+                                  @click.stop="toggleCard('map-demoman')"
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      map.demoman_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -640,384 +662,390 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <!-- Course WR Videos -->
-                <div v-if="courses.length > 0" class="video-section mb-3">
-                  <div class="collapsible-header" @click="toggleCourseVideos">
-                    <h5 class="video-section-title mb-0">
-                      🚩 Course WR Videos
-                      <i
-                        class="bi"
-                        :class="
-                          showCourseVideos ? 'bi-chevron-up' : 'bi-chevron-down'
-                        "
-                        style="margin-left: auto"
-                      ></i>
-                    </h5>
-                  </div>
-                  <div
-                    v-if="showCourseVideos"
-                    class="collapsible-content"
-                    @click.self="clearActive"
-                  >
-                    <div
-                      v-for="course in courses"
-                      :key="course.id"
-                      class="course-videos mb-4"
-                    >
-                      <h5 class="course-video-title mb-3">
-                        Course {{ course.index }}
+                  <!-- Course WR Videos -->
+                  <div v-if="courses.length > 0" class="video-section mb-3">
+                    <div class="collapsible-header" @click="toggleCourseVideos">
+                      <h5 class="video-section-title mb-0">
+                        🚩 Course WR Videos
+                        <i
+                          class="bi"
+                          :class="
+                            showCourseVideos
+                              ? 'bi-chevron-up'
+                              : 'bi-chevron-down'
+                          "
+                          style="margin-left: auto"
+                        ></i>
                       </h5>
-                      <div class="row g-4">
-                        <!-- Course Soldier -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('demoman') &&
-                              !isIntendedClass('soldier'),
-                          }"
-                        >
-                          <div
-                            class="video-card video-card-soldier"
-                            :class="{
-                              active:
-                                activeVideo === 'course-soldier-' + course.id,
-                            }"
-                            @click.stop="
-                              toggleCard('course-soldier-' + course.id)
-                            "
-                          >
-                            <h6 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Soldier
-                              record
-                            </h6>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  course.soldier_video &&
-                                  course.soldier_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="
-                                  toggleCard('course-soldier-' + course.id)
-                                "
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    course.soldier_video
-                                  "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Course Demoman -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('soldier') &&
-                              !isIntendedClass('demoman'),
-                          }"
-                        >
-                          <div
-                            class="video-card video-card-demoman"
-                            :class="{
-                              active:
-                                activeVideo === 'course-demoman-' + course.id,
-                            }"
-                            @click.stop="
-                              toggleCard('course-demoman-' + course.id)
-                            "
-                          >
-                            <h6 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Demoman
-                              record
-                            </h6>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  course.demoman_video &&
-                                  course.demoman_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="
-                                  toggleCard('course-demoman-' + course.id)
-                                "
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    course.demoman_video
-                                  "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                </div>
-                <!-- Bonus WR Videos -->
-                <div v-if="bonuses.length > 0" class="video-section">
-                  <div class="collapsible-header" @click="toggleBonusVideos">
-                    <h5 class="video-section-title mb-0">
-                      ⭐ Bonus WR Videos
-                      <i
-                        class="bi"
-                        :class="
-                          showBonusVideos ? 'bi-chevron-up' : 'bi-chevron-down'
-                        "
-                        style="margin-left: auto"
-                      ></i>
-                    </h5>
-                  </div>
-                  <div
-                    v-if="showBonusVideos"
-                    class="collapsible-content"
-                    @click.self="clearActive"
-                  >
                     <div
-                      v-for="bonus in bonuses"
-                      :key="bonus.id"
-                      class="bonus-videos"
-                    >
-                      <h5 class="bonus-video-title mb-3">
-                        Bonus {{ bonus.index }}
-                      </h5>
-                      <div class="row g-4">
-                        <!-- Bonus Soldier -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('demoman') &&
-                              !isIntendedClass('soldier'),
-                          }"
-                        >
-                          <div
-                            class="video-card video-card-soldier"
-                            :class="{
-                              active:
-                                activeVideo === 'bonus-soldier-' + bonus.id,
-                            }"
-                            @click.stop="
-                              toggleCard('bonus-soldier-' + bonus.id)
-                            "
-                          >
-                            <h6 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Soldier
-                              record
-                            </h6>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  bonus.soldier_video &&
-                                  bonus.soldier_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="
-                                  toggleCard('bonus-soldier-' + bonus.id)
-                                "
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    bonus.soldier_video
-                                  "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Bonus Demoman -->
-                        <div
-                          class="col-lg-6"
-                          :class="{
-                            'order-mobile-last':
-                              isIntendedClass('soldier') &&
-                              !isIntendedClass('demoman'),
-                          }"
-                        >
-                          <div
-                            class="video-card video-card-demoman"
-                            :class="{
-                              active:
-                                activeVideo === 'bonus-demoman-' + bonus.id,
-                            }"
-                            @click.stop="
-                              toggleCard('bonus-demoman-' + bonus.id)
-                            "
-                          >
-                            <h6 class="video-title">
-                              <i class="bi bi-person-fill me-2"></i>Demoman
-                              record
-                            </h6>
-                            <div class="video-container">
-                              <div
-                                v-if="
-                                  bonus.demoman_video &&
-                                  bonus.demoman_video !== 'null'
-                                "
-                                class="video-scale-wrapper"
-                                @click.stop="
-                                  toggleCard('bonus-demoman-' + bonus.id)
-                                "
-                              >
-                                <iframe
-                                  :src="
-                                    'https://www.youtube.com/embed/' +
-                                    bonus.demoman_video
-                                  "
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                ></iframe>
-                              </div>
-                              <div v-else class="no-video-placeholder">
-                                <i class="bi bi-camera-video-off"></i>
-                                <span>No video available</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- ROTW Videos -->
-                <div v-if="rotwVideos.length > 0" class="video-section">
-                  <div class="collapsible-header" @click="toggleRotwVideos">
-                    <h5 class="video-section-title mb-0">
-                      🏆 ROTW Video(s)
-                      <i
-                        class="bi"
-                        :class="
-                          showRotwVideos ? 'bi-chevron-up' : 'bi-chevron-down'
-                        "
-                        style="margin-left: auto"
-                      ></i>
-                    </h5>
-                  </div>
-                  <div
-                    v-if="showRotwVideos"
-                    class="collapsible-content"
-                    @click.self="clearActive"
-                  >
-                    <div
-                      class="row g-4 justify-content-center align-items-center"
+                      v-if="showCourseVideos"
+                      class="collapsible-content"
+                      @click.self="clearActive"
                     >
                       <div
-                        v-for="rotwVideo in displayedRotwVideos"
-                        :key="rotwVideo.video_id"
-                        class="col-lg-8 col-md-10 col-12"
+                        v-for="course in courses"
+                        :key="course.id"
+                        class="course-videos mb-4"
                       >
-                        <div
-                          class="video-card video-card-rotw"
-                          :class="{
-                            active:
-                              activeVideo === 'rotw-' + rotwVideo.video_id,
-                          }"
-                          @click.stop="toggleCard('rotw-' + rotwVideo.video_id)"
-                        >
-                          <h6 class="video-title">
-                            {{ rotwVideo.player_name || "Unknown Player" }}
-                          </h6>
-                          <div class="video-container">
+                        <h5 class="course-video-title mb-3">
+                          Course {{ course.index }}
+                        </h5>
+                        <div class="row g-4">
+                          <!-- Course Soldier -->
+                          <div
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('demoman') &&
+                                !isIntendedClass('soldier'),
+                            }"
+                          >
                             <div
-                              v-if="rotwVideo.video_id"
-                              class="video-scale-wrapper-rotw"
+                              class="video-card video-card-soldier"
+                              :class="{
+                                active:
+                                  activeVideo === 'course-soldier-' + course.id,
+                              }"
                               @click.stop="
-                                toggleCard('rotw-' + rotwVideo.video_id)
+                                toggleCard('course-soldier-' + course.id)
                               "
                             >
-                              <iframe
-                                :src="
-                                  'https://www.youtube.com/embed/' +
-                                  rotwVideo.video_id
-                                "
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                              ></iframe>
-                            </div>
-                            <div v-else class="no-video-placeholder">
-                              <i class="bi bi-camera-video-off"></i>
-                              <span>No video available</span>
+                              <h6 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Soldier
+                                record
+                              </h6>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    course.soldier_video &&
+                                    course.soldier_video !== 'null'
+                                  "
+                                  class="video-scale-wrapper"
+                                  @click.stop="
+                                    toggleCard('course-soldier-' + course.id)
+                                  "
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      course.soldier_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div class="rotw-info mt-2">
-                            <small class="rotw-text">
-                              <i class="bi bi-calendar me-1"></i>
-                              {{
-                                formatDate(
-                                  new Date(rotwVideo.uploaded_at).getTime() /
-                                    1000,
-                                )
-                              }}
-                            </small>
+                          <!-- Course Demoman -->
+                          <div
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('soldier') &&
+                                !isIntendedClass('demoman'),
+                            }"
+                          >
+                            <div
+                              class="video-card video-card-demoman"
+                              :class="{
+                                active:
+                                  activeVideo === 'course-demoman-' + course.id,
+                              }"
+                              @click.stop="
+                                toggleCard('course-demoman-' + course.id)
+                              "
+                            >
+                              <h6 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Demoman
+                                record
+                              </h6>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    course.demoman_video &&
+                                    course.demoman_video !== 'null'
+                                  "
+                                  class="video-scale-wrapper"
+                                  @click.stop="
+                                    toggleCard('course-demoman-' + course.id)
+                                  "
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      course.demoman_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <!-- Bonus WR Videos -->
+                  <div v-if="bonuses.length > 0" class="video-section">
+                    <div class="collapsible-header" @click="toggleBonusVideos">
+                      <h5 class="video-section-title mb-0">
+                        ⭐ Bonus WR Videos
+                        <i
+                          class="bi"
+                          :class="
+                            showBonusVideos
+                              ? 'bi-chevron-up'
+                              : 'bi-chevron-down'
+                          "
+                          style="margin-left: auto"
+                        ></i>
+                      </h5>
+                    </div>
+                    <div
+                      v-if="showBonusVideos"
+                      class="collapsible-content"
+                      @click.self="clearActive"
+                    >
                       <div
-                        v-if="hasMoreRotwVideos && !showAllRotwVideos"
-                        class="text-center mt-3"
+                        v-for="bonus in bonuses"
+                        :key="bonus.id"
+                        class="bonus-videos"
                       >
-                        <button
-                          @click="toggleShowAllRotwVideos"
-                          class="btn load-more-btn"
-                        >
-                          <i class="bi bi-chevron-down me-2"></i>
-                          Load {{ rotwVideos.length - 1 }} older ROTW video{{
-                            rotwVideos.length - 1 > 1 ? "s" : ""
-                          }}
-                        </button>
-                      </div>
-                      <div
-                        v-if="showAllRotwVideos && hasMoreRotwVideos"
-                        class="text-center mt-3"
-                      >
-                        <button
-                          @click="toggleShowAllRotwVideos"
-                          class="btn load-more-btn"
-                        >
-                          <i class="bi bi-chevron-up me-2"></i>
-                          Show only most recent
-                        </button>
+                        <h5 class="bonus-video-title mb-3">
+                          Bonus {{ bonus.index }}
+                        </h5>
+                        <div class="row g-4">
+                          <!-- Bonus Soldier -->
+                          <div
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('demoman') &&
+                                !isIntendedClass('soldier'),
+                            }"
+                          >
+                            <div
+                              class="video-card video-card-soldier"
+                              :class="{
+                                active:
+                                  activeVideo === 'bonus-soldier-' + bonus.id,
+                              }"
+                              @click.stop="
+                                toggleCard('bonus-soldier-' + bonus.id)
+                              "
+                            >
+                              <h6 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Soldier
+                                record
+                              </h6>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    bonus.soldier_video &&
+                                    bonus.soldier_video !== 'null'
+                                  "
+                                  class="video-scale-wrapper"
+                                  @click.stop="
+                                    toggleCard('bonus-soldier-' + bonus.id)
+                                  "
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      bonus.soldier_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Bonus Demoman -->
+                          <div
+                            class="col-lg-6"
+                            :class="{
+                              'order-mobile-last':
+                                isIntendedClass('soldier') &&
+                                !isIntendedClass('demoman'),
+                            }"
+                          >
+                            <div
+                              class="video-card video-card-demoman"
+                              :class="{
+                                active:
+                                  activeVideo === 'bonus-demoman-' + bonus.id,
+                              }"
+                              @click.stop="
+                                toggleCard('bonus-demoman-' + bonus.id)
+                              "
+                            >
+                              <h6 class="video-title">
+                                <i class="bi bi-person-fill me-2"></i>Demoman
+                                record
+                              </h6>
+                              <div class="video-container">
+                                <div
+                                  v-if="
+                                    bonus.demoman_video &&
+                                    bonus.demoman_video !== 'null'
+                                  "
+                                  class="video-scale-wrapper"
+                                  @click.stop="
+                                    toggleCard('bonus-demoman-' + bonus.id)
+                                  "
+                                >
+                                  <iframe
+                                    :src="
+                                      'https://www.youtube.com/embed/' +
+                                      bonus.demoman_video
+                                    "
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                  ></iframe>
+                                </div>
+                                <div v-else class="no-video-placeholder">
+                                  <i class="bi bi-camera-video-off"></i>
+                                  <span>No video available</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <!-- ROTW Videos -->
+                  <div v-if="rotwVideos.length > 0" class="video-section">
+                    <div class="collapsible-header" @click="toggleRotwVideos">
+                      <h5 class="video-section-title mb-0">
+                        🏆 ROTW Video(s)
+                        <i
+                          class="bi"
+                          :class="
+                            showRotwVideos ? 'bi-chevron-up' : 'bi-chevron-down'
+                          "
+                          style="margin-left: auto"
+                        ></i>
+                      </h5>
+                    </div>
+                    <div
+                      v-if="showRotwVideos"
+                      class="collapsible-content"
+                      @click.self="clearActive"
+                    >
+                      <div
+                        class="row g-4 justify-content-center align-items-center"
+                      >
+                        <div
+                          v-for="rotwVideo in displayedRotwVideos"
+                          :key="rotwVideo.video_id"
+                          class="col-lg-8 col-md-10 col-12"
+                        >
+                          <div
+                            class="video-card video-card-rotw"
+                            :class="{
+                              active:
+                                activeVideo === 'rotw-' + rotwVideo.video_id,
+                            }"
+                            @click.stop="
+                              toggleCard('rotw-' + rotwVideo.video_id)
+                            "
+                          >
+                            <h6 class="video-title">
+                              {{ rotwVideo.player_name || "Unknown Player" }}
+                            </h6>
+                            <div class="video-container">
+                              <div
+                                v-if="rotwVideo.video_id"
+                                class="video-scale-wrapper-rotw"
+                                @click.stop="
+                                  toggleCard('rotw-' + rotwVideo.video_id)
+                                "
+                              >
+                                <iframe
+                                  :src="
+                                    'https://www.youtube.com/embed/' +
+                                    rotwVideo.video_id
+                                  "
+                                  frameborder="0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowfullscreen
+                                ></iframe>
+                              </div>
+                              <div v-else class="no-video-placeholder">
+                                <i class="bi bi-camera-video-off"></i>
+                                <span>No video available</span>
+                              </div>
+                            </div>
+                            <div class="rotw-info mt-2">
+                              <small class="rotw-text">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{
+                                  formatDate(
+                                    new Date(rotwVideo.uploaded_at).getTime() /
+                                      1000,
+                                  )
+                                }}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          v-if="hasMoreRotwVideos && !showAllRotwVideos"
+                          class="text-center mt-3"
+                        >
+                          <button
+                            @click="toggleShowAllRotwVideos"
+                            class="btn load-more-btn"
+                          >
+                            <i class="bi bi-chevron-down me-2"></i>
+                            Load {{ rotwVideos.length - 1 }} older ROTW video{{
+                              rotwVideos.length - 1 > 1 ? "s" : ""
+                            }}
+                          </button>
+                        </div>
+                        <div
+                          v-if="showAllRotwVideos && hasMoreRotwVideos"
+                          class="text-center mt-3"
+                        >
+                          <button
+                            @click="toggleShowAllRotwVideos"
+                            class="btn load-more-btn"
+                          >
+                            <i class="bi bi-chevron-up me-2"></i>
+                            Show only most recent
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <Leaderboard
+                    :map-id="mapId"
+                    :type="type"
+                    :index="index"
+                    :intended-class="map ? map.intended_class : null"
+                  />
                 </div>
-                <Leaderboard
-                  :map-id="mapId"
-                  :type="type"
-                  :index="index"
-                  :intended-class="map ? map.intended_class : null"
-                />
               </div>
             </div>
           </div>
@@ -1662,6 +1690,10 @@ export default {
 </script>
 
 <style scoped>
+.content-container {
+  max-width: 1320px;
+  width: 100%;
+}
 .return-button {
   background: var(--color-box);
   color: var(--color-text);

@@ -24,7 +24,6 @@
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-
           <div class="popup-header">
             <h3>Welcome to Tempus Plaza!</h3>
             <p>Login for enhanced features and personalized experience</p>
@@ -32,23 +31,22 @@
               >This popup will not appear again</small
             >
           </div>
-
           <div class="popup-features">
             <div class="feature-item">
-              <i class="bi bi-person-circle"></i>
-              <span>Easy navigation to your profile</span>
+              <i class="bi bi-person-circle"></i
+              ><span>Easy navigation to your profile</span>
             </div>
             <div class="feature-item">
-              <i class="bi bi-person-fill-gear"></i>
-              <span>Personalized player profiles</span>
+              <i class="bi bi-person-fill-gear"></i
+              ><span>Personalized player profiles</span>
             </div>
             <div class="feature-item">
-              <i class="bi bi-graph-up"></i>
-              <span>See your own run on map leaderboards</span>
+              <i class="bi bi-graph-up"></i
+              ><span>See your own run on map leaderboards</span>
             </div>
             <div class="feature-item">
-              <i class="bi bi-trophy"></i>
-              <span>Automatically loads your player lookup</span>
+              <i class="bi bi-trophy"></i
+              ><span>Automatically loads your player lookup</span>
             </div>
           </div>
           <div class="popup-actions">
@@ -86,7 +84,6 @@
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-
           <div class="popup-header">
             <div class="error-icon-wrap">
               <i class="bi bi-steam error-steam-icon"></i>
@@ -97,7 +94,6 @@
             <h3>Account Not Found</h3>
             <p>Your Steam account isn't linked to any Tempus player profile.</p>
           </div>
-
           <div class="error-info-box">
             <i class="bi bi-info-circle"></i>
             <span
@@ -106,7 +102,6 @@
               recently, your data may not have synced yet.</span
             >
           </div>
-
           <div class="popup-actions" style="margin-top: 1.5rem">
             <button class="btn continue-btn" @click="showErrorPopup = false">
               Close
@@ -275,8 +270,10 @@
                     v-model="searchQuery"
                     @focus="navbarSearchFocused = true"
                     @blur="navbarSearchFocused = false"
+                    @keydown="onNavSearchKeydown"
                     placeholder="Search..."
                     class="navbar-search-input"
+                    autocomplete="off"
                   />
                   <button
                     v-if="searchQuery"
@@ -284,6 +281,7 @@
                     @mousedown.prevent="
                       searchQuery = '';
                       searchResults = null;
+                      navHighlightedIndex = -1;
                     "
                     aria-label="Clear search"
                   >
@@ -303,6 +301,7 @@
                 <Transition name="nav-dropdown">
                   <div
                     class="navbar-search-results-dropdown"
+                    ref="navDropdownRef"
                     v-if="
                       searchQuery.trim() &&
                       (loadingMaps || loadingPlayers || searchResults)
@@ -331,7 +330,7 @@
                         v-else-if="searchResults && searchResults.maps.length"
                       >
                         <HoverPreview
-                          v-for="map in searchResults.maps"
+                          v-for="(map, i) in searchResults.maps"
                           :key="map.id"
                           :mapName="map.name"
                           style="display: block"
@@ -340,7 +339,13 @@
                             :to="{ name: 'MapPage', params: { mapId: map.id } }"
                             tag="li"
                             class="nav-result-item"
-                            @click.native="handleSearchResultClick"
+                            :class="{
+                              'is-highlighted': navHighlightedIndex === i,
+                            }"
+                            :data-nav-result-index="i"
+                            @mouseenter="navHighlightedIndex = i"
+                            @mouseleave="navHighlightedIndex = -1"
+                            @click="handleSearchResultClick"
                           >
                             <span class="nav-item-name">{{
                               map.name || `Map ID: ${map.id}`
@@ -385,7 +390,7 @@
                         "
                       >
                         <SmartLink
-                          v-for="player in searchResults.players"
+                          v-for="(player, i) in searchResults.players"
                           :key="player.id"
                           :to="{
                             name: 'PlayerPage',
@@ -393,7 +398,13 @@
                           }"
                           tag="li"
                           class="nav-result-item"
-                          @click.native="handleSearchResultClick"
+                          :class="{
+                            'is-highlighted':
+                              navHighlightedIndex === navMapCount + i,
+                          }"
+                          :data-nav-result-index="navMapCount + i"
+                          @mouseenter="navHighlightedIndex = navMapCount + i"
+                          @mouseleave="navHighlightedIndex = -1"
                         >
                           <div class="nav-player-avatar-wrapper">
                             <img
@@ -449,7 +460,6 @@
                   />
                   <span>{{ user.name }}</span>
                 </button>
-
                 <ul
                   class="dropdown-menu dropdown-menu-end"
                   aria-labelledby="playerDropdown"
@@ -459,9 +469,8 @@
                       tag="a"
                       :to="getPlayerRoute()"
                       class="dropdown-item clickable"
+                      >My profile</SmartLink
                     >
-                      My profile
-                    </SmartLink>
                   </li>
                   <li>
                     <div class="dropdown-item non-clickable">
@@ -476,9 +485,9 @@
                           value="overall"
                           @change="updateUserPreferences"
                         />
-                        <label class="form-check-label" for="preferenceOverall">
-                          Overall
-                        </label>
+                        <label class="form-check-label" for="preferenceOverall"
+                          >Overall</label
+                        >
                       </div>
                       <div class="form-check">
                         <input
@@ -490,9 +499,9 @@
                           value="soldier"
                           @change="updateUserPreferences"
                         />
-                        <label class="form-check-label" for="preferenceSoldier">
-                          Soldier
-                        </label>
+                        <label class="form-check-label" for="preferenceSoldier"
+                          >Soldier</label
+                        >
                       </div>
                       <div class="form-check">
                         <input
@@ -504,9 +513,9 @@
                           value="demoman"
                           @change="updateUserPreferences"
                         />
-                        <label class="form-check-label" for="preferenceDemoman">
-                          Demoman
-                        </label>
+                        <label class="form-check-label" for="preferenceDemoman"
+                          >Demoman</label
+                        >
                       </div>
                     </div>
                   </li>
@@ -523,9 +532,9 @@
                           value="male"
                           @change="updateUserPreferences"
                         />
-                        <label class="form-check-label" for="genderMale">
-                          Male
-                        </label>
+                        <label class="form-check-label" for="genderMale"
+                          >Male</label
+                        >
                       </div>
                       <div class="form-check">
                         <input
@@ -537,9 +546,9 @@
                           value="female"
                           @change="updateUserPreferences"
                         />
-                        <label class="form-check-label" for="genderFemale">
-                          Female
-                        </label>
+                        <label class="form-check-label" for="genderFemale"
+                          >Female</label
+                        >
                       </div>
                     </div>
                   </li>
@@ -594,9 +603,9 @@
                     </div>
                   </li>
                   <li>
-                    <a class="dropdown-item clickable" @click="logout" href="#">
-                      Logout
-                    </a>
+                    <a class="dropdown-item clickable" @click="logout" href="#"
+                      >Logout</a
+                    >
                   </li>
                 </ul>
               </div>
@@ -667,8 +676,10 @@
             v-model="searchQuery"
             @focus="sidebarSearchFocused = true"
             @blur="sidebarSearchFocused = false"
+            @keydown="onNavSearchKeydown"
             placeholder="Search maps & players..."
             class="sidebar-search-input"
+            autocomplete="off"
           />
           <button
             v-if="searchQuery"
@@ -676,6 +687,7 @@
             @mousedown.prevent="
               searchQuery = '';
               searchResults = null;
+              navHighlightedIndex = -1;
             "
             aria-label="Clear"
           >
@@ -694,6 +706,7 @@
         </div>
         <div
           class="sidebar-search-results"
+          ref="sidebarDropdownRef"
           v-if="
             searchQuery.trim() &&
             (loadingMaps || loadingPlayers || searchResults)
@@ -721,7 +734,7 @@
             </div>
             <ul v-else-if="searchResults && searchResults.maps.length">
               <HoverPreview
-                v-for="map in searchResults.maps"
+                v-for="(map, i) in searchResults.maps"
                 :key="map.id"
                 :mapName="map.name"
                 style="display: block"
@@ -730,7 +743,11 @@
                   :to="{ name: 'MapPage', params: { mapId: map.id } }"
                   tag="li"
                   class="nav-result-item"
-                  @click.native="
+                  :class="{ 'is-highlighted': navHighlightedIndex === i }"
+                  :data-nav-result-index="i"
+                  @mouseenter="navHighlightedIndex = i"
+                  @mouseleave="navHighlightedIndex = -1"
+                  @click="
                     handleSearchResultClick();
                     closeSidebar();
                   "
@@ -772,12 +789,18 @@
             </div>
             <ul v-else-if="searchResults && searchResults.players.length">
               <SmartLink
-                v-for="player in searchResults.players"
+                v-for="(player, i) in searchResults.players"
                 :key="player.id"
                 :to="{ name: 'PlayerPage', params: { playerId: player.id } }"
                 tag="li"
                 class="nav-result-item"
-                @click.native="
+                :class="{
+                  'is-highlighted': navHighlightedIndex === navMapCount + i,
+                }"
+                :data-nav-result-index="navMapCount + i"
+                @mouseenter="navHighlightedIndex = navMapCount + i"
+                @mouseleave="navHighlightedIndex = -1"
+                @click="
                   handleSearchResultClick();
                   closeSidebar();
                 "
@@ -813,74 +836,65 @@
           to="/"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Home') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-house"></i><span>Home</span></router-link
         >
-          <i class="bi bi-house"></i><span>Home</span>
-        </router-link>
         <router-link
           to="/servers"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Servers') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-globe"></i><span>Servers</span></router-link
         >
-          <i class="bi bi-globe"></i><span>Servers</span>
-        </router-link>
         <router-link
           to="/activity"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Activity') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-graph-up"></i><span>Activity</span></router-link
         >
-          <i class="bi bi-graph-up"></i><span>Activity</span>
-        </router-link>
         <router-link
           to="/maps"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Maps') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-map"></i><span>Maps</span></router-link
         >
-          <i class="bi bi-map"></i><span>Maps</span>
-        </router-link>
         <router-link
           to="/players"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Players') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-trophy"></i><span>Leaderboards</span></router-link
         >
-          <i class="bi bi-trophy"></i><span>Leaderboards</span>
-        </router-link>
         <router-link
           to="/lookup"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Lookup') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-search"></i><span>Lookup</span></router-link
         >
-          <i class="bi bi-search"></i><span>Lookup</span>
-        </router-link>
         <router-link
           to="/compare"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Compare') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-bar-chart"></i><span>Compare</span></router-link
         >
-          <i class="bi bi-bar-chart"></i><span>Compare</span>
-        </router-link>
         <router-link
           to="/history"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('History') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-clock-history"></i><span>History</span></router-link
         >
-          <i class="bi bi-clock-history"></i><span>History</span>
-        </router-link>
         <router-link
           to="/donate"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Donate') }"
-          @click.native="closeSidebar"
+          @click="closeSidebar"
+          ><i class="bi bi-heart"></i><span>Donate</span></router-link
         >
-          <i class="bi bi-heart"></i><span>Donate</span>
-        </router-link>
       </nav>
       <div class="sidebar-footer">
         <button
@@ -890,7 +904,6 @@
         >
           <i class="bi bi-steam"></i> Login with Steam
         </button>
-
         <div v-if="user && user.steamid" class="sidebar-user-section">
           <button
             class="sidebar-user-toggle"
@@ -916,7 +929,6 @@
               <polyline points="18 15 12 9 6 15"></polyline>
             </svg>
           </button>
-
           <div
             v-if="sidebarSettingsOpen"
             class="sidebar-settings-panel"
@@ -926,7 +938,7 @@
               tag="div"
               :to="getPlayerRoute()"
               class="sidebar-settings-item sidebar-settings-link"
-              @click.native="closeSidebar"
+              @click="closeSidebar"
             >
               <i class="bi bi-person-circle"></i> My profile
             </SmartLink>
@@ -1063,25 +1075,22 @@
             class="footer-link"
             target="_blank"
             rel="noopener noreferrer"
+            ><i class="bi bi-globe"></i> Tempus</a
           >
-            <i class="bi bi-globe"></i> Tempus
-          </a>
           <a
             href="https://discord.gg/U48JYd9h99"
             class="footer-link"
             target="_blank"
             rel="noopener noreferrer"
+            ><i class="bi bi-discord"></i> Discord</a
           >
-            <i class="bi bi-discord"></i> Discord
-          </a>
           <a
             href="https://docs.google.com/spreadsheets/d/1kL76rEPL2AtMSu5RWI2VtW5ZJ2QIQx61BNowdfN-09M/edit?usp=sharing"
             class="footer-link"
             target="_blank"
             rel="noopener noreferrer"
+            ><i class="bi bi-journals"></i> Encyclopedia</a
           >
-            <i class="bi bi-journals"></i> Encyclopedia
-          </a>
         </div>
       </div>
     </footer>
@@ -1125,6 +1134,7 @@ export default {
       isDesktop: window.innerWidth >= 1200,
       navbarSearchFocused: false,
       sidebarSearchFocused: false,
+      navHighlightedIndex: -1,
       colorOptions: [
         { value: "blue", color: "var(--color-banner-blue-1)" },
         { value: "red", color: "var(--color-banner-red-1)" },
@@ -1152,18 +1162,84 @@ export default {
     isHomePage() {
       return this.$route.name === "Home";
     },
+    navMapCount() {
+      return this.searchResults?.maps?.length ?? 0;
+    },
+    navPlayerCount() {
+      return this.searchResults?.players?.length ?? 0;
+    },
+    navTotalResults() {
+      return this.navMapCount + this.navPlayerCount;
+    },
   },
   provide() {
-    return {
-      profileUpdateTracker: this.profileUpdateTracker,
-    };
+    return { profileUpdateTracker: this.profileUpdateTracker };
   },
   methods: {
+    onNavSearchKeydown(e) {
+      if (!this.searchResults || this.navTotalResults === 0) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this.navHighlightedIndex =
+          this.navHighlightedIndex < this.navTotalResults - 1
+            ? this.navHighlightedIndex + 1
+            : 0;
+        this.scrollNavHighlightedIntoView();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this.navHighlightedIndex =
+          this.navHighlightedIndex > 0
+            ? this.navHighlightedIndex - 1
+            : this.navTotalResults - 1;
+        this.scrollNavHighlightedIntoView();
+      } else if (e.key === "Enter" && this.navHighlightedIndex >= 0) {
+        e.preventDefault();
+        this.navigateNavHighlighted();
+      } else if (e.key === "Escape") {
+        this.searchResults = null;
+        this.navHighlightedIndex = -1;
+      }
+    },
+    scrollNavHighlightedIntoView() {
+      this.$nextTick(() => {
+        const ref = this.sidebarOpen
+          ? this.$refs.sidebarDropdownRef
+          : this.$refs.navDropdownRef;
+        if (!ref) return;
+        const el = ref.querySelector(
+          `[data-nav-result-index="${this.navHighlightedIndex}"]`,
+        );
+        if (el) el.scrollIntoView({ block: "nearest" });
+      });
+    },
+    navigateNavHighlighted() {
+      if (!this.searchResults) return;
+      if (this.navHighlightedIndex < this.navMapCount) {
+        const map = this.searchResults.maps[this.navHighlightedIndex];
+        if (map) {
+          this.$router.push({ name: "MapPage", params: { mapId: map.id } });
+          this.handleSearchResultClick();
+          if (this.sidebarOpen) this.closeSidebar();
+        }
+      } else {
+        const player =
+          this.searchResults.players[
+            this.navHighlightedIndex - this.navMapCount
+          ];
+        if (player) {
+          this.$router.push({
+            name: "PlayerPage",
+            params: { playerId: player.id },
+          });
+          this.handleSearchResultClick();
+          if (this.sidebarOpen) this.closeSidebar();
+        }
+      }
+    },
     handleAvatarError(e) {
       e.target.style.display = "none";
-      if (e.target.nextElementSibling) {
+      if (e.target.nextElementSibling)
         e.target.nextElementSibling.style.display = "flex";
-      }
     },
     checkNavbarOverflow() {
       this.isDesktop = window.innerWidth >= 1200;
@@ -1207,6 +1283,7 @@ export default {
       this.closeNavbar();
       this.searchQuery = "";
       this.searchResults = { maps: [], players: [] };
+      this.navHighlightedIndex = -1;
     },
     closeLoginPopup() {
       this.showLoginPopup = false;
@@ -1240,6 +1317,7 @@ export default {
       this.searchResults = null;
       this.loadingMaps = false;
       this.loadingPlayers = false;
+      this.navHighlightedIndex = -1;
     },
     loginWithSteam() {
       window.location.href = `${API_BASE_URL}/auth/steam`;
@@ -1251,11 +1329,8 @@ export default {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
         });
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          console.error("Logout failed:", response.status);
-        }
+        if (response.ok) window.location.reload();
+        else console.error("Logout failed:", response.status);
       } catch (error) {
         console.error("Logout failed:", error);
       }
@@ -1363,6 +1438,7 @@ export default {
     async fetchSearchResults() {
       const query = this.searchQuery.trim();
       this.searchResults = { maps: [], players: [] };
+      this.navHighlightedIndex = -1;
       this.loadingMaps = true;
       this.loadingPlayers = true;
       this.fetchMaps(query)
@@ -1394,6 +1470,7 @@ export default {
         this.searchResults = null;
         this.loadingMaps = false;
         this.loadingPlayers = false;
+        this.navHighlightedIndex = -1;
         return;
       }
       this.loadingMaps = true;
@@ -1410,11 +1487,7 @@ export default {
       await this.updateUserPreferences();
     },
   },
-  created() {
-    // Theres no 2 hour update anymore so this isnt needed
-    //this.checkUpdateStatus();
-    //this.updateInterval = setInterval(this.checkUpdateStatus, 30000);
-  },
+  created() {},
   beforeDestroy() {
     window.removeEventListener("resize", this.checkNavbarOverflow);
     clearInterval(this.updateInterval);
@@ -1486,6 +1559,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.w-95 {
+  width: 90% !important;
 }
 
 .background-container {
@@ -1891,7 +1968,10 @@ body {
 .nav-result-item:active {
   background: rgba(102, 126, 234, 0.25);
 }
-
+.nav-result-item.is-highlighted {
+  background: rgba(102, 126, 234, 0.2);
+  outline: 1px solid rgba(102, 126, 234, 0.35);
+}
 .nav-player-avatar-wrapper {
   position: relative;
   flex-shrink: 0;

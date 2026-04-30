@@ -1,6 +1,6 @@
 <template>
   <div class="position-relative min-vh-100 w-100 background-container">
-    <div class="container mx-auto py-4 d-flex flex-column align-items-center">
+    <div class="w-95 mx-auto py-4 d-flex flex-column align-items-center">
       <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">

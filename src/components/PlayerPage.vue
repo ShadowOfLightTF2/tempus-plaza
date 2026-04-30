@@ -16,144 +16,148 @@
         {{ toast.message }}
       </div>
     </transition>
-
-    <div class="container py-4 d-flex" style="margin-bottom: 10rem !important">
-      <div
-        v-if="playerNotFound"
-        class="alert alert-warning player-not-found text-center"
-      >
-        <p class="mb-3">No player found</p>
-        <button @click="returnToAllPlayers" class="btn return-button">
-          Return to all players
-        </button>
-      </div>
-      <div v-else>
-        <ProfileBanner
-          :player="player"
-          :player-rank-info="playerRankInfo"
-          :banner-colors="bannerColors"
-          :loading="loading.ranks"
-        />
-        <div class="row g-2 mt-3">
-          <div class="col-12 col-md-4 chart-col">
-            <PointsChart
-              title="Soldier Points History"
-              chart-type="soldier"
-              :points-data="pointsHistory"
-              :loading="loading.points"
-            />
-          </div>
-          <div class="col-12 col-md-4 chart-col">
-            <PointsChart
-              title="Overall Points History"
-              chart-type="overall"
-              :points-data="pointsHistory"
-              :loading="loading.points"
-            />
-          </div>
-          <div class="col-12 col-md-4 chart-col">
-            <PointsChart
-              title="Demoman Points History"
-              chart-type="demoman"
-              :points-data="pointsHistory"
-              :loading="loading.points"
-            />
-          </div>
+    <div
+      class="w-95 mx-auto py-4 d-flex flex-column align-items-center"
+      style="margin-bottom: 10rem !important"
+    >
+      <div class="content-container">
+        <div
+          v-if="playerNotFound"
+          class="alert alert-warning player-not-found text-center"
+        >
+          <p class="mb-3">No player found</p>
+          <button @click="returnToAllPlayers" class="btn return-button">
+            Return to all players
+          </button>
         </div>
-        <div class="row g-3 mt-2">
-          <div class="col-12 col-md-3 order-2 order-md-1">
-            <div class="stats-container">
-              <ClassStatsCard
-                class-type="soldier"
-                :current-stat-type="currentStatType['soldier']"
-                :stats="stats[currentStatType['soldier']]"
-                :loading="loading.stats"
-                @prev-stat="prevStatType('soldier')"
-                @next-stat="nextStatType('soldier')"
+        <div v-else>
+          <ProfileBanner
+            :player="player"
+            :player-rank-info="playerRankInfo"
+            :banner-colors="bannerColors"
+            :loading="loading.ranks"
+          />
+          <div class="row g-2 mt-3">
+            <div class="col-12 col-md-4 chart-col">
+              <PointsChart
+                title="Soldier Points History"
+                chart-type="soldier"
+                :points-data="pointsHistory"
+                :loading="loading.points"
               />
-              <SharedTimesCard
-                :shared-times="sharedTimesSoldier"
-                :shared-type="player.shared_soldier_type"
-                :loading="loading.shared"
-                :g1-count="stats.map.placement.soldier.G1"
-                :top-times-count="stats.map.topTimesAmount.soldier"
+            </div>
+            <div class="col-12 col-md-4 chart-col">
+              <PointsChart
+                title="Overall Points History"
+                chart-type="overall"
+                :points-data="pointsHistory"
+                :loading="loading.points"
+              />
+            </div>
+            <div class="col-12 col-md-4 chart-col">
+              <PointsChart
+                title="Demoman Points History"
+                chart-type="demoman"
+                :points-data="pointsHistory"
+                :loading="loading.points"
               />
             </div>
           </div>
-          <div class="col-12 col-md-6 order-1 order-md-2">
-            <RecordsSection
-              :player-id="playerId"
-              :recent-records="records.recentRecords"
-              :changed-placements="changedPlacements"
-              :loading="loading"
-              :next-update-countdown="nextUpdateCountdown"
-            />
-          </div>
-          <div class="col-12 col-md-3 order-3">
-            <div class="stats-container">
-              <ClassStatsCard
-                class-type="demoman"
-                :current-stat-type="currentStatType['demoman']"
-                :stats="stats[currentStatType['demoman']]"
-                :loading="loading.stats"
-                @prev-stat="prevStatType('demoman')"
-                @next-stat="nextStatType('demoman')"
-              />
-              <SharedTimesCard
-                :shared-times="sharedTimesDemoman"
-                :shared-type="player.shared_demoman_type"
-                :loading="loading.shared"
-                :g1-count="stats.map.placement.demoman.G1"
-                :top-times-count="stats.map.topTimesAmount.demoman"
+          <div class="row g-3 mt-2">
+            <div class="col-12 col-md-3 order-2 order-md-1">
+              <div class="stats-container">
+                <ClassStatsCard
+                  class-type="soldier"
+                  :current-stat-type="currentStatType['soldier']"
+                  :stats="stats[currentStatType['soldier']]"
+                  :loading="loading.stats"
+                  @prev-stat="prevStatType('soldier')"
+                  @next-stat="nextStatType('soldier')"
+                />
+                <SharedTimesCard
+                  :shared-times="sharedTimesSoldier"
+                  :shared-type="player.shared_soldier_type"
+                  :loading="loading.shared"
+                  :g1-count="stats.map.placement.soldier.G1"
+                  :top-times-count="stats.map.topTimesAmount.soldier"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-6 order-1 order-md-2">
+              <RecordsSection
+                :player-id="playerId"
+                :recent-records="records.recentRecords"
+                :changed-placements="changedPlacements"
+                :loading="loading"
+                :next-update-countdown="nextUpdateCountdown"
               />
             </div>
+            <div class="col-12 col-md-3 order-3">
+              <div class="stats-container">
+                <ClassStatsCard
+                  class-type="demoman"
+                  :current-stat-type="currentStatType['demoman']"
+                  :stats="stats[currentStatType['demoman']]"
+                  :loading="loading.stats"
+                  @prev-stat="prevStatType('demoman')"
+                  @next-stat="nextStatType('demoman')"
+                />
+                <SharedTimesCard
+                  :shared-times="sharedTimesDemoman"
+                  :shared-type="player.shared_demoman_type"
+                  :loading="loading.shared"
+                  :g1-count="stats.map.placement.demoman.G1"
+                  :top-times-count="stats.map.topTimesAmount.demoman"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        <div v-if="isCurrentUser || hasFavoriteMaps" class="row g-3 mt-3">
-          <div class="col-12">
-            <div class="map-section">
-              <div class="map-container">
-                <h4 class="map-section-title">Favourite Maps</h4>
-                <div class="map-grid">
-                  <FavoriteMapCard
-                    v-for="(map, index) in displayedMaps"
-                    :key="map.id || index"
-                    :map="map"
-                    :index="index"
-                    :is-current-user="isCurrentUser"
-                    @open-search="openMapSearch"
-                    @navigate-to-map="goToRecords"
-                  />
+          <div v-if="isCurrentUser || hasFavoriteMaps" class="row g-3 mt-3">
+            <div class="col-12">
+              <div class="map-section">
+                <div class="map-container">
+                  <h4 class="map-section-title">Favourite Maps</h4>
+                  <div class="map-grid">
+                    <FavoriteMapCard
+                      v-for="(map, index) in displayedMaps"
+                      :key="map.id || index"
+                      :map="map"
+                      :index="index"
+                      :is-current-user="isCurrentUser"
+                      @open-search="openMapSearch"
+                      @navigate-to-map="goToRecords"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div v-show="hasRotwVideos" class="row g-3 mt-2">
-          <div class="col-12">
-            <RotwVideos
-              :player-id="playerId"
-              @has-content="hasRotwVideos = $event"
-            />
+          <div v-show="hasRotwVideos" class="row g-3 mt-2">
+            <div class="col-12">
+              <RotwVideos
+                :player-id="playerId"
+                @has-content="hasRotwVideos = $event"
+              />
+            </div>
           </div>
-        </div>
-        <div v-show="hasAuthoredMaps" class="row g-3 mt-2">
-          <div class="col-12">
-            <AuthoredMaps
-              :player-id="playerId"
-              @has-content="hasAuthoredMaps = $event"
-            />
+          <div v-show="hasAuthoredMaps" class="row g-3 mt-2">
+            <div class="col-12">
+              <AuthoredMaps
+                :player-id="playerId"
+                @has-content="hasAuthoredMaps = $event"
+              />
+            </div>
           </div>
+          <MapSearchModal
+            :show="showMapSearch"
+            :search-results="mapSearchResults"
+            :has-map-at-current-index="hasMapAtCurrentIndex"
+            @close="cancelMapSearch"
+            @search="searchMap"
+            @select-map="selectMap"
+            @remove-map="removeMap"
+          />
         </div>
-        <MapSearchModal
-          :show="showMapSearch"
-          :search-results="mapSearchResults"
-          :has-map-at-current-index="hasMapAtCurrentIndex"
-          @close="cancelMapSearch"
-          @search="searchMap"
-          @select-map="selectMap"
-          @remove-map="removeMap"
-        />
       </div>
     </div>
   </div>
@@ -1408,7 +1412,8 @@ export default {
   opacity: 0;
   transform: translateX(-50%) translateY(-10px);
 }
-.container > div {
+.content-container {
+  max-width: 1320px;
   width: 100%;
 }
 .return-button {

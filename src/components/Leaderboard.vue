@@ -1,544 +1,558 @@
 <template>
   <div
-    class="container d-flex flex-column align-items-center"
+    class="w-100 mx-auto d-flex flex-column align-items-center"
     style="z-index: 1"
   >
-    <hr class="row-divider-no-top" style="width: 100%" />
-    <div
-      v-if="courseCount > 0 || bonusCount > 0"
-      class="category-tabs-container"
-    >
-      <div class="category-tabs">
-        <button
-          v-if="true"
-          v-for="type in ['Map']"
-          :key="type"
-          class="category-tab"
-          :class="{
-            active: selectedTypePill === type,
-            'map-pill': type === 'map',
-          }"
-          @click="
-            selectType(type);
-            goTo('map', null);
-          "
-        >
-          {{ type }}
-        </button>
-        <button
-          v-if="courseCount > 0"
-          v-for="type in ['Course']"
-          :key="type"
-          class="category-tab"
-          :class="{ active: selectedTypePill === type }"
-          @click="selectType(type)"
-        >
-          {{ type }}
-        </button>
-        <button
-          v-if="bonusCount > 0"
-          v-for="type in ['Bonus']"
-          :key="type"
-          class="category-tab"
-          :class="{ active: selectedTypePill === type }"
-          @click="selectType(type)"
-        >
-          {{ type }}
-        </button>
-      </div>
-    </div>
-    <div v-if="selectedTypePill !== 'Map'" class="subcategory-container">
-      <div class="subcategory-pills">
-        <div v-show="selectedTypePill === 'Course' && courseCount > 0">
-          <div class="pill-row">
-            <button
-              v-for="courseIndex in courseCount"
-              :key="'course-' + courseIndex"
-              class="subcategory-pill course-pill"
-              :class="{ active: type === 'course' && index === courseIndex }"
-              @click="goTo('course', courseIndex)"
-            >
-              Course {{ courseIndex }}
-            </button>
-          </div>
-        </div>
-        <div v-show="selectedTypePill === 'Bonus' && bonusCount > 0">
-          <div class="pill-row">
-            <button
-              v-for="bonusIndex in bonusCount"
-              :key="'bonus-' + bonusIndex"
-              class="subcategory-pill bonus-pill"
-              :class="{ active: type === 'bonus' && index === bonusIndex }"
-              @click="goTo('bonus', bonusIndex)"
-            >
-              Bonus {{ bonusIndex }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <hr
-      v-if="courseCount > 0 || bonusCount > 0"
-      class="row-divider"
-      style="width: 100%"
-    />
-    <div class="tables-wrapper justify-content-center">
-      <div class="soldier-table-container" :style="{ order: soldierOrder }">
-        <div class="table-wrapper">
-          <div
-            class="maps-header"
-            style="
-              background: linear-gradient(
-                135deg,
-                rgba(74, 111, 165, 0.3),
-                rgba(37, 55, 82, 0.3)
-              );
+    <div class="content-container">
+      <hr class="row-divider-no-top" style="width: 100%" />
+      <div
+        v-if="courseCount > 0 || bonusCount > 0"
+        class="category-tabs-container"
+      >
+        <div class="category-tabs">
+          <button
+            v-if="true"
+            v-for="type in ['Map']"
+            :key="type"
+            class="category-tab"
+            :class="{
+              active: selectedTypePill === type,
+              'map-pill': type === 'map',
+            }"
+            @click="
+              selectType(type);
+              goTo('map', null);
             "
           >
-            <div class="header-content">
-              <img
-                src="/icons/soldier.png"
-                alt="Soldier Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-type">
-                  {{ selectedType }}
-                  {{ selectedIndex !== null ? selectedIndex : "" }}
-                </p>
-                <p class="header-tier-rating">
-                  T{{ currentSoldierTier }} - R{{ currentSoldierRating }}
-                </p>
-              </div>
-              <div class="group-cutoffs">
-                <div
-                  class="cutoff-box cutoff-g1"
-                  v-if="currentSoldierCutoffs.g1"
-                >
-                  <span class="cutoff-label">G1</span>
-                  <span class="cutoff-value">{{
-                    currentSoldierCutoffs.g1
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g2"
-                  v-if="currentSoldierCutoffs.g2"
-                >
-                  <span class="cutoff-label">G2</span>
-                  <span class="cutoff-value">{{
-                    currentSoldierCutoffs.g2
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g3"
-                  v-if="currentSoldierCutoffs.g3"
-                >
-                  <span class="cutoff-label">G3</span>
-                  <span class="cutoff-value">{{
-                    currentSoldierCutoffs.g3
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g4"
-                  v-if="currentSoldierCutoffs.g4"
-                >
-                  <span class="cutoff-label">G4</span>
-                  <span class="cutoff-value">{{
-                    currentSoldierCutoffs.g4
-                  }}</span>
-                </div>
-              </div>
+            {{ type }}
+          </button>
+          <button
+            v-if="courseCount > 0"
+            v-for="type in ['Course']"
+            :key="type"
+            class="category-tab"
+            :class="{ active: selectedTypePill === type }"
+            @click="selectType(type)"
+          >
+            {{ type }}
+          </button>
+          <button
+            v-if="bonusCount > 0"
+            v-for="type in ['Bonus']"
+            :key="type"
+            class="category-tab"
+            :class="{ active: selectedTypePill === type }"
+            @click="selectType(type)"
+          >
+            {{ type }}
+          </button>
+        </div>
+      </div>
+      <div v-if="selectedTypePill !== 'Map'" class="subcategory-container">
+        <div class="subcategory-pills">
+          <div v-show="selectedTypePill === 'Course' && courseCount > 0">
+            <div class="pill-row">
+              <button
+                v-for="courseIndex in courseCount"
+                :key="'course-' + courseIndex"
+                class="subcategory-pill course-pill"
+                :class="{ active: type === 'course' && index === courseIndex }"
+                @click="goTo('course', courseIndex)"
+              >
+                Course {{ courseIndex }}
+              </button>
             </div>
           </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Duration</th>
-                  <th>Player</th>
-                  <th style="text-align: right">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <LeaderboardSkeleton v-if="loading" />
-                <template v-else>
-                  <tr
-                    v-if="userRecord.soldier && userRecord.soldier.rank > 1"
-                    class="fade-in"
-                    style="border-bottom: 2px solid var(--color-border)"
-                  >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(userRecord.soldier.placement)"
-                    >
-                      <span v-if="userRecord.soldier.rank === 2">🥈</span>
-                      <span v-else-if="userRecord.soldier.rank === 3">🥉</span>
-                      {{ userRecord.soldier.rank }}
-                    </td>
-                    <td class="duration-column">
-                      <a
-                        v-if="userRecord.soldier.demo_id"
-                        :href="`https://tempus2.xyz/demos/${userRecord.soldier.demo_id}`"
-                        target="_blank"
-                        class="demo-link"
-                      >
-                        {{ formatDuration(userRecord.soldier.duration) }}
-                      </a>
-                      <span v-else>{{
-                        formatDuration(userRecord.soldier.duration)
-                      }}</span>
-                    </td>
-                    <SmartLink
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRecord.soldier.id },
-                      }"
-                      class="name-cell align-middle player-name clickable name-column"
-                    >
-                      <div class="name-text">{{ userRecord.soldier.name }}</div>
-                    </SmartLink>
-                    <td
-                      class="date-column"
-                      :title="
-                        new Date(userRecord.soldier.date * 1000)
-                          .toLocaleDateString('en-CA')
-                          .replace(/-/g, '/')
-                      "
-                    >
-                      {{ formatDate(userRecord.soldier.date) }}
-                    </td>
-                  </tr>
-                  <tr v-if="error" class="text-center">
-                    <td colspan="4" class="alert alert-danger">{{ error }}</td>
-                  </tr>
-                  <tr
-                    v-else-if="displayedSoldierEntries.length === 0"
-                    class="text-center"
-                  >
-                    <td colspan="4" style="color: var(--color-text-soft)">
-                      No one has completed this.
-                    </td>
-                  </tr>
-                  <tr
-                    v-else
-                    v-for="(entry, index) in displayedSoldierEntries"
-                    :key="'soldier-' + index"
-                    class="fade-in"
-                    :class="{
-                      'current-user-row': playerId && entry.id === playerId,
-                    }"
-                  >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(entry.placement)"
-                    >
-                      <span v-if="entry.rank === 1">🥇</span>
-                      <span v-else-if="entry.rank === 2">🥈</span>
-                      <span v-else-if="entry.rank === 3">🥉</span>
-                      {{ entry.rank }}
-                    </td>
-                    <td class="duration-column">
-                      <a
-                        v-if="entry.demo_id"
-                        :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
-                        target="_blank"
-                        class="demo-link"
-                      >
-                        {{ formatDuration(entry.duration) }}
-                      </a>
-                      <span v-else>{{ formatDuration(entry.duration) }}</span>
-                    </td>
-                    <SmartLink
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: entry.id },
-                      }"
-                      class="name-cell align-middle player-name clickable name-column"
-                      :class="{
-                        'rank-1-name': entry.rank === 1,
-                        'rank-2-name': entry.rank === 2,
-                        'rank-3-name': entry.rank === 3,
-                      }"
-                    >
-                      <div class="name-text">{{ entry.name }}</div>
-                    </SmartLink>
-                    <td
-                      class="date-column"
-                      :title="
-                        new Date(entry.date * 1000)
-                          .toLocaleDateString('en-CA')
-                          .replace(/-/g, '/')
-                      "
-                    >
-                      {{ formatDate(entry.date) }}
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-          <div v-if="showMoreLoading" class="text-center">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading records...</span>
-            </div>
-          </div>
-          <div v-else class="maps-footer">
-            <div
-              v-if="
-                displayedSoldierEntries.length < selectedSoldierRecords.length
-              "
-              class="show-more-footer"
-            >
-              <div class="load-size-selector">
-                <span class="load-size-label">Load</span>
-                <div class="load-size-toggle">
-                  <button
-                    v-for="size in loadSizeOptions"
-                    :key="'sol-size-' + size"
-                    class="load-size-btn"
-                    :class="{ active: loadSize === size }"
-                    @click="loadSize = size"
-                  >
-                    {{ size }}
-                  </button>
-                </div>
-              </div>
-              <button @click="showMoreSoldierEntries" class="update-button">
-                Show more
+          <div v-show="selectedTypePill === 'Bonus' && bonusCount > 0">
+            <div class="pill-row">
+              <button
+                v-for="bonusIndex in bonusCount"
+                :key="'bonus-' + bonusIndex"
+                class="subcategory-pill bonus-pill"
+                :class="{ active: type === 'bonus' && index === bonusIndex }"
+                @click="goTo('bonus', bonusIndex)"
+              >
+                Bonus {{ bonusIndex }}
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="demoman-table-container" :style="{ order: demomanOrder }">
-        <div class="table-wrapper">
-          <div
-            class="maps-header"
-            style="
-              background: linear-gradient(
-                135deg,
-                rgba(74, 111, 165, 0.3),
-                rgba(37, 55, 82, 0.3)
-              );
-            "
-          >
-            <div class="header-content">
-              <img
-                src="/icons/demoman.png"
-                alt="Demoman Icon"
-                class="class-icon"
-              />
-              <div class="header-text">
-                <p class="header-type">
-                  {{ selectedType }}
-                  {{ selectedIndex !== null ? selectedIndex : "" }}
-                </p>
-                <p class="header-tier-rating">
-                  T{{ currentDemomanTier }} - R{{ currentDemomanRating }}
-                </p>
-              </div>
-              <div class="group-cutoffs">
-                <div
-                  class="cutoff-box cutoff-g1"
-                  v-if="currentDemomanCutoffs.g1"
-                >
-                  <span class="cutoff-label">G1</span>
-                  <span class="cutoff-value">{{
-                    currentDemomanCutoffs.g1
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g2"
-                  v-if="currentDemomanCutoffs.g2"
-                >
-                  <span class="cutoff-label">G2</span>
-                  <span class="cutoff-value">{{
-                    currentDemomanCutoffs.g2
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g3"
-                  v-if="currentDemomanCutoffs.g3"
-                >
-                  <span class="cutoff-label">G3</span>
-                  <span class="cutoff-value">{{
-                    currentDemomanCutoffs.g3
-                  }}</span>
-                </div>
-                <div
-                  class="cutoff-box cutoff-g4"
-                  v-if="currentDemomanCutoffs.g4"
-                >
-                  <span class="cutoff-label">G4</span>
-                  <span class="cutoff-value">{{
-                    currentDemomanCutoffs.g4
-                  }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-dark">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Duration</th>
-                  <th>Player</th>
-                  <th style="text-align: right">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <LeaderboardSkeleton v-if="loading" />
-                <template v-else>
-                  <tr
-                    v-if="userRecord.demoman && userRecord.demoman.rank > 1"
-                    class="fade-in"
-                    style="border-bottom: 2px solid var(--color-border)"
-                  >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(userRecord.demoman.placement)"
-                    >
-                      <span v-if="userRecord.demoman.rank === 2">🥈</span>
-                      <span v-else-if="userRecord.demoman.rank === 3">🥉</span>
-                      {{ userRecord.demoman.rank }}
-                    </td>
-                    <td class="duration-column">
-                      <a
-                        v-if="userRecord.demoman.demo_id"
-                        :href="`https://tempus2.xyz/demos/${userRecord.demoman.demo_id}`"
-                        target="_blank"
-                        class="demo-link"
-                      >
-                        {{ formatDuration(userRecord.demoman.duration) }}
-                      </a>
-                      <span v-else>{{
-                        formatDuration(userRecord.demoman.duration)
-                      }}</span>
-                    </td>
-                    <SmartLink
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: userRecord.demoman.id },
-                      }"
-                      class="name-cell align-middle player-name clickable name-column"
-                    >
-                      <div class="name-text">{{ userRecord.demoman.name }}</div>
-                    </SmartLink>
-                    <td
-                      class="date-column"
-                      :title="
-                        new Date(userRecord.demoman.date * 1000)
-                          .toLocaleDateString('en-CA')
-                          .replace(/-/g, '/')
-                      "
-                    >
-                      {{ formatDate(userRecord.demoman.date) }}
-                    </td>
-                  </tr>
-                  <tr v-if="error" class="text-center">
-                    <td colspan="4" class="alert alert-danger">{{ error }}</td>
-                  </tr>
-                  <tr
-                    v-else-if="displayedDemomanEntries.length === 0"
-                    class="text-center"
-                  >
-                    <td colspan="4" style="color: var(--color-text-soft)">
-                      No one has completed this.
-                    </td>
-                  </tr>
-                  <tr
-                    v-else
-                    v-for="(entry, index) in displayedDemomanEntries"
-                    :key="'demoman-' + index"
-                    class="fade-in"
-                    :class="{
-                      'current-user-row': playerId && entry.id === playerId,
-                    }"
-                  >
-                    <td
-                      class="rank-column"
-                      :class="getPlacementClass(entry.placement)"
-                    >
-                      <span v-if="entry.rank === 1">🥇</span>
-                      <span v-else-if="entry.rank === 2">🥈</span>
-                      <span v-else-if="entry.rank === 3">🥉</span>
-                      {{ entry.rank }}
-                    </td>
-                    <td class="duration-column">
-                      <a
-                        v-if="entry.demo_id"
-                        :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
-                        target="_blank"
-                        class="demo-link"
-                      >
-                        {{ formatDuration(entry.duration) }}
-                      </a>
-                      <span v-else>{{ formatDuration(entry.duration) }}</span>
-                    </td>
-                    <SmartLink
-                      tag="td"
-                      :to="{
-                        name: 'PlayerPage',
-                        params: { playerId: entry.id },
-                      }"
-                      class="name-cell align-middle player-name clickable name-column"
-                      :class="{
-                        'rank-1-name': entry.rank === 1,
-                        'rank-2-name': entry.rank === 2,
-                        'rank-3-name': entry.rank === 3,
-                      }"
-                    >
-                      <div class="name-text">{{ entry.name }}</div>
-                    </SmartLink>
-                    <td
-                      class="date-column"
-                      :title="
-                        new Date(entry.date * 1000)
-                          .toLocaleDateString('en-CA')
-                          .replace(/-/g, '/')
-                      "
-                    >
-                      {{ formatDate(entry.date) }}
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-          <div v-if="showMoreLoading" class="text-center">
-            <div class="spinner-border text-light" role="status">
-              <span class="visually-hidden">Loading records...</span>
-            </div>
-          </div>
-          <div v-else class="maps-footer">
+      <hr
+        v-if="courseCount > 0 || bonusCount > 0"
+        class="row-divider"
+        style="width: 100%"
+      />
+      <div class="tables-wrapper justify-content-center">
+        <div class="soldier-table-container" :style="{ order: soldierOrder }">
+          <div class="table-wrapper">
             <div
-              v-if="
-                displayedDemomanEntries.length < selectedDemomanRecords.length
+              class="maps-header"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(74, 111, 165, 0.3),
+                  rgba(37, 55, 82, 0.3)
+                );
               "
-              class="show-more-footer"
             >
-              <div class="load-size-selector">
-                <span class="load-size-label">Load</span>
-                <div class="load-size-toggle">
-                  <button
-                    v-for="size in loadSizeOptions"
-                    :key="'dem-size-' + size"
-                    class="load-size-btn"
-                    :class="{ active: loadSize === size }"
-                    @click="loadSize = size"
+              <div class="header-content">
+                <img
+                  src="/icons/soldier.png"
+                  alt="Soldier Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-type">
+                    {{ selectedType }}
+                    {{ selectedIndex !== null ? selectedIndex : "" }}
+                  </p>
+                  <p class="header-tier-rating">
+                    T{{ currentSoldierTier }} - R{{ currentSoldierRating }}
+                  </p>
+                </div>
+                <div class="group-cutoffs">
+                  <div
+                    class="cutoff-box cutoff-g1"
+                    v-if="currentSoldierCutoffs.g1"
                   >
-                    {{ size }}
-                  </button>
+                    <span class="cutoff-label">G1</span>
+                    <span class="cutoff-value">{{
+                      currentSoldierCutoffs.g1
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g2"
+                    v-if="currentSoldierCutoffs.g2"
+                  >
+                    <span class="cutoff-label">G2</span>
+                    <span class="cutoff-value">{{
+                      currentSoldierCutoffs.g2
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g3"
+                    v-if="currentSoldierCutoffs.g3"
+                  >
+                    <span class="cutoff-label">G3</span>
+                    <span class="cutoff-value">{{
+                      currentSoldierCutoffs.g3
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g4"
+                    v-if="currentSoldierCutoffs.g4"
+                  >
+                    <span class="cutoff-label">G4</span>
+                    <span class="cutoff-value">{{
+                      currentSoldierCutoffs.g4
+                    }}</span>
+                  </div>
                 </div>
               </div>
-              <button @click="showMoreDemomanEntries" class="update-button">
-                Show more
-              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Duration</th>
+                    <th>Player</th>
+                    <th style="text-align: right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <LeaderboardSkeleton v-if="loading" />
+                  <template v-else>
+                    <tr
+                      v-if="userRecord.soldier && userRecord.soldier.rank > 1"
+                      class="fade-in"
+                      style="border-bottom: 2px solid var(--color-border)"
+                    >
+                      <td
+                        class="rank-column"
+                        :class="getPlacementClass(userRecord.soldier.placement)"
+                      >
+                        <span v-if="userRecord.soldier.rank === 2">🥈</span>
+                        <span v-else-if="userRecord.soldier.rank === 3"
+                          >🥉</span
+                        >
+                        {{ userRecord.soldier.rank }}
+                      </td>
+                      <td class="duration-column">
+                        <a
+                          v-if="userRecord.soldier.demo_id"
+                          :href="`https://tempus2.xyz/demos/${userRecord.soldier.demo_id}`"
+                          target="_blank"
+                          class="demo-link"
+                        >
+                          {{ formatDuration(userRecord.soldier.duration) }}
+                        </a>
+                        <span v-else>{{
+                          formatDuration(userRecord.soldier.duration)
+                        }}</span>
+                      </td>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRecord.soldier.id },
+                        }"
+                        class="name-cell align-middle player-name clickable name-column"
+                      >
+                        <div class="name-text">
+                          {{ userRecord.soldier.name }}
+                        </div>
+                      </SmartLink>
+                      <td
+                        class="date-column"
+                        :title="
+                          new Date(userRecord.soldier.date * 1000)
+                            .toLocaleDateString('en-CA')
+                            .replace(/-/g, '/')
+                        "
+                      >
+                        {{ formatDate(userRecord.soldier.date) }}
+                      </td>
+                    </tr>
+                    <tr v-if="error" class="text-center">
+                      <td colspan="4" class="alert alert-danger">
+                        {{ error }}
+                      </td>
+                    </tr>
+                    <tr
+                      v-else-if="displayedSoldierEntries.length === 0"
+                      class="text-center"
+                    >
+                      <td colspan="4" style="color: var(--color-text-soft)">
+                        No one has completed this.
+                      </td>
+                    </tr>
+                    <tr
+                      v-else
+                      v-for="(entry, index) in displayedSoldierEntries"
+                      :key="'soldier-' + index"
+                      class="fade-in"
+                      :class="{
+                        'current-user-row': playerId && entry.id === playerId,
+                      }"
+                    >
+                      <td
+                        class="rank-column"
+                        :class="getPlacementClass(entry.placement)"
+                      >
+                        <span v-if="entry.rank === 1">🥇</span>
+                        <span v-else-if="entry.rank === 2">🥈</span>
+                        <span v-else-if="entry.rank === 3">🥉</span>
+                        {{ entry.rank }}
+                      </td>
+                      <td class="duration-column">
+                        <a
+                          v-if="entry.demo_id"
+                          :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                          target="_blank"
+                          class="demo-link"
+                        >
+                          {{ formatDuration(entry.duration) }}
+                        </a>
+                        <span v-else>{{ formatDuration(entry.duration) }}</span>
+                      </td>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: entry.id },
+                        }"
+                        class="name-cell align-middle player-name clickable name-column"
+                        :class="{
+                          'rank-1-name': entry.rank === 1,
+                          'rank-2-name': entry.rank === 2,
+                          'rank-3-name': entry.rank === 3,
+                        }"
+                      >
+                        <div class="name-text">{{ entry.name }}</div>
+                      </SmartLink>
+                      <td
+                        class="date-column"
+                        :title="
+                          new Date(entry.date * 1000)
+                            .toLocaleDateString('en-CA')
+                            .replace(/-/g, '/')
+                        "
+                      >
+                        {{ formatDate(entry.date) }}
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="showMoreLoading" class="text-center">
+              <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading records...</span>
+              </div>
+            </div>
+            <div v-else class="maps-footer">
+              <div
+                v-if="
+                  displayedSoldierEntries.length < selectedSoldierRecords.length
+                "
+                class="show-more-footer"
+              >
+                <div class="load-size-selector">
+                  <span class="load-size-label">Load</span>
+                  <div class="load-size-toggle">
+                    <button
+                      v-for="size in loadSizeOptions"
+                      :key="'sol-size-' + size"
+                      class="load-size-btn"
+                      :class="{ active: loadSize === size }"
+                      @click="loadSize = size"
+                    >
+                      {{ size }}
+                    </button>
+                  </div>
+                </div>
+                <button @click="showMoreSoldierEntries" class="update-button">
+                  Show more
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demoman-table-container" :style="{ order: demomanOrder }">
+          <div class="table-wrapper">
+            <div
+              class="maps-header"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(74, 111, 165, 0.3),
+                  rgba(37, 55, 82, 0.3)
+                );
+              "
+            >
+              <div class="header-content">
+                <img
+                  src="/icons/demoman.png"
+                  alt="Demoman Icon"
+                  class="class-icon"
+                />
+                <div class="header-text">
+                  <p class="header-type">
+                    {{ selectedType }}
+                    {{ selectedIndex !== null ? selectedIndex : "" }}
+                  </p>
+                  <p class="header-tier-rating">
+                    T{{ currentDemomanTier }} - R{{ currentDemomanRating }}
+                  </p>
+                </div>
+                <div class="group-cutoffs">
+                  <div
+                    class="cutoff-box cutoff-g1"
+                    v-if="currentDemomanCutoffs.g1"
+                  >
+                    <span class="cutoff-label">G1</span>
+                    <span class="cutoff-value">{{
+                      currentDemomanCutoffs.g1
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g2"
+                    v-if="currentDemomanCutoffs.g2"
+                  >
+                    <span class="cutoff-label">G2</span>
+                    <span class="cutoff-value">{{
+                      currentDemomanCutoffs.g2
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g3"
+                    v-if="currentDemomanCutoffs.g3"
+                  >
+                    <span class="cutoff-label">G3</span>
+                    <span class="cutoff-value">{{
+                      currentDemomanCutoffs.g3
+                    }}</span>
+                  </div>
+                  <div
+                    class="cutoff-box cutoff-g4"
+                    v-if="currentDemomanCutoffs.g4"
+                  >
+                    <span class="cutoff-label">G4</span>
+                    <span class="cutoff-value">{{
+                      currentDemomanCutoffs.g4
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Duration</th>
+                    <th>Player</th>
+                    <th style="text-align: right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <LeaderboardSkeleton v-if="loading" />
+                  <template v-else>
+                    <tr
+                      v-if="userRecord.demoman && userRecord.demoman.rank > 1"
+                      class="fade-in"
+                      style="border-bottom: 2px solid var(--color-border)"
+                    >
+                      <td
+                        class="rank-column"
+                        :class="getPlacementClass(userRecord.demoman.placement)"
+                      >
+                        <span v-if="userRecord.demoman.rank === 2">🥈</span>
+                        <span v-else-if="userRecord.demoman.rank === 3"
+                          >🥉</span
+                        >
+                        {{ userRecord.demoman.rank }}
+                      </td>
+                      <td class="duration-column">
+                        <a
+                          v-if="userRecord.demoman.demo_id"
+                          :href="`https://tempus2.xyz/demos/${userRecord.demoman.demo_id}`"
+                          target="_blank"
+                          class="demo-link"
+                        >
+                          {{ formatDuration(userRecord.demoman.duration) }}
+                        </a>
+                        <span v-else>{{
+                          formatDuration(userRecord.demoman.duration)
+                        }}</span>
+                      </td>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: userRecord.demoman.id },
+                        }"
+                        class="name-cell align-middle player-name clickable name-column"
+                      >
+                        <div class="name-text">
+                          {{ userRecord.demoman.name }}
+                        </div>
+                      </SmartLink>
+                      <td
+                        class="date-column"
+                        :title="
+                          new Date(userRecord.demoman.date * 1000)
+                            .toLocaleDateString('en-CA')
+                            .replace(/-/g, '/')
+                        "
+                      >
+                        {{ formatDate(userRecord.demoman.date) }}
+                      </td>
+                    </tr>
+                    <tr v-if="error" class="text-center">
+                      <td colspan="4" class="alert alert-danger">
+                        {{ error }}
+                      </td>
+                    </tr>
+                    <tr
+                      v-else-if="displayedDemomanEntries.length === 0"
+                      class="text-center"
+                    >
+                      <td colspan="4" style="color: var(--color-text-soft)">
+                        No one has completed this.
+                      </td>
+                    </tr>
+                    <tr
+                      v-else
+                      v-for="(entry, index) in displayedDemomanEntries"
+                      :key="'demoman-' + index"
+                      class="fade-in"
+                      :class="{
+                        'current-user-row': playerId && entry.id === playerId,
+                      }"
+                    >
+                      <td
+                        class="rank-column"
+                        :class="getPlacementClass(entry.placement)"
+                      >
+                        <span v-if="entry.rank === 1">🥇</span>
+                        <span v-else-if="entry.rank === 2">🥈</span>
+                        <span v-else-if="entry.rank === 3">🥉</span>
+                        {{ entry.rank }}
+                      </td>
+                      <td class="duration-column">
+                        <a
+                          v-if="entry.demo_id"
+                          :href="`https://tempus2.xyz/demos/${entry.demo_id}`"
+                          target="_blank"
+                          class="demo-link"
+                        >
+                          {{ formatDuration(entry.duration) }}
+                        </a>
+                        <span v-else>{{ formatDuration(entry.duration) }}</span>
+                      </td>
+                      <SmartLink
+                        tag="td"
+                        :to="{
+                          name: 'PlayerPage',
+                          params: { playerId: entry.id },
+                        }"
+                        class="name-cell align-middle player-name clickable name-column"
+                        :class="{
+                          'rank-1-name': entry.rank === 1,
+                          'rank-2-name': entry.rank === 2,
+                          'rank-3-name': entry.rank === 3,
+                        }"
+                      >
+                        <div class="name-text">{{ entry.name }}</div>
+                      </SmartLink>
+                      <td
+                        class="date-column"
+                        :title="
+                          new Date(entry.date * 1000)
+                            .toLocaleDateString('en-CA')
+                            .replace(/-/g, '/')
+                        "
+                      >
+                        {{ formatDate(entry.date) }}
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="showMoreLoading" class="text-center">
+              <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading records...</span>
+              </div>
+            </div>
+            <div v-else class="maps-footer">
+              <div
+                v-if="
+                  displayedDemomanEntries.length < selectedDemomanRecords.length
+                "
+                class="show-more-footer"
+              >
+                <div class="load-size-selector">
+                  <span class="load-size-label">Load</span>
+                  <div class="load-size-toggle">
+                    <button
+                      v-for="size in loadSizeOptions"
+                      :key="'dem-size-' + size"
+                      class="load-size-btn"
+                      :class="{ active: loadSize === size }"
+                      @click="loadSize = size"
+                    >
+                      {{ size }}
+                    </button>
+                  </div>
+                </div>
+                <button @click="showMoreDemomanEntries" class="update-button">
+                  Show more
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -613,7 +627,6 @@ export default {
       error: null,
       playerId: null,
       userRecord: { soldier: null, demoman: null },
-      // Load size selector
       loadSize: 50,
       loadSizeOptions: [50, 100, 200],
     };
@@ -1019,6 +1032,10 @@ export default {
 </script>
 
 <style scoped>
+.content-container {
+  max-width: 1320px;
+  width: 100%;
+}
 .align-items-center {
   padding: 0;
 }
@@ -1305,7 +1322,7 @@ export default {
   color: var(--color-text-soft);
   font-size: 12px;
   font-weight: 600;
-  padding: 3px 9px;
+  padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -1323,7 +1340,6 @@ export default {
   color: #fff;
   box-shadow: 0 1px 6px rgba(74, 111, 165, 0.45);
 }
-/* ── end load-size ── */
 .update-button {
   flex: 1;
   display: block;
@@ -1490,9 +1506,22 @@ export default {
   .load-size-label {
     display: none;
   }
+  .load-size-toggle {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
   .load-size-btn {
     font-size: 11px;
-    padding: 3px 6px;
+    padding: 4px 8px;
+    min-height: 36px;
+    min-width: 36px;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 10;
+  }
+  .show-more-footer {
+    overflow: visible;
+    min-height: auto;
   }
 }
 .category-container {

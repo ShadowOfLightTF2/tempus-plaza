@@ -13,7 +13,7 @@
             Support Tempus Plaza
           </h1>
         </div>
-        <hr class="row-divider" style="width: 75%" />
+        <hr class="row-divider" style="width: 100%" />
         <div class="donation-section">
           <div class="donation-panel">
             <div class="donation-header">

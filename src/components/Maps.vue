@@ -176,7 +176,7 @@
             Explore and filter maps, courses, and bonuses
           </p>
         </div>
-        <hr class="divider" style="width: 75%" />
+        <hr class="divider" style="width: 100%" />
         <div class="filter-section">
           <div class="filter-content">
             <div
@@ -413,7 +413,7 @@
             </div>
           </div>
         </div>
-        <hr class="divider" style="width: 75%" />
+        <hr class="divider" style="width: 100%" />
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
         <div v-else class="table-container">
           <div class="table-header-section">

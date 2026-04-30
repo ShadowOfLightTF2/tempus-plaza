@@ -48,17 +48,17 @@ const routes = [
     }),
   },
   {
-    path: '/players/:category?/:item?',
-    name: 'Players',
-    component: Players,
-    meta: { title: 'Top Tempus Players | Tempus Plaza' },
-  },
-  {
     path: '/lookup/player/:playerId',
     name: 'LookupPlayer',
     component: Lookup,
     meta: { title: 'Tempus Player Records | Tempus Plaza' },
     props: route => ({ playerId: Number(route.params.playerId) })
+  },
+  {
+    path: '/players/:category?/:item?',
+    name: 'Players',
+    component: Players,
+    meta: { title: 'Top Tempus Players | Tempus Plaza' },
   },
   {
     path: '/lookup/map/:mapId',
@@ -123,6 +123,14 @@ const router = createRouter({
 
 router.afterEach((to) => {
   document.title = to.meta?.title ?? 'Tempus Plaza'
+
+  let canonical = document.querySelector("link[rel='canonical']");
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute('href', `https://tempusplaza.com${to.path}`);
 });
 
 export default router;

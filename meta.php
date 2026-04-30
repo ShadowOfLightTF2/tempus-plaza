@@ -234,6 +234,7 @@ function getPlayerMeta(int $playerId): array {
     $apiUrl = API_BASE_URL . '/players/' . $playerId;
     $data = fetchApi($apiUrl);
 
+    $notFound = ($data === null || empty($data[0]));
     $ranksUrl = API_BASE_URL . '/players/' . $playerId . '/ranks';
     $ranks = fetchApi($ranksUrl);
 

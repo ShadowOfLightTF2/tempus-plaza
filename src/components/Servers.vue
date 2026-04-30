@@ -2,10 +2,7 @@
   <div
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
-    <div
-      class="container mx-auto py-4 d-flex flex-column align-items-center"
-      style="z-index: 1"
-    >
+    <div class="w-95 mx-auto py-4 d-flex flex-column align-items-center">
       <div class="content-container" style="z-index: 1">
         <div class="page-header">
           <h1 class="page-title">
@@ -329,33 +326,50 @@
                         </td>
                         <SmartLink
                           tag="td"
-                          :to="{
-                            name: 'MapPage',
-                            params: { mapId: server.map_id },
-                          }"
-                          class="map-cell align-middle map-name clickable"
-                          style="color: var(--color-text-clickable)"
+                          :to="
+                            server.hostname !== null
+                              ? {
+                                  name: 'MapPage',
+                                  params: { mapId: server.map_id },
+                                }
+                              : null
+                          "
+                          class="map-cell align-middle"
+                          :class="
+                            server.hostname !== null ? 'map-name clickable' : ''
+                          "
+                          :style="
+                            server.hostname !== null
+                              ? 'color: var(--color-text-clickable)'
+                              : ''
+                          "
                           @click.stop
                         >
-                          <HoverPreview :map-name="server.currentMap">
-                            {{ server.currentMap }}
-                          </HoverPreview>
+                          <template v-if="server.hostname !== null">
+                            <HoverPreview :map-name="server.currentMap">
+                              {{ server.currentMap }}
+                            </HoverPreview>
+                          </template>
+                          <span v-else class="server-offline">—</span>
                         </SmartLink>
                         <td class="align-middle">
                           <div class="player-info">
-                            <span v-if="server.hostname !== null">
-                              {{ server.playerCount }}/{{ server.maxPlayers }}
-                            </span>
-                            <div
-                              v-if="server.hostname !== null"
-                              class="server-status"
-                              :class="
-                                getServerStatusClass(
-                                  server.playerCount,
-                                  server.maxPlayers,
-                                )
-                              "
-                            ></div>
+                            <template v-if="server.hostname !== null">
+                              <span
+                                >{{ server.playerCount }}/{{
+                                  server.maxPlayers
+                                }}</span
+                              >
+                              <div
+                                class="server-status"
+                                :class="
+                                  getServerStatusClass(
+                                    server.playerCount,
+                                    server.maxPlayers,
+                                  )
+                                "
+                              ></div>
+                            </template>
                             <span v-else class="server-offline">Offline</span>
                           </div>
                         </td>

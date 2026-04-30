@@ -3,7 +3,7 @@
     class="position-relative min-vh-100 w-100 overflow-hidden background-container"
   >
     <div
-      class="container mx-auto py-4 d-flex flex-column align-items-center position-relative"
+      class="w-95 mx-auto py-4 d-flex flex-column align-items-center position-relative"
       style="z-index: 1"
     >
       <div class="content-container">
