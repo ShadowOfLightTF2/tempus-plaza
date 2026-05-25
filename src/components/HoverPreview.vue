@@ -181,6 +181,13 @@ export default {
       this.imageLoading = false;
     },
   },
+  watch: {
+    mapName() {
+      this.metadata = null;
+      this.metadataError = false;
+      this.metadataFetchAttempted = false;
+    },
+  },
 };
 </script>
 

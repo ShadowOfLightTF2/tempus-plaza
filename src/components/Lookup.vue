@@ -1224,7 +1224,7 @@ export default {
       if (newMapId) this.fetchMapRecords();
     },
     selectedGroups: {
-      handler() {
+      handler(newVal, oldVal) {
         const placements = [];
         this.selectedGroups.forEach((group) => {
           if (group === "WR") placements.push(1);

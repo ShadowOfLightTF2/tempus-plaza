@@ -446,14 +446,18 @@ export default {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 .search-box.is-focused,
 .search-box:hover {
   border-color: rgba(102, 126, 234, 0.6);
   background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15),
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.15),
     0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -508,17 +512,22 @@ export default {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.04);
   overflow: hidden;
   z-index: 1000;
 }
 
 .dropdown-enter-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .dropdown-leave-active {
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transition:
+    opacity 0.1s ease,
+    transform 0.1s ease;
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

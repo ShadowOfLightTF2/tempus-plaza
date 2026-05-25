@@ -146,13 +146,12 @@ export default {
   name: "ActivitySkeleton",
   data() {
     return {
-      isMinMode:
-        window.innerWidth <= 992
-          ? true
-          : localStorage.getItem("activityMinMode") === "true",
+      isMinMode: false,
     };
   },
   mounted() {
+    const mobile = window.innerWidth <= 992
+    this.isMinMode = mobile ? true : localStorage.getItem("activityMinMode") === "true"
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
   },

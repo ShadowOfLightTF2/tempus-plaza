@@ -216,12 +216,9 @@ export default {
       topTimesData: [],
       group1sData: [],
       loading: false,
-      isMobile: window.innerWidth <= 992,
-      manualMinMode: localStorage.getItem("activityMinMode") === "true",
-      minMode:
-        window.innerWidth <= 992
-          ? true
-          : localStorage.getItem("activityMinMode") === "true",
+      isMobile: false,
+      manualMinMode: false,
+      minMode: false,
       filterOptions: {
         selectedClasses: [],
         selectedTypes: [],
@@ -259,6 +256,9 @@ export default {
     if (view) this.currentView = view;
   },
   mounted() {
+    this.isMobile = window.innerWidth <= 992;
+    this.manualMinMode = localStorage.getItem("activityMinMode") === "true";
+    this.minMode = this.isMobile ? true : this.manualMinMode;
     this.startUpdateTimer();
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);

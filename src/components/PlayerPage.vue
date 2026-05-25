@@ -90,6 +90,8 @@
                 :changed-placements="changedPlacements"
                 :loading="loading"
                 :next-update-countdown="nextUpdateCountdown"
+                @load-more="fetchRecentRecords"
+                @load-more-placements="fetchChangedPlacements"
               />
             </div>
             <div class="col-12 col-md-3 order-3">
@@ -112,7 +114,7 @@
               </div>
             </div>
           </div>
-          <div v-if="isCurrentUser || hasFavoriteMaps" class="row g-3 mt-3">
+          <div v-if="isCurrentUser || hasFavoriteMaps" class="row g-3 mt-1">
             <div class="col-12">
               <div class="map-section">
                 <div class="map-container">
@@ -132,7 +134,7 @@
               </div>
             </div>
           </div>
-          <div v-show="hasRotwVideos" class="row g-3 mt-2">
+          <div v-show="hasRotwVideos" class="row g-3 mt-1">
             <div class="col-12">
               <RotwVideos
                 :player-id="playerId"
@@ -140,7 +142,7 @@
               />
             </div>
           </div>
-          <div v-show="hasAuthoredMaps" class="row g-3 mt-2">
+          <div v-show="hasAuthoredMaps" class="row g-3 mt-1">
             <div class="col-12">
               <AuthoredMaps
                 :player-id="playerId"
@@ -211,6 +213,10 @@ export default {
     AuthoredMaps,
   },
   data: () => ({
+    recentRecordsOffset: 0,
+    recentRecordsLoading: false,
+    changedPlacementsOffset: 0,
+    changedPlacementsLoading: false,
     hasRotwVideos: false,
     hasAuthoredMaps: false,
     toast: {
@@ -546,6 +552,10 @@ export default {
       }, 1000);
     },
     async loadPlayerPageData(playerId) {
+      this.records.recentRecords = [];
+      this.recentRecordsOffset = 0;
+      this.changedPlacements = [];
+      this.changedPlacementsOffset = 0;
       try {
         fetch(
           `https://api.tempusplaza.com/players/${playerId}/update-player-last-seen`,
@@ -561,10 +571,10 @@ export default {
           this.fetchPlayerData(playerId),
           this.fetchUserData(playerId),
           this.fetchPlayerRanks(playerId),
-          this.fetchRecentRecords(playerId),
+          this.fetchRecentRecords(),
           this.fetchPlayerPoints(playerId),
           this.fetchFavoriteMaps(playerId),
-          this.fetchChangedPlacements(playerId),
+          this.fetchChangedPlacements(),
         ]);
         await this.fetchPlayerStats(playerId);
         await this.fetchSharedTimes(playerId);
@@ -572,14 +582,21 @@ export default {
         console.error("Error loading player page data:", error);
       }
     },
-    async fetchChangedPlacements(playerId) {
-      this.loading["Lost placements"] = true;
+    async fetchChangedPlacements(reset = false) {
+      if (this.changedPlacementsLoading) return;
+      this.changedPlacementsLoading = true;
+
+      if (reset || this.changedPlacements.length === 0) {
+        this.loading["Lost placements"] = true;
+      }
+
       try {
         const response = await fetch(
-          `${API_BASE_URL}/players/${playerId}/lost-records`,
+          `${API_BASE_URL}/players/${this.playerId}/lost-records?offset=${this.changedPlacementsOffset}`,
         );
         const data = await response.json();
-        this.changedPlacements = data.map((p) => {
+
+        const processed = data.map((p) => {
           const old_rank = p.old_placement;
           const new_rank = p.new_placement;
           const points_change = p.points_change;
@@ -600,9 +617,7 @@ export default {
             oldRankDisplay: isNewCompletion
               ? "New"
               : `${this.getMedal(old_rank)}${this.formatRankDisplay(old_rank)}`,
-            newRankDisplay: `${this.getMedal(new_rank)}${this.formatRankDisplay(
-              new_rank,
-            )}`,
+            newRankDisplay: `${this.getMedal(new_rank)}${this.formatRankDisplay(new_rank)}`,
             oldRankClass: isNewCompletion
               ? ""
               : this.getPlacementClass(old_rank),
@@ -612,9 +627,13 @@ export default {
             formattedDate: this.formatDate(date),
           };
         });
+
+        this.changedPlacements = [...this.changedPlacements, ...processed];
+        this.changedPlacementsOffset += data.length;
       } catch (error) {
         console.error("Error fetching lost placements:", error);
       } finally {
+        this.changedPlacementsLoading = false;
         this.loading["Lost placements"] = false;
       }
     },
@@ -1100,33 +1119,53 @@ export default {
         this.loading.ranks = false;
       }
     },
-    async fetchRecentRecords(playerId) {
+    async fetchRecentRecords(reset = false) {
+      if (this.recentRecordsLoading) return;
+      this.recentRecordsLoading = true;
+
+      if (reset || this.records.recentRecords.length === 0) {
+        this.loading["Latest runs"] = true;
+      }
+
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/recent-records`,
+        const response = await fetch(
+          `${API_BASE_URL}/players/${this.playerId}/recent-records?offset=${this.recentRecordsOffset}`,
         );
-        this.records.recentRecords = response.data.map((r) => {
+        const data = await response.json();
+
+        const processed = data.map((record) => {
           const hasDurationImprovement =
-            r.old_duration != null && r.old_duration > r.duration;
+            record.old_duration != null &&
+            record.old_duration > record.duration;
+          const durationDelta = hasDurationImprovement
+            ? record.old_duration - record.duration
+            : null;
           return {
-            ...r,
-            durationFormatted: this.formatDuration(r.duration),
-            rankClass:
-              r.rank >= 1 && r.rank <= 3 ? this.getPlacementClass(r.rank) : "",
-            placementClass: this.getPlacementClass(r.placement),
-            medal: this.getMedal(r.rank),
-            formattedDate: this.formatDate(r.date),
+            ...record,
+            durationFormatted: formatDuration(record.duration),
             hasDurationImprovement,
             durationDeltaText: hasDurationImprovement
-              ? `-${this.formatDuration(r.old_duration - r.duration)}`
+              ? `-${formatDuration(durationDelta)}`
               : null,
+            rankClass:
+              record.rank >= 1 && record.rank <= 3
+                ? this.getPlacementClass(record.rank)
+                : "",
+            placementClass: this.getPlacementClass(record.placement),
+            medal: this.getMedal(record.rank),
+            formattedDate: formatDate(record.date),
           };
         });
+
+        this.records.recentRecords = [
+          ...this.records.recentRecords,
+          ...processed,
+        ];
+        this.recentRecordsOffset += data.length;
       } catch (error) {
-        this.error =
-          "Failed to fetch player recent records. Please try again later.";
         console.error("Error fetching recent records:", error);
       } finally {
+        this.recentRecordsLoading = false;
         this.loading["Latest runs"] = false;
       }
     },
@@ -1405,7 +1444,9 @@ export default {
 }
 .toast-fade-enter-active,
 .toast-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 .toast-fade-enter-from,
 .toast-fade-leave-to {
@@ -1445,7 +1486,6 @@ export default {
   padding: 10px;
 }
 .map-section {
-  padding: 15px 0;
   display: flex;
   justify-content: center;
 }

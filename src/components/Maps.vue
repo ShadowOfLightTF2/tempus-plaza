@@ -354,7 +354,15 @@
                 <i class="bi bi-tags me-1"></i>Tags
               </button>
 
-              <button @click="clearAllFilters" class="filter-btn">Clear</button>
+              <button
+                @click="
+                  clearAllFilters();
+                  searchQuery = '';
+                "
+                class="filter-btn"
+              >
+                Clear
+              </button>
 
               <span class="filter-count">
                 {{ filteredAndSortedItems.length }}/{{ currentItems.length }}
@@ -751,6 +759,7 @@ export default {
       pickerComplete: false,
       eliminatingRowId: null,
       shouldContinuePicker: true,
+      shuffledPickerOrder: [],
       searchQuery: "",
       showSoldierColumns: true,
       showDemomanColumns: true,
@@ -849,9 +858,20 @@ export default {
           const n = name.toLowerCase();
           if (n === query) return 0;
           if (n.startsWith(query)) return 1;
-          const underscoreIdx = n.indexOf("_" + query);
-          if (underscoreIdx !== -1) return 2;
-          if (n.includes(query)) return 3;
+
+          const segments = n.split("_");
+
+          // Exact segment match — score based on position (earlier = better)
+          const segmentIdx = segments.indexOf(query);
+          if (segmentIdx !== -1) return 2 + segmentIdx * 0.01;
+
+          // Segment starts with query — score based on position
+          const segmentStartIdx = segments.findIndex((s) =>
+            s.startsWith(query),
+          );
+          if (segmentStartIdx !== -1) return 3 + segmentStartIdx * 0.01;
+
+          if (n.includes(query)) return 4;
           return 99;
         };
 
@@ -1195,8 +1215,8 @@ export default {
                   map.intended_class === 3
                     ? "soldier"
                     : map.intended_class === 4
-                    ? "demoman"
-                    : "soldier",
+                      ? "demoman"
+                      : "soldier",
                 tags: map.tags || [],
               };
             } catch (error) {
@@ -1207,8 +1227,8 @@ export default {
                   map.intended_class === 3
                     ? "soldier"
                     : map.intended_class === 4
-                    ? "demoman"
-                    : "soldier",
+                      ? "demoman"
+                      : "soldier",
                 tags: [],
               };
             }
@@ -1234,8 +1254,8 @@ export default {
             map.intended_class === 3
               ? "soldier"
               : map.intended_class === 4
-              ? "demoman"
-              : "soldier",
+                ? "demoman"
+                : "soldier",
         }));
       } catch (error) {
         this.error = "Error fetching courses data.";
@@ -1255,8 +1275,8 @@ export default {
             map.intended_class === 3
               ? "soldier"
               : map.intended_class === 4
-              ? "demoman"
-              : "soldier",
+                ? "demoman"
+                : "soldier",
         }));
       } catch (error) {
         this.error = "Error fetching bonuses data.";
@@ -1518,7 +1538,9 @@ export default {
   animation: eliminate 0.8s ease-in-out;
   background: linear-gradient(90deg, #ff4757, #ff6b6b, #ff4757);
   background-size: 200% 100%;
-  animation: eliminate 0.8s ease-in-out, shimmer 0.8s ease-in-out;
+  animation:
+    eliminate 0.8s ease-in-out,
+    shimmer 0.8s ease-in-out;
 }
 
 @keyframes eliminate {

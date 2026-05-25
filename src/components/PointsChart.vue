@@ -19,6 +19,11 @@
           <span class="visually-hidden">Loading chart...</span>
         </div>
       </div>
+      <div v-else-if="!series.length" class="empty-chart">
+        <p class="empty-chart-icon">📈</p>
+        <p class="empty-chart-text">No data yet</p>
+        <p class="empty-chart-sub">Play some maps to see your points history</p>
+      </div>
       <apexchart
         v-else
         type="line"
@@ -410,6 +415,32 @@ export default {
   background: rgba(74, 111, 165, 0.5);
   border-color: var(--color-primary);
   color: white;
+}
+
+.empty-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  gap: 6px;
+  opacity: 0.5;
+}
+.empty-chart-icon {
+  font-size: 2rem;
+  margin: 0;
+}
+.empty-chart-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+.empty-chart-sub {
+  font-size: 0.78rem;
+  color: #aaa;
+  margin: 0;
+  text-align: center;
 }
 
 @media (max-width: 1024px) {

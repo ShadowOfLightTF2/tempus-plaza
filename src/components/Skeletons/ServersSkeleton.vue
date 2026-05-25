@@ -169,9 +169,8 @@ export default {
   },
   data() {
     return {
-      windowWidth: window.innerWidth,
-      // Mirror parent: read saved preference from localStorage
-      manualMinMode: localStorage.getItem("minMode") === "true",
+      windowWidth: 0,
+      manualMinMode: false,
     };
   },
   computed: {
@@ -186,6 +185,8 @@ export default {
     },
   },
   mounted() {
+    this.windowWidth = window.innerWidth;
+    this.manualMinMode = localStorage.getItem("minMode") === "true";
     window.addEventListener("resize", this.onResize);
     window.addEventListener("storage", this.onStorageChange);
   },

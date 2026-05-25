@@ -150,7 +150,7 @@ function getHomeMeta(): array {
     return [
         'tags' => generateMetaTags([
             'title'        => 'Tempus Plaza | TF2 Jump Stats & Leaderboards',
-            'description'  => 'Tempus records, player rankings, map information and everything to do with the Team Fortress 2 jump Tempus network.',
+            'description'  => 'Tempus records, player rankings, map information and everything to do with the TF2 jump Tempus network.',
             'image'        => DEFAULT_IMAGE,
             'image_width'  => 512,
             'image_height' => 512,
@@ -192,7 +192,7 @@ function getMapMeta(int $mapId): array {
 
     $description = $mapName . ' is a TF2 jump map';
     if ($solTier) $description .= ' (Soldier T' . $solTier . '/R' . $solRating;
-    if ($demTier) $description .= ', Demo T' . $demTier . '/R' . $demRating . ')';
+    if ($demTier) $description .= ', Demoman T' . $demTier . '/R' . $demRating . ')';
     if ($authorString) $description .= ' by ' . $authorString;
     if (!empty($parts)) $description .= ' with ' . implode(' and ', $parts);
     $description .= '. ' . $solCompletions . ' Soldier and ' . $demCompletions . ' Demoman completions on Tempus.';

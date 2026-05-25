@@ -35,7 +35,7 @@
             alt="Avatar"
             class="avatar"
             :class="{ 'golden-avatar': player.donator }"
-            onerror="this.src='/avatars/golly.jpg'"
+            onerror="this.src = '/avatars/golly.jpg'"
           />
         </a>
 
@@ -94,13 +94,15 @@ export default {
   },
   computed: {
     stats() {
+      const fmt = (val) => (val != null ? `#${val}` : "—");
+      const fmtPts = (val) => (val != null ? val : "—");
       return [
-        { label: "Overall Rank", value: `#${this.player.overall_rank}` },
-        { label: "Soldier Rank", value: `#${this.player.soldier_rank}` },
-        { label: "Demoman Rank", value: `#${this.player.demoman_rank}` },
-        { label: "Overall Points", value: this.player.overall_points },
-        { label: "Soldier Points", value: this.player.soldier_points },
-        { label: "Demoman Points", value: this.player.demoman_points },
+        { label: "Overall Rank", value: fmt(this.player.overall_rank) },
+        { label: "Soldier Rank", value: fmt(this.player.soldier_rank) },
+        { label: "Demoman Rank", value: fmt(this.player.demoman_rank) },
+        { label: "Overall Points", value: fmtPts(this.player.overall_points) },
+        { label: "Soldier Points", value: fmtPts(this.player.soldier_points) },
+        { label: "Demoman Points", value: fmtPts(this.player.demoman_points) },
       ];
     },
   },
@@ -294,7 +296,9 @@ export default {
   justify-content: center;
   padding: 14px 10px;
   gap: 6px;
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 

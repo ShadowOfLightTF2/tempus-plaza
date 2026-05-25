@@ -151,6 +151,34 @@
         </button>
       </div>
     </div>
+    <div v-if="showXyzBanner && !xyzBannerDismissed" class="xyz-banner">
+      <div class="xyz-banner">
+        <div class="xyz-banner-content">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span
+            >tempusplaza.xyz will be going down soon, make sure to swap to
+            tempusplaza.com</span
+          >
+          <button
+            class="update-close"
+            @click="xyzBannerDismissed = true"
+            aria-label="Dismiss"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
     <nav class="navbar navbar-expand-xl bg-custom">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -1110,6 +1138,7 @@ export default {
   components: { HoverPreview },
   data() {
     return {
+      xyzBannerDismissed: false,
       showErrorPopup: false,
       showLoginPopup: false,
       hasVisitedBefore: false,
@@ -1131,7 +1160,7 @@ export default {
       colorPreference: "blue",
       sidebarOpen: false,
       sidebarSettingsOpen: false,
-      isDesktop: window.innerWidth >= 1200,
+      isDesktop: true,
       navbarSearchFocused: false,
       sidebarSearchFocused: false,
       navHighlightedIndex: -1,
@@ -1156,6 +1185,12 @@ export default {
     };
   },
   computed: {
+    showXyzBanner() {
+      return (
+        document.referrer.includes("tempusplaza.xyz") ||
+        new URLSearchParams(window.location.search).get("ref") === "xyz"
+      );
+    },
     user() {
       return this.currentUser;
     },
@@ -1506,6 +1541,7 @@ export default {
     },
   },
   async mounted() {
+    this.isDesktop = window.innerWidth >= 1200;
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("error") === "player_not_found") {
       this.showErrorPopup = true;
@@ -2071,7 +2107,10 @@ body {
   background: rgba(255, 255, 255, 0.06);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   width: 240px;
 }
@@ -2079,7 +2118,9 @@ body {
 .navbar-search-box:hover {
   border-color: rgba(102, 126, 234, 0.6);
   background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15), 0 2px 12px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.15),
+    0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-search-icon-container {
@@ -2131,17 +2172,22 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6),
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.04);
   overflow: hidden;
   z-index: 1000;
 }
 
 .nav-dropdown-enter-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .nav-dropdown-leave-active {
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transition:
+    opacity 0.1s ease,
+    transform 0.1s ease;
 }
 .nav-dropdown-enter-from,
 .nav-dropdown-leave-to {
@@ -2160,7 +2206,10 @@ body {
   background: rgba(255, 255, 255, 0.06);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 .sidebar-search-box.is-focused,
 .sidebar-search-box:hover {
@@ -2733,5 +2782,31 @@ body {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+.xyz-banner {
+  background: linear-gradient(135deg, #bd9e48, #966010);
+  color: white;
+  position: relative;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.3s ease-out;
+}
+.xyz-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  gap: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.xyz-banner-content i {
+  font-size: 1rem;
+  color: #ffd166;
+  flex-shrink: 0;
+}
+.xyz-banner-content span {
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>

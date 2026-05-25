@@ -67,9 +67,17 @@
                             alt="Soldier"
                             class="class-icon-small"
                           />
-                          <span class="rank-value">{{
-                            player.soldier_rank || "N/A"
-                          }}</span>
+                          <span
+                            class="rank-value"
+                            :class="{
+                              'rank-best':
+                                player.soldier_rank &&
+                                (!player.demoman_rank ||
+                                  player.soldier_rank <= player.demoman_rank),
+                            }"
+                          >
+                            {{ player.soldier_rank || "N/A" }}
+                          </span>
                         </div>
                         <div class="rank-badge demoman">
                           <img
@@ -77,9 +85,17 @@
                             alt="Demoman"
                             class="class-icon-small"
                           />
-                          <span class="rank-value">{{
-                            player.demoman_rank || "N/A"
-                          }}</span>
+                          <span
+                            class="rank-value"
+                            :class="{
+                              'rank-best':
+                                player.demoman_rank &&
+                                (!player.soldier_rank ||
+                                  player.demoman_rank <= player.soldier_rank),
+                            }"
+                          >
+                            {{ player.demoman_rank || "N/A" }}
+                          </span>
                         </div>
                       </template>
                       <template v-else>
@@ -104,7 +120,7 @@
                             "
                             class="class-icon-small"
                           />
-                          <span class="rank-value">{{
+                          <span class="rank-value rank-best">{{
                             player.highest_rank || "N/A"
                           }}</span>
                         </div>
@@ -210,7 +226,16 @@
                 <div class="table-header-top">
                   <div class="table-header-icon">🌍</div>
                   <div class="table-header-title-section">
-                    <h3 class="table-header-title">Server Status</h3>
+                    <div class="server-status-title-row">
+                      <h3 class="table-header-title">Server Status</h3>
+                      <div class="total-players-badge">
+                        <span class="total-players-dot"></span>
+                        <span class="total-players-count">{{
+                          totalPlayerCount
+                        }}</span>
+                        <span class="total-players-label">online</span>
+                      </div>
+                    </div>
                     <p class="table-header-subtitle">Updates every minute</p>
                   </div>
                 </div>
@@ -471,12 +496,9 @@ export default {
       currentView: "topplayers",
       loading: false,
       failedMapImages: new Set(),
-      isMobile: window.innerWidth <= 992,
-      manualMinMode: localStorage.getItem("minMode") === "true",
-      minMode:
-        window.innerWidth <= 992
-          ? true
-          : localStorage.getItem("minMode") === "true",
+      isMobile: false,
+      manualMinMode: false,
+      minMode: false,
       topPlayersData: [],
       serversData: [],
       expandedServerId: null,
@@ -506,6 +528,9 @@ export default {
     };
   },
   computed: {
+    totalPlayerCount() {
+      return this.serversData.reduce((sum, s) => sum + (s.playerCount || 0), 0);
+    },
     filteredServersData() {
       let filtered = this.serversData;
       if (this.selectedRegion !== "all") {
@@ -548,6 +573,9 @@ export default {
     this.parseUrlFilters();
   },
   mounted() {
+    this.isMobile = window.innerWidth <= 992;
+    this.manualMinMode = localStorage.getItem("minMode") === "true";
+    this.minMode = this.isMobile ? true : this.manualMinMode;
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
     this.refreshInterval = setInterval(this.silentRefresh, 60000);
@@ -798,10 +826,10 @@ export default {
               player.intended_class === "3"
                 ? "soldier"
                 : player.intended_class === "4"
-                ? "demoman"
-                : player.intended_class === "5"
-                ? "both"
-                : player.intended_class || "soldier",
+                  ? "demoman"
+                  : player.intended_class === "5"
+                    ? "both"
+                    : player.intended_class || "soldier",
           }));
       } catch (error) {
         console.error("Error fetching top players data:", error);
@@ -850,7 +878,8 @@ export default {
       return "status-low";
     },
     connectToServer(ip, port) {
-      window.location.href = `steam://connect/${ip}:${port}`;
+      const address = `${ip}:${port}`;
+      window.location.href = `steam://run/440//+connect ${address}/`;
     },
     switchView(view) {
       if (this.currentView === view) return;
@@ -1078,7 +1107,52 @@ export default {
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
   flex-shrink: 0;
 }
+.server-status-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
+.total-players-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(74, 111, 165, 0.2);
+  border: 1px solid rgba(74, 111, 165, 0.4);
+  border-radius: 20px;
+  padding: 0.2rem 0.65rem;
+}
+
+.total-players-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 5px #22c55e;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.total-players-count {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.total-players-label {
+  font-size: 0.8rem;
+  color: var(--color-text);
+  opacity: 0.7;
+}
 .table-header-title-section {
   flex: 1;
 }
@@ -1092,6 +1166,7 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--color-text);
+  display: flex;
 }
 
 .table-header-subtitle {
@@ -1099,6 +1174,7 @@ export default {
   font-size: 0.9rem;
   color: var(--color-text);
   opacity: 0.8;
+  display: flex;
 }
 
 .table-responsive {
@@ -1312,6 +1388,12 @@ export default {
   color: var(--color-text);
   font-weight: bold;
   margin-left: 4px;
+}
+.rank-best {
+}
+.rank-value:not(.rank-best) {
+  font-weight: 400;
+  font-size: 0.9rem;
 }
 
 .player-info-section {

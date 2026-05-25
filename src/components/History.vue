@@ -1688,7 +1688,8 @@ export default {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       to bottom,
       rgba(255, 255, 255, 0.12) 0%,
       rgba(255, 255, 255, 0.06) 40%,
@@ -1711,7 +1712,9 @@ export default {
   min-height: 260px;
 }
 .hist-card:hover {
-  box-shadow: 0 0 50px rgba(102, 126, 234, 0.4), 0 20px 40px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 50px rgba(102, 126, 234, 0.4),
+    0 20px 40px rgba(0, 0, 0, 0.5);
 }
 .hist-card-bg {
   position: absolute;
@@ -1887,7 +1890,9 @@ export default {
 }
 .hist-pill.changed {
   border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 0 12px rgba(102, 126, 234, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 12px rgba(102, 126, 234, 0.55),
+    0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .hist-arrow {
   color: #d6e4ff;
@@ -2196,7 +2201,9 @@ export default {
   text-decoration: none;
   color: var(--color-text, #eee);
   overflow: hidden;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
   width: 100%;
   box-sizing: border-box;
   min-height: 58px;

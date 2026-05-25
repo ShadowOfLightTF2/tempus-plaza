@@ -1,5 +1,5 @@
 <template>
-  <div class="records-card">
+  <div class="records-card" @click="onSectionClick">
     <div
       class="card-header tabs-header"
       style="background: rgba(255, 255, 255, 0.05)"
@@ -61,7 +61,7 @@
       :filter-options="filterOptions"
       :show-change-filters="activeRecordsTab === 'changed-placements'"
       @update:filter-options="filterOptions = $event"
-      @filter-changed="currentPage = 1"
+      @filter-changed="() => {}"
       @clear-filters="clearAllFilters"
     />
     <div
@@ -74,15 +74,27 @@
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
-        <div v-else>
+        <div
+          class="records-scroll-area"
+          :class="{ 'scroll-locked': isMobile && !isScrollFocused }"
+        >
           <div v-if="activeRecordsTab === 'recent-runs'">
             <div
-              v-for="(group, date) in filteredAndPaginatedRecords"
+              v-if="filteredRecords.length === 0 && !currentLoadingState"
+              class="empty-records"
+            >
+              <p class="empty-records-title">No runs yet</p>
+              <p class="empty-records-sub">
+                Complete a map to see your runs here
+              </p>
+            </div>
+            <div
+              v-for="(group, date) in groupedRecords"
               :key="date"
               class="date-group fade-in"
             >
               <div class="date-header">
-                <h5>{{ precomputedHeaders[date] }}</h5>
+                <h5>{{ formatDateHeader(date) }}</h5>
               </div>
               <ul class="list-group">
                 <SmartLink
@@ -158,14 +170,23 @@
               </ul>
             </div>
           </div>
+
           <div v-else-if="activeRecordsTab === 'changed-placements'">
             <div
-              v-for="(group, date) in processedChangedPlacements"
+              v-if="
+                filteredChangedPlacements.length === 0 && !currentLoadingState
+              "
+              class="empty-records"
+            >
+              <p class="empty-records-title">No point changes found</p>
+            </div>
+            <div
+              v-for="(group, date) in groupedChangedPlacementsFull"
               :key="date"
               class="date-group fade-in"
             >
               <div class="date-header">
-                <h5>{{ precomputedHeaders[date] }}</h5>
+                <h5>{{ formatDateHeader(date) }}</h5>
               </div>
               <ul class="list-group">
                 <SmartLink
@@ -177,7 +198,7 @@
                   }"
                   tag="li"
                   class="list-group-item record-item"
-                  :class="placement.placementClass"
+                  :class="getPlacementClass(placement)"
                   style="background: rgba(255, 255, 255, 0.05)"
                 >
                   <div class="d-flex align-items-center record-class-map">
@@ -217,7 +238,7 @@
                   </div>
                   <div
                     class="text-end align-items-center record-time-detail"
-                    :class="placement.placementClass"
+                    :class="getPlacementClass(placement)"
                   >
                     <div class="d-flex flex-column align-items-end">
                       <div class="placement-change-indicator">
@@ -236,7 +257,6 @@
                             {{ placement.newRankDisplay }}
                           </span>
                         </span>
-
                         <span
                           class="points-change"
                           :class="placement.pointsChangeClass"
@@ -244,7 +264,6 @@
                           {{ placement.pointsChangeText }}
                         </span>
                       </div>
-
                       <span class="record-detail record-date">
                         {{ placement.formattedDate }}
                       </span>
@@ -252,26 +271,6 @@
                   </div>
                 </SmartLink>
               </ul>
-            </div>
-          </div>
-          <div class="pagination-controls">
-            <div class="pagination-side">
-              <button
-                v-if="currentPage > 1"
-                @click="prevPage"
-                class="btn btn-dark global-btn"
-              >
-                Previous
-              </button>
-            </div>
-            <div class="pagination-side">
-              <button
-                v-if="shouldShowNextButton"
-                @click="nextPage"
-                class="btn btn-dark global-btn next-btn"
-              >
-                Next
-              </button>
             </div>
           </div>
         </div>
@@ -312,6 +311,9 @@ export default {
   },
   data() {
     return {
+      isScrollFocused: false,
+      isMobile: window.innerWidth <= 768,
+      lastLoadMore: 0,
       activeRecordsTab: "recent-runs",
       showFilterSection: false,
       filterOptions: {
@@ -321,82 +323,26 @@ export default {
         selectedGainLoss: [],
         selectedUnchanged: false,
       },
-      currentPage: 1,
-      pageSize: 8,
     };
   },
   computed: {
-    precomputedHeaders() {
-      const headers = {};
-
-      Object.keys(this.filteredAndPaginatedRecords || {}).forEach((date) => {
-        headers[date] = this.formatDateHeader(date);
-      });
-
-      Object.keys(this.filteredAndPaginatedChangedPlacements || {}).forEach(
-        (date) => {
-          headers[date] = this.formatDateHeader(date);
-        },
-      );
-
-      return headers;
-    },
-    processedChangedPlacements() {
-      const processed = {};
-
-      for (const [date, placements] of Object.entries(
-        this.filteredAndPaginatedChangedPlacements,
-      )) {
-        processed[date] = placements.map((placement) => {
-          let placementClass;
-
-          if (placement.points_change > 0) {
-            placementClass = "gained-placement";
-          } else if (placement.points_change < 0) {
-            placementClass = "lost-placement";
-          } else {
-            placementClass = "tied-placement";
-          }
-
-          return {
-            ...placement,
-            placementClass: placementClass,
-          };
-        });
-      }
-
-      return processed;
-    },
-    filteredAndPaginatedRecords() {
-      const grouped = this.groupRecords(this.filteredRecords);
-      return this.paginateGroupedData(grouped);
-    },
-    filteredAndPaginatedChangedPlacements() {
-      return this.paginateGroupedData(this.groupedChangedPlacements);
-    },
-    shouldShowNextButton() {
-      if (this.activeRecordsTab === "recent-runs") {
-        return this.currentPage * this.pageSize < this.filteredRecords.length;
-      } else {
-        const totalItems = this.filteredChangedPlacements.length;
-        return this.currentPage * this.pageSize < totalItems;
-      }
+    currentLoadingState() {
+      return this.activeRecordsTab === "recent-runs"
+        ? this.loading["Latest runs"]
+        : this.loading["Lost placements"];
     },
     filteredRecords() {
-      let recordsToFilter = this.recentRecords;
-      return recordsToFilter.filter((record) => {
+      return this.recentRecords.filter((record) => {
         if (
           this.filterOptions.selectedClasses.length > 0 &&
           !this.filterOptions.selectedClasses.includes(record.class)
-        ) {
+        )
           return false;
-        }
         if (
           this.filterOptions.selectedTypes.length > 0 &&
           !this.filterOptions.selectedTypes.includes(record.type)
-        ) {
+        )
           return false;
-        }
         if (
           this.filterOptions.selectedPlacements.length > 0 &&
           !this.filterOptions.selectedPlacements.some((placement) => {
@@ -405,47 +351,32 @@ export default {
               return record.placement >= 2 && record.placement <= 10;
             return record.placement === placement;
           })
-        ) {
+        )
           return false;
-        }
         return true;
       });
     },
     filteredChangedPlacements() {
       if (!this.changedPlacements || !this.changedPlacements.length) return [];
 
-      let filtered = this.changedPlacements.filter((placement) => {
+      return this.changedPlacements.filter((placement) => {
         if (
           this.filterOptions.selectedClasses.length > 0 &&
           !this.filterOptions.selectedClasses.includes(placement.class)
-        ) {
+        )
           return false;
-        }
         if (
           this.filterOptions.selectedTypes.length > 0 &&
           !this.filterOptions.selectedTypes.includes(placement.type)
-        ) {
+        )
           return false;
-        }
         if (this.filterOptions.selectedPlacements.length > 0) {
           const matchesPlacement = this.filterOptions.selectedPlacements.some(
-            (selectedPlacement) => {
-              const oldRankMatches = this.checkPlacementMatch(
-                placement.old_rank,
-                selectedPlacement,
-              );
-              const newRankMatches = this.checkPlacementMatch(
-                placement.new_rank,
-                selectedPlacement,
-              );
-
-              return oldRankMatches || newRankMatches;
-            },
+            (selectedPlacement) =>
+              this.checkPlacementMatch(placement.old_rank, selectedPlacement) ||
+              this.checkPlacementMatch(placement.new_rank, selectedPlacement),
           );
-
-          if (!matchesPlacement) {
-            return false;
-          }
+          if (!matchesPlacement) return false;
         }
         if (
           this.filterOptions.selectedGainLoss.length > 0 ||
@@ -454,13 +385,9 @@ export default {
           const isGain = placement.points_change > 0;
           const isLoss = placement.points_change < 0;
           const isUnchanged = placement.points_change === 0;
-
           let matches = false;
-
-          if (this.filterOptions.selectedUnchanged && isUnchanged) {
+          if (this.filterOptions.selectedUnchanged && isUnchanged)
             matches = true;
-          }
-
           if (this.filterOptions.selectedGainLoss.length > 0) {
             const matchesGainLoss = this.filterOptions.selectedGainLoss.some(
               (filter) => {
@@ -469,41 +396,36 @@ export default {
                 return false;
               },
             );
-            if (matchesGainLoss) {
-              matches = true;
-            }
+            if (matchesGainLoss) matches = true;
           }
-
-          if (!matches) {
-            return false;
-          }
+          if (!matches) return false;
         }
-
         return true;
       });
-
-      return filtered;
     },
-    groupedChangedPlacements() {
-      if (
-        !this.filteredChangedPlacements ||
-        !Array.isArray(this.filteredChangedPlacements) ||
-        this.filteredChangedPlacements.length === 0
-      ) {
-        return {};
-      }
+    groupedRecords() {
+      return this.groupRecords(this.filteredRecords);
+    },
+    groupedChangedPlacementsFull() {
       return this.groupRecords(this.filteredChangedPlacements);
-    },
-    currentLoadingState() {
-      return this.activeRecordsTab === "recent-runs"
-        ? this.loading["Latest runs"]
-        : this.loading["Lost placements"];
     },
   },
   methods: {
+    onSectionClick() {
+      this.isScrollFocused = true;
+    },
+    onClickOutside(e) {
+      if (!this.$el.contains(e.target)) {
+        this.isScrollFocused = false;
+      }
+    },
     switchRecordsTab(tab) {
       this.activeRecordsTab = tab;
-      this.currentPage = 1;
+      this.$nextTick(() => {
+        this.attachScrollListener();
+        const el = this.$el.querySelector(".records-scroll-area");
+        if (el) el.scrollTop = 0;
+      });
     },
     toggleFilterSection() {
       this.showFilterSection = !this.showFilterSection;
@@ -516,50 +438,17 @@ export default {
         selectedGainLoss: [],
         selectedUnchanged: false,
       };
-      this.currentPage = 1;
     },
-    nextPage() {
-      this.currentPage++;
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+    getPlacementClass(placement) {
+      if (placement.points_change > 0) return "gained-placement";
+      if (placement.points_change < 0) return "lost-placement";
+      return "tied-placement";
     },
     formatDateHeader(dateString) {
       const date = new Date(dateString);
       const day = String(date.getDate()).padStart(2, "0");
       const month = date.toLocaleDateString("en-US", { month: "short" });
       return `${day} ${month}`;
-    },
-    paginateGroupedData(groupedData) {
-      if (!groupedData || typeof groupedData !== "object") {
-        return {};
-      }
-
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      const dates = Object.keys(groupedData);
-      const paginated = {};
-      let count = 0;
-
-      for (const date of dates) {
-        if (!Array.isArray(groupedData[date])) {
-          continue;
-        }
-
-        for (const item of groupedData[date]) {
-          if (count >= start && count < end) {
-            if (!paginated[date]) {
-              paginated[date] = [];
-            }
-            paginated[date].push(item);
-          }
-          count++;
-        }
-      }
-
-      return paginated;
     },
     checkPlacementMatch(rank, selectedPlacement) {
       if (selectedPlacement === 1) return rank === 1;
@@ -570,12 +459,58 @@ export default {
       const grouped = {};
       records.forEach((record) => {
         const date = new Date(record.date * 1000).toDateString();
-        if (!grouped[date]) {
-          grouped[date] = [];
-        }
+        if (!grouped[date]) grouped[date] = [];
         grouped[date].push(record);
       });
       return grouped;
+    },
+    attachScrollListener() {
+      const el = this.$el.querySelector(".records-scroll-area");
+      if (el) {
+        el.removeEventListener("scroll", this.onScroll);
+        el.addEventListener("scroll", this.onScroll);
+      }
+    },
+    detachScrollListener() {
+      const el = this.$el.querySelector(".records-scroll-area");
+      if (el) el.removeEventListener("scroll", this.onScroll);
+    },
+    onScroll(e) {
+      const el = e.target;
+      const nearBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 100;
+      if (nearBottom) {
+        const now = Date.now();
+        if (now - this.lastLoadMore > 1000) {
+          this.lastLoadMore = now;
+          if (this.activeRecordsTab === "recent-runs") {
+            this.$emit("load-more");
+          } else {
+            this.$emit("load-more-placements");
+          }
+        }
+      }
+    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.attachScrollListener();
+    });
+    document.addEventListener("click", this.onClickOutside);
+    document.addEventListener("touchstart", this.onClickOutside);
+  },
+  beforeUnmount() {
+    this.detachScrollListener();
+    document.removeEventListener("click", this.onClickOutside);
+    document.removeEventListener("touchstart", this.onClickOutside);
+  },
+  watch: {
+    currentLoadingState(newVal) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          this.attachScrollListener();
+        });
+      }
     },
   },
 };
@@ -629,6 +564,26 @@ export default {
   padding: 0;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+.empty-records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 8px;
+  opacity: 0.45;
+}
+.empty-records-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+.empty-records-sub {
+  font-size: 0.82rem;
+  color: #aaa;
+  margin: 0;
 }
 .card-body {
   position: relative;
@@ -725,33 +680,35 @@ export default {
     rgba(74, 111, 165, 0.1)
   );
 }
-.pagination-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-  padding-bottom: 10px;
-}
-.pagination-side {
-  flex: 1;
-  display: flex;
-  justify-content: flex-start;
-}
-.pagination-side:last-child {
-  justify-content: flex-end;
-}
 .records-section {
   position: relative;
-  min-height: 630px !important;
-  padding-bottom: 80px !important;
+  min-height: 700px !important;
 }
-.records-section .pagination-controls {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
+@media (max-width: 768px) {
+  .records-scroll-area.scroll-locked {
+    overflow-y: hidden;
+  }
+}
+.records-scroll-area {
+  height: 690px;
+  overflow-y: auto;
+  padding-bottom: 10px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.records-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+.records-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.records-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.records-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 .date-header {
   color: var(--color-text);
@@ -915,12 +872,6 @@ export default {
     padding: 5px 7px;
     max-width: 120px;
   }
-  .pagination-controls .global-btn,
-  .allruns-button-container .global-btn,
-  .filter-button-container .global-btn {
-    font-size: 0.85rem;
-    padding: 6px 8px;
-  }
 }
 
 @media (max-width: 992px) {
@@ -968,12 +919,6 @@ export default {
     padding: 2px 4px;
     max-width: 100px;
   }
-  .pagination-controls .global-btn,
-  .allruns-button-container .global-btn,
-  .filter-button-container .global-btn {
-    font-size: 0.8rem;
-    padding: 6px 8px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -1005,13 +950,6 @@ export default {
   }
   .card-header.tabs-header {
     padding: 14px;
-  }
-
-  .pagination-controls .global-btn,
-  .allruns-button-container .global-btn,
-  .filter-button-container .global-btn {
-    font-size: 0.9rem;
-    padding: 6px 8px;
   }
 }
 
@@ -1059,12 +997,6 @@ export default {
   .class-icon {
     width: 22px;
     height: 22px;
-  }
-  .pagination-controls .global-btn,
-  .allruns-button-container .global-btn,
-  .filter-button-container .global-btn {
-    font-size: 0.8rem;
-    padding: 5px 7px;
   }
 }
 </style>

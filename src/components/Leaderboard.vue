@@ -162,7 +162,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <LeaderboardSkeleton v-if="loading" />
+                  <LeaderboardSkeleton v-if="firstLoad" />
                   <template v-else>
                     <tr
                       v-if="userRecord.soldier && userRecord.soldier.rank > 1"
@@ -398,7 +398,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <LeaderboardSkeleton v-if="loading" />
+                  <LeaderboardSkeleton v-if="firstLoad" />
                   <template v-else>
                     <tr
                       v-if="userRecord.demoman && userRecord.demoman.rank > 1"
@@ -596,6 +596,7 @@ export default {
   },
   data() {
     return {
+      firstLoad: true,
       map: null,
       courseCount: 0,
       bonusCount: 0,
@@ -735,9 +736,6 @@ export default {
     await this.loadRecords(this.type, this.index);
   },
   watch: {
-    intendedClass(newVal) {
-      console.log("intendedClass changed:", newVal);
-    },
     mapId() {
       this.resetComponents();
       this.fetchMapData().then(() => this.loadRecords(this.type, this.index));
@@ -911,23 +909,37 @@ export default {
             ...res.data,
           ];
         }
-        if (userRes?.data) this.checkUserRecord(userRes.data);
+        if (userRes?.data) this.checkUserRecord(userRes.data, classType);
       } catch (err) {
         console.error(`Error fetching ${type} records:`, err);
         this.error = `Error fetching ${type} records.`;
       } finally {
         this.loading = false;
         this.showMoreLoading = false;
+        if (offset === 0) this.firstLoad = false;
       }
     },
-    checkUserRecord(records) {
+    checkUserRecord(records, classType) {
       if (!this.playerId || !records) return;
+
+      let found = false;
+
       records.forEach((r) => {
         if (r.id === this.playerId) {
-          if (r.class === "soldier") this.userRecord.soldier = r;
-          else if (r.class === "demoman") this.userRecord.demoman = r;
+          if (r.class === "soldier") {
+            this.userRecord.soldier = r;
+            found = true;
+          } else if (r.class === "demoman") {
+            this.userRecord.demoman = r;
+            found = true;
+          }
         }
       });
+
+      if (!found) {
+        if (classType === "soldier") this.userRecord.soldier = null;
+        else if (classType === "demoman") this.userRecord.demoman = null;
+      }
     },
     async loadRecords(type, index) {
       if (type === "map") {
@@ -993,13 +1005,10 @@ export default {
       this.selectedIndex = index;
     },
     resetRecordsAndUserRecord() {
-      this.userRecord = { soldier: null, demoman: null };
       this.soldierDisplayCount = 50;
       this.demomanDisplayCount = 50;
       this.soldierOffset = 0;
       this.demomanOffset = 0;
-      this.selectedSoldierRecords = [];
-      this.selectedDemomanRecords = [];
     },
     resetComponents() {
       this.resetRecordsAndUserRecord();
@@ -1017,6 +1026,7 @@ export default {
       this.selectedIndex = null;
       this.selectedCourseIndex = null;
       this.selectedBonusIndex = null;
+      this.firstLoad = true;
     },
     selectType(type) {
       this.selectedTypePill = type;
