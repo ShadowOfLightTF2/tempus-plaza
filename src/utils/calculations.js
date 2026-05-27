@@ -8,7 +8,7 @@ export function calculateGroups(totalCompletions) {
 }
 
 export function formatDuration(recordDuration) {
-    const totalSeconds = recordDuration;
+    const totalSeconds = recordDuration + 0.0005;
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = Math.floor(totalSeconds % 60);

@@ -1325,36 +1325,46 @@ export default {
       this.pickerComplete = false;
       this.shouldContinuePicker = true;
 
-      const totalItems = this.filteredAndSortedItems.length;
-      const maxEliminationTime = 5000;
-      const targetSteps = Math.min(30, totalItems - 1);
-      const stepInterval = maxEliminationTime / targetSteps;
-      const itemsPerStep = Math.ceil((totalItems - 1) / targetSteps);
+      // Fisher-Yates shuffle of all row IDs upfront
+      const ids = this.filteredAndSortedItems.map((item, i) =>
+        this.getRowId(item, i),
+      );
+      for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+      }
+      // All but the last ID will be eliminated; last ID is the winner
+      this.shuffledPickerOrder = ids.slice(0, ids.length - 1);
 
-      await this.eliminateRandomly(stepInterval, itemsPerStep);
+      const total = this.shuffledPickerOrder.length;
+      const totalMs = Math.min(5000, total * 200);
+      const interval = totalMs / total;
+
+      await this.runPickerStep(0, interval);
     },
-    async eliminateRandomly(stepInterval, itemsPerStep) {
+
+    async runPickerStep(index, interval) {
       if (!this.shouldContinuePicker) return;
 
-      const availableRows = this.filteredAndSortedItems
-        .map((item, index) => ({ item, index, id: this.getRowId(item) }))
-        .filter((row) => !this.eliminatedRows.has(row.id));
-
-      if (availableRows.length <= 1) {
+      if (index >= this.shuffledPickerOrder.length) {
+        // All eliminations done, declare winner
         this.isPickerActive = false;
         this.pickerComplete = true;
+        await this.$nextTick();
 
-        if (availableRows.length === 1) {
-          await this.$nextTick();
-          const rowIndex = availableRows[0].index;
+        const winnerRow = this.filteredAndSortedItems.find(
+          (item, i) => !this.eliminatedRows.has(this.getRowId(item, i)),
+        );
+        const winnerIndex = this.filteredAndSortedItems.indexOf(winnerRow);
 
+        if (winnerIndex !== -1) {
           if (this.currentLayout === "table" && this.$refs.tableRows) {
-            this.$refs.tableRows[rowIndex]?.scrollIntoView({
+            this.$refs.tableRows[winnerIndex]?.scrollIntoView({
               behavior: "smooth",
               block: "center",
             });
           } else if (this.currentLayout === "grid" && this.$refs.gridCards) {
-            this.$refs.gridCards[rowIndex]?.scrollIntoView({
+            this.$refs.gridCards[winnerIndex]?.scrollIntoView({
               behavior: "smooth",
               block: "center",
             });
@@ -1363,26 +1373,15 @@ export default {
         return;
       }
 
-      const remainingToEliminate = availableRows.length - 1;
-      const itemsToEliminateThisStep = Math.min(
-        itemsPerStep,
-        remainingToEliminate,
-      );
+      // Eliminate the next item in the pre-shuffled order
+      this.eliminatedRows.add(this.shuffledPickerOrder[index]);
 
-      const shuffledRows = [...availableRows].sort(() => Math.random() - 0.5);
-      const rowsToEliminate = shuffledRows.slice(0, itemsToEliminateThisStep);
-
-      rowsToEliminate.forEach((row) => {
-        this.eliminatedRows.add(row.id);
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, stepInterval));
-
-      await this.eliminateRandomly(stepInterval, itemsPerStep);
+      await new Promise((resolve) => setTimeout(resolve, interval));
+      await this.runPickerStep(index + 1, interval);
     },
-
     resetPicker() {
       this.eliminatedRows.clear();
+      this.shuffledPickerOrder = [];
       this.shouldContinuePicker = false;
       this.isPickerActive = false;
       this.pickerComplete = false;
