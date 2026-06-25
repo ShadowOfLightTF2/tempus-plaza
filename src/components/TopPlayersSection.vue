@@ -295,7 +295,7 @@ export default {
   padding: 30px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 0; /* allow grid item to shrink */
+  min-width: 0;
 }
 
 .section-subtitle {
@@ -330,7 +330,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
-  min-width: 0; /* critical: allow flex item to shrink below content width */
+  min-width: 0;
 }
 
 .player-card::after {

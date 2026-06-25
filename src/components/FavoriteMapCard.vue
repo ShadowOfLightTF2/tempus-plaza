@@ -154,7 +154,8 @@ export default {
 <style scoped>
 .map-card {
   box-shadow: 0 0 20px rgba(0, 0, 0);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       to bottom,
       rgba(255, 255, 255, 0.15) 0%,
       rgba(255, 255, 255, 0.288) 20%,
@@ -222,7 +223,8 @@ export default {
 
 .map-card:hover {
   border-radius: 15px;
-  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+  box-shadow:
+    0 20px 50px rgba(102, 126, 234, 0.2),
     0 0 0 1px rgba(102, 126, 234, 0.3);
   cursor: pointer;
 }
@@ -323,7 +325,6 @@ export default {
   text-align: center;
 }
 
-/* Tier colors */
 .map-tier-color.tier-0 {
   background: rgba(51, 51, 51, 0.5);
   color: var(--color-text);
@@ -369,7 +370,6 @@ export default {
   color: var(--color-text);
 }
 
-/* Rating colors */
 .map-rating-color.rating-1 {
   background: rgba(148, 196, 125, 0.5);
   color: var(--color-text);
@@ -387,7 +387,6 @@ export default {
   color: var(--color-text);
 }
 
-/* Placement colors */
 .placement-gold {
   color: #ffd700;
   font-weight: bold;

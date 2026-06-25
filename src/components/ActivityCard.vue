@@ -14,7 +14,7 @@
           :src="record.avatar"
           alt="Avatar"
           class="player-avatar-large"
-          onerror="this.src='/avatars/golly.jpg'"
+          onerror="this.src = '/avatars/golly.jpg'"
         />
         <div class="player-details">
           <div class="player-name-large" v-dragscroll>
@@ -149,7 +149,7 @@
           :src="record.avatar"
           alt="Avatar"
           class="normal-avatar"
-          onerror="this.src='/avatars/golly.jpg'"
+          onerror="this.src = '/avatars/golly.jpg'"
         />
         <div class="normal-player-details">
           <div class="normal-player-name">{{ record.player }}</div>
@@ -315,7 +315,6 @@ export default {
 </script>
 
 <style scoped>
-/* ── Min-mode card ─────────────────────────────────────────────────────────── */
 .activity-card {
   display: grid;
   grid-template-columns: minmax(0, 250px) 1fr 250px 100px;

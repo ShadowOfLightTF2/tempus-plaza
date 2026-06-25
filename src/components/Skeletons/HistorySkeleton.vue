@@ -1,12 +1,9 @@
 <template>
   <div class="timeline-container">
-    <!-- Month 1 -->
     <div class="timeline-month-section">
       <div class="timeline-month-header">
         <div class="skel skel-month-label"></div>
       </div>
-
-      <!-- Day 1 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -98,8 +95,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Day 2 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -205,8 +200,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Day 3 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -315,8 +308,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Day 4 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -428,14 +419,10 @@
         </div>
       </div>
     </div>
-
-    <!-- Month 2 -->
     <div class="timeline-month-section">
       <div class="timeline-month-header">
         <div class="skel skel-month-label skel-month-label--short"></div>
       </div>
-
-      <!-- Day 1 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -496,8 +483,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Day 2 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -603,8 +588,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Day 3 -->
       <div class="timeline-day">
         <div class="day-marker"><div class="skel skel-day-badge"></div></div>
         <div class="day-events">
@@ -840,7 +823,6 @@ export default {
   }
 }
 
-/* ── Tier / Map card ── */
 .skel-card {
   position: relative;
   border-radius: 20px;

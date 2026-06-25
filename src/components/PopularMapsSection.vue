@@ -11,8 +11,6 @@
           <span class="title-accent">MOST </span> POPULAR MAPS
         </h2>
         <h5 class="section-title-subtitle">(past 3 days)</h5>
-
-        <!-- Soldier grid -->
         <div class="grid">
           <template v-if="loading">
             <div class="card skeleton-card" v-for="n in 3" :key="'sol-' + n">
@@ -88,10 +86,7 @@
             </SmartLink>
           </template>
         </div>
-
         <hr class="divider" style="width: 100%" />
-
-        <!-- Demoman grid -->
         <div class="grid">
           <template v-if="loading">
             <div class="card skeleton-card" v-for="n in 3" :key="'dem-' + n">

@@ -19,7 +19,6 @@
           class="player-card"
           :class="{ 'min-mode': minMode }"
         >
-          <!-- Ranks section -->
           <div class="ranks-section">
             <div class="player-ranks">
               <template v-if="!minMode">
@@ -31,8 +30,6 @@
               </template>
             </div>
           </div>
-
-          <!-- Player info section -->
           <div class="player-info-section">
             <div class="player-link-skel">
               <div v-if="!minMode" class="skeleton skeleton-avatar-large"></div>
@@ -51,8 +48,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Map info section -->
           <div class="map-info-section">
             <div class="map-details-skel">
               <div
@@ -65,8 +60,6 @@
               ></div>
             </div>
           </div>
-
-          <!-- Server info section: stacked in full-mode, row in min-mode, hidden on mobile min-mode -->
           <div class="server-info-section" :class="{ 'min-mode': minMode }">
             <div
               class="skeleton skeleton-server-name"
@@ -77,8 +70,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Servers table skeleton -->
     <div v-else class="table-wrapper">
       <div class="table-header-content">
         <div class="table-header-top">

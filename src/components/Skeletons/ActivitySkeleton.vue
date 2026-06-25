@@ -36,8 +36,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Day group -->
     <div class="day-group">
       <div class="skeleton skeleton-day-label"></div>
       <div class="activity-cards-container">
@@ -47,14 +45,10 @@
           class="activity-card-base"
           :class="isMinMode ? 'is-min-mode' : 'is-normal-mode'"
         >
-          <!-- CLASS SECTION (normal mode only) -->
           <div class="card-class-section">
             <div class="skeleton skeleton-class-icon-normal"></div>
           </div>
-
-          <!-- PLAYER SECTION -->
           <div class="card-player-section">
-            <!-- min mode: class icon inline -->
             <div
               v-if="isMinMode"
               class="skeleton skeleton-class-icon-row"
@@ -79,8 +73,6 @@
               </div>
             </div>
           </div>
-
-          <!-- MAP SECTION -->
           <div class="card-map-section">
             <div class="map-details-skel">
               <div class="map-name-row-skel">
@@ -95,19 +87,15 @@
                 <div class="skeleton skeleton-map-badge"></div>
               </div>
             </div>
-            <!-- min mode: intended class + tier/rating on right -->
             <div v-if="isMinMode" class="min-mode-meta-skel">
               <div class="skeleton skeleton-intended-class-icon"></div>
               <div class="skeleton skeleton-tier-badge"></div>
             </div>
-            <!-- normal mode: intended class + tier/rating top-right -->
             <div v-if="!isMinMode" class="normal-map-top-right-skel">
               <div class="skeleton skeleton-intended-class-icon-normal"></div>
               <div class="skeleton skeleton-tier-badge"></div>
             </div>
           </div>
-
-          <!-- TIME SECTION -->
           <div class="card-time-section">
             <div
               class="time-rank-row-skel"
@@ -130,8 +118,6 @@
               class="skeleton skeleton-timeago-normal"
             ></div>
           </div>
-
-          <!-- TIMEAGO SECTION (min mode only) -->
           <div v-if="isMinMode" class="card-timeago-section">
             <div class="skeleton skeleton-time-ago"></div>
           </div>
@@ -150,8 +136,10 @@ export default {
     };
   },
   mounted() {
-    const mobile = window.innerWidth <= 992
-    this.isMinMode = mobile ? true : localStorage.getItem("activityMinMode") === "true"
+    const mobile = window.innerWidth <= 992;
+    this.isMinMode = mobile
+      ? true
+      : localStorage.getItem("activityMinMode") === "true";
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
   },
@@ -198,7 +186,6 @@ export default {
   flex-shrink: 0;
 }
 
-/* ── Header ── */
 .table-header-content {
   display: flex;
   align-items: center;
@@ -273,7 +260,6 @@ export default {
   border-radius: 4px;
 }
 
-/* ── Day group ── */
 .activity-cards {
   width: 100%;
   border-radius: 0 0 8px 8px;
@@ -299,7 +285,6 @@ export default {
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* ── Card base ── */
 .activity-card-base {
   display: grid;
   border: 1px solid var(--color-border-soft);
@@ -325,7 +310,6 @@ export default {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* ── Class section ── */
 .card-class-section {
   display: flex;
   align-items: center;
@@ -342,7 +326,6 @@ export default {
   border-radius: 50%;
 }
 
-/* ── Player section ── */
 .card-player-section {
   display: flex;
   align-items: center;
@@ -415,7 +398,6 @@ export default {
   border-radius: 4px;
 }
 
-/* ── Map section ── */
 .card-map-section {
   display: flex;
   align-items: center;
@@ -469,7 +451,6 @@ export default {
   flex-shrink: 0;
 }
 
-/* min mode meta (right side of map section) */
 .min-mode-meta-skel {
   display: flex;
   flex-direction: row;
@@ -492,7 +473,6 @@ export default {
   border-radius: 4px;
 }
 
-/* normal mode top-right */
 .normal-map-top-right-skel {
   display: flex;
   flex-direction: row;
@@ -508,7 +488,6 @@ export default {
   border-radius: 50%;
 }
 
-/* ── Time section ── */
 .card-time-section {
   display: flex;
   flex-direction: column;
@@ -568,7 +547,6 @@ export default {
   opacity: 0.65;
 }
 
-/* ── Timeago section (min mode) ── */
 .card-timeago-section {
   display: flex;
   align-items: center;
@@ -583,7 +561,6 @@ export default {
   border-radius: 4px;
 }
 
-/* ── 1200px ── */
 @media (max-width: 1200px) {
   .table-header-content {
     flex-wrap: wrap;
@@ -637,7 +614,6 @@ export default {
   }
 }
 
-/* ── 992px ── */
 @media (max-width: 992px) {
   .desktop-only {
     display: none;
@@ -665,13 +641,11 @@ export default {
   }
 }
 
-/* ── 768px ── */
 @media (max-width: 767.98px) {
   .activity-card-base.is-min-mode {
     grid-template-columns: minmax(0, 130px) 1fr auto;
   }
 
-  /* hide the timeago column on mobile */
   .card-timeago-section {
     display: none;
   }
@@ -692,7 +666,6 @@ export default {
     width: 26px;
   }
 
-  /* stack time + rank vertically on mobile */
   .time-rank-row-skel--min {
     flex-direction: column;
     gap: 4px;
