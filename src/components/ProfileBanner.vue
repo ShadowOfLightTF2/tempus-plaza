@@ -12,10 +12,45 @@
       </div>
     </div>
 
+    <div class="profile-top">
+      <div class="top-left">
+        <div v-if="player.donator" class="donator-badge">Donator</div>
+      </div>
+      <div class="top-right">
+        <div
+          v-if="onlineStatus"
+          class="online-indicator"
+          @click="connectToServer(onlineStatus.ipaddr, onlineStatus.port)"
+          title="Click to connect"
+        >
+          <span class="online-dot"></span>
+          <span class="online-text">
+            {{ onlineStatus.shortname || onlineStatus.server_name }}
+            <span class="online-sep">·</span>
+            {{ onlineStatus.currentMap }}
+          </span>
+        </div>
+        <div v-if="player.tempus_first_seen" class="date-item">
+          <span class="date-label">First joined</span>
+          <span class="date-value">{{
+            formatJoinDate(player.tempus_first_seen)
+          }}</span>
+        </div>
+        <span
+          v-if="player.tempus_last_seen && player.tempus_first_seen"
+          class="date-sep"
+          >·</span
+        >
+        <div v-if="player.tempus_last_seen" class="date-item">
+          <span class="date-label">Last online</span>
+          <span class="date-value">{{
+            formatRelativeTime(player.tempus_last_seen)
+          }}</span>
+        </div>
+      </div>
+    </div>
     <div class="banner-inner">
       <div class="profile-left">
-        <div v-if="player.donator" class="donator-badge">Donator</div>
-
         <a
           :href="
             player.steamidconverted && player.steamidconverted !== '#'
@@ -91,6 +126,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    onlineStatus: {
+      type: Object,
+      default: null, // null = offline, { server_name, shortname, currentMap } = online
+    },
   },
   computed: {
     stats() {
@@ -107,6 +146,9 @@ export default {
     },
   },
   methods: {
+    connectToServer(ip, port) {
+      window.location.href = `steam://run/440//+connect ${ip}:${port}/`;
+    },
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
         ? countryCode.toLowerCase()
@@ -115,6 +157,44 @@ export default {
     },
     handleImageError(event) {
       event.target.src = "/icons/default-flag.jpg";
+    },
+    formatRelativeTime(timestamp) {
+      if (!timestamp) return null;
+      const now = Date.now();
+      const ts =
+        typeof timestamp === "number"
+          ? timestamp * 1000
+          : new Date(timestamp).getTime();
+      const diff = Math.floor((now - ts) / 1000);
+      if (diff < 60) return "just now";
+      if (diff < 3600) {
+        const m = Math.floor(diff / 60);
+        return `${m}m ago`;
+      }
+      if (diff < 86400) {
+        const h = Math.floor(diff / 3600);
+        return `${h}h ago`;
+      }
+      if (diff < 86400 * 30) {
+        const d = Math.floor(diff / 86400);
+        return `${d}d ago`;
+      }
+      return new Date(ts).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    },
+    formatJoinDate(timestamp) {
+      if (!timestamp) return null;
+      const ts =
+        typeof timestamp === "number"
+          ? timestamp * 1000
+          : new Date(timestamp).getTime();
+      return new Date(ts).toLocaleDateString(undefined, {
+        month: "short",
+        year: "numeric",
+      });
     },
   },
 };
@@ -156,6 +236,111 @@ export default {
   border-radius: inherit;
 }
 
+.profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px 0;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.top-left {
+  display: flex;
+  align-items: center;
+  min-width: 70px;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.date-item {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.date-label {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.date-value {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.date-sep {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.online-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(72, 199, 116, 0.12);
+  border: 1px solid rgba(72, 199, 116, 0.3);
+  border-radius: 20px;
+  padding: 2px 10px 2px 7px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.online-indicator:hover {
+  background: rgba(72, 199, 116, 0.22);
+  border-color: rgba(72, 199, 116, 0.55);
+}
+
+.online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #48c774;
+  box-shadow: 0 0 6px rgba(72, 199, 116, 0.8);
+  animation: onlinePulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes onlinePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(72, 199, 116, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(72, 199, 116, 1);
+  }
+}
+
+.online-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.online-sep {
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0 1px;
+}
+
 .banner-inner {
   display: flex;
   align-items: stretch;
@@ -170,16 +355,12 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 28px 24px;
+  padding: 10px 28px 24px;
   flex: 0 0 240px;
-
   text-align: center;
 }
 
 .donator-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
   background: gold;
   color: #1a1200;
   padding: 3px 10px;
@@ -276,7 +457,7 @@ export default {
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 24px 20px;
+  padding: 10px 24px 20px;
 }
 
 .stats-grid {
@@ -318,29 +499,26 @@ export default {
   line-height: 1;
 }
 
-@media (min-width: 992px) {
-  .player-nameN {
-    min-width: 250px;
-  }
-}
-
 @media (max-width: 900px) {
   .profile-left {
     flex: 0 0 200px;
-    padding: 24px 16px;
+    padding: 10px 24px 16px;
   }
-
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
-
   .stat-value {
     font-size: 1.15rem;
   }
   .player-name {
     font-size: 1.4rem;
     max-width: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .online-indicator {
+    display: none;
   }
 }
 
@@ -355,20 +533,13 @@ export default {
     align-items: center;
     gap: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    padding: 20px 16px;
+    padding: 10px 20px 16px;
     text-align: left;
-  }
-
-  .profile-left .donator-badge {
-    top: 8px;
-    left: 8px;
-    font-size: 0.6rem;
   }
 
   .profile-info {
     align-items: flex-start;
   }
-
   .player-name {
     font-size: 1.4rem;
     max-width: 250px;
@@ -376,16 +547,12 @@ export default {
   .country {
     font-size: 0.82rem;
   }
-
   .profile-right {
-    padding: 16px 14px 20px;
+    padding: 10px 14px 20px;
   }
-
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
-
   .stat-card {
     padding: 12px 6px;
   }
@@ -395,11 +562,59 @@ export default {
   .stat-label {
     font-size: 0.68rem;
   }
+
+  .profile-top {
+    padding: 10px 14px 0;
+    gap: 8px;
+  }
+
+  .date-sep {
+    display: none;
+  }
+
+  .online-text {
+    max-width: 160px;
+  }
+
+  .date-label {
+    font-size: 0.6rem;
+  }
+  .date-value {
+    font-size: 0.72rem;
+  }
 }
 
 @media (max-width: 400px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-top {
+    padding: 8px 12px 0;
+  }
+
+  .top-right {
+    gap: 6px;
+  }
+
+  .online-indicator {
+    padding: 2px 8px 2px 6px;
+  }
+
+  .online-text {
+    max-width: 120px;
+  }
+
+  .date-item {
+    gap: 4px;
+  }
+
+  .date-label {
+    font-size: 0.55rem;
+  }
+
+  .date-value {
+    font-size: 0.65rem;
   }
 }
 </style>

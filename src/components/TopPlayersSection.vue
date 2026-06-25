@@ -242,6 +242,7 @@ export default {
   border-radius: 4px;
   background: rgba(102, 126, 234, 0.08);
   backdrop-filter: blur(4px);
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -253,6 +254,7 @@ export default {
   text-transform: uppercase;
   color: #ffffff;
   margin: 0 0 10px;
+  word-break: break-word;
 }
 
 .title-accent {
@@ -293,6 +295,7 @@ export default {
   padding: 30px;
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 0; /* allow grid item to shrink */
 }
 
 .section-subtitle {
@@ -327,6 +330,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
+  min-width: 0; /* critical: allow flex item to shrink below content width */
 }
 
 .player-card::after {
@@ -350,7 +354,8 @@ export default {
 }
 
 .player-card:hover {
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5),
+  box-shadow:
+    0 10px 40px rgba(102, 126, 234, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-color: rgba(102, 126, 234, 0.4);
   cursor: pointer;
@@ -385,6 +390,7 @@ export default {
   margin-right: 15px;
   min-width: 50px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .player-card:nth-child(1) .player-rank {
@@ -405,6 +411,8 @@ export default {
   flex-direction: column;
   flex: 1;
   align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .player-avatar {
@@ -415,6 +423,7 @@ export default {
   border: 3px solid var(--color-primary);
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .player-card:hover .player-avatar {
@@ -428,7 +437,7 @@ export default {
   color: #ffffff;
   margin-bottom: 5px;
   align-self: flex-start;
-  max-width: 200px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -441,12 +450,18 @@ export default {
   color: #d5d5d5;
   margin-bottom: 10px;
   align-self: flex-start;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .flag-icon {
   margin-right: 8px;
   width: 20px;
   height: auto;
+  flex-shrink: 0;
 }
 
 .points-gained {
@@ -454,17 +469,22 @@ export default {
   align-items: center;
   gap: 8px;
   align-self: flex-start;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .points-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .points-label {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
 }
 
 .period-selector {
@@ -554,14 +574,11 @@ export default {
 
   .player-card {
     padding: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .player-info {
-    flex: unset;
-    min-width: 200px;
+    flex: 1 1 0%;
+    min-width: 0;
   }
 
   .player-avatar {
@@ -608,40 +625,171 @@ export default {
 }
 
 @media (max-width: 450px) {
-  .period-btn {
-    font-size: 0.8rem;
-    padding: 10px 20px;
+  .container {
+    padding: 0 12px;
   }
 
-  .section-subtitle,
-  .player-card .player-rank {
-    font-size: 1.4rem;
+  .divider-container {
+    padding: 0 12px;
+    gap: 10px;
+    margin: 32px 0 16px;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 18px;
+  }
+
+  .class-section {
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  .players-list {
+    gap: 10px;
+  }
+
+  .player-card {
+    padding: 12px 10px;
+    border-radius: 14px;
+    gap: 0;
+  }
+
+  .player-rank {
+    font-size: 1.15rem;
+    min-width: 30px;
+    margin-right: 8px;
   }
 
   .player-avatar {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
+    border-width: 2px;
+  }
+
+  .player-info {
+    gap: 2px;
   }
 
   .player-card .player-name {
-    font-size: 1rem;
-  }
-
-  .player-card .points-gained .points-value,
-  .player-card .points-gained .points-label {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    margin-bottom: 2px;
   }
 
   .player-card .country {
     font-size: 0.7rem;
+    margin-bottom: 4px;
   }
 
   .player-card .flag-icon {
-    width: 15px;
+    width: 14px;
+    margin-right: 5px;
   }
 
-  .player-info {
-    min-width: 150px;
+  .points-gained {
+    gap: 5px;
+  }
+
+  .player-card .points-gained .points-value,
+  .player-card .points-gained .points-label {
+    font-size: 0.78rem;
+  }
+
+  .period-selector {
+    padding: 0 12px;
+    margin: 18px 0 24px 0;
+    gap: 8px;
+  }
+
+  .period-btn {
+    font-size: 0.78rem;
+    padding: 9px 16px;
+  }
+
+  .skeleton-card {
+    padding: 12px 10px;
+  }
+  .skeleton-rank {
+    width: 30px;
+    height: 28px;
+    margin-right: 8px;
+  }
+  .skeleton-avatar {
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
+  }
+  .skeleton-name {
+    height: 14px;
+  }
+  .skeleton-country {
+    height: 11px;
+  }
+  .skeleton-points {
+    height: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .class-section {
+    padding: 12px 8px;
+  }
+
+  .player-card {
+    padding: 10px 8px;
+  }
+
+  .player-rank {
+    font-size: 1rem;
+    min-width: 26px;
+    margin-right: 6px;
+  }
+
+  .player-avatar {
+    width: 38px;
+    height: 38px;
+    margin-right: 10px;
+  }
+
+  .player-card .player-name {
+    font-size: 0.8rem;
+  }
+
+  .player-card .country {
+    font-size: 0.65rem;
+  }
+
+  .player-card .flag-icon {
+    width: 12px;
+  }
+
+  .player-card .points-gained .points-value,
+  .player-card .points-gained .points-label {
+    font-size: 0.7rem;
+  }
+
+  .period-btn {
+    font-size: 0.7rem;
+    padding: 8px 12px;
   }
 }
 
@@ -660,6 +808,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 24px;
+  min-width: 0;
 }
 
 .skeleton-rank,
@@ -676,6 +825,7 @@ export default {
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite linear;
   border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .skeleton-rank {
@@ -683,20 +833,19 @@ export default {
   height: 36px;
   border-radius: 6px;
   margin-right: 15px;
-  flex-shrink: 0;
 }
 .skeleton-avatar {
   width: 75px;
   height: 75px;
   border-radius: 50%;
   margin-right: 25px;
-  flex-shrink: 0;
 }
 .skeleton-info {
   display: flex;
   flex-direction: column;
   gap: 10px;
   flex: 1;
+  min-width: 0;
 }
 .skeleton-name {
   width: 55%;

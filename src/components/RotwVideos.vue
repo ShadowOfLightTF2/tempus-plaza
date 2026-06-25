@@ -24,7 +24,14 @@
             <iframe
               :src="`https://www.youtube.com/embed/${video.video_id}`"
               frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+              "
               allowfullscreen
               :style="{
                 pointerEvents:
@@ -176,9 +183,7 @@ export default {
 .rotw-container {
   width: fit-content;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 .rotw-section-title {
   font-size: 1.75rem;
@@ -219,12 +224,15 @@ export default {
   z-index: 1;
   min-width: 300px;
   max-width: 750px;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
   will-change: transform;
 }
 .rotw-card:hover {
-  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+  box-shadow:
+    0 20px 50px rgba(102, 126, 234, 0.2),
     0 0 0 1px rgba(102, 126, 234, 0.3);
   border-color: rgba(102, 126, 234, 0.35);
 }

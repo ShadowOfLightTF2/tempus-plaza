@@ -178,7 +178,13 @@
             </div>
           </Transition>
         </div>
-
+        <PlayoffsSection
+          :players="playoffsPlayers"
+          :maps="playoffsMaps"
+          event-date="June 14, 2026"
+          description="test"
+          youtube-id="4Rq6VQXl5WA"
+        />
         <NewestSection />
         <div>
           <TopPlayersSection />
@@ -200,6 +206,7 @@ import TierRatingChangesSection from "./TierRatingChangesSection.vue";
 import PopularMapsSection from "./PopularMapsSection.vue";
 import YoutubeSection from "./YoutubeSection.vue";
 import NewestSection from "./NewestSection.vue";
+import PlayoffsSection from "./Playoffssection.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -212,6 +219,7 @@ export default {
     TierRatingChangesSection,
     PopularMapsSection,
     YoutubeSection,
+    PlayoffsSection,
   },
   setup() {
     useHead({ title: "Tempus Plaza" });

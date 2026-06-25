@@ -184,8 +184,8 @@
                           points
                             ? "Points"
                             : selectedCategory === "completion"
-                            ? "Percentage"
-                            : "Count"
+                              ? "Percentage"
+                              : "Count"
                         }}
                       </th>
                     </tr>
@@ -274,6 +274,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </td>
                         <SmartLink
                           v-else
@@ -290,6 +296,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </SmartLink>
                         <td
                           class="points-column"
@@ -380,8 +392,8 @@
                                 : "Points"
                               : "Points"
                             : selectedCategory === "completion"
-                            ? "Percentage"
-                            : "Count"
+                              ? "Percentage"
+                              : "Count"
                         }}
                       </th>
                     </tr>
@@ -470,6 +482,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </td>
                         <SmartLink
                           v-else
@@ -486,6 +504,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </SmartLink>
                         <td
                           class="points-column"
@@ -571,8 +595,8 @@
                           points
                             ? "Points"
                             : selectedCategory === "completion"
-                            ? "Percentage"
-                            : "Count"
+                              ? "Percentage"
+                              : "Count"
                         }}
                       </th>
                     </tr>
@@ -661,6 +685,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </td>
                         <SmartLink
                           v-else
@@ -677,6 +707,12 @@
                             @error="handleError"
                           />
                           {{ player.name }}
+                          <span
+                            v-if="player.inactive"
+                            class="inactive-badge"
+                            title="Not seen in 3+ months"
+                            >Inactive</span
+                          >
                         </SmartLink>
                         <td
                           class="points-column"
@@ -1505,6 +1541,23 @@ export default {
   background: var(--color-primary-dark) !important;
 }
 
+.inactive-badge {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff7b7b;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.name-cell:has(.inactive-badge) {
+}
+
 .name-cell,
 .country-cell {
   max-width: 250px;
@@ -1849,6 +1902,11 @@ export default {
     min-width: 0;
     max-width: 33%;
   }
+  .inactive-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    margin-left: 4px;
+  }
 }
 
 @media (max-width: 1400px) {
@@ -1948,6 +2006,13 @@ export default {
   }
   .header-title {
     font-size: 18px;
+  }
+  .inactive-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+    margin-left: 3px;
+    border-radius: 8px;
+    letter-spacing: 0;
   }
 }
 

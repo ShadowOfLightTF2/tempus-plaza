@@ -106,7 +106,9 @@
                   }"
                   tag="li"
                   class="list-group-item record-item"
+                  :class="{ 'link-disabled': isMobile && !isScrollFocused }"
                   style="background: rgba(255, 255, 255, 0.05)"
+                  @click.capture="handleRecordClick"
                 >
                   <div class="d-flex align-items-center record-class-map">
                     <img
@@ -198,8 +200,12 @@
                   }"
                   tag="li"
                   class="list-group-item record-item"
-                  :class="getPlacementClass(placement)"
+                  :class="[
+                    getPlacementClass(placement),
+                    { 'link-disabled': isMobile && !isScrollFocused },
+                  ]"
                   style="background: rgba(255, 255, 255, 0.05)"
+                  @click.capture="handleRecordClick"
                 >
                   <div class="d-flex align-items-center record-class-map">
                     <img
@@ -414,6 +420,13 @@ export default {
     onSectionClick() {
       this.isScrollFocused = true;
     },
+    handleRecordClick(e) {
+      if (this.isMobile && !this.isScrollFocused) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.isScrollFocused = true;
+      }
+    },
     onClickOutside(e) {
       if (!this.$el.contains(e.target)) {
         this.isScrollFocused = false;
@@ -617,6 +630,14 @@ export default {
   ) !important;
   cursor: pointer;
 }
+.list-group-item.record-item.link-disabled {
+  cursor: default;
+  pointer-events: auto;
+}
+.list-group-item.record-item.link-disabled:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  cursor: default;
+}
 .card-body,
 .card-header {
   padding: 10px;
@@ -754,14 +775,47 @@ export default {
 .new-rank {
   font-weight: bold;
 }
-.record-item.gained-placement {
-  border-left: 3px solid #51cf66;
+.list-group-item.record-item.gained-placement {
+  background: linear-gradient(
+    to right,
+    rgba(81, 207, 102, 0.1),
+    rgba(81, 207, 102, 0) 60%
+  ) !important;
 }
-.record-item.lost-placement {
-  border-left: 3px solid #ff6b6b;
+.list-group-item.record-item.lost-placement {
+  background: linear-gradient(
+    to right,
+    rgba(255, 107, 107, 0.1),
+    rgba(255, 107, 107, 0) 60%
+  ) !important;
 }
-.record-item.tied-placement {
-  border-left: 3px solid #6c757d;
+.list-group-item.record-item.tied-placement {
+  background: linear-gradient(
+    to right,
+    rgba(108, 117, 125, 0.1),
+    rgba(108, 117, 125, 0) 60%
+  ) !important;
+}
+.list-group-item.record-item.gained-placement:hover {
+  background: linear-gradient(
+    to right,
+    rgba(81, 207, 102, 0.3),
+    rgba(74, 111, 165, 0.1)
+  ) !important;
+}
+.list-group-item.record-item.lost-placement:hover {
+  background: linear-gradient(
+    to right,
+    rgba(255, 107, 107, 0.3),
+    rgba(74, 111, 165, 0.1)
+  ) !important;
+}
+.list-group-item.record-item.tied-placement:hover {
+  background: linear-gradient(
+    to right,
+    rgba(108, 117, 125, 0.3),
+    rgba(74, 111, 165, 0.1)
+  ) !important;
 }
 .record-time-detail.gained-placement,
 .record-time-detail.lost-placement {

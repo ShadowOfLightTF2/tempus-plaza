@@ -106,30 +106,29 @@
                   </div>
                 </div>
                 <div v-if="map" class="lookup-map-secondary">
-                  <span class="secondary-stat"
-                    >{{ map.course_count }} courses</span
+                  <template
+                    v-for="(stat, idx) in secondaryStatsList"
+                    :key="idx"
                   >
-                  <span class="stat-separator">•</span>
-                  <span class="secondary-stat"
-                    >{{ map.bonus_count }} bonuses</span
-                  >
-                  <span class="stat-separator">•</span>
-                  <span class="secondary-stat"
-                    >{{ map.soldier_completion_count }} [S] completions</span
-                  >
-                  <span class="stat-separator">•</span>
-                  <span class="secondary-stat"
-                    >{{ map.demoman_completion_count }} [D] completions</span
-                  >
-                  <span class="stat-separator">•</span>
-                  <span class="secondary-stat"
-                    >Added {{ formatDate(map.date_added) }}</span
-                  >
+                    <span class="secondary-stat">{{ stat }}</span>
+                    <span
+                      v-if="idx < secondaryStatsList.length - 1"
+                      class="stat-separator"
+                      >•</span
+                    >
+                  </template>
                 </div>
                 <div v-else class="loading-ranks">
                   <div class="loading-spinner"></div>
                   <span>Loading...</span>
                 </div>
+                <button
+                  class="banner-tag-btn"
+                  title="Vote for tag(s)"
+                  @click.stop.prevent="showTagModal = true"
+                >
+                  <i class="bi bi-tag-fill"></i>
+                </button>
                 <a
                   :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
                   class="download-btn"
@@ -602,7 +601,13 @@
                                       map.soldier_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -647,7 +652,14 @@
                                       map.demoman_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      autoplay;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -732,7 +744,14 @@
                                       course.soldier_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      autoplay;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -783,7 +802,14 @@
                                       course.demoman_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      autoplay;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -868,7 +894,14 @@
                                       bonus.soldier_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      autoplay;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -919,7 +952,14 @@
                                       bonus.demoman_video
                                     "
                                     frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="
+                                      accelerometer;
+                                      autoplay;
+                                      clipboard-write;
+                                      encrypted-media;
+                                      gyroscope;
+                                      picture-in-picture;
+                                    "
                                     allowfullscreen
                                   ></iframe>
                                 </div>
@@ -988,7 +1028,14 @@
                                     rotwVideo.video_id
                                   "
                                   frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allow="
+                                    accelerometer;
+                                    autoplay;
+                                    clipboard-write;
+                                    encrypted-media;
+                                    gyroscope;
+                                    picture-in-picture;
+                                  "
                                   allowfullscreen
                                 ></iframe>
                               </div>
@@ -1348,6 +1395,24 @@ export default {
     },
   },
   computed: {
+    secondaryStatsList() {
+      if (!this.map) return [];
+      const stats = [];
+      if (this.map.course_count > 0) {
+        stats.push(
+          `${this.map.course_count} course${this.map.course_count > 1 ? "s" : ""}`,
+        );
+      }
+      if (this.map.bonus_count > 0) {
+        stats.push(
+          `${this.map.bonus_count} bonus${this.map.bonus_count > 1 ? "es" : ""}`,
+        );
+      }
+      stats.push(`${this.map.soldier_completion_count || 0} [S] completions`);
+      stats.push(`${this.map.demoman_completion_count || 0} [D] completions`);
+      stats.push(`Added ${this.formatDate(this.map.date_added)}`);
+      return stats;
+    },
     displayedRotwVideos() {
       if (this.showAllRotwVideos || this.rotwVideos.length <= 1) {
         return this.rotwVideos;
@@ -1951,8 +2016,10 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.35s ease, border-color 0.35s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
   will-change: transform;
 }
 
@@ -3070,6 +3137,39 @@ export default {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
+.banner-tag-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.banner-tag-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.banner-tag-btn:active {
+  transform: translateY(0);
+}
+
 .lookup-map-main {
   display: flex;
   flex-direction: column;
@@ -3079,10 +3179,14 @@ export default {
 .lookup-map-name {
   font-size: 2.25rem;
   font-weight: 700;
-  margin: 0;
+  margin: auto;
+  width: 80%;
   color: #ffffff;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .map-primary-info {

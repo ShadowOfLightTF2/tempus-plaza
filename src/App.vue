@@ -151,34 +151,6 @@
         </button>
       </div>
     </div>
-    <div v-if="showXyzBanner && !xyzBannerDismissed" class="xyz-banner">
-      <div class="xyz-banner">
-        <div class="xyz-banner-content">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          <span
-            >tempusplaza.xyz will be going down soon, make sure to swap to
-            tempusplaza.com</span
-          >
-          <button
-            class="update-close"
-            @click="xyzBannerDismissed = true"
-            aria-label="Dismiss"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
     <nav class="navbar navbar-expand-xl bg-custom">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -273,7 +245,7 @@
                 <i class="bi bi-heart"></i>
               </router-link>
             </li>
-            <div class="navbar-right" v-if="!isHomePage">
+            <div class="navbar-right">
               <div class="navbar-search-container me-3" @click.stop>
                 <div
                   class="navbar-search-box"
@@ -1138,7 +1110,6 @@ export default {
   components: { HoverPreview },
   data() {
     return {
-      xyzBannerDismissed: false,
       showErrorPopup: false,
       showLoginPopup: false,
       hasVisitedBefore: false,
@@ -1185,12 +1156,6 @@ export default {
     };
   },
   computed: {
-    showXyzBanner() {
-      return (
-        document.referrer.includes("tempusplaza.xyz") ||
-        new URLSearchParams(window.location.search).get("ref") === "xyz"
-      );
-    },
     user() {
       return this.currentUser;
     },
@@ -2782,31 +2747,5 @@ body {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
-}
-.xyz-banner {
-  background: linear-gradient(135deg, #bd9e48, #966010);
-  color: white;
-  position: relative;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  animation: slideDown 0.3s ease-out;
-}
-.xyz-banner-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  gap: 10px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.xyz-banner-content i {
-  font-size: 1rem;
-  color: #ffd166;
-  flex-shrink: 0;
-}
-.xyz-banner-content span {
-  font-size: 16px;
-  font-weight: 500;
 }
 </style>

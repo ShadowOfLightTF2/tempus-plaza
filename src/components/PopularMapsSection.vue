@@ -329,8 +329,10 @@ export default {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
   animation: fadeSlideUp 0.4s ease both;
   animation-delay: var(--delay, 0ms);
 }
@@ -381,7 +383,8 @@ export default {
 }
 
 .card:hover {
-  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+  box-shadow:
+    0 20px 50px rgba(102, 126, 234, 0.2),
     0 0 0 1px rgba(102, 126, 234, 0.3);
   border-color: rgba(102, 126, 234, 0.35);
   cursor: pointer;

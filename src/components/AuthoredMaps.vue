@@ -311,9 +311,7 @@ export default {
 .map-container {
   width: fit-content;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 .map-section-title {
   font-size: 1.75rem;
@@ -421,7 +419,8 @@ export default {
 }
 .map-card {
   box-shadow: 0 0 20px rgba(0, 0, 0);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       to bottom,
       rgba(255, 255, 255, 0.15) 0%,
       rgba(255, 255, 255, 0.288) 20%,
@@ -442,7 +441,8 @@ export default {
 }
 .map-card:hover {
   border-radius: 15px;
-  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2),
+  box-shadow:
+    0 20px 50px rgba(102, 126, 234, 0.2),
     0 0 0 1px rgba(102, 126, 234, 0.3);
   cursor: pointer;
 }

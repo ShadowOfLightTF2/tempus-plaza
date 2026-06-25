@@ -270,7 +270,51 @@
                           'rank-3-name': entry.rank === 3,
                         }"
                       >
-                        <div class="name-text">{{ entry.name }}</div>
+                        <span class="name-text">{{ entry.name }}</span>
+                        <span
+                          v-if="entry.inactive"
+                          class="inactive-badge"
+                          title="Inactive, not seen in 3+ months"
+                        >
+                          <svg
+                            width="14"
+                            height="10"
+                            viewBox="0 0 22 14"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <text
+                              x="0"
+                              y="13"
+                              font-size="11"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                            <text
+                              x="7"
+                              y="11"
+                              font-size="12"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                            <text
+                              x="14"
+                              y="9"
+                              font-size="16"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                          </svg>
+                        </span>
                       </SmartLink>
                       <td
                         class="date-column"
@@ -506,7 +550,51 @@
                           'rank-3-name': entry.rank === 3,
                         }"
                       >
-                        <div class="name-text">{{ entry.name }}</div>
+                        <span class="name-text">{{ entry.name }}</span>
+                        <span
+                          v-if="entry.inactive"
+                          class="inactive-badge"
+                          title="Inactive, not seen in 3+ months"
+                        >
+                          <svg
+                            width="14"
+                            height="10"
+                            viewBox="0 0 22 14"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <text
+                              x="0"
+                              y="13"
+                              font-size="11"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                            <text
+                              x="7"
+                              y="11"
+                              font-size="12"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                            <text
+                              x="14"
+                              y="9"
+                              font-size="16"
+                              fill="currentColor"
+                              font-family="sans-serif"
+                              font-weight="bold"
+                            >
+                              z
+                            </text>
+                          </svg>
+                        </span>
                       </SmartLink>
                       <td
                         class="date-column"
@@ -900,16 +988,13 @@ export default {
         const capClass = capitalizeFirstLetter(classType);
         if (offset === 0) this[`selected${capClass}Records`] = res.data;
         else {
-          this[`selected${capClass}Records`].splice(
-            offset,
-            offset + this.loadSize,
-          );
           this[`selected${capClass}Records`] = [
-            ...this[`selected${capClass}Records`],
+            ...this[`selected${capClass}Records`].slice(0, offset),
             ...res.data,
           ];
         }
-        if (userRes?.data) this.checkUserRecord(userRes.data, classType);
+        if (offset === 0 && userRes?.data)
+          this.checkUserRecord(userRes.data, classType);
       } catch (err) {
         console.error(`Error fetching ${type} records:`, err);
         this.error = `Error fetching ${type} records.`;
@@ -1141,6 +1226,20 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   z-index: -1;
+}
+.inactive-badge {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff7b7b;
+  width: 24px;
+  height: 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  cursor: help;
 }
 .name-cell {
   max-width: 250px;
@@ -1532,6 +1631,13 @@ export default {
   .show-more-footer {
     overflow: visible;
     min-height: auto;
+  }
+  .inactive-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+    margin-left: 3px;
+    border-radius: 8px;
+    letter-spacing: 0;
   }
 }
 .category-container {

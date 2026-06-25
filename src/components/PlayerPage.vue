@@ -36,6 +36,7 @@
             :player-rank-info="playerRankInfo"
             :banner-colors="bannerColors"
             :loading="loading.ranks"
+            :online-status="onlineStatus"
           />
           <div class="row g-2 mt-3">
             <div class="col-12 col-md-4 chart-col">
@@ -134,7 +135,7 @@
               </div>
             </div>
           </div>
-          <div v-show="hasRotwVideos" class="row g-3 mt-1">
+          <div v-show="hasRotwVideos" class="row g-3">
             <div class="col-12">
               <RotwVideos
                 :player-id="playerId"
@@ -142,7 +143,7 @@
               />
             </div>
           </div>
-          <div v-show="hasAuthoredMaps" class="row g-3 mt-1">
+          <div v-show="hasAuthoredMaps" class="row g-3">
             <div class="col-12">
               <AuthoredMaps
                 :player-id="playerId"
@@ -278,6 +279,7 @@ export default {
     showMapSearch: false,
     currentMapIndex: null,
     mapSearchResults: [],
+    onlineStatus: null,
     player: {
       id: null,
       steamid: null,
@@ -575,6 +577,7 @@ export default {
           this.fetchPlayerPoints(playerId),
           this.fetchFavoriteMaps(playerId),
           this.fetchChangedPlacements(),
+          this.fetchPlayerOnlineStatus(playerId),
         ]);
         await this.fetchPlayerStats(playerId);
         await this.fetchSharedTimes(playerId);
@@ -1012,6 +1015,17 @@ export default {
         };
       } catch (error) {
         console.error("Error fetching user data:", error);
+      }
+    },
+    async fetchPlayerOnlineStatus(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/servers/${playerId}/online-status`,
+        );
+        this.onlineStatus = response.data; // null if offline
+      } catch (error) {
+        console.error("Error fetching online status:", error);
+        this.onlineStatus = null;
       }
     },
     async fetchFavoriteMaps(playerId) {
@@ -1492,9 +1506,7 @@ export default {
 .map-container {
   width: fit-content;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 .map-section-title {
   font-size: 1.75rem;
