@@ -31,7 +31,7 @@
                 :src="playerAvatar || '/avatars/golly.jpg'"
                 alt="Avatar"
                 class="lookup-avatar"
-                onerror="this.src='/avatars/golly.jpg'"
+                onerror="this.src = '/avatars/golly.jpg'"
               />
               <div class="lookup-player-info">
                 <h2
@@ -223,7 +223,22 @@
             </div>
           </SmartLink>
         </div>
-
+        <div v-else-if="loading" class="lookup-banner-skeleton">
+          <div class="lookup-banner-skeleton-content">
+            <div class="lookup-banner-skeleton-left">
+              <span class="lookup-skeleton lookup-skeleton-avatar-large"></span>
+              <div class="lookup-skeleton-info">
+                <span class="lookup-skeleton lookup-skeleton-title"></span>
+                <span class="lookup-skeleton lookup-skeleton-subtitle"></span>
+              </div>
+            </div>
+            <div class="lookup-banner-skeleton-stats">
+              <span class="lookup-skeleton lookup-skeleton-stat"></span>
+              <span class="lookup-skeleton lookup-skeleton-stat"></span>
+              <span class="lookup-skeleton lookup-skeleton-stat"></span>
+            </div>
+          </div>
+        </div>
         <div class="search-section">
           <div class="lookup-search-container" @click.stop>
             <div
@@ -1969,14 +1984,18 @@ export default {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 .lookup-search-box.is-focused,
 .lookup-search-box:hover {
   border-color: rgba(102, 126, 234, 0.6);
   background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15),
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.15),
     0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -2031,17 +2050,22 @@ export default {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.04);
   overflow: hidden;
   z-index: 1000;
 }
 
 .lookup-dropdown-enter-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .lookup-dropdown-leave-active {
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transition:
+    opacity 0.1s ease,
+    transform 0.1s ease;
 }
 .lookup-dropdown-enter-from,
 .lookup-dropdown-leave-to {
@@ -2830,7 +2854,10 @@ export default {
   letter-spacing: 0.04em;
   text-decoration: none;
   text-transform: uppercase;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
   z-index: 10;
 }
 
@@ -2971,6 +2998,59 @@ export default {
 .stat-separator {
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.75rem;
+}
+
+.lookup-banner-skeleton {
+  width: 100%;
+  max-width: 1000px;
+  margin: 20px auto;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+.lookup-banner-skeleton-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  gap: 24px;
+}
+.lookup-banner-skeleton-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.lookup-skeleton-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lookup-skeleton-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lookup-skeleton-title {
+  width: 200px;
+  height: 24px;
+  border-radius: 8px;
+}
+.lookup-skeleton-subtitle {
+  width: 120px;
+  height: 16px;
+  border-radius: 6px;
+}
+.lookup-banner-skeleton-stats {
+  display: flex;
+  gap: 16px;
+}
+.lookup-skeleton-stat {
+  width: 120px;
+  height: 80px;
+  border-radius: 12px;
 }
 
 .skeleton-row td {
@@ -3166,6 +3246,30 @@ export default {
   }
   .secondary-stat {
     font-size: 0.75rem;
+  }
+  .lookup-banner-skeleton-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 20px;
+  }
+  .lookup-banner-skeleton-left {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 16px;
+  }
+  .lookup-skeleton-info {
+    align-items: flex-start;
+  }
+  .lookup-banner-skeleton-stats {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .lookup-skeleton-stat {
+    min-width: 100px;
+    height: 70px;
   }
 }
 
