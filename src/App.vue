@@ -110,6 +110,7 @@
         </div>
       </div>
     </div>
+    <PointsCalculator v-model="showCalculator" />
     <div v-if="isUpdating" class="update-banner">
       <div class="update-banner-content">
         <div class="update-icon">
@@ -215,7 +216,7 @@
                 <i class="bi bi-search"></i> Lookup
               </router-link>
             </li>
-            <li class="nav-item me-3">
+            <!-- <li class="nav-item me-3">
               <router-link
                 to="/compare"
                 class="nav-link"
@@ -224,8 +225,8 @@
               >
                 <i class="bi bi-bar-chart"></i> Compare
               </router-link>
-            </li>
-            <li class="nav-item me-3">
+            </li> -->
+            <li class="nav-item me-2">
               <router-link
                 to="/history"
                 class="nav-link"
@@ -235,7 +236,7 @@
                 <i class="bi bi-clock-history"></i> History
               </router-link>
             </li>
-            <li class="nav-item me-3">
+            <li class="nav-item">
               <router-link
                 to="/donate"
                 class="nav-link"
@@ -244,6 +245,15 @@
               >
                 <i class="bi bi-heart"></i>
               </router-link>
+            </li>
+            <li class="nav-item me-3">
+              <button
+                type="button"
+                class="nav-link calculator-btn"
+                @click="showCalculator = true"
+              >
+                <i class="bi bi-calculator"></i>
+              </button>
             </li>
             <div class="navbar-right">
               <div class="navbar-search-container me-3" @click.stop>
@@ -613,6 +623,14 @@
           </ul>
         </div>
         <button
+          class="navbar-toggler mobile-calc-btn"
+          type="button"
+          @click="showCalculator = true"
+          aria-label="Points calculator"
+        >
+          <i class="bi bi-calculator"></i>
+        </button>
+        <button
           class="navbar-toggler"
           type="button"
           @click.stop="toggleSidebar"
@@ -874,13 +892,13 @@
           @click="closeSidebar"
           ><i class="bi bi-search"></i><span>Lookup</span></router-link
         >
-        <router-link
+        <!-- <router-link
           to="/compare"
           class="sidebar-nav-link"
           :class="{ active: isNavItemActive('Compare') }"
           @click="closeSidebar"
           ><i class="bi bi-bar-chart"></i><span>Compare</span></router-link
-        >
+        > -->
         <router-link
           to="/history"
           class="sidebar-nav-link"
@@ -1099,19 +1117,20 @@
 
 <script>
 import HoverPreview from "./components/HoverPreview.vue";
+import PointsCalculator from "./components/PointsCalculator.vue";
 import DOMPurify from "dompurify";
-import debounce from "debounce";
 import { provide, reactive } from "vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "App",
-  components: { HoverPreview },
+  components: { HoverPreview, PointsCalculator },
   data() {
     return {
       showErrorPopup: false,
       showLoginPopup: false,
+      showCalculator: false,
       hasVisitedBefore: false,
       searchQuery: "",
       searchResults: { maps: [], players: [] },
@@ -2160,6 +2179,18 @@ body {
   transform: translateY(-6px);
 }
 
+.calculator-btn {
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.calculator-btn,
+.donate-link {
+  padding: 10px 8px !important;
+}
+
 .sidebar-search-wrap {
   padding: 0.75rem 1.25rem 0.5rem;
   position: relative;
@@ -2711,13 +2742,26 @@ body {
 .navbar-toggler {
   border: none;
   padding: 0.25rem 0.5rem;
-  margin-left: auto;
 }
 .navbar-toggler:focus {
   box-shadow: none;
 }
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.mobile-calc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+  margin-right: 0.5rem;
+  margin-left: auto;
+  padding: 0.25rem 0.5rem;
+}
+.mobile-calc-btn:focus {
+  box-shadow: none;
 }
 
 @keyframes slideDown {

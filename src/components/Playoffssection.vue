@@ -113,7 +113,6 @@
               </div>
             </div>
           </div>
-
           <div class="bracket-links">
             <a
               href="https://commoninja.site/59b1d4f0-8cbd-4f36-b840-7bce1f8f7ed8"
@@ -329,9 +328,9 @@ const PLAYER_DEFS = [
   { id: 31339, name: "Hass", classes: ["soldier"] },
   { id: 74551, name: "Rev!4", classes: ["soldier"] },
   { id: 24856, name: "Spidda", classes: ["soldier"] },
-  { id: 281915, name: "Newjuls", classes: ["demoman"] },
   { id: 243670, name: "Cander", classes: ["demoman"] },
   { id: 35454, name: "Nnameee", classes: ["demoman"] },
+  { id: 281915, name: "Newjuls", classes: ["demoman"] },
 ];
 
 // Final standings — used to apply gold/silver/bronze borders to player chips
@@ -342,7 +341,9 @@ const PLACEMENTS = {
     602086: 3, // Nikita
   },
   demoman: {
-    // empty until Demo finishes
+    10736: 1, // Vice
+    243670: 2, // Cander
+    35454: 3, // Nnameee
   },
 };
 

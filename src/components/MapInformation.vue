@@ -567,7 +567,6 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
-  max-width: 600px;
   transition: transform 0.3s ease;
 }
 

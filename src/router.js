@@ -10,6 +10,7 @@ import Compare from './components/Compare.vue';
 import Lookup from './components/Lookup.vue';
 import Donate from './components/Donate.vue';
 import History from './components/History.vue';
+import NotFound from './components/NotFound.vue';
 
 const routes = [
   {
@@ -102,6 +103,12 @@ const routes = [
     component: PlayerPage,
     meta: { title: 'Tempus Plaza' },
     props: route => ({ playerId: Number(route.params.playerId) }),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound,
+    meta: { title: '404 Not Found | Tempus Plaza' },
   },
 ];
 

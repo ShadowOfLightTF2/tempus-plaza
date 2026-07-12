@@ -31,12 +31,51 @@
                   :class="{ active: activeVideo === 'map-soldier' }"
                   @click.stop="toggleCard('map-soldier')"
                 >
-                  <h5 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Soldier record
-                  </h5>
                   <div class="video-container">
                     <div
                       v-if="
+                        map &&
+                        map.soldier_video &&
+                        map.soldier_video !== 'null' &&
+                        !isVideoLoaded('map-soldier')
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map.name)"
+                      @click.stop="playVideo('map-soldier')"
+                    >
+                      <img
+                        src="/icons/soldier.png"
+                        class="class-icon"
+                        alt="Soldier"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(map.soldier_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[map.soldier_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[map.soldier_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[map.soldier_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         map && map.soldier_video && map.soldier_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -44,11 +83,14 @@
                     >
                       <iframe
                         :src="
-                          'https://www.youtube.com/embed/' + map.soldier_video
+                          'https://www.youtube.com/embed/' +
+                          map.soldier_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
                           accelerometer;
+                          autoplay;
                           clipboard-write;
                           encrypted-media;
                           gyroscope;
@@ -76,12 +118,51 @@
                   :class="{ active: activeVideo === 'map-demoman' }"
                   @click.stop="toggleCard('map-demoman')"
                 >
-                  <h5 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Demoman record
-                  </h5>
                   <div class="video-container">
                     <div
                       v-if="
+                        map &&
+                        map.demoman_video &&
+                        map.demoman_video !== 'null' &&
+                        !isVideoLoaded('map-demoman')
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map.name)"
+                      @click.stop="playVideo('map-demoman')"
+                    >
+                      <img
+                        src="/icons/demoman.png"
+                        class="class-icon"
+                        alt="Demoman"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(map.demoman_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[map.demoman_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[map.demoman_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[map.demoman_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         map && map.demoman_video && map.demoman_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -89,7 +170,9 @@
                     >
                       <iframe
                         :src="
-                          'https://www.youtube.com/embed/' + map.demoman_video
+                          'https://www.youtube.com/embed/' +
+                          map.demoman_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
@@ -151,12 +234,50 @@
                   }"
                   @click.stop="toggleCard('course-soldier-' + course.id)"
                 >
-                  <h6 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Soldier record
-                  </h6>
                   <div class="video-container">
                     <div
                       v-if="
+                        course.soldier_video &&
+                        course.soldier_video !== 'null' &&
+                        !isVideoLoaded('course-soldier-' + course.id)
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map && map.name)"
+                      @click.stop="playVideo('course-soldier-' + course.id)"
+                    >
+                      <img
+                        src="/icons/soldier.png"
+                        class="class-icon"
+                        alt="Soldier"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(course.soldier_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[course.soldier_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[course.soldier_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[course.soldier_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         course.soldier_video && course.soldier_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -165,7 +286,8 @@
                       <iframe
                         :src="
                           'https://www.youtube.com/embed/' +
-                          course.soldier_video
+                          course.soldier_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
@@ -200,12 +322,50 @@
                   }"
                   @click.stop="toggleCard('course-demoman-' + course.id)"
                 >
-                  <h6 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Demoman record
-                  </h6>
                   <div class="video-container">
                     <div
                       v-if="
+                        course.demoman_video &&
+                        course.demoman_video !== 'null' &&
+                        !isVideoLoaded('course-demoman-' + course.id)
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map && map.name)"
+                      @click.stop="playVideo('course-demoman-' + course.id)"
+                    >
+                      <img
+                        src="/icons/demoman.png"
+                        class="class-icon"
+                        alt="Demoman"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(course.demoman_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[course.demoman_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[course.demoman_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[course.demoman_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         course.demoman_video && course.demoman_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -214,7 +374,8 @@
                       <iframe
                         :src="
                           'https://www.youtube.com/embed/' +
-                          course.demoman_video
+                          course.demoman_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
@@ -272,12 +433,50 @@
                   }"
                   @click.stop="toggleCard('bonus-soldier-' + bonus.id)"
                 >
-                  <h6 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Soldier record
-                  </h6>
                   <div class="video-container">
                     <div
                       v-if="
+                        bonus.soldier_video &&
+                        bonus.soldier_video !== 'null' &&
+                        !isVideoLoaded('bonus-soldier-' + bonus.id)
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map && map.name)"
+                      @click.stop="playVideo('bonus-soldier-' + bonus.id)"
+                    >
+                      <img
+                        src="/icons/soldier.png"
+                        class="class-icon"
+                        alt="Soldier"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(bonus.soldier_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[bonus.soldier_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[bonus.soldier_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[bonus.soldier_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         bonus.soldier_video && bonus.soldier_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -285,7 +484,9 @@
                     >
                       <iframe
                         :src="
-                          'https://www.youtube.com/embed/' + bonus.soldier_video
+                          'https://www.youtube.com/embed/' +
+                          bonus.soldier_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
@@ -320,12 +521,50 @@
                   }"
                   @click.stop="toggleCard('bonus-demoman-' + bonus.id)"
                 >
-                  <h6 class="video-title">
-                    <i class="bi bi-person-fill me-2"></i>Demoman record
-                  </h6>
                   <div class="video-container">
                     <div
                       v-if="
+                        bonus.demoman_video &&
+                        bonus.demoman_video !== 'null' &&
+                        !isVideoLoaded('bonus-demoman-' + bonus.id)
+                      "
+                      class="custom-thumbnail"
+                      :style="getThumbnailStyle(map && map.name)"
+                      @click.stop="playVideo('bonus-demoman-' + bonus.id)"
+                    >
+                      <img
+                        src="/icons/demoman.png"
+                        class="class-icon"
+                        alt="Demoman"
+                      />
+                      <img
+                        :src="getYoutubeThumbnail(bonus.demoman_video)"
+                        class="youtube-preview"
+                        alt="YouTube thumbnail"
+                      />
+                      <div class="thumbnail-overlay">
+                        <div class="thumbnail-info">
+                          <span class="thumbnail-player">{{
+                            parseVideoTitle(videoTitles[bonus.demoman_video])
+                              .playerName || "Unknown"
+                          }}</span>
+                          <span
+                            v-if="
+                              parseVideoTitle(videoTitles[bonus.demoman_video])
+                                .duration
+                            "
+                            class="thumbnail-duration"
+                            >{{
+                              parseVideoTitle(videoTitles[bonus.demoman_video])
+                                .duration
+                            }}</span
+                          >
+                        </div>
+                        <i class="bi bi-play-circle-fill play-icon"></i>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="
                         bonus.demoman_video && bonus.demoman_video !== 'null'
                       "
                       class="video-scale-wrapper"
@@ -333,7 +572,9 @@
                     >
                       <iframe
                         :src="
-                          'https://www.youtube.com/embed/' + bonus.demoman_video
+                          'https://www.youtube.com/embed/' +
+                          bonus.demoman_video +
+                          '?autoplay=1'
                         "
                         frameborder="0"
                         allow="
@@ -491,7 +732,22 @@ export default {
       showRotwVideos: false,
       showAllRotwVideos: false,
       activeVideo: null,
+      loadedVideos: new Set(),
+      failedThumbnails: new Set(),
+      videoTitles: {},
+      videoTitlesFetching: new Set(),
     };
+  },
+  watch: {
+    map() {
+      this.fetchAllVideoTitles();
+    },
+    courses() {
+      this.fetchAllVideoTitles();
+    },
+    bonuses() {
+      this.fetchAllVideoTitles();
+    },
   },
   computed: {
     displayedRotwVideos() {
@@ -578,9 +834,113 @@ export default {
       const year = date.getFullYear();
       return `${day} ${monthName} ${year}`;
     },
+    getThumbnailUrl(mapName) {
+      if (!mapName) return null;
+      return `/map-backgrounds/${encodeURIComponent(mapName)}.webp`;
+    },
+    getThumbnailStyle(mapName) {
+      const url = this.getThumbnailUrl(mapName);
+      const hasImage = url && !this.failedThumbnails.has(mapName);
+      if (hasImage) {
+        return {
+          backgroundImage:
+            "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(" +
+            url +
+            ")",
+        };
+      }
+      return {
+        backgroundImage:
+          "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6))",
+      };
+    },
+    markThumbnailFailed(mapName) {
+      if (mapName) this.failedThumbnails.add(mapName);
+    },
+    preloadThumbnail(mapName) {
+      const url = this.getThumbnailUrl(mapName);
+      if (!url) return;
+      const img = new Image();
+      img.onerror = () => this.markThumbnailFailed(mapName);
+      img.src = url;
+    },
+    isVideoLoaded(id) {
+      return this.loadedVideos.has(id);
+    },
+    playVideo(id) {
+      this.loadedVideos.add(id);
+      this.activeVideo = id;
+    },
+    parseVideoTitle(title) {
+      if (!title || typeof title !== "string") {
+        return { playerName: null, duration: null };
+      }
+
+      const lastDashIndex = title.lastIndexOf(" - ");
+      if (lastDashIndex === -1) {
+        return { playerName: null, duration: null };
+      }
+
+      const meta = title.slice(0, lastDashIndex).trim();
+      const duration = title.slice(lastDashIndex + 3).trim() || null;
+
+      const nameMatch = meta.match(/^\[.+?\]\s*(.+?)\s+on\s+/i);
+      const playerName = nameMatch ? nameMatch[1].trim() : null;
+
+      return { playerName, duration };
+    },
+    setVideoTitle(videoId, title) {
+      if (this.$set) {
+        this.$set(this.videoTitles, videoId, title);
+      } else {
+        this.videoTitles[videoId] = title;
+      }
+    },
+    async fetchVideoTitle(videoId) {
+      if (!videoId || videoId === "null") return;
+      if (this.videoTitles[videoId] !== undefined) return; // already fetched
+      if (this.videoTitlesFetching.has(videoId)) return; // already in flight
+      this.videoTitlesFetching.add(videoId);
+
+      try {
+        const oEmbedUrl =
+          "https://www.youtube.com/oembed?url=" +
+          encodeURIComponent("https://www.youtube.com/watch?v=" + videoId) +
+          "&format=json";
+        const res = await fetch(oEmbedUrl);
+        if (!res.ok) throw new Error("oEmbed request failed");
+        const data = await res.json();
+        this.setVideoTitle(videoId, data.title || null);
+      } catch (err) {
+        this.setVideoTitle(videoId, null);
+      } finally {
+        this.videoTitlesFetching.delete(videoId);
+      }
+    },
+    fetchAllVideoTitles() {
+      const ids = [];
+      if (this.map) {
+        ids.push(this.map.soldier_video, this.map.demoman_video);
+      }
+      (this.courses || []).forEach((course) => {
+        ids.push(course.soldier_video, course.demoman_video);
+      });
+      (this.bonuses || []).forEach((bonus) => {
+        ids.push(bonus.soldier_video, bonus.demoman_video);
+      });
+      ids
+        .filter((id) => id && id !== "null")
+        .forEach((id) => this.fetchVideoTitle(id));
+    },
+    getYoutubeThumbnail(videoId) {
+      if (!videoId || videoId === "null") return null;
+      return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+    },
   },
   mounted() {
     document.addEventListener("click", this.handleClickOutside);
+    if (this.map && this.map.name) this.preloadThumbnail(this.map.name);
+    this.fetchAllVideoTitles();
   },
   beforeUnmount() {
     document.removeEventListener("click", this.handleClickOutside);
@@ -840,16 +1200,111 @@ export default {
   pointer-events: auto;
 }
 
+.custom-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  text-align: center;
+  padding: 12px;
+}
+
+.class-icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  z-index: 2;
+}
+
+.youtube-preview {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 144px;
+  height: 81px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.play-icon {
+  font-size: 2rem;
+  opacity: 0.9;
+  transition: transform 0.2s ease;
+}
+
+.custom-thumbnail:hover .play-icon {
+  transform: scale(1.15);
+}
+
+.thumbnail-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.thumbnail-player {
+  font-weight: 700;
+  font-size: 1.6rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+.thumbnail-duration {
+  font-weight: 600;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
 @media (max-width: 768px) {
   .order-mobile-last {
     order: 1;
   }
-
   .video-card.active {
     transform: none;
   }
   .video-card-rotw.active {
     transform: none !important;
+  }
+  .youtube-preview {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 96px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+  .class-icon {
+    width: 32px;
+    height: 32px;
   }
 }
 </style>
