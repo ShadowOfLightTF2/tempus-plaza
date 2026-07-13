@@ -445,8 +445,11 @@
               </div>
             </div>
             <div class="user-section">
+              <div v-if="authChecking" class="login-checking">
+                <span class="login-spinner"></span>
+              </div>
               <button
-                v-if="!user || !user.steamid"
+                v-else-if="!user || !user.steamid"
                 class="btn login-button"
                 @click="loginWithSteam"
               >
@@ -915,8 +918,11 @@
         >
       </nav>
       <div class="sidebar-footer">
+        <div v-if="authChecking" class="login-checking login-checking-sidebar">
+          <span class="login-spinner"></span>
+        </div>
         <button
-          v-if="!user || !user.steamid"
+          v-else-if="!user || !user.steamid"
           class="btn sidebar-login-btn"
           @click="loginWithSteam"
         >
@@ -1132,6 +1138,7 @@ export default {
       showLoginPopup: false,
       showCalculator: false,
       hasVisitedBefore: false,
+      authChecking: true,
       searchQuery: "",
       searchResults: { maps: [], players: [] },
       loadingMaps: false,
@@ -1264,7 +1271,11 @@ export default {
       this.isDesktop = window.innerWidth >= 1200;
       if (this.isDesktop) this.sidebarOpen = false;
       const nav = document.querySelector(".navbar-nav");
-      if (!nav) return;
+      if (!nav || !this.isDesktop) return;
+
+      const wasCompact = nav.classList.contains("nav-compact");
+      if (wasCompact) nav.classList.remove("nav-compact");
+
       const items = nav.querySelectorAll(
         ".nav-item, .navbar-right, .user-section",
       );
@@ -1276,9 +1287,8 @@ export default {
         if (rect.bottom < minBottom) minBottom = rect.bottom;
       });
       const hasOverflow = maxBottom - minBottom > 10;
-      document
-        .querySelector(".navbar-nav")
-        ?.classList.toggle("nav-compact", hasOverflow);
+
+      nav.classList.toggle("nav-compact", hasOverflow);
     },
     toggleSidebar() {
       this.sidebarOpen = !this.sidebarOpen;
@@ -1508,7 +1518,9 @@ export default {
   },
   created() {},
   beforeDestroy() {
-    window.removeEventListener("resize", this.checkNavbarOverflow);
+    window.removeEventListener("resize", this._navResizeHandler);
+    if (this._navRAF) cancelAnimationFrame(this._navRAF);
+    this._navObserver?.disconnect();
     clearInterval(this.updateInterval);
     clearTimeout(this.debounceTimer);
     document.body.style.overflow = "";
@@ -1526,13 +1538,41 @@ export default {
   },
   async mounted() {
     this.isDesktop = window.innerWidth >= 1200;
+
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("error") === "player_not_found") {
       this.showErrorPopup = true;
       window.history.replaceState({}, "", window.location.pathname);
     }
+
     this.$nextTick(() => this.checkNavbarOverflow());
-    window.addEventListener("resize", this.checkNavbarOverflow);
+
+    this._navRAF = null;
+    this._navResizeHandler = () => {
+      if (this._navRAF) return;
+      this._navRAF = requestAnimationFrame(() => {
+        this._navRAF = null;
+        this.checkNavbarOverflow();
+      });
+    };
+    window.addEventListener("resize", this._navResizeHandler);
+
+    const nav = document.querySelector(".navbar-nav");
+    if (nav && "ResizeObserver" in window) {
+      this._navObserver = new ResizeObserver(() => {
+        if (this._navRAF) return;
+        this._navRAF = requestAnimationFrame(() => {
+          this._navRAF = null;
+          this.checkNavbarOverflow();
+        });
+      });
+      this._navObserver.observe(nav);
+    }
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => this.checkNavbarOverflow());
+    }
+
     try {
       const isAuthenticated = await this.checkAuthStatus();
       if (isAuthenticated) {
@@ -1551,7 +1591,10 @@ export default {
     } catch (error) {
       console.error("Error during authentication check:", error);
       this.currentUser = null;
+    } finally {
+      this.authChecking = false;
     }
+
     if (!this.currentUser && this.checkFirstVisit()) {
       this.debounceTimer = setTimeout(() => {
         this.showLoginPopup = true;
@@ -1659,6 +1702,31 @@ body {
   color: var(--color-text);
   border-color: #363a3d !important;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.login-checking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+.login-checking-sidebar {
+  width: 100%;
+  height: 32px;
+}
+.login-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--color-primary, #4a7fc0);
+  animation: login-spinner-spin 0.7s linear infinite;
+}
+@keyframes login-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .bi-steam {

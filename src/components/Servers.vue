@@ -754,34 +754,7 @@ export default {
         console.error("Error refreshing data:", error);
       }
     },
-    sortServersByPlayers() {
-      if (this.sortBy === "players") this.sortDirection *= -1;
-      else {
-        this.sortBy = "players";
-        this.sortDirection = -1;
-      }
-      this.serversData.sort(
-        (a, b) => (a.playerCount - b.playerCount) * this.sortDirection,
-      );
-    },
-    sortServersByMap() {
-      if (this.sortBy === "map") this.sortDirection *= -1;
-      else {
-        this.sortBy = "map";
-        this.sortDirection = 1;
-      }
-      this.serversData.sort(
-        (a, b) =>
-          (a.currentMap || "").localeCompare(b.currentMap || "") *
-          this.sortDirection,
-      );
-    },
-    sortServersByRegion() {
-      if (this.sortBy === "region") this.sortDirection *= -1;
-      else {
-        this.sortBy = "region";
-        this.sortDirection = 1;
-      }
+    applyCurrentSort() {
       const regionOrder = [
         "north_america",
         "europe",
@@ -792,12 +765,57 @@ export default {
         "middle_east",
         "unknown",
       ];
-      this.serversData.sort((a, b) => {
-        const diff =
-          regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
-        if (diff !== 0) return diff * this.sortDirection;
-        return a.country.localeCompare(b.country) * this.sortDirection;
-      });
+      switch (this.sortBy) {
+        case "region":
+          this.serversData.sort((a, b) => {
+            const diff =
+              regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
+            if (diff !== 0) return diff * this.sortDirection;
+            return a.country.localeCompare(b.country) * this.sortDirection;
+          });
+          break;
+        case "name":
+          this.serversData.sort(
+            (a, b) => a.name.localeCompare(b.name) * this.sortDirection,
+          );
+          break;
+        case "map":
+          this.serversData.sort(
+            (a, b) =>
+              (a.currentMap || "").localeCompare(b.currentMap || "") *
+              this.sortDirection,
+          );
+          break;
+        case "players":
+          this.serversData.sort(
+            (a, b) => (a.playerCount - b.playerCount) * this.sortDirection,
+          );
+          break;
+      }
+    },
+    sortServersByPlayers() {
+      if (this.sortBy === "players") this.sortDirection *= -1;
+      else {
+        this.sortBy = "players";
+        this.sortDirection = -1;
+      }
+      this.applyCurrentSort();
+    },
+    sortServersByMap() {
+      if (this.sortBy === "map") this.sortDirection *= -1;
+      else {
+        this.sortBy = "map";
+        this.sortDirection = 1;
+      }
+      this.applyCurrentSort();
+    },
+    sortServersByRegion() {
+      if (this.sortBy === "region") this.sortDirection *= -1;
+      else {
+        this.sortBy = "region";
+        this.sortDirection = 1;
+      }
+      this.applyCurrentSort();
     },
     sortServersByName() {
       if (this.sortBy === "name") this.sortDirection *= -1;
@@ -805,9 +823,7 @@ export default {
         this.sortBy = "name";
         this.sortDirection = 1;
       }
-      this.serversData.sort(
-        (a, b) => a.name.localeCompare(b.name) * this.sortDirection,
-      );
+      this.applyCurrentSort();
     },
     async fetchTopPlayersData() {
       try {
@@ -839,28 +855,13 @@ export default {
       try {
         const response = await fetch(`${API_BASE_URL}/servers`);
         const data = await response.json();
-        const regionOrder = [
-          "north_america",
-          "europe",
-          "asia",
-          "oceania",
-          "south_america",
-          "africa",
-          "middle_east",
-          "unknown",
-        ];
         this.serversData = data
           .filter((server) => server.hidden !== 1)
           .map((server) => ({
             ...server,
             players: server.players ? JSON.parse(server.players) : [],
-          }))
-          .sort((a, b) => {
-            const diff =
-              regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
-            if (diff !== 0) return diff;
-            return a.country.localeCompare(b.country);
-          });
+          }));
+        this.applyCurrentSort();
       } catch (error) {
         console.error("Error fetching servers data:", error);
       }

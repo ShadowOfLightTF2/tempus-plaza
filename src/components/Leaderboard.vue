@@ -115,6 +115,7 @@
                   <div
                     class="cutoff-box cutoff-g1"
                     v-if="currentSoldierCutoffs.g1"
+                    @click="jumpToCutoff('soldier', 'g1')"
                   >
                     <span class="cutoff-label">G1</span>
                     <span class="cutoff-value">{{
@@ -124,6 +125,7 @@
                   <div
                     class="cutoff-box cutoff-g2"
                     v-if="currentSoldierCutoffs.g2"
+                    @click="jumpToCutoff('soldier', 'g2')"
                   >
                     <span class="cutoff-label">G2</span>
                     <span class="cutoff-value">{{
@@ -133,6 +135,7 @@
                   <div
                     class="cutoff-box cutoff-g3"
                     v-if="currentSoldierCutoffs.g3"
+                    @click="jumpToCutoff('soldier', 'g3')"
                   >
                     <span class="cutoff-label">G3</span>
                     <span class="cutoff-value">{{
@@ -142,6 +145,7 @@
                   <div
                     class="cutoff-box cutoff-g4"
                     v-if="currentSoldierCutoffs.g4"
+                    @click="jumpToCutoff('soldier', 'g4')"
                   >
                     <span class="cutoff-label">G4</span>
                     <span class="cutoff-value">{{
@@ -232,6 +236,7 @@
                       v-else
                       v-for="(entry, index) in displayedSoldierEntries"
                       :key="'soldier-' + index"
+                      :id="'soldier-row-' + entry.rank"
                       class="fade-in"
                       :class="{
                         'current-user-row': playerId && entry.id === playerId,
@@ -395,6 +400,7 @@
                   <div
                     class="cutoff-box cutoff-g1"
                     v-if="currentDemomanCutoffs.g1"
+                    @click="jumpToCutoff('demoman', 'g1')"
                   >
                     <span class="cutoff-label">G1</span>
                     <span class="cutoff-value">{{
@@ -404,15 +410,17 @@
                   <div
                     class="cutoff-box cutoff-g2"
                     v-if="currentDemomanCutoffs.g2"
+                    @click="jumpToCutoff('demoman', 'g2')"
                   >
                     <span class="cutoff-label">G2</span>
                     <span class="cutoff-value">{{
-                      currentDemomanCutoffs.g2
+                      currentSoldierCutoffs.g2
                     }}</span>
                   </div>
                   <div
                     class="cutoff-box cutoff-g3"
                     v-if="currentDemomanCutoffs.g3"
+                    @click="jumpToCutoff('demoman', 'g3')"
                   >
                     <span class="cutoff-label">G3</span>
                     <span class="cutoff-value">{{
@@ -422,6 +430,7 @@
                   <div
                     class="cutoff-box cutoff-g4"
                     v-if="currentDemomanCutoffs.g4"
+                    @click="jumpToCutoff('demoman', 'g4')"
                   >
                     <span class="cutoff-label">G4</span>
                     <span class="cutoff-value">{{
@@ -512,6 +521,7 @@
                       v-else
                       v-for="(entry, index) in displayedDemomanEntries"
                       :key="'demoman-' + index"
+                      :id="'demoman-row-' + entry.rank"
                       class="fade-in"
                       :class="{
                         'current-user-row': playerId && entry.id === playerId,
@@ -843,6 +853,48 @@ export default {
     },
   },
   methods: {
+    async jumpToCutoff(playerClass, groupKey) {
+      const cutoffs =
+        playerClass === "soldier"
+          ? this.currentSoldierCutoffs
+          : this.currentDemomanCutoffs;
+      const targetRank = cutoffs[groupKey];
+      if (!targetRank) return;
+
+      const roundedCount = Math.ceil(targetRank / 50) * 50;
+      const capClass = capitalizeFirstLetter(playerClass);
+      const recordsKey = `selected${capClass}Records`;
+      const displayCountKey = `${playerClass}DisplayCount`;
+      const offsetKey = `${playerClass}Offset`;
+
+      if (this[recordsKey].length < roundedCount) {
+        const type = this.selectedTypePill.toLowerCase();
+        let index = null;
+        if (type === "course") index = this.selectedCourseIndex;
+        else if (type === "bonus") index = this.selectedBonusIndex;
+
+        const currentLength = this[recordsKey].length;
+        await this.fetchRecords(
+          type,
+          playerClass,
+          index,
+          currentLength,
+          roundedCount - currentLength + 1,
+        );
+      }
+
+      if (this[displayCountKey] + this[offsetKey] < roundedCount) {
+        this[offsetKey] = roundedCount - this[displayCountKey];
+      }
+
+      await this.$nextTick();
+      const el = document.getElementById(`${playerClass}-row-${targetRank}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("highlight-row");
+        setTimeout(() => el.classList.remove("highlight-row"), 2000);
+      }
+    },
     async fetchUser() {
       try {
         const res = await fetch(`${API_BASE_URL}/api/get-user`, {
@@ -1300,6 +1352,25 @@ export default {
 .cutoff-value {
   font-size: 13px;
   font-weight: 700;
+}
+.cutoff-box {
+  cursor: pointer;
+}
+.cutoff-box:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.highlight-row td {
+  animation: cutoff-flash 2s ease-out;
+}
+@keyframes cutoff-flash {
+  0% {
+    background: rgba(74, 111, 165, 0.7) !important;
+  }
+  100% {
+    background: inherit;
+  }
 }
 .cutoff-g1 {
   border-color: rgba(255, 151, 151, 0.4);

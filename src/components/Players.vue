@@ -324,6 +324,20 @@
                 </table>
               </div>
               <div class="players-footer">
+                <div class="load-size-selector">
+                  <span class="load-size-label">Load</span>
+                  <div class="load-size-toggle">
+                    <button
+                      v-for="size in loadSizeOptions"
+                      :key="'sol-size-' + size"
+                      class="load-size-btn"
+                      :class="{ active: loadSize === size }"
+                      @click="loadSize = size"
+                    >
+                      {{ size }}
+                    </button>
+                  </div>
+                </div>
                 <button
                   class="btn btn-dark update-button"
                   style="
@@ -333,7 +347,6 @@
                       rgba(74, 111, 165, 0.3)
                     );
                     font-weight: bold;
-                    width: 100%;
                   "
                   @click="loadMoreSoldiers"
                   :disabled="loadingSoldiers"
@@ -532,6 +545,20 @@
                 </table>
               </div>
               <div class="players-footer">
+                <div class="load-size-selector">
+                  <span class="load-size-label">Load</span>
+                  <div class="load-size-toggle">
+                    <button
+                      v-for="size in loadSizeOptions"
+                      :key="'dem-size-' + size"
+                      class="load-size-btn"
+                      :class="{ active: loadSize === size }"
+                      @click="loadSize = size"
+                    >
+                      {{ size }}
+                    </button>
+                  </div>
+                </div>
                 <button
                   class="btn btn-dark update-button"
                   style="
@@ -541,7 +568,6 @@
                       rgba(74, 111, 165, 0.3)
                     );
                     font-weight: bold;
-                    width: 100%;
                   "
                   @click="loadMoreDemomen"
                   :disabled="loadingDemomen"
@@ -735,6 +761,20 @@
                 </table>
               </div>
               <div class="players-footer">
+                <div class="load-size-selector">
+                  <span class="load-size-label">Load</span>
+                  <div class="load-size-toggle">
+                    <button
+                      v-for="size in loadSizeOptions"
+                      :key="'ovr-size-' + size"
+                      class="load-size-btn"
+                      :class="{ active: loadSize === size }"
+                      @click="loadSize = size"
+                    >
+                      {{ size }}
+                    </button>
+                  </div>
+                </div>
                 <button
                   class="btn btn-dark update-button"
                   style="
@@ -744,7 +784,6 @@
                       rgba(74, 111, 165, 0.3)
                     );
                     font-weight: bold;
-                    width: 100%;
                   "
                   @click="loadMoreOverall"
                   :disabled="loadingOverall"
@@ -781,6 +820,8 @@ export default {
     });
   },
   data: () => ({
+    loadSize: 50,
+    loadSizeOptions: [50, 100, 200],
     showOverallTable: false,
     soldierPlayers: [],
     demomanPlayers: [],
@@ -1092,11 +1133,14 @@ export default {
       const fallback = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
       if (e.target.src !== fallback) e.target.src = fallback;
     },
-    async fetchDataForCurrentSelection(index, classType = "both") {
+    async fetchDataForCurrentSelection(
+      offset,
+      classType = "both",
+      limit = this.loadSize,
+    ) {
       try {
         const category = this.selectedCategory;
         const item = this.selectedItem;
-
         let tableName = category;
         let type = item
           .replace(/\s+/g, "")
@@ -1106,41 +1150,44 @@ export default {
 
         if (category === "completion") {
           this.points = false;
-          await this.fetchCompletions(type, index, classType);
-          if (index === 0) await this.fetchUserRank();
+          await this.fetchCompletions(type, offset, classType, limit);
+          if (offset === 0) await this.fetchUserRank();
           return;
         }
-
         if (category === "countries") {
           this.points = true;
-          await this.fetchCountries(index, classType);
-          if (index === 0) await this.fetchUserRank();
+          await this.fetchCountries(offset, classType, limit);
+          if (offset === 0) await this.fetchUserRank();
           return;
         }
-
         if (type.includes("(count)")) {
           type = type.replace("(count)", "");
           cat = "count";
           this.points = false;
         }
-
         if (tableName === "ratings") {
           tableName = type.replace(/rating(\d+)/g, (_, n) => `r${n}s`);
           type = "maps";
         } else if (tableName === "groups") {
           if (type === "groups") {
-            await this.fetchPlayers(tableName, "total", cat, index, classType);
-            if (index === 0) await this.fetchUserRank();
+            await this.fetchPlayers(
+              tableName,
+              "total",
+              cat,
+              offset,
+              classType,
+              limit,
+            );
+            if (offset === 0) await this.fetchUserRank();
             return;
           }
           tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
           type = "total";
         }
-
         if (tableName === "tiers") cat = "total";
 
-        await this.fetchPlayers(tableName, type, cat, index, classType);
-        if (index === 0) await this.fetchUserRank();
+        await this.fetchPlayers(tableName, type, cat, offset, classType, limit);
+        if (offset === 0) await this.fetchUserRank();
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -1149,28 +1196,6 @@ export default {
         this.loadingSoldiers = false;
         this.loadingDemomen = false;
         this.loadingOverall = false;
-      }
-    },
-    async fetchCompletions(type, index, classType = "both") {
-      let indexFix = index > 0 ? 50 : 0;
-      const { data } = await axios.get(
-        `${API_BASE_URL}/players/players-completion-stats/${type}/${
-          index - indexFix
-        }`,
-      );
-      const [soldierData, demomanData, overallData] = data;
-
-      if (index === 0) {
-        this.soldierPlayers = soldierData;
-        this.demomanPlayers = demomanData;
-        this.overallPlayers = overallData;
-      } else {
-        if (classType === "both" || classType === "soldier")
-          this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
-        if (classType === "both" || classType === "demoman")
-          this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
-        if (classType === "both" || classType === "overall")
-          this.overallPlayers = [...this.overallPlayers, ...overallData];
       }
     },
     async loadCountriesList() {
@@ -1218,96 +1243,6 @@ export default {
     resetCountryFilter() {
       this.filteredCountries = [...this.allCountries];
       this.searchQuery = "";
-    },
-    async fetchCountries(index, classType = "both") {
-      try {
-        if (this.selectedItem === "Total") {
-          if (index === 0) {
-            const { data: countriesData } = await axios.get(
-              `${API_BASE_URL}/players/get-countries-data`,
-            );
-
-            const toEntry = (country, amountKey, sortKey) => ({
-              id: country.country_code,
-              player_id: country.country_code,
-              name: country.country,
-              flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
-              amount:
-                amountKey === "overall"
-                  ? country.soldier_total_points + country.demoman_total_points
-                  : country[amountKey] || 0,
-            });
-
-            this.soldierPlayers = [...countriesData]
-              .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
-              .map((c) => toEntry(c, "soldier_total_points"));
-
-            this.demomanPlayers = [...countriesData]
-              .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
-              .map((c) => toEntry(c, "demoman_total_points"));
-
-            this.overallPlayers = [...countriesData]
-              .sort(
-                (a, b) =>
-                  b.soldier_total_points +
-                  b.demoman_total_points -
-                  (a.soldier_total_points + a.demoman_total_points),
-              )
-              .map((c) => toEntry(c, "overall"));
-          }
-        } else if (this.selectedCountry) {
-          let indexFix = index > 0 ? 50 : 0;
-          const { data: players } = await axios.get(
-            `${API_BASE_URL}/players/country-top-players/${
-              this.selectedCountry.code
-            }/${index - indexFix}`,
-          );
-
-          const defaultAvatar = `${
-            import.meta.env.BASE_URL
-          }avatars/default-avatar.jpg`;
-          const normalize = (list, pointsKey) =>
-            (list || []).map((p) => ({
-              ...p,
-              amount: p[pointsKey] ?? 0,
-              steam_avatar: p.steam_avatar || defaultAvatar,
-              player_id: p.id,
-            }));
-
-          if (index === 0) {
-            this.soldierPlayers = normalize(
-              players.topSoldiers,
-              "soldier_total_points",
-            );
-            this.demomanPlayers = normalize(
-              players.topDemomen,
-              "demoman_total_points",
-            );
-            this.overallPlayers = normalize(
-              players.topOverall || [],
-              "overall_total_points",
-            );
-          } else {
-            if (classType === "both" || classType === "soldier")
-              this.soldierPlayers = [
-                ...this.soldierPlayers,
-                ...normalize(players.topSoldiers, "soldier_total_points"),
-              ];
-            if (classType === "both" || classType === "demoman")
-              this.demomanPlayers = [
-                ...this.demomanPlayers,
-                ...normalize(players.topDemomen, "demoman_total_points"),
-              ];
-            if (classType === "both" || classType === "overall")
-              this.overallPlayers = [
-                ...this.overallPlayers,
-                ...normalize(players.topOverall || [], "overall_total_points"),
-              ];
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching countries data:", error);
-      }
     },
     fillDropdowns() {
       this.dropdowns.points = ["Total", "Maps", "Courses", "Bonuses"];
@@ -1369,9 +1304,10 @@ export default {
         this.searchQuery = "";
       }
 
-      this.currentSoldierIndex = 50;
-      this.currentDemomanIndex = 50;
-      this.currentOverallIndex = 50;
+      this.loadSize = 50;
+      this.currentSoldierIndex = this.loadSize;
+      this.currentDemomanIndex = this.loadSize;
+      this.currentOverallIndex = this.loadSize;
 
       this._internalNavigation = true;
       this.$router.push({
@@ -1390,16 +1326,20 @@ export default {
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
     },
-    async fetchPlayers(tableName, type, category, index, classType = "both") {
+    async fetchPlayers(
+      tableName,
+      type,
+      category,
+      offset,
+      classType = "both",
+      limit = this.loadSize,
+    ) {
       try {
-        let indexFix = index > 0 ? 50 : 0;
         const { data } = await axios.get(
-          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${
-            index - indexFix
-          }`,
+          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${offset}/${limit}`,
         );
         const [soldierData, demomanData, overallData] = data;
-        if (index === 0) {
+        if (offset === 0) {
           this.soldierPlayers = soldierData;
           this.demomanPlayers = demomanData;
           this.overallPlayers = overallData;
@@ -1415,20 +1355,131 @@ export default {
         console.error("Error fetching players");
       }
     },
-    loadMoreDemomen() {
-      this.loadingDemomen = true;
-      this.currentDemomanIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentDemomanIndex, "demoman");
+
+    async fetchCompletions(
+      type,
+      offset,
+      classType = "both",
+      limit = this.loadSize,
+    ) {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/players/players-completion-stats/${type}/${offset}/${limit}`,
+      );
+      const [soldierData, demomanData, overallData] = data;
+      if (offset === 0) {
+        this.soldierPlayers = soldierData;
+        this.demomanPlayers = demomanData;
+        this.overallPlayers = overallData;
+      } else {
+        if (classType === "both" || classType === "soldier")
+          this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
+        if (classType === "both" || classType === "demoman")
+          this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
+        if (classType === "both" || classType === "overall")
+          this.overallPlayers = [...this.overallPlayers, ...overallData];
+      }
     },
-    loadMoreSoldiers() {
+    async fetchCountries(offset, classType = "both", limit = this.loadSize) {
+      try {
+        if (this.selectedItem === "Total") {
+          if (offset === 0) {
+            const { data: countriesData } = await axios.get(
+              `${API_BASE_URL}/players/get-countries-data`,
+            );
+
+            const toEntry = (country, amountKey) => ({
+              id: country.country_code,
+              player_id: country.country_code,
+              name: country.country,
+              flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
+              amount:
+                amountKey === "overall"
+                  ? country.soldier_total_points + country.demoman_total_points
+                  : country[amountKey] || 0,
+            });
+
+            this.soldierPlayers = [...countriesData]
+              .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
+              .map((c) => toEntry(c, "soldier_total_points"));
+
+            this.demomanPlayers = [...countriesData]
+              .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
+              .map((c) => toEntry(c, "demoman_total_points"));
+
+            this.overallPlayers = [...countriesData]
+              .sort(
+                (a, b) =>
+                  b.soldier_total_points +
+                  b.demoman_total_points -
+                  (a.soldier_total_points + a.demoman_total_points),
+              )
+              .map((c) => toEntry(c, "overall"));
+          }
+        } else if (this.selectedCountry) {
+          const { data: players } = await axios.get(
+            `${API_BASE_URL}/players/country-top-players/${this.selectedCountry.code}/${offset}/${limit}`,
+          );
+          const defaultAvatar = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
+          const normalize = (list, pointsKey) =>
+            (list || []).map((p) => ({
+              ...p,
+              amount: p[pointsKey] ?? 0,
+              steam_avatar: p.steam_avatar || defaultAvatar,
+              player_id: p.id,
+            }));
+
+          if (offset === 0) {
+            this.soldierPlayers = normalize(
+              players.topSoldiers,
+              "soldier_total_points",
+            );
+            this.demomanPlayers = normalize(
+              players.topDemomen,
+              "demoman_total_points",
+            );
+            this.overallPlayers = normalize(
+              players.topOverall || [],
+              "overall_total_points",
+            );
+          } else {
+            if (classType === "both" || classType === "soldier")
+              this.soldierPlayers = [
+                ...this.soldierPlayers,
+                ...normalize(players.topSoldiers, "soldier_total_points"),
+              ];
+            if (classType === "both" || classType === "demoman")
+              this.demomanPlayers = [
+                ...this.demomanPlayers,
+                ...normalize(players.topDemomen, "demoman_total_points"),
+              ];
+            if (classType === "both" || classType === "overall")
+              this.overallPlayers = [
+                ...this.overallPlayers,
+                ...normalize(players.topOverall || [], "overall_total_points"),
+              ];
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching countries data:", error);
+      }
+    },
+    async loadMoreSoldiers() {
       this.loadingSoldiers = true;
-      this.currentSoldierIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentSoldierIndex, "soldier");
+      const offset = this.currentSoldierIndex;
+      await this.fetchDataForCurrentSelection(offset, "soldier", this.loadSize);
+      this.currentSoldierIndex = this.soldierPlayers.length;
     },
-    loadMoreOverall() {
+    async loadMoreDemomen() {
+      this.loadingDemomen = true;
+      const offset = this.currentDemomanIndex;
+      await this.fetchDataForCurrentSelection(offset, "demoman", this.loadSize);
+      this.currentDemomanIndex = this.demomanPlayers.length;
+    },
+    async loadMoreOverall() {
       this.loadingOverall = true;
-      this.currentOverallIndex += 50;
-      this.fetchDataForCurrentSelection(this.currentOverallIndex, "overall");
+      const offset = this.currentOverallIndex;
+      await this.fetchDataForCurrentSelection(offset, "overall", this.loadSize);
+      this.currentOverallIndex = this.overallPlayers.length;
     },
   },
   watch: {
@@ -1439,6 +1490,10 @@ export default {
           return;
         }
         if (params.category && params.item) {
+          this.loadSize = 50;
+          this.currentSoldierIndex = 50;
+          this.currentDemomanIndex = 50;
+          this.currentOverallIndex = 50;
           this.selectedCategory = params.category;
           if (params.category === "countries" && params.item !== "Total") {
             const found = this.allCountries.find(
@@ -1583,8 +1638,65 @@ export default {
   white-space: nowrap;
 }
 
+.players-footer {
+  display: flex;
+  align-items: stretch;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.load-size-selector {
+  display: flex;
+  align-items: center;
+  background: rgba(30, 50, 80, 0.6);
+  padding: 8px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+.load-size-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 7px;
+  white-space: nowrap;
+}
+.load-size-toggle {
+  display: flex;
+  gap: 3px;
+}
+.load-size-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.load-size-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--color-text);
+}
+.load-size-btn.active {
+  background: rgba(74, 111, 165, 0.55);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(74, 111, 165, 0.45);
+}
 .update-button {
-  border-radius: 0 0 10px 10px;
+  flex: 1;
+  border-radius: 0 !important;
+}
+@media (max-width: 767.98px) {
+  .load-size-label {
+    display: none;
+  }
 }
 
 .clickable:hover {
