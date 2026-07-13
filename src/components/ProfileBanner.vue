@@ -14,7 +14,7 @@
 
     <div class="profile-top">
       <div class="top-left">
-        <div v-if="player.donator" class="donator-badge">Donator</div>
+        <div v-if="player.donator" class="donator-badge">Donor</div>
       </div>
       <div class="top-right">
         <div

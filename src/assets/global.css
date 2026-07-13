@@ -187,7 +187,11 @@ body, html {
   flex: 1;
 }
 
-.soldier-table-container::before {
+.soldier-table-container .table-dark tbody {
+  position: relative;
+}
+
+.soldier-table-container .table-dark tbody::before {
   content: "";
   position: absolute;
   right: 75px;
@@ -200,9 +204,14 @@ body, html {
   background-position: right bottom;
   opacity: 0.1;
   z-index: 0;
+  pointer-events: none;
 }
 
-.demoman-table-container::before {
+.demoman-table-container .table-dark tbody {
+  position: relative;
+}
+
+.demoman-table-container .table-dark tbody::before {
   content: "";
   position: absolute;
   left: 175px;
@@ -216,6 +225,7 @@ body, html {
   opacity: 0.1;
   z-index: 0;
   transform: scaleX(-1);
+  pointer-events: none;
 }
 
 .rank-color-emperor {

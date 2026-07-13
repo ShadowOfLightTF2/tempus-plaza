@@ -83,7 +83,7 @@
           </div>
         </div>
         <div class="donators-carousel-section">
-          <h2 class="donators-title">Our Amazing Donators</h2>
+          <h2 class="donators-title">Our Amazing Donors</h2>
           <div v-if="donators.length" class="carousel-container">
             <div class="carousel-track" ref="carouselTrack">
               <SmartLink
@@ -252,7 +252,6 @@ export default {
         (countryCode || "us").toLowerCase() +
         ".png";
     },
-    // Player object passed to ProfileBanner — always show donator=true for preview
     previewPlayer() {
       return { ...this.player, donator: true };
     },
@@ -634,6 +633,7 @@ code {
 
 .carousel-track {
   display: flex;
+  padding-bottom: 4px;
   gap: 16px;
   width: max-content;
   will-change: transform;
