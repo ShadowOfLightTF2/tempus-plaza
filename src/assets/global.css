@@ -187,17 +187,20 @@ body, html {
   flex: 1;
 }
 
-.soldier-table-container .table-dark tbody {
+.soldier-table-container,
+.demoman-table-container,
+.overall-table-container {
   position: relative;
+  overflow: hidden;
 }
 
-.soldier-table-container .table-dark tbody::before {
+.soldier-table-container::before {
   content: "";
   position: absolute;
-  right: 75px;
-  top: 0;
-  width: 350px;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  width: 55%;
+  height: 70%;
   background-image: url("/images/soldier.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -207,17 +210,13 @@ body, html {
   pointer-events: none;
 }
 
-.demoman-table-container .table-dark tbody {
-  position: relative;
-}
-
-.demoman-table-container .table-dark tbody::before {
+.demoman-table-container::before {
   content: "";
   position: absolute;
-  left: 175px;
-  top: 0;
-  width: 400px;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  width: 62%;
+  height: 70%;
   background-image: url("/images/demoman.png");
   background-size: contain;
   background-repeat: no-repeat;

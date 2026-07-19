@@ -1956,39 +1956,6 @@ export default {
 }
 
 @media (min-width: 1400px) {
-  .soldier-table-container::before {
-    width: 250px;
-    right: 60px;
-  }
-  .demoman-table-container::before {
-    width: 300px;
-    left: 100px;
-  }
-}
-
-@media (max-width: 991px) and (min-width: 768px) {
-  .soldier-table-container::before {
-    width: 200px;
-    right: 15px;
-  }
-  .demoman-table-container::before {
-    width: 235px;
-    left: 35px;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .soldier-table-container::before {
-    width: 300px;
-    right: 30px;
-  }
-  .demoman-table-container::before {
-    width: 320px;
-    left: 150px;
-  }
-}
-
-@media (min-width: 1400px) {
   .tables-wrapper {
     flex-wrap: nowrap;
     gap: 30px;
@@ -2135,14 +2102,6 @@ export default {
   .tables-wrapper.two-tables .soldier-table-container,
   .tables-wrapper.two-tables .demoman-table-container {
     max-width: 50%;
-  }
-  .tables-wrapper.two-tables :deep(.soldier-table-container::before) {
-    width: 350px !important;
-    right: 75px !important;
-  }
-  .tables-wrapper.two-tables :deep(.demoman-table-container::before) {
-    width: 400px !important;
-    left: 175px !important;
   }
 }
 

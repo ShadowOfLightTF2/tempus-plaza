@@ -414,7 +414,7 @@
                   >
                     <span class="cutoff-label">G2</span>
                     <span class="cutoff-value">{{
-                      currentSoldierCutoffs.g2
+                      currentDemomanCutoffs.g2
                     }}</span>
                   </div>
                   <div
@@ -1891,38 +1891,5 @@ export default {
   color: var(--color-text-clickable);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-@media (max-width: 1100px) {
-  .soldier-table-container::before {
-    width: 300px;
-    right: 20px;
-  }
-  .demoman-table-container::before {
-    width: 320px;
-    left: 20px;
-  }
-}
-
-@media (max-width: 991px) and (min-width: 768px) {
-  .soldier-table-container::before {
-    width: 220px;
-    right: 10px;
-  }
-  .demoman-table-container::before {
-    width: 250px;
-    left: 10px;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .soldier-table-container::before {
-    width: 300px;
-    right: 30px;
-  }
-  .demoman-table-container::before {
-    width: 320px;
-    left: 30px;
-  }
 }
 </style>
