@@ -59,6 +59,17 @@
   --color-banner-cyan-2: #0D8A994D;
   --color-banner-lime-1: #74B8164D;
   --color-banner-lime-2: #5C940D4D;
+  --color-banner-charcoal-1: #4B55634D;
+  --color-banner-charcoal-2: #1F29374D;
+  --color-banner-burgundy-1: #B4536A4D;
+  --color-banner-burgundy-2: #8813374D;
+  --color-banner-sky-1: #38BDF84D;
+  --color-banner-sky-2: #0284C74D;
+--color-banner-forest-1: #2F9E444D;
+--color-banner-forest-2: #1B5E204D;
+  --color-banner-rust-1: #C1440E4D;
+  --color-banner-rust-2: #8A2E074D;
+
 }
 body, html {
   margin: 0;

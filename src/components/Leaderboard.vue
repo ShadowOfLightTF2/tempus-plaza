@@ -1424,6 +1424,7 @@ export default {
   width: 100%;
   flex: 1;
   border-radius: 12px;
+  border: 1px solid var(--color-border-soft);
   box-shadow: 0 0px 20px rgb(0, 0, 0);
 }
 .rank-column {

@@ -216,16 +216,6 @@
                 <i class="bi bi-search"></i> Lookup
               </router-link>
             </li>
-            <!-- <li class="nav-item me-3">
-              <router-link
-                to="/compare"
-                class="nav-link"
-                :class="{ active: isNavItemActive('Compare') }"
-                @click="closeNavbar"
-              >
-                <i class="bi bi-bar-chart"></i> Compare
-              </router-link>
-            </li> -->
             <li class="nav-item me-2">
               <router-link
                 to="/history"
@@ -578,39 +568,120 @@
                           class="color-option-wrapper"
                           @click="selectColor(color.value)"
                         >
-                          <input
-                            class="d-none"
-                            type="radio"
-                            :id="'color-' + index"
-                            name="colorPreference"
-                            v-model="colorPreference"
-                            :value="color.value"
-                            @change="updateUserPreferences"
-                            :disabled="donator === 0"
-                          />
                           <label
                             class="color-swatch"
                             :for="'color-' + index"
                             :class="{
                               selected: colorPreference === color.value,
+                              locked: !unlockedColors.includes(color.value),
                             }"
                             :style="{ backgroundColor: color.color }"
-                          ></label>
-                        </div>
-                        <div
-                          v-if="showTooltip"
-                          class="supporter-tooltip"
-                          @click.stop
-                        >
-                          <div class="tooltip-content">
-                            <p>
-                              You need to become a supporter to select colors
-                            </p>
-                            <button @click="goToDonate" class="tooltip-button">
-                              Become a Supporter
-                            </button>
+                            :title="
+                              unlockedColors.includes(color.value)
+                                ? ''
+                                : 'Donator only'
+                            "
+                          >
+                            <svg
+                              v-if="!unlockedColors.includes(color.value)"
+                              class="lock-icon"
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path
+                                d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
+                              />
+                            </svg>
+                          </label>
+                          <div
+                            v-if="
+                              showTooltip && activeTooltipColor === color.value
+                            "
+                            class="supporter-tooltip"
+                            @click.stop
+                          >
+                            <div class="tooltip-content">
+                              <p>
+                                You need to become a supporter to select this
+                                colors
+                              </p>
+                              <button
+                                @click="goToDonate"
+                                class="tooltip-button"
+                              >
+                                Become a Supporter
+                              </button>
+                            </div>
+                            <div class="tooltip-arrow"></div>
                           </div>
-                          <div class="tooltip-arrow"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <li @click.stop>
+                    <div class="dropdown-item non-clickable">
+                      <h6>Banner background</h6>
+                      <div class="pattern-picker-container">
+                        <div
+                          v-for="pattern in patternOptions"
+                          :key="pattern.value"
+                          class="pattern-option-wrapper"
+                          @click="selectPattern(pattern)"
+                        >
+                          <label
+                            class="pattern-block"
+                            :for="'pattern-' + (pattern.value ?? 'none')"
+                            :class="{
+                              selected: bannerPattern === pattern.value,
+                              'pattern-none': pattern.value === null,
+                              locked: !unlockedPatterns.includes(pattern.value),
+                            }"
+                            :style="
+                              pattern.thumb
+                                ? { backgroundImage: `url(${pattern.thumb})` }
+                                : {}
+                            "
+                            :title="
+                              unlockedPatterns.includes(pattern.value)
+                                ? pattern.label
+                                : pattern.label + ' (Donator only)'
+                            "
+                          >
+                            <svg
+                              v-if="!unlockedPatterns.includes(pattern.value)"
+                              class="lock-icon pattern-lock-icon"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path
+                                d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
+                              />
+                            </svg>
+                          </label>
+                          <div
+                            v-if="
+                              showPatternTooltip &&
+                              activeTooltipPattern === pattern.value
+                            "
+                            class="supporter-tooltip pattern-tooltip"
+                            @click.stop
+                          >
+                            <div class="tooltip-content">
+                              <p>{{ patternTooltipMessage }}</p>
+                              <button
+                                v-if="patternTooltipShowDonateBtn"
+                                @click="goToDonate"
+                                class="tooltip-button"
+                              >
+                                Become a Supporter
+                              </button>
+                            </div>
+                            <div class="tooltip-arrow"></div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -895,13 +966,6 @@
           @click="closeSidebar"
           ><i class="bi bi-search"></i><span>Lookup</span></router-link
         >
-        <!-- <router-link
-          to="/compare"
-          class="sidebar-nav-link"
-          :class="{ active: isNavItemActive('Compare') }"
-          @click="closeSidebar"
-          ><i class="bi bi-bar-chart"></i><span>Compare</span></router-link
-        > -->
         <router-link
           to="/history"
           class="sidebar-nav-link"
@@ -1060,14 +1124,35 @@
                     v-model="colorPreference"
                     :value="color.value"
                     @change="updateUserPreferences"
-                    :disabled="donator === 0"
+                    :disabled="!unlockedColors.includes(color.value)"
                   />
                   <label
                     class="color-swatch"
                     :for="'sb-color-' + index"
-                    :class="{ selected: colorPreference === color.value }"
+                    :class="{
+                      selected: colorPreference === color.value,
+                      locked: !unlockedColors.includes(color.value),
+                    }"
                     :style="{ backgroundColor: color.color }"
-                  ></label>
+                    :title="
+                      unlockedColors.includes(color.value)
+                        ? ''
+                        : 'Supporter only'
+                    "
+                  >
+                    <svg
+                      v-if="!unlockedColors.includes(color.value)"
+                      class="lock-icon"
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
+                      />
+                    </svg>
+                  </label>
                 </div>
                 <div v-if="showTooltip" class="supporter-tooltip" @click.stop>
                   <div class="tooltip-content">
@@ -1077,6 +1162,68 @@
                     </button>
                   </div>
                   <div class="tooltip-arrow"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sidebar-settings-divider"></div>
+            <div class="sidebar-settings-item" @click.stop>
+              <h6>Banner background</h6>
+              <div
+                class="pattern-picker-container position-relative"
+                @click.stop
+              >
+                <div
+                  v-for="pattern in patternOptions"
+                  :key="pattern.value"
+                  class="pattern-option-wrapper"
+                  @click="
+                    !unlockedPatterns.includes(pattern.value)
+                      ? selectPattern(pattern)
+                      : null
+                  "
+                >
+                  <input
+                    class="d-none"
+                    type="radio"
+                    :id="'sb-pattern-' + pattern.value"
+                    name="sbPatternPreference"
+                    v-model="bannerPattern"
+                    :value="pattern.value"
+                    @change="updateUserPreferences"
+                    :disabled="!unlockedPatterns.includes(pattern.value)"
+                  />
+                  <label
+                    class="pattern-block"
+                    :for="'sb-pattern-' + pattern.value"
+                    :class="{
+                      selected: bannerPattern === pattern.value,
+                      'pattern-none': pattern.value === null,
+                      locked: !unlockedPatterns.includes(pattern.value),
+                    }"
+                    :style="
+                      pattern.thumb
+                        ? { backgroundImage: `url(${pattern.thumb})` }
+                        : {}
+                    "
+                    :title="
+                      unlockedPatterns.includes(pattern.value)
+                        ? pattern.label
+                        : pattern.label + ' (Donator only)'
+                    "
+                  >
+                    <svg
+                      v-if="!unlockedPatterns.includes(pattern.value)"
+                      class="lock-icon pattern-lock-icon"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
+                      />
+                    </svg>
+                  </label>
                 </div>
               </div>
             </div>
@@ -1154,13 +1301,42 @@ export default {
       updateDismissed: false,
       showTooltip: false,
       tooltipTimeout: null,
-      colorPreference: "blue",
+      activeTooltipColor: null,
+      showPatternTooltip: false,
+      patternTooltipTimeout: null,
+      patternTooltipMessage: "",
+      patternTooltipShowDonateBtn: false,
+      activeTooltipPattern: null,
       sidebarOpen: false,
       sidebarSettingsOpen: false,
       isDesktop: true,
       navbarSearchFocused: false,
       sidebarSearchFocused: false,
       navHighlightedIndex: -1,
+      bannerPattern: null,
+      colorPreference: "blue",
+      unlockedColors: [],
+      unlockedPatterns: [],
+      patternOptions: [
+        { value: null, label: "None", thumb: null },
+        { value: "soldier", label: "Soldier", thumb: "/icons/soldier.png" },
+        { value: "demoman", label: "Demoman", thumb: "/icons/demoman.png" },
+        {
+          value: "golly",
+          label: "Golly",
+          thumb: "/images/golly.jpg",
+          unlockMessage:
+            "You need to become a supporter to select this pattern",
+          donatable: true,
+        },
+        {
+          value: "jf",
+          label: "JF",
+          thumb: "/images/jf-logo.png",
+          unlockMessage: "Unlocked by playing in special Jump Fortress events",
+          donatable: false,
+        },
+      ],
       colorOptions: [
         { value: "blue", color: "var(--color-banner-blue-1)" },
         { value: "red", color: "var(--color-banner-red-1)" },
@@ -1172,12 +1348,17 @@ export default {
         { value: "teal", color: "var(--color-banner-teal-1)" },
         { value: "indigo", color: "var(--color-banner-indigo-1)" },
         { value: "pink", color: "var(--color-banner-pink-1)" },
+        { value: "sky", color: "var(--color-banner-sky-1)" },
+        { value: "rust", color: "var(--color-banner-rust-1)" },
+        { value: "forest", color: "var(--color-banner-forest-1)" },
+        { value: "charcoal", color: "var(--color-banner-charcoal-1)" },
+        { value: "burgundy", color: "var(--color-banner-burgundy-1)" },
       ],
       profileUpdateTracker: reactive({
         rank: "overall",
         color: "blue",
         gender: "male",
-        updateCount: 0,
+        pattern: null,
       }),
     };
   },
@@ -1365,16 +1546,35 @@ export default {
       }
     },
     async selectColor(colorValue) {
-      const user = await this.fetchUserData();
-      if (user.donator === 0) {
+      if (!this.unlockedColors.includes(colorValue)) {
+        this.activeTooltipColor = colorValue;
         this.showTooltip = true;
         if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
         this.tooltipTimeout = setTimeout(() => {
           this.showTooltip = false;
+          this.activeTooltipColor = null;
         }, 3000);
         return;
       }
       this.colorPreference = colorValue;
+      await this.updateUserPreferences();
+    },
+    async selectPattern(pattern) {
+      if (!this.unlockedPatterns.includes(pattern.value)) {
+        this.activeTooltipPattern = pattern.value;
+        this.patternTooltipMessage =
+          pattern.unlockMessage || "This pattern is locked";
+        this.patternTooltipShowDonateBtn = !!pattern.donatable;
+        this.showPatternTooltip = true;
+        if (this.patternTooltipTimeout)
+          clearTimeout(this.patternTooltipTimeout);
+        this.patternTooltipTimeout = setTimeout(() => {
+          this.showPatternTooltip = false;
+          this.activeTooltipPattern = null;
+        }, 3000);
+        return;
+      }
+      this.bannerPattern = pattern.value;
       await this.updateUserPreferences();
     },
     async checkDonatorStatus() {
@@ -1416,8 +1616,12 @@ export default {
       }
     },
     async updateUserPreferences() {
-      const currentUser = await this.fetchUserData();
-      if (currentUser.donator === 0) this.colorPreference = "blue";
+      if (!this.unlockedColors.includes(this.colorPreference)) {
+        this.colorPreference = "blue";
+      }
+      if (!this.unlockedPatterns.includes(this.bannerPattern)) {
+        this.bannerPattern = null;
+      }
       try {
         const response = await fetch(
           `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
@@ -1429,6 +1633,7 @@ export default {
               rankPref: this.rankPreference,
               gender: this.gender,
               color: this.colorPreference,
+              pattern: this.bannerPattern ?? null,
             }),
           },
         );
@@ -1437,7 +1642,7 @@ export default {
         this.profileUpdateTracker.rank = this.rankPreference;
         this.profileUpdateTracker.color = this.colorPreference;
         this.profileUpdateTracker.gender = this.gender;
-        this.profileUpdateTracker.updateCount++;
+        this.profileUpdateTracker.pattern = this.bannerPattern;
       } catch (error) {
         console.error("Failed to update user preferences:", error);
       }
@@ -1583,9 +1788,13 @@ export default {
           this.gender = userData.gender || "male";
           this.donator = userData.donator || 0;
           this.colorPreference = userData.color || "blue";
+          this.bannerPattern = userData.pattern ?? null;
+          this.unlockedColors = userData.unlockedColors || [];
+          this.unlockedPatterns = userData.unlockedPatterns || [];
           this.profileUpdateTracker.rank = this.rankPreference;
           this.profileUpdateTracker.color = this.colorPreference;
           this.profileUpdateTracker.gender = this.gender;
+          this.profileUpdateTracker.pattern = this.bannerPattern;
         }
       }
     } catch (error) {
@@ -2715,6 +2924,57 @@ body {
   font-weight: bold !important;
 }
 
+.pattern-picker-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 180px;
+  margin-top: 4px;
+}
+.pattern-option-wrapper {
+  margin: 2px;
+  position: relative;
+}
+.pattern-block {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.05);
+  background-size: cover;
+  background-position: center;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.pattern-block.pattern-none {
+  background-image: none !important;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.05) 4px,
+    rgba(255, 255, 255, 0.1) 4px,
+    rgba(255, 255, 255, 0.1) 8px
+  );
+}
+.pattern-block:hover {
+  border-color: var(--color-border);
+}
+.pattern-block.selected {
+  border: 2px solid var(--color-text);
+}
+.pattern-block.locked {
+  opacity: 0.45;
+}
+.pattern-lock-icon {
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+}
 .color-picker-container {
   display: flex;
   flex-wrap: wrap;
@@ -2722,15 +2982,28 @@ body {
 }
 .color-option-wrapper {
   margin: 2px;
+  position: relative;
 }
 .color-swatch {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  display: inline-block;
   cursor: pointer;
   transition: transform 0.15s ease;
   border: 2px solid transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.color-swatch.locked {
+  opacity: 0.45;
+  cursor: pointer;
+}
+.lock-icon {
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
 }
 .color-swatch:hover {
   border: 1px solid var(--color-border);
@@ -2740,26 +3013,30 @@ body {
 }
 .supporter-tooltip {
   position: absolute;
-  top: -80px;
+  bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--color-dark);
   border: 2px solid var(--color-primary);
   border-radius: 12px;
   padding: 12px 16px;
-  min-width: 200px;
+  width: 200px;
+  box-sizing: border-box;
   z-index: 1000;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   animation: tooltipSlideIn 0.3s ease-out;
-}
-.tooltip-content {
-  text-align: center;
 }
 .tooltip-content p {
   margin: 0 0 8px 0;
   font-size: 13px;
   color: var(--color-text);
   font-weight: 500;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.tooltip-content {
+  text-align: center;
 }
 .tooltip-button {
   background: var(--color-primary);

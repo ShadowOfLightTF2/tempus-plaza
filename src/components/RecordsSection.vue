@@ -310,10 +310,6 @@ export default {
       type: Object,
       required: true,
     },
-    nextUpdateCountdown: {
-      type: String,
-      required: true,
-    },
   },
   data() {
     return {

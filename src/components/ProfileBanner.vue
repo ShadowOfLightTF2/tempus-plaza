@@ -6,15 +6,50 @@
       background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
     }"
   >
+    <!--:class="{ 'logo-overlay-golden': player.donator }"-->
+    <div
+      v-if="activeOverlay.src"
+      class="logo-overlay"
+      :style="{ opacity: overlayOpacity }"
+    >
+      <svg class="logo-overlay-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern
+            id="logoPattern"
+            patternUnits="userSpaceOnUse"
+            :width="activeOverlay.gap"
+            :height="activeOverlay.gap"
+            :patternTransform="`rotate(${activeOverlay.angle})`"
+          >
+            <clipPath v-if="activeOverlay.circular" id="logoClip">
+              <circle
+                :cx="activeOverlay.gap / 2"
+                :cy="activeOverlay.gap / 2"
+                :r="activeOverlay.logoSize / 2"
+              />
+            </clipPath>
+            <image
+              :href="activeOverlay.src"
+              :x="(activeOverlay.gap - activeOverlay.logoSize) / 2"
+              :y="(activeOverlay.gap - activeOverlay.logoSize) / 2"
+              :width="activeOverlay.logoSize"
+              :height="activeOverlay.logoSize"
+              :clip-path="activeOverlay.circular ? 'url(#logoClip)' : null"
+              :transform="`rotate(${activeOverlay.imageRotate || 0} ${activeOverlay.gap / 2} ${activeOverlay.gap / 2})`"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#logoPattern)" />
+      </svg>
+    </div>
     <div v-if="loading" class="loading-overlay">
       <div class="spinner-border text-light" role="status">
         <span class="visually-hidden">Loading ranks...</span>
       </div>
     </div>
-
     <div class="profile-top">
       <div class="top-left">
-        <div v-if="player.donator" class="donator-badge">Donor</div>
+        <div v-if="player.donator" class="donator-badge">Supporter</div>
       </div>
       <div class="top-right">
         <div
@@ -130,8 +165,93 @@ export default {
       type: Object,
       default: null, // null = offline, { server_name, shortname, currentMap } = online
     },
+    bannerPattern: {
+      type: String,
+      default: "null",
+    },
+  },
+  data() {
+    return {
+      overlayOptions: [
+        {
+          key: "jf",
+          label: "JF Logo",
+          src: "/images/jf-logo.png",
+          logoSize: 60,
+          gap: 75,
+          angle: 45,
+          imageRotate: -45,
+          opacity: 0.02,
+          circular: false,
+        },
+        {
+          key: "coolcat",
+          label: "Cool cat Pattern",
+          src: "/images/coolcat.png",
+          logoSize: 60,
+          gap: 100,
+          angle: 30,
+          imageRotate: 0,
+          opacity: 0.06,
+          circular: true,
+        },
+        {
+          key: "golly",
+          label: "Golly Pattern",
+          src: "/images/golly.jpg",
+          logoSize: 60,
+          gap: 100,
+          angle: 30,
+          imageRotate: -30,
+          opacity: 0.03,
+          circular: true,
+        },
+        {
+          key: "soldier",
+          label: "Soldier pattern",
+          src: "/icons/soldier.png",
+          logoSize: 60,
+          gap: 100,
+          angle: 45,
+          imageRotate: -45,
+          opacity: 0.035,
+          circular: false,
+        },
+        {
+          key: "demoman",
+          label: "Demoman pattern",
+          src: "/icons/demoman.png",
+          logoSize: 60,
+          gap: 100,
+          angle: 30,
+          imageRotate: -45,
+          opacity: 0.035,
+          circular: false,
+        },
+        {
+          key: "none",
+          label: "No Overlay",
+          src: null,
+          logoSize: 0,
+          gap: 0,
+          angle: 0,
+          imageRotate: 0,
+          opacity: 0,
+        },
+      ],
+    };
   },
   computed: {
+    activeOverlay() {
+      return (
+        this.overlayOptions.find((o) => o.key === this.bannerPattern) ||
+        this.overlayOptions.find((o) => o.key === "none") ||
+        this.overlayOptions[this.overlayOptions.length - 1]
+      );
+    },
+    overlayOpacity() {
+      return Math.min(this.activeOverlay.opacity * 3, 0.22);
+    },
     stats() {
       const fmt = (val) => (val != null ? `#${val}` : "—");
       const fmtPts = (val) => (val != null ? val : "—");
@@ -468,7 +588,7 @@ export default {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   display: flex;
@@ -587,6 +707,8 @@ export default {
 @media (max-width: 400px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
   }
 
   .profile-top {
@@ -616,5 +738,29 @@ export default {
   .date-value {
     font-size: 0.65rem;
   }
+}
+
+.logo-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.logo-overlay-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.logo-overlay-golden .logo-overlay-svg image {
+  filter: grayscale(1) brightness(1.3) sepia(1) saturate(15) hue-rotate(-15deg);
+}
+.profile-top,
+.banner-inner {
+  position: relative;
+  z-index: 2;
 }
 </style>

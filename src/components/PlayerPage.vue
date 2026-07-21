@@ -37,6 +37,7 @@
             :banner-colors="bannerColors"
             :loading="loading.ranks"
             :online-status="onlineStatus"
+            :banner-pattern="bannerPattern"
           />
           <div class="row g-2 mt-3">
             <div class="col-12 col-md-4 chart-col">
@@ -90,7 +91,6 @@
                 :recent-records="records.recentRecords"
                 :changed-placements="changedPlacements"
                 :loading="loading"
-                :next-update-countdown="nextUpdateCountdown"
                 @load-more="fetchRecentRecords"
                 @load-more-placements="fetchChangedPlacements"
               />
@@ -297,6 +297,7 @@ export default {
       gender: "male",
       launcher_pref: 1,
       rank_pref: "",
+      pattern: null,
       donator: false,
       shared_soldier_type: "",
       shared_demoman_type: "",
@@ -379,22 +380,6 @@ export default {
       );
       return currentMap && currentMap.id !== null;
     },
-    nextUpdateCountdown() {
-      const now = this.currentTime;
-      const nextUpdate = new Date(now);
-      const nextHour = Math.ceil((now.getHours() + 1) / 2) * 2;
-      nextUpdate.setHours(nextHour, 0, 0, 0);
-      const diff = nextUpdate - now;
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      if (hours > 0) {
-        return `${hours}h ${minutes}m ${seconds}s`;
-      } else if (minutes > 0) {
-        return `${minutes}m ${seconds}s`;
-      }
-      return `${seconds}s`;
-    },
     currentTimeString() {
       return this.currentTime.toLocaleTimeString([], {
         hour: "2-digit",
@@ -456,6 +441,9 @@ export default {
         color1: `var(--color-banner-${color}-1)`,
         color2: `var(--color-banner-${color}-2)`,
       };
+    },
+    bannerPattern() {
+      return this.player.pattern ?? null;
     },
   },
   async mounted() {
@@ -1003,6 +991,7 @@ export default {
             gender: "male",
             donator: false,
             color: "blue",
+            pattern: null,
           };
           return;
         }
@@ -1012,6 +1001,7 @@ export default {
           rank_pref: data.rank_pref,
           donator: Boolean(data.donator),
           color: data.color,
+          pattern: data.pattern ?? null,
         };
       } catch (error) {
         console.error("Error fetching user data:", error);

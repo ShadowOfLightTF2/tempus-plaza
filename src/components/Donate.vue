@@ -64,7 +64,7 @@
             Donating unlocks different profile banner colours
           </h2>
           <p class="preview-subtitle">
-            This is what your profile could look like with donator perks!
+            This is what your profile could look like with supporter perks!
           </p>
           <div v-if="loading" class="loading-message">
             Loading your profile data...
@@ -83,7 +83,7 @@
           </div>
         </div>
         <div class="donators-carousel-section">
-          <h2 class="donators-title">Our Amazing Donors</h2>
+          <h2 class="donators-title">Our Amazing Supporters</h2>
           <div v-if="donators.length" class="carousel-container">
             <div class="carousel-track" ref="carouselTrack">
               <SmartLink

@@ -468,6 +468,64 @@
             </div>
           </div>
         </div>
+        <div class="playercount-graph-wrapper">
+          <div class="table-header-content">
+            <div class="table-header-top graph-header-row">
+              <div class="table-header-icon">📈</div>
+              <div class="table-header-title-section">
+                <h3 class="table-header-title">Player Count History</h3>
+                <p class="table-header-subtitle">
+                  Total players online over time (average over the hour)
+                </p>
+              </div>
+              <div class="graph-range-buttons">
+                <button
+                  v-for="range in graphRanges"
+                  :key="range.key"
+                  :class="{ active: graphRange === range.key }"
+                  @click="setGraphRange(range.key)"
+                  class="global-btn"
+                >
+                  {{ range.name }}
+                </button>
+              </div>
+              <div class="graph-stats">
+                <div class="stat-badge online-now-badge">
+                  <span class="total-players-dot"></span>
+                  <div class="stat-badge-text">
+                    <span class="stat-badge-value">{{ totalPlayerCount }}</span>
+                    <span class="stat-badge-label">Online Now</span>
+                  </div>
+                </div>
+                <div class="stat-badge peak-badge">
+                  <div class="stat-badge-text">
+                    <span class="stat-badge-value">{{
+                      peakPlayerData.count
+                    }}</span>
+                    <span class="stat-badge-label"
+                      >Peak<template v-if="peakPlayerData.date">
+                        · {{ formatPeakDate(peakPlayerData.date) }}</template
+                      ></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="graph-container">
+            <apexchart
+              v-if="filteredGraphData.length"
+              type="area"
+              height="320"
+              :options="chartOptions"
+              :series="chartSeries"
+            />
+            <div v-else class="no-graph-data">
+              No player count history available yet.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -476,12 +534,13 @@
 <script>
 import { useHead } from "@vueuse/head";
 import ServersSkeleton from "./Skeletons/ServersSkeleton.vue";
+import VueApexCharts from "vue3-apexcharts";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "Servers",
-  components: { ServersSkeleton },
+  components: { ServersSkeleton, apexchart: VueApexCharts },
   setup() {
     useHead({ title: "Servers | Tempus Plaza" });
   },
@@ -525,11 +584,25 @@ export default {
         { key: "rank_only", name: "Rank Only" },
         { key: "empty", name: "Empty" },
       ],
+      playerCountHistory: [],
+      graphRange: "24h",
+      graphRanges: [
+        { key: "24h", name: "24H" },
+        { key: "7d", name: "7D" },
+        { key: "30d", name: "30D" },
+      ],
     };
   },
   computed: {
     totalPlayerCount() {
       return this.serversData.reduce((sum, s) => sum + (s.playerCount || 0), 0);
+    },
+    peakPlayerData() {
+      if (!this.playerCountHistory.length) return { count: 0, date: null };
+      const peak = this.playerCountHistory.reduce((best, entry) =>
+        entry.total_player_count > best.total_player_count ? entry : best,
+      );
+      return { count: peak.total_player_count, date: peak.hour_start };
     },
     filteredServersData() {
       let filtered = this.serversData;
@@ -557,6 +630,111 @@ export default {
         });
       }
       return filtered;
+    },
+    filteredGraphData() {
+      if (!this.playerCountHistory.length) return [];
+
+      const rangeMs = {
+        "24h": 24 * 60 * 60 * 1000,
+        "7d": 7 * 24 * 60 * 60 * 1000,
+        "30d": 30 * 24 * 60 * 60 * 1000,
+      };
+
+      const latestTimestamp = Math.max(
+        ...this.playerCountHistory.map((d) => new Date(d.hour_start).getTime()),
+      );
+      const cutoff = latestTimestamp - rangeMs[this.graphRange];
+
+      return this.playerCountHistory
+        .filter((d) => new Date(d.hour_start).getTime() >= cutoff)
+        .sort((a, b) => new Date(a.hour_start) - new Date(b.hour_start));
+    },
+
+    chartSeries() {
+      const data = this.filteredGraphData;
+      return [
+        {
+          name: "Average Players",
+          data: data.map((d) => [
+            new Date(d.hour_start).getTime(),
+            Math.round(d.avg_player_count),
+          ]),
+        },
+      ];
+    },
+
+    chartOptions() {
+      return {
+        chart: {
+          type: "area",
+          toolbar: { show: false },
+          zoom: { enabled: false },
+          background: "transparent",
+          fontFamily: "inherit",
+        },
+        theme: { mode: "dark" },
+        colors: ["#4a6fa5"],
+        stroke: { curve: "smooth", width: 3 },
+        fill: {
+          type: "gradient",
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.4,
+            opacityTo: 0.05,
+            stops: [0, 100],
+          },
+        },
+        dataLabels: { enabled: false },
+        grid: { borderColor: "rgba(255,255,255,0.1)", strokeDashArray: 3 },
+        annotations: {
+          xaxis: [],
+          yaxis: [],
+          points: [],
+        },
+        xaxis: {
+          type: "datetime",
+          labels: {
+            style: { colors: "rgba(255,255,255,0.7)" },
+            datetimeUTC: false,
+            formatter: (value) => {
+              const date = new Date(Number(value));
+              if (this.graphRange === "24h") {
+                return date.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                });
+              }
+              return date.toLocaleDateString([], {
+                month: "short",
+                day: "numeric",
+              });
+            },
+          },
+          axisBorder: { color: "rgba(255,255,255,0.15)" },
+          axisTicks: { color: "rgba(255,255,255,0.15)" },
+        },
+        yaxis: {
+          labels: { style: { colors: "rgba(255,255,255,0.7)" } },
+          min: 0,
+        },
+        tooltip: {
+          theme: "dark",
+          x: {
+            formatter: (value) => {
+              const date = new Date(Number(value));
+              return date.toLocaleString([], {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
+            },
+          },
+        },
+        legend: { show: false },
+      };
     },
   },
   watch: {
@@ -737,6 +915,7 @@ export default {
         await Promise.all([
           this.fetchTopPlayersData(),
           this.fetchServersData(),
+          this.fetchPlayerCountHistory(),
         ]);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -749,6 +928,7 @@ export default {
         await Promise.all([
           this.fetchTopPlayersData(),
           this.fetchServersData(),
+          this.fetchPlayerCountHistory(),
         ]);
       } catch (error) {
         console.error("Error refreshing data:", error);
@@ -886,6 +1066,53 @@ export default {
       if (this.currentView === view) return;
       this.currentView = view;
       this.$router.push({ name: "Servers", params: { view } });
+    },
+    switchView(view) {
+      if (this.currentView === view) return;
+      this.currentView = view;
+      this.$router.push({ name: "Servers", params: { view } });
+    },
+
+    setGraphRange(range) {
+      this.graphRange = range;
+    },
+
+    formatPeakDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    },
+
+    normalizeUtcString(dateStr) {
+      if (typeof dateStr !== "string") return dateStr;
+      const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(dateStr);
+      if (hasTimezone) return dateStr;
+      return dateStr.replace(" ", "T") + "Z";
+    },
+    async fetchPlayerCountHistory() {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/servers/servers-player-count`,
+        );
+        if (!response.ok) throw new Error("bad response");
+        const data = await response.json();
+
+        this.playerCountHistory = data.map((row) => ({
+          hour_start: this.normalizeUtcString(row.hour_start),
+          avg_player_count: Number(row.avg_player_count) || 0,
+          min_player_count: Number(row.min_player_count) || 0,
+          max_player_count: Number(row.max_player_count) || 0,
+          total_player_count: Number(row.total_player_count) || 0,
+          sample_count: Number(row.sample_count) || 0,
+        }));
+      } catch (error) {
+        console.warn("Player count history endpoint not available: ", error);
+      }
     },
   },
 };
@@ -1621,6 +1848,80 @@ export default {
   height: 16px;
 }
 
+.playercount-graph-wrapper {
+  margin-top: 2rem;
+  box-shadow: 0 0px 20px rgb(0, 0, 0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.graph-header-row {
+  flex-wrap: wrap;
+  row-gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.graph-header-row .table-header-title-section {
+  min-width: 200px;
+}
+
+.graph-range-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.graph-stats {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(74, 111, 165, 0.2);
+  border: 1px solid rgba(74, 111, 165, 0.4);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+}
+
+.stat-badge-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.stat-badge-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.stat-badge-label {
+  font-size: 0.7rem;
+  color: var(--color-text);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.graph-container {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.no-graph-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-text);
+  opacity: 0.7;
+  font-style: italic;
+}
+
 @media (max-width: 1400px) {
   .player-card:not(.min-mode) {
     grid-template-columns: 0.4fr 1.3fr 1.8fr 1.8fr;
@@ -1855,6 +2156,30 @@ export default {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+  }
+
+  .graph-header-row {
+    flex-direction: row;
+  }
+
+  .graph-header-row .table-header-title-section {
+    order: 1;
+    flex-basis: calc(100% - 3.5rem);
+  }
+
+  .graph-header-row .graph-stats {
+    order: 2;
+    flex-basis: 100%;
+    justify-content: center;
+    margin-top: 0.25rem;
+    margin-left: 0;
+  }
+
+  .graph-header-row .graph-range-buttons {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
   }
 
   .table-responsive {
