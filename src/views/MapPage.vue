@@ -223,10 +223,10 @@
 
 <script>
 import axios from "axios";
-import Leaderboard from "./Leaderboard.vue";
-import MapInformation from "./MapInformation.vue";
-import WRVideos from "./WRVideos.vue";
-import TagModal from "./TagModal.vue";
+import Leaderboard from "@/components/Leaderboard.vue";
+import MapInformation from "@/components/MapInformation.vue";
+import WRVideos from "@/components/WRVideos.vue";
+import TagModal from "@/components/TagModal.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 

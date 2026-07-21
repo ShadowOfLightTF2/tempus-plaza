@@ -1,15 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from './components/Home.vue';
-import Servers from './components/Servers.vue';
-import Activity from './components/Activity.vue';
-import Maps from './components/Maps.vue';
-import Players from './components/Players.vue';
-import PlayerPage from './components/PlayerPage.vue';
-import MapPage from './components/MapPage.vue';
-import Compare from './components/Compare.vue';
-import Lookup from './components/Lookup.vue';
-import Donate from './components/Donate.vue';
-import History from './components/History.vue';
+import Home from './views/Home.vue';
+import Servers from './views/Servers.vue';
+import Activity from './views/Activity.vue';
+import Maps from './views/Maps.vue';
+import Players from './views/Players.vue';
+import PlayerPage from './views/PlayerPage.vue';
+import MapPage from './views/MapPage.vue';
+import Compare from './views/Compare.vue';
+import Lookup from './views/Lookup.vue';
+import Donate from './views/Donate.vue';
+import History from './views/History.vue';
 import NotFound from './components/NotFound.vue';
 
 const routes = [

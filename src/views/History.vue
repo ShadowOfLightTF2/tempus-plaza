@@ -775,8 +775,8 @@
 
 <script>
 import { useHead } from "@vueuse/head";
-import HistorySkeleton from "./Skeletons/HistorySkeleton.vue";
-import HoverPreview from "./HoverPreview.vue";
+import HistorySkeleton from "@/components/skeletons/HistorySkeleton.vue";
+import HoverPreview from "@/components/utils/HoverPreview.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const PAGE_SIZE = 20;

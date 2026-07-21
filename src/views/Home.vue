@@ -194,12 +194,12 @@
 <script>
 import { useHead } from "@vueuse/head";
 import axios from "axios";
-import HoverPreview from "./HoverPreview.vue";
-import TopPlayersSection from "./TopPlayersSection.vue";
-import TierRatingChangesSection from "./TierRatingChangesSection.vue";
-import PopularMapsSection from "./PopularMapsSection.vue";
-import YoutubeSection from "./YoutubeSection.vue";
-import NewestSection from "./NewestSection.vue";
+import HoverPreview from "@/components/utils/HoverPreview.vue";
+import TopPlayersSection from "@/components/home/TopPlayersSection.vue";
+import TierRatingChangesSection from "@/components/home/TierRatingChangesSection.vue";
+import PopularMapsSection from "@/components/home/PopularMapsSection.vue";
+import YoutubeSection from "@/components/home/YoutubeSection.vue";
+import NewestSection from "@/components/home/NewestSection.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 

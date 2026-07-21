@@ -2,8 +2,8 @@ import { createApp } from 'vue';
 import { createHead } from '@vueuse/head'
 import App from './App.vue';
 import router from './router';
-import SmartLink from './components/SmartLink.vue'
-import HoverPreview from "./components/HoverPreview.vue";
+import SmartLink from '@/components/utils/SmartLink.vue';
+import HoverPreview from "@/components/utils/HoverPreview.vue";
 import * as bootstrap from 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';

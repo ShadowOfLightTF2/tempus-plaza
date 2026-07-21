@@ -368,7 +368,7 @@
 </template>
 
 <script>
-import SmartLink from "./SmartLink.vue";
+import SmartLink from "@/components/utils/SmartLink.vue";
 
 export default {
   name: "MapInformation",

@@ -1,157 +1,9 @@
 <template>
   <div id="app" @click="closeDropdown">
-    <div
-      v-if="showLoginPopup"
-      class="login-popup-overlay"
-      @click="closeLoginPopup"
-    >
-      <div class="login-popup" @click.stop>
-        <div class="login-popup-content">
-          <button
-            class="popup-close"
-            @click="closeLoginPopup"
-            aria-label="Close"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-          <div class="popup-header">
-            <h3>Welcome to Tempus Plaza!</h3>
-            <p>Login for enhanced features and personalized experience</p>
-            <small class="popup-disclaimer"
-              >This popup will not appear again</small
-            >
-          </div>
-          <div class="popup-features">
-            <div class="feature-item">
-              <i class="bi bi-person-circle"></i
-              ><span>Easy navigation to your profile</span>
-            </div>
-            <div class="feature-item">
-              <i class="bi bi-person-fill-gear"></i
-              ><span>Personalized player profiles</span>
-            </div>
-            <div class="feature-item">
-              <i class="bi bi-graph-up"></i
-              ><span>See your own run on map leaderboards</span>
-            </div>
-            <div class="feature-item">
-              <i class="bi bi-trophy"></i
-              ><span>Automatically loads your player lookup</span>
-            </div>
-          </div>
-          <div class="popup-actions">
-            <button class="btn login-popup-btn" @click="loginWithSteam">
-              <i class="bi bi-steam"></i> Login with Steam
-            </button>
-            <button class="btn continue-btn" @click="closeLoginPopup">
-              Continue without login
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="showErrorPopup"
-      class="login-popup-overlay"
-      @click="showErrorPopup = false"
-    >
-      <div class="login-popup" @click.stop>
-        <div class="login-popup-content">
-          <button
-            class="popup-close"
-            @click="showErrorPopup = false"
-            aria-label="Close"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-          <div class="popup-header">
-            <div class="error-icon-wrap">
-              <i class="bi bi-steam error-steam-icon"></i>
-              <div class="error-badge">
-                <i class="bi bi-exclamation-lg"></i>
-              </div>
-            </div>
-            <h3>Account Not Found</h3>
-            <p>Your Steam account isn't linked to any Tempus player profile.</p>
-          </div>
-          <div class="error-info-box">
-            <i class="bi bi-info-circle"></i>
-            <span
-              >Only players who have played on
-              <strong>Tempus servers</strong> have a profile. If you've played
-              recently, your data may not have synced yet.</span
-            >
-          </div>
-          <div class="popup-actions" style="margin-top: 1.5rem">
-            <button class="btn continue-btn" @click="showErrorPopup = false">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <LoginPopup v-model="showLoginPopup" @login-with-steam="loginWithSteam" />
+    <AccountNotFoundPopup v-model="showErrorPopup" />
     <PointsCalculator v-model="showCalculator" />
-    <div v-if="isUpdating" class="update-banner">
-      <div class="update-banner-content">
-        <div class="update-icon">
-          <svg
-            class="spinning"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M21 12a9 9 0 11-6.219-8.56" />
-          </svg>
-        </div>
-        <span class="update-text">
-          <span class="d-none d-md-inline"
-            >Database is updating - Performance may be temporarily affected and
-            some data may be missing</span
-          >
-          <span class="d-md-none">Database updating...</span>
-        </span>
-        <button
-          class="update-close"
-          @click="dismissUpdate"
-          aria-label="Dismiss"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <UpdateBanner v-if="isUpdating" @dismiss="dismissUpdate" />
     <nav class="navbar navbar-expand-xl bg-custom">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -1238,39 +1090,17 @@
       </div>
     </div>
     <router-view />
-    <footer class="footer">
-      <div class="container-fluid">
-        <div class="footer-content">
-          <a
-            href="https://tempus2.xyz"
-            class="footer-link"
-            target="_blank"
-            rel="noopener noreferrer"
-            ><i class="bi bi-globe"></i> Tempus</a
-          >
-          <a
-            href="https://discord.gg/U48JYd9h99"
-            class="footer-link"
-            target="_blank"
-            rel="noopener noreferrer"
-            ><i class="bi bi-discord"></i> Discord</a
-          >
-          <a
-            href="https://docs.google.com/spreadsheets/d/1kL76rEPL2AtMSu5RWI2VtW5ZJ2QIQx61BNowdfN-09M/edit?usp=sharing"
-            class="footer-link"
-            target="_blank"
-            rel="noopener noreferrer"
-            ><i class="bi bi-journals"></i> Encyclopedia</a
-          >
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 
 <script>
-import HoverPreview from "./components/HoverPreview.vue";
-import PointsCalculator from "./components/PointsCalculator.vue";
+import HoverPreview from "./components/utils/HoverPreview.vue";
+import PointsCalculator from "./components/utils/PointsCalculator.vue";
+import LoginPopup from "./components/popups/LoginPopup.vue";
+import AccountNotFoundPopup from "./components/popups/AccountNotFoundPopup.vue";
+import UpdateBanner from "./components/UpdateBanner.vue";
+import AppFooter from "./components/AppFooter.vue";
 import DOMPurify from "dompurify";
 import { provide, reactive } from "vue";
 
@@ -1278,7 +1108,14 @@ const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "App",
-  components: { HoverPreview, PointsCalculator },
+  components: {
+    HoverPreview,
+    PointsCalculator,
+    LoginPopup,
+    AccountNotFoundPopup,
+    UpdateBanner,
+    AppFooter,
+  },
   data() {
     return {
       showErrorPopup: false,
@@ -1494,10 +1331,6 @@ export default {
       this.searchQuery = "";
       this.searchResults = { maps: [], players: [] };
       this.navHighlightedIndex = -1;
-    },
-    closeLoginPopup() {
-      this.showLoginPopup = false;
-      localStorage.setItem("tempus_popup_shown", "true");
     },
     checkFirstVisit() {
       const hasSeenPopup = localStorage.getItem("tempus_popup_shown");
@@ -1987,234 +1820,9 @@ body {
   opacity: 0;
 }
 
-.footer {
-  background: var(--color-dark);
-  border-top: 1px solid var(--color-border-soft);
-  padding: 0.4rem 0;
-  margin-top: auto;
-}
-.footer .container-fluid {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.footer-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-}
-.footer-link {
-  color: var(--color-text);
-  text-decoration: none;
-  font-weight: bold;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.footer-link:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-  color: var(--color-text);
-  text-decoration: none;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-.error-icon-wrap {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-.error-steam-icon {
-  font-size: 3rem;
-  color: var(--color-text);
-  opacity: 0.85;
-}
-.error-badge {
-  position: absolute;
-  bottom: -4px;
-  right: -10px;
-  background: linear-gradient(135deg, #e05c5c, #c0392b);
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--color-background-new, #0f1318);
-}
-.error-badge i {
-  font-size: 0.75rem;
-  color: #fff;
-  font-weight: bold;
-}
-.error-info-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(74, 111, 165, 0.25);
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  color: var(--color-text);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  margin-top: 1rem;
-}
-.error-info-box i {
-  font-size: 1rem;
-  color: var(--color-primary, #4a7fc0);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.error-info-box strong {
-  color: #ffffff;
-}
-.login-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-  backdrop-filter: blur(4px);
-}
-.login-popup {
-  background: linear-gradient(
-    to bottom,
-    rgba(74, 111, 165, 0.5),
-    rgba(74, 111, 165, 0.3)
-  );
-  border-radius: 12px;
-  max-width: 450px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--color-border);
-}
-.login-popup-content {
-  padding: 2rem;
-  position: relative;
-}
-.popup-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  color: var(--color-text);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-.popup-close:hover {
-  background: var(--color-dark);
-  color: var(--color-text);
-}
-.popup-header {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-.popup-header h3 {
-  color: var(--color-text);
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-.popup-header p {
-  color: var(--color-text);
-  margin: 0;
-  font-size: 0.95rem;
-}
-.popup-disclaimer {
-  color: var(--color-text-soft);
-  font-size: 0.85rem;
-  opacity: 0.8;
-  display: block;
-  margin: 0;
-}
-.popup-features {
-  margin-bottom: 2rem;
-}
-.feature-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 0;
-  color: var(--color-text);
-  font-size: 0.9rem;
-}
-.feature-item i {
-  margin-right: 0.75rem;
-  color: var(--color-text);
-  font-size: 1.1rem;
-  width: 20px;
-  text-align: center;
-}
-.popup-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.login-popup-btn {
-  background: #1b2838;
-  color: var(--color-text) !important;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-.login-popup-btn:hover {
-  background: #2a3f5f;
-  transform: translateY(-1px);
-}
-.continue-btn {
-  background: transparent;
-  color: var(--color-text) !important;
-  border: 1px solid var(--color-border) !important;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-.continue-btn:hover {
-  background: var(--color-dark) !important;
-  border-color: var(--color-border) !important;
-}
-
 @media (max-width: 1199px) {
   .navbar-collapse {
     display: none !important;
-  }
-  .footer {
-    padding: 0.75rem 0;
-  }
-  .footer .container-fluid {
-    padding: 0 0.5rem;
-  }
-  .footer-content {
-    gap: 1rem;
-    justify-content: center;
-  }
-  .footer-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
-    min-width: auto;
   }
 }
 </style>
@@ -2792,53 +2400,23 @@ body {
   color: #ff6b6b !important;
 }
 
-.update-banner {
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
-  color: white;
-  position: relative;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  animation: slideDown 0.3s ease-out;
-}
-.update-banner-content {
+.user-section {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 12px 20px;
-  gap: 12px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
-.update-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
+
+.navbar-nav.nav-compact .nav-link {
+  padding: 8px 9px !important;
+  font-size: 0.85rem;
 }
-.spinning {
-  animation: spin 2s linear infinite;
+.navbar-nav.nav-compact .nav-item.me-3 {
+  margin-right: 0.2rem !important;
 }
-.update-text {
-  font-weight: 600;
-  font-size: 16px;
-  flex: 1;
-  text-align: center;
+.navbar-nav.nav-compact .navbar-search-box {
+  width: 170px;
 }
-.update-close {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.update-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.navbar-nav.nav-compact .navbar-search-container {
+  margin-right: 6px !important;
 }
 
 .navbar {
@@ -3065,25 +2643,6 @@ body {
   border-top: 8px solid var(--color-primary);
 }
 
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.navbar-nav.nav-compact .nav-link {
-  padding: 8px 9px !important;
-  font-size: 0.85rem;
-}
-.navbar-nav.nav-compact .nav-item.me-3 {
-  margin-right: 0.2rem !important;
-}
-.navbar-nav.nav-compact .navbar-search-box {
-  width: 170px;
-}
-.navbar-nav.nav-compact .navbar-search-container {
-  margin-right: 6px !important;
-}
-
 .navbar-toggler {
   border: none;
   padding: 0.25rem 0.5rem;
@@ -3109,24 +2668,6 @@ body {
   box-shadow: none;
 }
 
-@keyframes slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 @keyframes tooltipSlideIn {
   from {
     opacity: 0;

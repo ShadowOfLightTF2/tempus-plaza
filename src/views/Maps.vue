@@ -711,7 +711,7 @@
 import axios from "axios";
 import { useHead } from "@vueuse/head";
 import { useRoute, useRouter } from "vue-router";
-import MapCard from "./MapCard.vue";
+import MapCard from "@/components/MapCard.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];

@@ -533,7 +533,7 @@
 
 <script>
 import { useHead } from "@vueuse/head";
-import ServersSkeleton from "./Skeletons/ServersSkeleton.vue";
+import ServersSkeleton from "@/components/skeletons/ServersSkeleton.vue";
 import VueApexCharts from "vue3-apexcharts";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;

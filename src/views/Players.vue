@@ -808,7 +808,7 @@
 <script>
 import axios from "axios";
 import { useHead } from "@vueuse/head";
-import PlayersSkeleton from "./Skeletons/PlayersSkeleton.vue";
+import PlayersSkeleton from "@/components/skeletons/PlayersSkeleton.vue";
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {

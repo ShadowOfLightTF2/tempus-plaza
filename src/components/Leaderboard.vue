@@ -664,7 +664,7 @@ import axios from "axios";
 import { formatDuration, formatDate } from "@/utils/calculations.js";
 import { ref } from "vue";
 import { useHead } from "@vueuse/head";
-import LeaderboardSkeleton from "./Skeletons/LeaderboardSkeleton.vue";
+import LeaderboardSkeleton from "./skeletons/LeaderboardSkeleton.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const capitalizeFirstLetter = (str) =>

@@ -164,8 +164,8 @@
 <script>
 import { formatDate, formatDuration } from "@/utils/calculations";
 import { useHead } from "@vueuse/head";
-import ActivitySkeleton from "./Skeletons/ActivitySkeleton.vue";
-import ActivityCard from "./ActivityCard.vue";
+import ActivitySkeleton from "@/components/skeletons/ActivitySkeleton.vue";
+import ActivityCard from "@/components/ActivityCard.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
