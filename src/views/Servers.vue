@@ -225,19 +225,6 @@
               <div class="table-header-content">
                 <div class="table-header-top">
                   <div class="table-header-icon">🌍</div>
-                  <div class="table-header-title-section">
-                    <div class="server-status-title-row">
-                      <h3 class="table-header-title">Server Status</h3>
-                      <div class="total-players-badge">
-                        <span class="total-players-dot"></span>
-                        <span class="total-players-count">{{
-                          totalPlayerCount
-                        }}</span>
-                        <span class="total-players-label">online</span>
-                      </div>
-                    </div>
-                    <p class="table-header-subtitle">Updates every minute</p>
-                  </div>
                 </div>
                 <div class="table-header-filters">
                   <div class="region-buttons">
@@ -1335,12 +1322,6 @@ export default {
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
   flex-shrink: 0;
 }
-.server-status-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .total-players-badge {
   display: flex;
   align-items: center;
@@ -1370,17 +1351,6 @@ export default {
   }
 }
 
-.total-players-count {
-  font-size: 0.95rem;
-  font-weight: bold;
-  color: var(--color-text);
-}
-
-.total-players-label {
-  font-size: 0.8rem;
-  color: var(--color-text);
-  opacity: 0.7;
-}
 .table-header-title-section {
   flex: 1;
 }

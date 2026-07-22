@@ -6,7 +6,6 @@
       background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
     }"
   >
-    <!--:class="{ 'logo-overlay-golden': player.donator }"-->
     <div
       v-if="activeOverlay.src"
       class="logo-overlay"
@@ -36,6 +35,15 @@
               :height="activeOverlay.logoSize"
               :clip-path="activeOverlay.circular ? 'url(#logoClip)' : null"
               :transform="`rotate(${activeOverlay.imageRotate || 0} ${activeOverlay.gap / 2} ${activeOverlay.gap / 2})`"
+            />
+            <circle
+              v-if="activeOverlay.goldBorder"
+              :cx="activeOverlay.gap / 2"
+              :cy="activeOverlay.gap / 2"
+              :r="activeOverlay.logoSize / 2"
+              fill="none"
+              stroke="gold"
+              stroke-width="2"
             />
           </pattern>
         </defs>
@@ -203,8 +211,20 @@ export default {
           gap: 100,
           angle: 30,
           imageRotate: -30,
-          opacity: 0.03,
+          opacity: 0.035,
           circular: true,
+        },
+        {
+          key: "goldengolly",
+          label: "Golden Golly Pattern",
+          src: "/images/goldengolly.jpg",
+          logoSize: 60,
+          gap: 100,
+          angle: 30,
+          imageRotate: -30,
+          opacity: 0.035,
+          circular: true,
+          goldBorder: true,
         },
         {
           key: "soldier",
@@ -755,9 +775,6 @@ export default {
   display: block;
 }
 
-.logo-overlay-golden .logo-overlay-svg image {
-  filter: grayscale(1) brightness(1.3) sepia(1) saturate(15) hue-rotate(-15deg);
-}
 .profile-top,
 .banner-inner {
   position: relative;

@@ -167,18 +167,18 @@
 </template>
 
 <script>
-import ProfileBanner from "@/components/playerprofile/ProfileBanner.vue";
-import ClassStatsCard from "@/components/playerprofile/ClassStatsCard.vue";
-import SharedTimesCard from "@/components/playerprofile/SharedTimesCard.vue";
+import ProfileBanner from "@/components/playerpage/ProfileBanner.vue";
+import ClassStatsCard from "@/components/playerpage/ClassStatsCard.vue";
+import SharedTimesCard from "@/components/playerpage/SharedTimesCard.vue";
 import RecordsSection from "@/components/RecordsSection.vue";
-import FavoriteMapCard from "@/components/playerprofile/FavoriteMapCard.vue";
+import FavoriteMapCard from "@/components/playerpage/FavoriteMapCard.vue";
 import MapSearchModal from "@/components/MapSearchModal.vue";
-import RotwVideos from "@/components/playerprofile/RotwVideos.vue";
-import AuthoredMaps from "@/components/playerprofile/AuthoredMaps.vue";
+import RotwVideos from "@/components/playerpage/RotwVideos.vue";
+import AuthoredMaps from "@/components/playerpage/AuthoredMaps.vue";
 import axios from "axios";
 import { ref, defineAsyncComponent } from "vue";
 const PointsChart = defineAsyncComponent(
-  () => import("@/components/playerprofile/PointsChart.vue"),
+  () => import("@/components/playerpage/PointsChart.vue"),
 );
 import { useHead } from "@vueuse/head";
 import { formatDuration } from "@/utils/calculations.js";

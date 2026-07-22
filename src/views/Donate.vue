@@ -124,7 +124,7 @@
 
 <script>
 import { useHead } from "@vueuse/head";
-import ProfileBanner from "@/components/playerprofile/ProfileBanner.vue";
+import ProfileBanner from "@/components/playerpage/ProfileBanner.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const cache = new Map();
