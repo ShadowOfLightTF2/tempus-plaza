@@ -279,20 +279,16 @@ export default {
     bannerColorPairs() {
       return [
         {
-          color1: "var(--color-banner-red-1)",
-          color2: "var(--color-banner-red-2)",
+          color1: "var(--color-banner-sky-1)",
+          color2: "var(--color-banner-sky-2)",
         },
         {
-          color1: "var(--color-banner-purple-1)",
-          color2: "var(--color-banner-purple-2)",
+          color1: "var(--color-banner-forest-1)",
+          color2: "var(--color-banner-forest-2)",
         },
         {
-          color1: "var(--color-banner-teal-1)",
-          color2: "var(--color-banner-teal-2)",
-        },
-        {
-          color1: "var(--color-banner-cyan-1)",
-          color2: "var(--color-banner-cyan-2)",
+          color1: "var(--color-banner-indigo-1)",
+          color2: "var(--color-banner-indigo-2)",
         },
       ];
     },

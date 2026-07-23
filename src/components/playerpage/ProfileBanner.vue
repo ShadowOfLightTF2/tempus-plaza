@@ -1,147 +1,151 @@
 <template>
   <div
-    class="profile-banner mb-4"
+    class="profile-banner-wrapper mb-4"
     :class="{ 'golden-border': player.donator }"
-    :style="{
-      background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
-    }"
   >
     <div
-      v-if="activeOverlay.src"
-      class="logo-overlay"
-      :style="{ opacity: overlayOpacity }"
+      class="profile-banner"
+      :style="{
+        background: `linear-gradient(135deg, ${bannerColors.color1}, ${bannerColors.color2})`,
+      }"
     >
-      <svg class="logo-overlay-svg" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern
-            id="logoPattern"
-            patternUnits="userSpaceOnUse"
-            :width="activeOverlay.gap"
-            :height="activeOverlay.gap"
-            :patternTransform="`rotate(${activeOverlay.angle})`"
-          >
-            <clipPath v-if="activeOverlay.circular" id="logoClip">
+      <div
+        v-if="activeOverlay.src"
+        class="logo-overlay"
+        :style="{ opacity: overlayOpacity }"
+      >
+        <svg class="logo-overlay-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern
+              id="logoPattern"
+              patternUnits="userSpaceOnUse"
+              :width="activeOverlay.gap"
+              :height="activeOverlay.gap"
+              :patternTransform="`rotate(${activeOverlay.angle})`"
+            >
+              <clipPath v-if="activeOverlay.circular" id="logoClip">
+                <circle
+                  :cx="activeOverlay.gap / 2"
+                  :cy="activeOverlay.gap / 2"
+                  :r="activeOverlay.logoSize / 2"
+                />
+              </clipPath>
+              <image
+                :href="activeOverlay.src"
+                :x="(activeOverlay.gap - activeOverlay.logoSize) / 2"
+                :y="(activeOverlay.gap - activeOverlay.logoSize) / 2"
+                :width="activeOverlay.logoSize"
+                :height="activeOverlay.logoSize"
+                :clip-path="activeOverlay.circular ? 'url(#logoClip)' : null"
+                :transform="`rotate(${activeOverlay.imageRotate || 0} ${activeOverlay.gap / 2} ${activeOverlay.gap / 2})`"
+              />
               <circle
+                v-if="activeOverlay.goldBorder"
                 :cx="activeOverlay.gap / 2"
                 :cy="activeOverlay.gap / 2"
                 :r="activeOverlay.logoSize / 2"
+                fill="none"
+                stroke="gold"
+                stroke-width="2"
               />
-            </clipPath>
-            <image
-              :href="activeOverlay.src"
-              :x="(activeOverlay.gap - activeOverlay.logoSize) / 2"
-              :y="(activeOverlay.gap - activeOverlay.logoSize) / 2"
-              :width="activeOverlay.logoSize"
-              :height="activeOverlay.logoSize"
-              :clip-path="activeOverlay.circular ? 'url(#logoClip)' : null"
-              :transform="`rotate(${activeOverlay.imageRotate || 0} ${activeOverlay.gap / 2} ${activeOverlay.gap / 2})`"
-            />
-            <circle
-              v-if="activeOverlay.goldBorder"
-              :cx="activeOverlay.gap / 2"
-              :cy="activeOverlay.gap / 2"
-              :r="activeOverlay.logoSize / 2"
-              fill="none"
-              stroke="gold"
-              stroke-width="2"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#logoPattern)" />
-      </svg>
-    </div>
-    <div v-if="loading" class="loading-overlay">
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Loading ranks...</span>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#logoPattern)" />
+        </svg>
       </div>
-    </div>
-    <div class="profile-top">
-      <div class="top-left">
-        <div v-if="player.donator" class="donator-badge">Supporter</div>
-      </div>
-      <div class="top-right">
-        <div
-          v-if="onlineStatus"
-          class="online-indicator"
-          @click="connectToServer(onlineStatus.ipaddr, onlineStatus.port)"
-          title="Click to connect"
-        >
-          <span class="online-dot"></span>
-          <span class="online-text">
-            {{ onlineStatus.shortname || onlineStatus.server_name }}
-            <span class="online-sep">·</span>
-            {{ onlineStatus.currentMap }}
-          </span>
-        </div>
-        <div v-if="player.tempus_first_seen" class="date-item">
-          <span class="date-label">First joined</span>
-          <span class="date-value">{{
-            formatJoinDate(player.tempus_first_seen)
-          }}</span>
-        </div>
-        <span
-          v-if="player.tempus_last_seen && player.tempus_first_seen"
-          class="date-sep"
-          >·</span
-        >
-        <div v-if="player.tempus_last_seen" class="date-item">
-          <span class="date-label">Last online</span>
-          <span class="date-value">{{
-            formatRelativeTime(player.tempus_last_seen)
-          }}</span>
+      <div v-if="loading" class="loading-overlay">
+        <div class="spinner-border text-light" role="status">
+          <span class="visually-hidden">Loading ranks...</span>
         </div>
       </div>
-    </div>
-    <div class="banner-inner">
-      <div class="profile-left">
-        <a
-          :href="
-            player.steamidconverted && player.steamidconverted !== '#'
-              ? `https://steamcommunity.com/profiles/${player.steamidconverted}`
-              : '#'
-          "
-          :class="{
-            'pointer-events-none':
-              !player.steamidconverted || player.steamidconverted === '#',
-          }"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="avatar-link"
-        >
-          <img
-            :src="`${player.steam_avatar}`"
-            alt="Avatar"
-            class="avatar"
-            :class="{ 'golden-avatar': player.donator }"
-            onerror="this.src = '/avatars/golly.jpg'"
-          />
-        </a>
-
-        <div class="profile-info">
-          <h1 v-if="player.name" class="player-name" :title="player.name">
-            {{ player.name }}
-          </h1>
-          <p class="rank-name">
-            <span :class="playerRankInfo.color">{{
-              playerRankInfo.title
+      <div class="profile-top">
+        <div class="top-left">
+          <div v-if="player.donator" class="donator-badge">Supporter</div>
+        </div>
+        <div class="top-right">
+          <div
+            v-if="onlineStatus"
+            class="online-indicator"
+            @click="connectToServer(onlineStatus.ipaddr, onlineStatus.port)"
+            title="Click to connect"
+          >
+            <span class="online-dot"></span>
+            <span class="online-text">
+              {{ onlineStatus.shortname || onlineStatus.server_name }}
+              <span class="online-sep">·</span>
+              {{ onlineStatus.currentMap }}
+            </span>
+          </div>
+          <div v-if="player.tempus_first_seen" class="date-item">
+            <span class="date-label">First joined</span>
+            <span class="date-value">{{
+              formatJoinDate(player.tempus_first_seen)
             }}</span>
-          </p>
-          <p class="country">
-            <img
-              :src="getFlagImageUrl(player.country_code)"
-              alt="flag"
-              class="flag-icon"
-              @error="handleImageError"
-            />
-            {{ player.country }}
-          </p>
+          </div>
+          <span
+            v-if="player.tempus_last_seen && player.tempus_first_seen"
+            class="date-sep"
+            >·</span
+          >
+          <div v-if="player.tempus_last_seen" class="date-item">
+            <span class="date-label">Last online</span>
+            <span class="date-value">{{
+              formatRelativeTime(player.tempus_last_seen)
+            }}</span>
+          </div>
         </div>
       </div>
-      <div class="profile-right">
-        <div class="stats-grid">
-          <div class="stat-card" v-for="stat in stats" :key="stat.label">
-            <span class="stat-label">{{ stat.label }}</span>
-            <span class="stat-value">{{ stat.value }}</span>
+      <div class="banner-inner">
+        <div class="profile-left">
+          <a
+            :href="
+              player.steamidconverted && player.steamidconverted !== '#'
+                ? `https://steamcommunity.com/profiles/${player.steamidconverted}`
+                : '#'
+            "
+            :class="{
+              'pointer-events-none':
+                !player.steamidconverted || player.steamidconverted === '#',
+            }"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="avatar-link"
+          >
+            <img
+              :src="`${player.steam_avatar}`"
+              alt="Avatar"
+              class="avatar"
+              :class="{ 'golden-avatar': player.donator }"
+              onerror="this.src = '/avatars/golly.jpg'"
+            />
+          </a>
+
+          <div class="profile-info">
+            <h1 v-if="player.name" class="player-name" :title="player.name">
+              {{ player.name }}
+            </h1>
+            <p class="rank-name">
+              <span :class="playerRankInfo.color">{{
+                playerRankInfo.title
+              }}</span>
+            </p>
+            <p class="country">
+              <img
+                :src="getFlagImageUrl(player.country_code)"
+                alt="flag"
+                class="flag-icon"
+                @error="handleImageError"
+              />
+              {{ player.country }}
+            </p>
+          </div>
+        </div>
+        <div class="profile-right">
+          <div class="stats-grid">
+            <div class="stat-card" v-for="stat in stats" :key="stat.label">
+              <span class="stat-label">{{ stat.label }}</span>
+              <span class="stat-value">{{ stat.value }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -341,6 +345,11 @@ export default {
 </script>
 
 <style scoped>
+.profile-banner-wrapper {
+  position: relative;
+  border-radius: 14px;
+}
+
 .profile-banner {
   position: relative;
   border: 1px solid rgba(42, 42, 42, 0.99);
@@ -350,18 +359,31 @@ export default {
   width: 100%;
 }
 
-.golden-border {
+.golden-border .profile-banner {
   border: 2px solid gold;
+  box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.4);
+}
+
+.golden-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 28px 6px rgba(255, 215, 0, 0.75);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  will-change: opacity;
   animation: goldenGlow 3s ease-in-out infinite;
 }
 
 @keyframes goldenGlow {
   0%,
   100% {
-    box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.4);
+    opacity: 0;
   }
   50% {
-    box-shadow: 0 0 28px 6px rgba(255, 215, 0, 0.75);
+    opacity: 1;
   }
 }
 

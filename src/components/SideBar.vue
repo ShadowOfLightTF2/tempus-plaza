@@ -545,7 +545,10 @@
             </div>
             <div class="sidebar-settings-divider"></div>
             <div class="sidebar-settings-item">
-              <a class="sidebar-logout-link" @click="navShared.logout" href="#"
+              <a
+                class="sidebar-logout-link"
+                @click.prevent="confirmLogoutOpen = true"
+                href="#"
                 ><i class="bi bi-box-arrow-right"></i> Logout</a
               >
             </div>
@@ -553,22 +556,33 @@
         </div>
       </div>
     </div>
+    <ConfirmPopup
+      v-model="confirmLogoutOpen"
+      title="Log out?"
+      message="Are you sure you want to log out?"
+      confirm-text="Log out"
+      cancel-text="Cancel"
+      @confirm="navShared.logout"
+    />
   </div>
 </template>
 
 <script>
-import HoverPreview from "./utils/HoverPreview.vue";
+import HoverPreview from "@/components/utils/HoverPreview.vue";
+import ConfirmPopup from "@/components/popups/ConfirmPopup.vue";
 
 export default {
   name: "Sidebar",
   components: {
     HoverPreview,
+    ConfirmPopup,
   },
   inject: ["navShared"],
   data() {
     return {
       searchFocused: false,
       sidebarSettingsOpen: false,
+      confirmLogoutOpen: false,
     };
   },
   computed: {

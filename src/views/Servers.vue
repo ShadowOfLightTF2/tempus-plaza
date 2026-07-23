@@ -225,6 +225,10 @@
               <div class="table-header-content">
                 <div class="table-header-top">
                   <div class="table-header-icon">🌍</div>
+                  <div class="table-header-text">
+                    <h3 class="table-header-title">Server Status</h3>
+                    <p class="table-header-subtitle">Updates every minute</p>
+                  </div>
                 </div>
                 <div class="table-header-filters">
                   <div class="region-buttons">
@@ -499,12 +503,11 @@
               </div>
             </div>
           </div>
-
           <div class="graph-container">
             <apexchart
               v-if="filteredGraphData.length"
               type="area"
-              height="320"
+              :height="isMobile ? 240 : 320"
               :options="chartOptions"
               :series="chartSeries"
             />
@@ -679,10 +682,22 @@ export default {
           points: [],
         },
         xaxis: {
-          type: "datetime",
+          type: "numeric",
+          min: this.filteredGraphData.length
+            ? new Date(this.filteredGraphData[0].hour_start).getTime()
+            : undefined,
+          max: this.filteredGraphData.length
+            ? new Date(
+                this.filteredGraphData[this.filteredGraphData.length - 1]
+                  .hour_start,
+              ).getTime()
+            : undefined,
+          tickAmount: this.isMobile ? 4 : 8,
           labels: {
-            style: { colors: "rgba(255,255,255,0.7)" },
-            datetimeUTC: false,
+            style: {
+              colors: "rgba(255,255,255,0.7)",
+              fontSize: this.isMobile ? "10px" : "12px",
+            },
             formatter: (value) => {
               const date = new Date(Number(value));
               if (this.graphRange === "24h") {
@@ -700,6 +715,21 @@ export default {
           },
           axisBorder: { color: "rgba(255,255,255,0.15)" },
           axisTicks: { color: "rgba(255,255,255,0.15)" },
+        },
+        tooltip: {
+          theme: "dark",
+          x: {
+            formatter: (value) => {
+              const date = new Date(Number(value));
+              return date.toLocaleString([], {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
+            },
+          },
         },
         yaxis: {
           labels: { style: { colors: "rgba(255,255,255,0.7)" } },
@@ -2130,6 +2160,12 @@ export default {
 
   .graph-header-row {
     flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .graph-header-row .table-header-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
   }
 
   .graph-header-row .table-header-title-section {
@@ -2137,10 +2173,17 @@ export default {
     flex-basis: calc(100% - 3.5rem);
   }
 
+  .graph-header-row .table-header-title-section,
+  .graph-header-row .table-header-title,
+  .graph-header-row .table-header-subtitle {
+    text-align: left;
+  }
+
   .graph-header-row .graph-stats {
     order: 2;
     flex-basis: 100%;
     justify-content: center;
+    gap: 0.5rem;
     margin-top: 0.25rem;
     margin-left: 0;
   }
@@ -2150,6 +2193,23 @@ export default {
     flex-basis: 100%;
     justify-content: center;
     margin-top: 0.5rem;
+  }
+
+  .stat-badge {
+    padding: 0.25rem 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .stat-badge-value {
+    font-size: 0.85rem;
+  }
+
+  .stat-badge-label {
+    font-size: 0.65rem;
+  }
+
+  .graph-container {
+    padding: 0.75rem 0.5rem 1rem;
   }
 
   .table-responsive {

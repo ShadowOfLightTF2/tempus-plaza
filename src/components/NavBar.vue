@@ -561,7 +561,7 @@
                 <li>
                   <a
                     class="dropdown-item clickable"
-                    @click="navShared.logout"
+                    @click.prevent="confirmLogoutOpen = true"
                     href="#"
                     >Logout</a
                   >
@@ -571,7 +571,6 @@
           </div>
         </ul>
       </div>
-
       <button
         class="navbar-toggler mobile-calc-btn"
         type="button"
@@ -590,21 +589,32 @@
       </button>
     </div>
   </nav>
+  <ConfirmPopup
+    v-model="confirmLogoutOpen"
+    title="Log out?"
+    message="Are you sure you want to log out?"
+    confirm-text="Log out"
+    cancel-text="Cancel"
+    @confirm="navShared.logout"
+  />
 </template>
 
 <script>
-import HoverPreview from "./utils/HoverPreview.vue";
+import HoverPreview from "@/components/utils/HoverPreview.vue";
+import ConfirmPopup from "@/components/popups/ConfirmPopup.vue";
 
 export default {
   name: "Navbar",
   components: {
     HoverPreview,
+    ConfirmPopup,
   },
   inject: ["navShared"],
   emits: ["open-calculator"],
   data() {
     return {
       searchFocused: false,
+      confirmLogoutOpen: false,
     };
   },
   computed: {
