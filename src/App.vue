@@ -102,7 +102,7 @@ export default {
           },
           {
             value: "jf",
-            label: "JF",
+            label: "Jump Fortress",
             thumb: "/images/jf-logo.png",
             unlockMessage:
               "Unlocked by playing in special Jump Fortress events",
@@ -535,7 +535,6 @@ body {
 }
 
 /* --- Styles shared between Navbar.vue and Sidebar.vue --- */
-
 .form-check-input:checked {
   background: linear-gradient(
     to bottom,
@@ -574,7 +573,6 @@ body {
   color: var(--color-text);
 }
 
-/* search dropdown result rows (used by both navbar + sidebar search) */
 .nav-search-section {
   padding: 6px 0;
 }
@@ -719,11 +717,10 @@ body {
   transform: translateY(-6px);
 }
 
-/* color / pattern pickers + supporter tooltip (used in both navbar dropdown and sidebar settings) */
 .pattern-picker-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 5px;
   max-width: 180px;
   margin-top: 4px;
 }

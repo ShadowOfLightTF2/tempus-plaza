@@ -442,7 +442,7 @@
                           :title="
                             navShared.unlockedColors.includes(color.value)
                               ? ''
-                              : 'Donator only'
+                              : 'Supporter only'
                           "
                         >
                           <svg
@@ -514,7 +514,7 @@
                           :title="
                             navShared.unlockedPatterns.includes(pattern.value)
                               ? pattern.label
-                              : pattern.label + ' (Donator only)'
+                              : pattern.label + ' (Not unlocked)'
                           "
                         >
                           <svg

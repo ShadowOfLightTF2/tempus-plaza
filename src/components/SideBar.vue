@@ -524,7 +524,7 @@
                     :title="
                       navShared.unlockedPatterns.includes(pattern.value)
                         ? pattern.label
-                        : pattern.label + ' (Donator only)'
+                        : pattern.label + ' (Not unlocked)'
                     "
                   >
                     <svg

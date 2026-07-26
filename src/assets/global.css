@@ -74,7 +74,13 @@
 body, html {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI';
+  font-family:
+    'Segoe UI',
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto,
+    Inter,
+    sans-serif;
   color: #333;
   scroll-behavior: auto !important;
 }
