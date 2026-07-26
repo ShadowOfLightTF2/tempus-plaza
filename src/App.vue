@@ -18,9 +18,9 @@ import PointsCalculator from "@/components/utils/PointsCalculator.vue";
 import LoginPopup from "@/components/popups/LoginPopup.vue";
 import AccountNotFoundPopup from "@/components/popups/AccountNotFoundPopup.vue";
 import UpdateBanner from "@/components/UpdateBanner.vue";
-import AppFooter from "@/components/AppFooter.vue";
-import Navbar from "@/components/Navbar.vue";
-import Sidebar from "@/components/Sidebar.vue";
+import AppFooter from "@/components/nav/AppFooter.vue";
+import Navbar from "@/components/nav/NavBar.vue";
+import Sidebar from "@/components/nav/SideBar.vue";
 import DOMPurify from "dompurify";
 import { reactive } from "vue";
 

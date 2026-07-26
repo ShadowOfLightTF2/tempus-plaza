@@ -511,21 +511,22 @@
                     <h6 class="filter-title mb-2">Soldier tiers</h6>
                     <div class="tier-filter-container">
                       <div class="tier-filters">
-                        <label
+                        <span
                           v-for="tier in availableTiers"
                           :key="'soldier-tier-' + tier"
-                          class="tier-checkbox"
+                          :class="[
+                            'tier-badge',
+                            `tier-${tier}`,
+                            {
+                              'filter-included':
+                                soldierTierState[tier] === 'include',
+                              'filter-excluded':
+                                soldierTierState[tier] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleSoldierTier(tier)"
+                          >{{ tier }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="tier"
-                            v-model="selectedSoldierTiers"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`tier-badge tier-${tier}`">{{
-                            tier
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -535,21 +536,22 @@
                     <h6 class="filter-title mb-2">Demoman tiers</h6>
                     <div class="tier-filter-container">
                       <div class="tier-filters">
-                        <label
+                        <span
                           v-for="tier in availableTiers"
                           :key="'demo-tier-' + tier"
-                          class="tier-checkbox"
+                          :class="[
+                            'tier-badge',
+                            `tier-${tier}`,
+                            {
+                              'filter-included':
+                                demomanTierState[tier] === 'include',
+                              'filter-excluded':
+                                demomanTierState[tier] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleDemomanTier(tier)"
+                          >{{ tier }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="tier"
-                            v-model="selectedDemomanTiers"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`tier-badge tier-${tier}`">{{
-                            tier
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -570,21 +572,22 @@
                     <h6 class="filter-title mb-2">Soldier ratings</h6>
                     <div class="rating-filter-container">
                       <div class="rating-filters">
-                        <label
+                        <span
                           v-for="rating in availableRatings"
                           :key="'soldier-rating-' + rating"
-                          class="rating-checkbox"
+                          :class="[
+                            'rating-badge',
+                            `rating-${rating}`,
+                            {
+                              'filter-included':
+                                soldierRatingState[rating] === 'include',
+                              'filter-excluded':
+                                soldierRatingState[rating] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleSoldierRating(rating)"
+                          >{{ rating }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="rating"
-                            v-model="selectedSoldierRatings"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`rating-badge rating-${rating}`">{{
-                            rating
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -598,7 +601,10 @@
                         :key="cls.id"
                         @click="toggleIntendedClass(cls.id)"
                         :class="{
-                          active: selectedIntendedClasses.includes(cls.id),
+                          'filter-included':
+                            intendedClassState[cls.id] === 'include',
+                          'filter-excluded':
+                            intendedClassState[cls.id] === 'exclude',
                         }"
                         class="intended-class-btn"
                       >
@@ -612,21 +618,22 @@
                     <h6 class="filter-title mb-2">Demoman ratings</h6>
                     <div class="rating-filter-container">
                       <div class="rating-filters">
-                        <label
+                        <span
                           v-for="rating in availableRatings"
                           :key="'demo-rating-' + rating"
-                          class="rating-checkbox"
+                          :class="[
+                            'rating-badge',
+                            `rating-${rating}`,
+                            {
+                              'filter-included':
+                                demomanRatingState[rating] === 'include',
+                              'filter-excluded':
+                                demomanRatingState[rating] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleDemomanRating(rating)"
+                          >{{ rating }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="rating"
-                            v-model="selectedDemomanRatings"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`rating-badge rating-${rating}`">{{
-                            rating
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -637,48 +644,49 @@
               <h6 class="filter-title mb-2">Placement</h6>
               <div class="group-filter-container">
                 <div class="group-filters">
-                  <label class="group-checkbox">
-                    <input
-                      type="checkbox"
-                      value="WR"
-                      v-model="selectedGroups"
-                      @change="onFilterChange"
-                    />
-                    <span class="group-badge group-wr">WR</span>
-                  </label>
-                  <label class="group-checkbox">
-                    <input
-                      type="checkbox"
-                      value="TT"
-                      v-model="selectedGroups"
-                      @change="onFilterChange"
-                    />
-                    <span class="group-badge group-tt">TT</span>
-                  </label>
-                  <label
+                  <span
+                    class="group-badge group-wr"
+                    :class="{
+                      'filter-included': groupState['WR'] === 'include',
+                      'filter-excluded': groupState['WR'] === 'exclude',
+                    }"
+                    @click="toggleGroup('WR')"
+                    >WR</span
+                  >
+                  <span
+                    class="group-badge group-tt"
+                    :class="{
+                      'filter-included': groupState['TT'] === 'include',
+                      'filter-excluded': groupState['TT'] === 'exclude',
+                    }"
+                    @click="toggleGroup('TT')"
+                    >TT</span
+                  >
+                  <span
                     v-for="group in availableGroups"
                     :key="'group-' + group"
-                    class="group-checkbox"
+                    :class="[
+                      'group-badge',
+                      `group-${group}`,
+                      {
+                        'filter-included':
+                          groupState[String(group)] === 'include',
+                        'filter-excluded':
+                          groupState[String(group)] === 'exclude',
+                      },
+                    ]"
+                    @click="toggleGroup(String(group))"
+                    >G{{ group }}</span
                   >
-                    <input
-                      type="checkbox"
-                      :value="group"
-                      v-model="selectedGroups"
-                      @change="onFilterChange"
-                    />
-                    <span :class="`group-badge group-${group}`"
-                      >G{{ group }}</span
-                    >
-                  </label>
-                  <label class="group-checkbox">
-                    <input
-                      type="checkbox"
-                      value="BT"
-                      v-model="selectedGroups"
-                      @change="onFilterChange"
-                    />
-                    <span class="group-badge group-bt">BT</span>
-                  </label>
+                  <span
+                    class="group-badge group-bt"
+                    :class="{
+                      'filter-included': groupState['BT'] === 'include',
+                      'filter-excluded': groupState['BT'] === 'exclude',
+                    }"
+                    @click="toggleGroup('BT')"
+                    >BT</span
+                  >
                 </div>
               </div>
             </div>
@@ -690,7 +698,7 @@
                     v-for="classOption in ['soldier', 'demoman']"
                     :key="classOption"
                     class="class-checkbox"
-                    :class="{ selected: selectedClasses.includes(classOption) }"
+                    :class="{ selected: classState[classOption] === 'include' }"
                     @click="toggleClass(classOption)"
                   >
                     <span>{{ classOption }}</span>
@@ -704,7 +712,7 @@
                     v-for="typeOption in ['map', 'course', 'bonus']"
                     :key="typeOption"
                     class="type-checkbox"
-                    :class="{ selected: selectedTypes.includes(typeOption) }"
+                    :class="{ selected: typeState[typeOption] === 'include' }"
                     @click="toggleType(typeOption)"
                   >
                     <span>{{ typeOption }}</span>
@@ -720,7 +728,7 @@
                     v-for="statusOption in ['completed', 'incomplete']"
                     :key="statusOption"
                     class="status-checkbox"
-                    :class="{ selected: selectedStatus.includes(statusOption) }"
+                    :class="{ selected: statusState[statusOption] === 'include' }"
                     @click="toggleStatus(statusOption)"
                   >
                     <span>{{ statusOption }}</span>
@@ -1039,22 +1047,22 @@ export default {
     records: [],
     loading: false,
     error: null,
-    selectedClasses: [],
-    selectedTypes: [],
-    selectedStatus: ["completed"],
-    selectedSoldierTiers: [],
-    selectedSoldierRatings: [],
-    selectedDemomanTiers: [],
-    selectedDemomanRatings: [],
+    classState: {},
+    typeState: {},
+    statusState: { completed: "include" },
+    soldierTierState: {},
+    soldierRatingState: {},
+    demomanTierState: {},
+    demomanRatingState: {},
     availableTiers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
     availableRatings: [1, 2, 3, 4],
-    selectedIntendedClasses: [],
+    intendedClassState: {},
     availableIntendedClasses: [
       { id: 3, label: "Soldier", icon: "/icons/soldier.png" },
       { id: 4, label: "Demoman", icon: "/icons/demoman.png" },
     ],
     availableGroups: [1, 2, 3, 4, 5],
-    selectedGroups: [],
+    groupState: {},
     sortByCategory: "time",
     sortDirection: "asc",
     recordSearchQuery: "",
@@ -1075,7 +1083,6 @@ export default {
     showLoading: false,
     debounceTimer: null,
     cachedRecords: { records: [], courseRecords: [], bonusRecords: [] },
-    validPlacements: [],
     displayCount: 300,
     lookupSearchFocused: false,
     lookupHighlightedIndex: -1,
@@ -1091,89 +1098,121 @@ export default {
       return this.lookupMapCount + this.lookupPlayerCount;
     },
     filteredSortedItems() {
-      let recordsToFilter = [];
+      const recordsToFilter = [
+        ...this.cachedRecords.records,
+        ...this.cachedRecords.courseRecords,
+        ...this.cachedRecords.bonusRecords,
+      ];
 
-      if (this.selectedTypes.length === 0) {
-        recordsToFilter = [
-          ...this.cachedRecords.records,
-          ...this.cachedRecords.courseRecords,
-          ...this.cachedRecords.bonusRecords,
-        ];
-      } else {
-        if (this.selectedTypes.includes("map"))
-          recordsToFilter.push(...this.cachedRecords.records);
-        if (this.selectedTypes.includes("course"))
-          recordsToFilter.push(...this.cachedRecords.courseRecords);
-        if (this.selectedTypes.includes("bonus"))
-          recordsToFilter.push(...this.cachedRecords.bonusRecords);
-      }
+      const includedTypes = this.getIncluded(this.typeState);
+      const includedClasses = this.getIncluded(this.classState);
+      const includedStatus = this.getIncluded(this.statusState);
+      const includedSoldierTiers = this.getIncluded(
+        this.soldierTierState,
+        true,
+      );
+      const includedSoldierRatings = this.getIncluded(
+        this.soldierRatingState,
+        true,
+      );
+      const includedDemomanTiers = this.getIncluded(
+        this.demomanTierState,
+        true,
+      );
+      const includedDemomanRatings = this.getIncluded(
+        this.demomanRatingState,
+        true,
+      );
+      const includedGroups = this.getIncluded(this.groupState);
+      const excludedGroups = this.getExcluded(this.groupState);
+      const includedIntendedClasses = this.getIncluded(
+        this.intendedClassState,
+        true,
+      );
+      const excludedIntendedClasses = this.getExcluded(
+        this.intendedClassState,
+        true,
+      );
 
       const filtered = recordsToFilter.filter((record) => {
+        // Type
+        if (includedTypes.length > 0 && !includedTypes.includes(record.type))
+          return false;
+
+        // Class (soldier/demoman)
         if (
-          this.selectedClasses.length > 0 &&
-          !this.selectedClasses.includes(record.class)
+          includedClasses.length > 0 &&
+          !includedClasses.includes(record.class)
         )
           return false;
 
-        if (this.selectedStatus.length > 0) {
-          const isComplete = record.duration !== null;
-          if (isComplete && !this.selectedStatus.includes("completed"))
-            return false;
-          if (!isComplete && !this.selectedStatus.includes("incomplete"))
-            return false;
-        }
+        // Status (completed/incomplete)
+        const isComplete = record.duration !== null;
+        const statusKey = isComplete ? "completed" : "incomplete";
+        if (includedStatus.length > 0 && !includedStatus.includes(statusKey))
+          return false;
 
+        // Tiers / ratings by class
         if (record.class === "soldier") {
+          if (this.soldierTierState[record.tier] === "exclude") return false;
           if (
-            this.selectedSoldierTiers.length > 0 &&
-            !this.selectedSoldierTiers.includes(record.tier)
+            includedSoldierTiers.length > 0 &&
+            !includedSoldierTiers.includes(record.tier)
           )
             return false;
+          if (this.soldierRatingState[record.rating] === "exclude")
+            return false;
           if (
-            this.selectedSoldierRatings.length > 0 &&
-            !this.selectedSoldierRatings.includes(record.rating)
+            includedSoldierRatings.length > 0 &&
+            !includedSoldierRatings.includes(record.rating)
           )
             return false;
         } else if (record.class === "demoman") {
+          if (this.demomanTierState[record.tier] === "exclude") return false;
           if (
-            this.selectedDemomanTiers.length > 0 &&
-            !this.selectedDemomanTiers.includes(record.tier)
+            includedDemomanTiers.length > 0 &&
+            !includedDemomanTiers.includes(record.tier)
           )
             return false;
+          if (this.demomanRatingState[record.rating] === "exclude")
+            return false;
           if (
-            this.selectedDemomanRatings.length > 0 &&
-            !this.selectedDemomanRatings.includes(record.rating)
+            includedDemomanRatings.length > 0 &&
+            !includedDemomanRatings.includes(record.rating)
           )
             return false;
         }
 
-        if (this.selectedGroups.length > 0) {
-          let shouldInclude = false;
+        // Placement groups
+        if (includedGroups.length > 0 || excludedGroups.length > 0) {
+          if (excludedGroups.some((key) => this.matchesGroup(key, record)))
+            return false;
           if (
-            this.selectedGroups.includes("BT") &&
-            record.rank === record.completion_count
+            includedGroups.length > 0 &&
+            !includedGroups.some((key) => this.matchesGroup(key, record))
           )
-            shouldInclude = true;
-          if (
-            this.validPlacements.length > 0 &&
-            this.validPlacements.includes(record.placement)
-          )
-            shouldInclude = true;
-          if (!shouldInclude) return false;
+            return false;
         }
 
-        if (this.selectedIntendedClasses.length > 0) {
+        // Intended class
+        if (
+          includedIntendedClasses.length > 0 ||
+          excludedIntendedClasses.length > 0
+        ) {
+          const recordClasses =
+            record.intended_class === 5 ? [3, 4] : [record.intended_class];
           if (
-            this.selectedIntendedClasses.includes(3) &&
-            this.selectedIntendedClasses.includes(4)
-          ) {
-            if (record.intended_class !== 5) return false;
-          } else {
-            if (
-              !this.selectedIntendedClasses.includes(record.intended_class) &&
-              record.intended_class !== 5
-            )
+            excludedIntendedClasses.some((k) => recordClasses.includes(k))
+          )
+            return false;
+          if (includedIntendedClasses.length > 0) {
+            if (includedIntendedClasses.length === 2) {
+              if (record.intended_class !== 5) return false;
+            } else if (
+              !includedIntendedClasses.some((k) => recordClasses.includes(k))
+            ) {
               return false;
+            }
           }
         }
 
@@ -1238,20 +1277,6 @@ export default {
     mapId(newMapId) {
       if (newMapId) this.fetchMapRecords();
     },
-    selectedGroups: {
-      handler(newVal, oldVal) {
-        const placements = [];
-        this.selectedGroups.forEach((group) => {
-          if (group === "WR") placements.push(1);
-          else if (group === "TT")
-            placements.push(...[2, 3, 4, 5, 6, 7, 8, 9, 10]);
-          else placements.push(10 + Number(group));
-        });
-        this.validPlacements = placements;
-        if (oldVal !== undefined) this.updateUrl();
-      },
-      immediate: true,
-    },
     $route(to, from) {
       if (to.params.playerId && to.params.playerId !== from.params.playerId) {
         this.playerId = to.params.playerId;
@@ -1315,6 +1340,90 @@ export default {
     }
   },
   methods: {
+    cycleFilterState(stateObj, key) {
+      const current = stateObj[key];
+      if (current === "include") {
+        stateObj[key] = "exclude";
+      } else if (current === "exclude") {
+        delete stateObj[key];
+      } else {
+        stateObj[key] = "include";
+      }
+      this.onFilterChange();
+    },
+    getIncluded(stateObj, numeric = false) {
+      return Object.keys(stateObj)
+        .filter((k) => stateObj[k] === "include")
+        .map((k) => (numeric ? Number(k) : k));
+    },
+    getExcluded(stateObj, numeric = false) {
+      return Object.keys(stateObj)
+        .filter((k) => stateObj[k] === "exclude")
+        .map((k) => (numeric ? Number(k) : k));
+    },
+    matchesGroup(key, record) {
+      if (key === "WR") return record.placement === 1;
+      if (key === "TT")
+        return record.placement >= 2 && record.placement <= 10;
+      if (key === "BT") return record.rank === record.completion_count;
+      return record.placement === 10 + Number(key);
+    },
+    serializeState(stateObj) {
+      return Object.keys(stateObj)
+        .map((k) => (stateObj[k] === "exclude" ? "-" + k : k))
+        .join(",");
+    },
+    parseState(str, allowedKeys, numeric = false) {
+      const result = {};
+      if (!str) return result;
+      String(str)
+        .split(",")
+        .forEach((token) => {
+          if (!token) return;
+          const exclude = token.startsWith("-");
+          const rawKey = exclude ? token.slice(1) : token;
+          const key = numeric ? parseInt(rawKey) : rawKey;
+          if (numeric && isNaN(key)) return;
+          if (allowedKeys && !allowedKeys.includes(key)) return;
+          result[key] = exclude ? "exclude" : "include";
+        });
+      return result;
+    },
+    toggleSoldierTier(tier) {
+      this.cycleFilterState(this.soldierTierState, tier);
+    },
+    toggleSoldierRating(rating) {
+      this.cycleFilterState(this.soldierRatingState, rating);
+    },
+    toggleDemomanTier(tier) {
+      this.cycleFilterState(this.demomanTierState, tier);
+    },
+    toggleDemomanRating(rating) {
+      this.cycleFilterState(this.demomanRatingState, rating);
+    },
+    toggleGroup(group) {
+      this.cycleFilterState(this.groupState, group);
+    },
+    toggleIntendedClass(clsId) {
+      this.cycleFilterState(this.intendedClassState, clsId);
+    },
+    toggleSimpleState(stateObj, key) {
+      if (stateObj[key] === "include") {
+        delete stateObj[key];
+      } else {
+        stateObj[key] = "include";
+      }
+      this.onFilterChange();
+    },
+    toggleClass(classOption) {
+      this.toggleSimpleState(this.classState, classOption);
+    },
+    toggleType(typeOption) {
+      this.toggleSimpleState(this.typeState, typeOption);
+    },
+    toggleStatus(statusOption) {
+      this.toggleSimpleState(this.statusState, statusOption);
+    },
     onLookupKeydown(e) {
       if (!this.searchResults || this.lookupTotalResults === 0) return;
       if (e.key === "ArrowDown") {
@@ -1363,37 +1472,36 @@ export default {
     },
     parseUrlFilters() {
       const q = this.$route.query;
-      const parseInts = (param, allowed) => {
-        if (!param) return [];
-        const vals = Array.isArray(param) ? param : param.split(",");
-        return vals
-          .map((v) => parseInt(v))
-          .filter((v) => !isNaN(v) && allowed.includes(v));
-      };
-      const parseStrs = (param, allowed) => {
-        if (!param) return [];
-        const vals = Array.isArray(param) ? param : param.split(",");
-        return vals.filter((v) => allowed.includes(v));
-      };
-      this.selectedSoldierTiers = parseInts(q.st, this.availableTiers);
-      this.selectedSoldierRatings = parseInts(q.sr, this.availableRatings);
-      this.selectedDemomanTiers = parseInts(q.dt, this.availableTiers);
-      this.selectedDemomanRatings = parseInts(q.dr, this.availableRatings);
-      this.selectedIntendedClasses = parseInts(q.ic, [3, 4]);
-      this.selectedClasses = parseStrs(q.cls, ["soldier", "demoman"]);
-      this.selectedTypes = parseStrs(q.typ, ["map", "course", "bonus"]);
-      this.selectedGroups = parseStrs(q.grp, [
-        "WR",
-        "TT",
-        "BT",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-      ]);
-      const allowedStatus = ["completed", "incomplete"];
-      if (q.sts) this.selectedStatus = parseStrs(q.sts, allowedStatus);
+      this.soldierTierState = this.parseState(q.st, this.availableTiers, true);
+      this.soldierRatingState = this.parseState(
+        q.sr,
+        this.availableRatings,
+        true,
+      );
+      this.demomanTierState = this.parseState(q.dt, this.availableTiers, true);
+      this.demomanRatingState = this.parseState(
+        q.dr,
+        this.availableRatings,
+        true,
+      );
+      this.intendedClassState = this.parseState(q.ic, [3, 4], true);
+      this.classState = this.parseState(q.cls, ["soldier", "demoman"], false);
+      this.typeState = this.parseState(
+        q.typ,
+        ["map", "course", "bonus"],
+        false,
+      );
+      this.groupState = this.parseState(
+        q.grp,
+        ["WR", "TT", "BT", "1", "2", "3", "4", "5"],
+        false,
+      );
+      if (q.sts)
+        this.statusState = this.parseState(
+          q.sts,
+          ["completed", "incomplete"],
+          false,
+        );
       if (
         q.srt &&
         [
@@ -1414,25 +1522,30 @@ export default {
     },
     updateUrl() {
       const q = {};
-      if (this.selectedSoldierTiers.length)
-        q.st = this.selectedSoldierTiers.join(",");
-      if (this.selectedSoldierRatings.length)
-        q.sr = this.selectedSoldierRatings.join(",");
-      if (this.selectedDemomanTiers.length)
-        q.dt = this.selectedDemomanTiers.join(",");
-      if (this.selectedDemomanRatings.length)
-        q.dr = this.selectedDemomanRatings.join(",");
-      if (this.selectedIntendedClasses.length)
-        q.ic = this.selectedIntendedClasses.join(",");
-      if (this.selectedClasses.length) q.cls = this.selectedClasses.join(",");
-      if (this.selectedTypes.length) q.typ = this.selectedTypes.join(",");
-      if (this.selectedGroups.length) q.grp = this.selectedGroups.join(",");
-      const defaultStatus = ["completed"];
-      const statusChanged = !(
-        this.selectedStatus.length === defaultStatus.length &&
-        this.selectedStatus.every((s) => defaultStatus.includes(s))
-      );
-      if (statusChanged) q.sts = this.selectedStatus.join(",");
+      const st = this.serializeState(this.soldierTierState);
+      if (st) q.st = st;
+      const sr = this.serializeState(this.soldierRatingState);
+      if (sr) q.sr = sr;
+      const dt = this.serializeState(this.demomanTierState);
+      if (dt) q.dt = dt;
+      const dr = this.serializeState(this.demomanRatingState);
+      if (dr) q.dr = dr;
+      const ic = this.serializeState(this.intendedClassState);
+      if (ic) q.ic = ic;
+      const cls = this.serializeState(this.classState);
+      if (cls) q.cls = cls;
+      const typ = this.serializeState(this.typeState);
+      if (typ) q.typ = typ;
+      const grp = this.serializeState(this.groupState);
+      if (grp) q.grp = grp;
+
+      const defaultStatus = { completed: "include" };
+      const statusChanged =
+        JSON.stringify(this.statusState) !== JSON.stringify(defaultStatus);
+      if (statusChanged) {
+        const sts = this.serializeState(this.statusState);
+        q.sts = sts;
+      }
       if (this.sortByCategory !== "time") q.srt = this.sortByCategory;
       if (this.sortDirection !== "asc") q.dir = this.sortDirection;
       this.$router
@@ -1714,32 +1827,6 @@ export default {
     onFilterChange() {
       this.updateUrl();
     },
-    toggleClass(classOption) {
-      this.selectedClasses = this.selectedClasses.includes(classOption)
-        ? this.selectedClasses.filter((c) => c !== classOption)
-        : [...this.selectedClasses, classOption];
-      this.onFilterChange();
-    },
-    toggleType(typeOption) {
-      this.selectedTypes = this.selectedTypes.includes(typeOption)
-        ? this.selectedTypes.filter((t) => t !== typeOption)
-        : [...this.selectedTypes, typeOption];
-      this.onFilterChange();
-    },
-    toggleStatus(statusOption) {
-      this.selectedStatus = this.selectedStatus.includes(statusOption)
-        ? this.selectedStatus.filter((s) => s !== statusOption)
-        : [...this.selectedStatus, statusOption];
-      this.onFilterChange();
-    },
-    toggleIntendedClass(clsId) {
-      this.selectedIntendedClasses = this.selectedIntendedClasses.includes(
-        clsId,
-      )
-        ? this.selectedIntendedClasses.filter((id) => id !== clsId)
-        : [...this.selectedIntendedClasses, clsId];
-      this.onFilterChange();
-    },
     formatPlacement(placement) {
       if (placement <= 10) return "";
       if (placement <= 15) return "(G" + (placement - 10) + ")";
@@ -1930,15 +2017,15 @@ export default {
       }
     },
     clearAllFilters() {
-      this.selectedClasses = [];
-      this.selectedTypes = [];
-      this.selectedStatus = ["completed"];
-      this.selectedSoldierTiers = [];
-      this.selectedSoldierRatings = [];
-      this.selectedDemomanTiers = [];
-      this.selectedDemomanRatings = [];
-      this.selectedIntendedClasses = [];
-      this.selectedGroups = [];
+      this.classState = {};
+      this.typeState = {};
+      this.statusState = { completed: "include" };
+      this.soldierTierState = {};
+      this.soldierRatingState = {};
+      this.demomanTierState = {};
+      this.demomanRatingState = {};
+      this.intendedClassState = {};
+      this.groupState = {};
       this.sortByCategory = "time";
       this.sortDirection = "desc";
       this.recordSearchQuery = "";
@@ -2365,28 +2452,17 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
 }
-.tier-checkbox,
-.rating-checkbox {
-  display: flex;
-  align-items: center;
+.tier-badge,
+.rating-badge,
+.group-badge {
   cursor: pointer;
-  margin: 0;
 }
-.tier-checkbox:hover,
-.rating-checkbox:hover,
-.group-checkbox:hover {
+.tier-badge:hover,
+.rating-badge:hover,
+.group-badge:hover {
   border-radius: 4px;
   border-color: var(--color-border, #444);
-  box-shadow: 0 0 0 1px var(--color-border, #444);
-}
-.tier-checkbox input,
-.rating-checkbox input {
-  display: none;
-}
-.tier-checkbox input:checked + .tier-badge,
-.rating-checkbox input:checked + .rating-badge {
-  border-color: var(--color-border, #444);
-  box-shadow: 0 0 0 1px var(--color-border, #444);
+  box-shadow: 0 0 0 0.5px var(--color-border, #444);
 }
 .tier-badge,
 .rating-badge {
@@ -2552,22 +2628,6 @@ export default {
   flex-wrap: nowrap;
   justify-content: center;
 }
-.group-checkbox,
-.rating-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  margin: 0;
-}
-.group-checkbox input,
-.rating-checkbox input {
-  display: none;
-}
-.group-checkbox input:checked + .group-badge,
-.rating-checkbox input:checked + .rating-badge {
-  border-color: var(--color-border, #444);
-  box-shadow: 0 0 0 1px var(--color-border, #444);
-}
 .group-badge,
 .rating-badge {
   padding: 4px 8px;
@@ -2578,6 +2638,15 @@ export default {
   transition: all 0.2s ease;
   min-width: 28px;
   text-align: center;
+}
+
+.filter-included {
+  border-color: var(--color-border, #444) !important;
+  box-shadow: 0 0 0 0.5px var(--color-border, #444) !important;
+}
+.filter-excluded {
+  border-color: #ff3b3b !important;
+  box-shadow: 0 0 0 1px #ff3b3b !important;
 }
 
 .filter-actions {
@@ -2728,9 +2797,13 @@ export default {
   height: 28px;
   display: block;
 }
-.intended-class-btn.active {
+.intended-class-btn.filter-included {
   background: rgba(165, 165, 165, 0.5);
-  border-color: var(--color-border);
+  border-width: 1px;
+}
+.intended-class-btn.filter-excluded {
+  background: rgba(220, 53, 69, 0.25);
+  border-width: 1px;
 }
 .intended-class-btn:hover {
   background: rgba(165, 165, 165, 0.3);
