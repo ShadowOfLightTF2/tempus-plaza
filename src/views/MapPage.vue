@@ -149,10 +149,24 @@
                 </div>
                 <button
                   class="banner-tag-btn"
-                  title="Vote for tag(s)"
+                  :class="{
+                    'has-voted': hasVotedMapTags,
+                    'not-voted': !hasVotedMapTags,
+                  }"
+                  :title="
+                    hasVotedMapTags ? 'You voted for tag(s)' : 'Vote for tag(s)'
+                  "
                   @click.stop.prevent="showTagModal = true"
                 >
                   <i class="bi bi-tag-fill"></i>
+                  <i
+                    v-if="hasVotedMapTags"
+                    class="bi bi-check-circle-fill vote-check-badge voted"
+                  ></i>
+                  <i
+                    v-else
+                    class="bi bi-exclamation-circle-fill vote-check-badge unvoted"
+                  ></i>
                 </button>
                 <a
                   :href="`https://static.tempus2.xyz/tempus/server/maps/${mapName}.bsp.bz2`"
@@ -290,6 +304,10 @@ export default {
     },
   },
   computed: {
+    hasVotedMapTags() {
+      if (this.selectedMapTags === null) return null;
+      return this.selectedMapTags.length > 0;
+    },
     secondaryStatsList() {
       if (!this.map) return [];
       const stats = [];
@@ -314,6 +332,7 @@ export default {
     },
     handleTagModalClose() {
       this.loadMapTags(this.mapId);
+      this.loadTags(this.mapId);
     },
     async loadTags(mapId = null) {
       try {
@@ -595,6 +614,31 @@ export default {
 
 .banner-tag-btn:active {
   transform: translateY(0);
+}
+
+.vote-check-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 0.75rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.vote-check-badge.voted {
+  color: #4ade80;
+}
+
+.vote-check-badge.unvoted {
+  color: #fbbf24;
+}
+
+.banner-tag-btn.has-voted {
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.banner-tag-btn.not-voted {
+  border-color: rgba(251, 191, 36, 0.4);
 }
 
 .lookup-map-main {
