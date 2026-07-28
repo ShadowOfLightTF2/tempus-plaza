@@ -145,12 +145,17 @@
           class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
           :class="{ 'two-tables': !showOverallTable }"
         >
-          <div class="soldier-table-container">
+          <div
+            v-for="table in tableConfigs"
+            :key="table.key"
+            :class="`${table.key}-table-container`"
+            v-show="table.key !== 'overall' || showOverallTable"
+          >
             <div class="table-wrapper">
               <div class="header-content">
                 <img
-                  src="/icons/soldier.png"
-                  alt="Soldier Icon"
+                  :src="table.icon"
+                  :alt="`${table.label} Icon`"
                   class="class-icon"
                 />
                 <div class="header-text">
@@ -159,8 +164,7 @@
                       categoryDisplayNames[selectedCategory] ||
                       capitalize(selectedCategory)
                     }}
-                    -
-                    {{ selectedItem }}
+                    - {{ selectedItem }}
                     <img
                       v-if="
                         selectedCategory === 'countries' &&
@@ -173,92 +177,227 @@
                   </p>
                 </div>
               </div>
+              <div class="your-rank-banner">
+                <span class="your-rank-label">Your Rank</span>
+                <span class="your-rank-position">{{
+                  table.userRank ? "#" + table.userRank.rank : "-"
+                }}</span>
+                <div
+                  v-if="
+                    selectedCategory === 'countries' && selectedItem === 'Total'
+                  "
+                  class="your-rank-player"
+                  :class="{ clickable: !!table.userRank }"
+                  @click="
+                    table.userRank && selectCountryFromSearch(table.userRank)
+                  "
+                >
+                  <img
+                    :src="
+                      table.userRank
+                        ? table.userRank.flag
+                        : '/icons/default-flag.jpg'
+                    "
+                    class="your-rank-avatar"
+                    alt="Country Flag"
+                    @error="handleError"
+                  />
+                  <span class="your-rank-name">{{
+                    table.userRank ? table.userRank.name : "-"
+                  }}</span>
+                </div>
+                <SmartLink
+                  v-else-if="table.userRank"
+                  tag="div"
+                  :to="{
+                    name: 'PlayerPage',
+                    params: { playerId: table.userRank.player_id },
+                  }"
+                  class="your-rank-player clickable"
+                >
+                  <img
+                    :src="
+                      table.userRank.steam_avatar ||
+                      currentUserAvatar ||
+                      defaultAvatarPath
+                    "
+                    class="your-rank-avatar"
+                    @error="handleError"
+                  />
+                  <span class="your-rank-name">{{ table.userRank.name }}</span>
+                </SmartLink>
+                <div v-else class="your-rank-player">
+                  <img
+                    :src="currentUserAvatar || defaultAvatarPath"
+                    class="your-rank-avatar"
+                    @error="handleError"
+                  />
+                  <span class="your-rank-name">-</span>
+                </div>
+                <span class="your-rank-amount">{{
+                  formatAmount(table.userRank)
+                }}</span>
+              </div>
+              <div
+                v-if="!firstLoad && !isSwitching && table.topPlayers.length"
+                class="podium-container"
+              >
+                <div
+                  v-for="(player, index) in table.topPlayers"
+                  :key="`top-${table.key}-${index}`"
+                  class="podium-card"
+                  :class="`podium-rank-${index + 1}`"
+                >
+                  <span class="podium-rank-number">{{ index + 1 }}</span>
+                  <img
+                    v-if="
+                      !(
+                        selectedCategory === 'countries' &&
+                        selectedItem === 'Total'
+                      ) && player.podiumFlag
+                    "
+                    :src="player.podiumFlag"
+                    class="podium-flag"
+                    alt="Country Flag"
+                    @error="handleError"
+                  />
+                  <div
+                    v-if="
+                      selectedCategory === 'countries' &&
+                      selectedItem === 'Total'
+                    "
+                    class="podium-player-link clickable"
+                    @click="selectCountryFromSearch(player)"
+                  >
+                    <img
+                      :src="player.flag || '/icons/default-flag.jpg'"
+                      class="flag-avatar"
+                      @error="handleError"
+                    />
+                    <div class="podium-name">{{ player.name }}</div>
+                  </div>
+                  <SmartLink
+                    v-else
+                    tag="div"
+                    :to="{
+                      name: 'PlayerPage',
+                      params: { playerId: player.player_id },
+                    }"
+                    class="podium-player-link clickable"
+                  >
+                    <img
+                      :src="player.steam_avatar"
+                      class="podium-avatar"
+                      @error="handleError"
+                    />
+                    <div class="podium-name">
+                      {{ player.name }}
+                      <span
+                        v-if="player.inactive"
+                        class="inactive-badge"
+                        title="Not seen in 3+ months"
+                        >Inactive</span
+                      >
+                    </div>
+                  </SmartLink>
+                  <div class="podium-main-stat">
+                    <span class="podium-stat-value">{{
+                      formatPlayerAmount(player)
+                    }}</span>
+                  </div>
+                  <div
+                    v-if="
+                      selectedCategory === 'countries' &&
+                      selectedItem === 'Total'
+                    "
+                    class="podium-country-players"
+                  >
+                    <SmartLink
+                      v-for="(topPlayer, tIndex) in player.podiumTopPlayers"
+                      :key="`top-${table.key}-country-player-${tIndex}`"
+                      tag="div"
+                      :to="{
+                        name: 'PlayerPage',
+                        params: { playerId: topPlayer.player_id },
+                      }"
+                      class="podium-country-player clickable"
+                    >
+                      <img
+                        :src="topPlayer.steam_avatar"
+                        class="podium-country-avatar"
+                        @error="handleError"
+                      />
+                      <span class="podium-country-player-name">{{
+                        topPlayer.name
+                      }}</span>
+                      <span class="podium-country-player-points">
+                        {{
+                          (topPlayer.points ?? 0)
+                            .toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                      </span>
+                    </SmartLink>
+                    <div
+                      v-if="
+                        !player.podiumTopPlayers ||
+                        !player.podiumTopPlayers.length
+                      "
+                      class="podium-country-player-empty"
+                    >
+                      No players yet
+                    </div>
+                  </div>
+                  <div v-else class="podium-substats">
+                    <div class="podium-substat">
+                      <span class="podium-substat-label">{{
+                        selectedCategory === "completion"
+                          ? "Points"
+                          : "Completion"
+                      }}</span>
+                      <span class="podium-substat-value">{{
+                        formatPodiumSubstat(player)
+                      }}</span>
+                    </div>
+                    <div class="podium-substat">
+                      <span class="podium-substat-label">WRs</span>
+                      <span class="podium-substat-value">{{
+                        player.podiumWr ?? "—"
+                      }}</span>
+                    </div>
+                    <div class="podium-substat">
+                      <span class="podium-substat-label">Top Times</span>
+                      <span class="podium-substat-value">{{
+                        player.podiumTt ?? "—"
+                      }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="table-responsive">
                 <table class="table table-dark">
                   <thead>
                     <tr>
                       <th>Rank</th>
                       <th>Player</th>
-                      <th>
-                        {{
-                          points
-                            ? "Points"
-                            : selectedCategory === "completion"
-                              ? "Percentage"
-                              : "Count"
-                        }}
-                      </th>
+                      <th>{{ getTableHeader() }}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <template v-if="firstLoad">
+                    <template v-if="firstLoad || isSwitching">
                       <PlayersSkeleton />
                     </template>
                     <template v-else>
                       <tr
-                        v-if="userRankSoldier"
-                        class="fade-in user-rank-row"
-                        style="border-bottom: 2px solid var(--color-border)"
-                      >
-                        <td class="rank-column">#{{ userRankSoldier.rank }}</td>
-                        <td
-                          v-if="
-                            selectedCategory === 'countries' &&
-                            selectedItem === 'Total'
-                          "
-                          class="country-cell align-middle fancy-hover clickable name-column"
-                          @click="selectCountryFromSearch(userRankSoldier)"
-                        >
-                          <img
-                            :src="userRankSoldier.flag"
-                            alt="Country Flag"
-                            class="flag"
-                            @error="handleError"
-                          />
-                          {{ userRankSoldier.name }}
-                        </td>
-                        <SmartLink
-                          v-else
-                          tag="td"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: userRankSoldier.player_id },
-                          }"
-                          class="name-cell align-middle fancy-hover clickable name-column"
-                        >
-                          <img
-                            :src="userRankSoldier.steam_avatar"
-                            class="avatar"
-                            @error="handleError"
-                          />
-                          {{ userRankSoldier.name }}
-                        </SmartLink>
-                        <td
-                          class="points-column"
-                          :class="{
-                            'percentage-column':
-                              selectedCategory === 'completion',
-                          }"
-                        >
-                          {{
-                            selectedCategory === "completion"
-                              ? userRankSoldier.amount + "%"
-                              : (userRankSoldier.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
-                        </td>
-                      </tr>
-                      <tr
-                        v-for="(player, index) in displayedSoldierPlayers"
-                        :key="'soldier-' + index"
+                        v-for="(player, index) in table.displayedPlayers"
+                        :key="`${table.key}-${index}`"
                         class="fade-in"
                         :class="{
                           'current-user-row':
                             currentUserId && player.player_id === currentUserId,
                         }"
                       >
-                        <td class="rank-column">#{{ index + 1 }}</td>
+                        <td class="rank-column">#{{ index + 4 }}</td>
                         <td
                           v-if="
                             selectedCategory === 'countries' &&
@@ -310,13 +449,7 @@
                               selectedCategory === 'completion',
                           }"
                         >
-                          {{
-                            selectedCategory === "completion"
-                              ? player.percentage + "%"
-                              : (player.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
+                          {{ formatPlayerAmount(player) }}
                         </td>
                       </tr>
                     </template>
@@ -329,7 +462,7 @@
                   <div class="load-size-toggle">
                     <button
                       v-for="size in loadSizeOptions"
-                      :key="'sol-size-' + size"
+                      :key="`${table.key}-size-${size}`"
                       class="load-size-btn"
                       :class="{ active: loadSize === size }"
                       @click="loadSize = size"
@@ -348,447 +481,10 @@
                     );
                     font-weight: bold;
                   "
-                  @click="loadMoreSoldiers"
-                  :disabled="loadingSoldiers"
+                  @click="table.loadMore()"
+                  :disabled="table.loading"
                 >
-                  <span v-if="!loadingSoldiers">Show more</span>
-                  <span
-                    v-else
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="demoman-table-container">
-            <div class="table-wrapper">
-              <div class="header-content">
-                <img
-                  src="/icons/demoman.png"
-                  alt="Demoman Icon"
-                  class="class-icon"
-                />
-                <div class="header-text">
-                  <p class="header-title">
-                    {{
-                      categoryDisplayNames[selectedCategory] ||
-                      capitalize(selectedCategory)
-                    }}
-                    -
-                    {{ selectedItem }}
-                    <img
-                      v-if="
-                        selectedCategory === 'countries' &&
-                        selectedCountry &&
-                        selectedItem !== 'Total'
-                      "
-                      :src="selectedCountry.flag"
-                      class="flag"
-                    />
-                  </p>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-dark">
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Player</th>
-                      <th>
-                        {{
-                          points
-                            ? selectedCategory === "countries"
-                              ? selectedItem === "Player Count"
-                                ? "Players"
-                                : "Points"
-                              : "Points"
-                            : selectedCategory === "completion"
-                              ? "Percentage"
-                              : "Count"
-                        }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-if="firstLoad">
-                      <PlayersSkeleton />
-                    </template>
-                    <template v-else>
-                      <tr
-                        v-if="userRankDemoman"
-                        class="fade-in user-rank-row"
-                        style="border-bottom: 2px solid var(--color-border)"
-                      >
-                        <td class="rank-column">#{{ userRankDemoman.rank }}</td>
-                        <td
-                          v-if="
-                            selectedCategory === 'countries' &&
-                            selectedItem === 'Total'
-                          "
-                          class="country-cell align-middle fancy-hover clickable name-column"
-                          @click="selectCountryFromSearch(userRankDemoman)"
-                        >
-                          <img
-                            :src="userRankDemoman.flag"
-                            alt="Country Flag"
-                            class="flag"
-                            @error="handleError"
-                          />
-                          {{ userRankDemoman.name }}
-                        </td>
-                        <SmartLink
-                          v-else
-                          tag="td"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: userRankDemoman.player_id },
-                          }"
-                          class="name-cell align-middle fancy-hover clickable name-column"
-                        >
-                          <img
-                            :src="userRankDemoman.steam_avatar"
-                            class="avatar"
-                            @error="handleError"
-                          />
-                          {{ userRankDemoman.name }}
-                        </SmartLink>
-                        <td
-                          class="points-column"
-                          :class="{
-                            'percentage-column':
-                              selectedCategory === 'completion',
-                          }"
-                        >
-                          {{
-                            selectedCategory === "completion"
-                              ? userRankDemoman.amount + "%"
-                              : (userRankDemoman.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
-                        </td>
-                      </tr>
-                      <tr
-                        v-for="(player, index) in displayedDemomanPlayers"
-                        :key="'demoman-' + index"
-                        class="fade-in"
-                        :class="{
-                          'current-user-row':
-                            currentUserId && player.player_id === currentUserId,
-                        }"
-                      >
-                        <td class="rank-column">#{{ index + 1 }}</td>
-                        <td
-                          v-if="
-                            selectedCategory === 'countries' &&
-                            selectedItem === 'Total'
-                          "
-                          class="country-cell align-middle fancy-hover clickable name-column"
-                          @click="selectCountryFromSearch(player)"
-                        >
-                          <img
-                            :src="player.flag"
-                            alt="Country Flag"
-                            class="flag"
-                            @error="handleError"
-                          />
-                          {{ player.name }}
-                          <span
-                            v-if="player.inactive"
-                            class="inactive-badge"
-                            title="Not seen in 3+ months"
-                            >Inactive</span
-                          >
-                        </td>
-                        <SmartLink
-                          v-else
-                          tag="td"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: player.player_id },
-                          }"
-                          class="name-cell align-middle fancy-hover clickable name-column"
-                        >
-                          <img
-                            :src="player.steam_avatar"
-                            class="avatar"
-                            @error="handleError"
-                          />
-                          {{ player.name }}
-                          <span
-                            v-if="player.inactive"
-                            class="inactive-badge"
-                            title="Not seen in 3+ months"
-                            >Inactive</span
-                          >
-                        </SmartLink>
-                        <td
-                          class="points-column"
-                          :class="{
-                            'percentage-column':
-                              selectedCategory === 'completion',
-                          }"
-                        >
-                          {{
-                            selectedCategory === "completion"
-                              ? player.percentage + "%"
-                              : (player.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-              <div class="players-footer">
-                <div class="load-size-selector">
-                  <span class="load-size-label">Load</span>
-                  <div class="load-size-toggle">
-                    <button
-                      v-for="size in loadSizeOptions"
-                      :key="'dem-size-' + size"
-                      class="load-size-btn"
-                      :class="{ active: loadSize === size }"
-                      @click="loadSize = size"
-                    >
-                      {{ size }}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  class="btn btn-dark update-button"
-                  style="
-                    background: linear-gradient(
-                      to bottom,
-                      rgba(74, 111, 165, 0.5),
-                      rgba(74, 111, 165, 0.3)
-                    );
-                    font-weight: bold;
-                  "
-                  @click="loadMoreDemomen"
-                  :disabled="loadingDemomen"
-                >
-                  <span v-if="!loadingDemomen">Show more</span>
-                  <span
-                    v-else
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="overall-table-container" v-show="showOverallTable">
-            <div class="table-wrapper">
-              <div class="header-content">
-                <img
-                  src="/icons/overall.png"
-                  alt="Combined Icon"
-                  class="class-icon"
-                />
-                <div class="header-text">
-                  <p class="header-title">
-                    {{
-                      categoryDisplayNames[selectedCategory] ||
-                      capitalize(selectedCategory)
-                    }}
-                    - {{ selectedItem }}
-                    <img
-                      v-if="
-                        selectedCategory === 'countries' &&
-                        selectedCountry &&
-                        selectedItem !== 'Total'
-                      "
-                      :src="selectedCountry.flag"
-                      class="flag"
-                    />
-                  </p>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-dark">
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Player</th>
-                      <th>
-                        {{
-                          points
-                            ? "Points"
-                            : selectedCategory === "completion"
-                              ? "Percentage"
-                              : "Count"
-                        }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-if="firstLoad">
-                      <PlayersSkeleton />
-                    </template>
-                    <template v-else>
-                      <tr
-                        v-if="userRankOverall"
-                        class="fade-in user-rank-row"
-                        style="border-bottom: 2px solid var(--color-border)"
-                      >
-                        <td class="rank-column">#{{ userRankOverall.rank }}</td>
-                        <td
-                          v-if="
-                            selectedCategory === 'countries' &&
-                            selectedItem === 'Total'
-                          "
-                          class="country-cell align-middle fancy-hover clickable name-column"
-                          @click="selectCountryFromSearch(userRankOverall)"
-                        >
-                          <img
-                            :src="userRankOverall.flag"
-                            alt="Country Flag"
-                            class="flag"
-                            @error="handleError"
-                          />
-                          {{ userRankOverall.name }}
-                        </td>
-                        <SmartLink
-                          v-else
-                          tag="td"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: userRankOverall.player_id },
-                          }"
-                          class="name-cell align-middle fancy-hover clickable name-column"
-                        >
-                          <img
-                            :src="userRankOverall.steam_avatar"
-                            class="avatar"
-                            @error="handleError"
-                          />
-                          {{ userRankOverall.name }}
-                        </SmartLink>
-                        <td
-                          class="points-column"
-                          :class="{
-                            'percentage-column':
-                              selectedCategory === 'completion',
-                          }"
-                        >
-                          {{
-                            selectedCategory === "completion"
-                              ? userRankOverall.amount + "%"
-                              : (userRankOverall.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
-                        </td>
-                      </tr>
-                      <tr
-                        v-for="(player, index) in displayedOverallPlayers"
-                        :key="'overall-' + index"
-                        class="fade-in"
-                        :class="{
-                          'current-user-row':
-                            currentUserId && player.player_id === currentUserId,
-                        }"
-                      >
-                        <td class="rank-column">#{{ index + 1 }}</td>
-                        <td
-                          v-if="
-                            selectedCategory === 'countries' &&
-                            selectedItem === 'Total'
-                          "
-                          class="country-cell align-middle fancy-hover clickable name-column"
-                          @click="selectCountryFromSearch(player)"
-                        >
-                          <img
-                            :src="player.flag"
-                            alt="Country Flag"
-                            class="flag"
-                            @error="handleError"
-                          />
-                          {{ player.name }}
-                          <span
-                            v-if="player.inactive"
-                            class="inactive-badge"
-                            title="Not seen in 3+ months"
-                            >Inactive</span
-                          >
-                        </td>
-                        <SmartLink
-                          v-else
-                          tag="td"
-                          :to="{
-                            name: 'PlayerPage',
-                            params: { playerId: player.player_id },
-                          }"
-                          class="name-cell align-middle fancy-hover clickable name-column"
-                        >
-                          <img
-                            :src="player.steam_avatar"
-                            class="avatar"
-                            @error="handleError"
-                          />
-                          {{ player.name }}
-                          <span
-                            v-if="player.inactive"
-                            class="inactive-badge"
-                            title="Not seen in 3+ months"
-                            >Inactive</span
-                          >
-                        </SmartLink>
-                        <td
-                          class="points-column"
-                          :class="{
-                            'percentage-column':
-                              selectedCategory === 'completion',
-                          }"
-                        >
-                          {{
-                            selectedCategory === "completion"
-                              ? player.percentage + "%"
-                              : (player.amount ?? 0)
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }}
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-              <div class="players-footer">
-                <div class="load-size-selector">
-                  <span class="load-size-label">Load</span>
-                  <div class="load-size-toggle">
-                    <button
-                      v-for="size in loadSizeOptions"
-                      :key="'ovr-size-' + size"
-                      class="load-size-btn"
-                      :class="{ active: loadSize === size }"
-                      @click="loadSize = size"
-                    >
-                      {{ size }}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  class="btn btn-dark update-button"
-                  style="
-                    background: linear-gradient(
-                      to bottom,
-                      rgba(74, 111, 165, 0.5),
-                      rgba(74, 111, 165, 0.3)
-                    );
-                    font-weight: bold;
-                  "
-                  @click="loadMoreOverall"
-                  :disabled="loadingOverall"
-                >
-                  <span v-if="!loadingOverall">Show more</span>
+                  <span v-if="!table.loading">Show more</span>
                   <span
                     v-else
                     class="spinner-border spinner-border-sm"
@@ -815,14 +511,12 @@ export default {
   name: "Players",
   components: { PlayersSkeleton },
   setup() {
-    useHead({
-      title: "Leaderboards | Tempus Plaza",
-    });
+    useHead({ title: "Leaderboards | Tempus Plaza" });
   },
   data: () => ({
     loadSize: 50,
     loadSizeOptions: [50, 100, 200],
-    showOverallTable: false,
+    showOverallTable: true,
     soldierPlayers: [],
     demomanPlayers: [],
     overallPlayers: [],
@@ -830,9 +524,11 @@ export default {
     userRankDemoman: null,
     userRankOverall: null,
     currentUserId: null,
+    currentUserAvatar: null,
     loadingUserRank: false,
     loading: false,
     firstLoad: true,
+    isSwitching: false,
     loadingSoldiers: false,
     loadingDemomen: false,
     loadingOverall: false,
@@ -876,6 +572,7 @@ export default {
     currentSoldierIndex: 50,
     currentDemomanIndex: 50,
     currentOverallIndex: 50,
+    _internalNavigation: false,
   }),
 
   async mounted() {
@@ -916,18 +613,219 @@ export default {
         this.selectedCategory.slice(1)
       );
     },
+    defaultAvatarPath() {
+      return `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
+    },
+    topSoldierPlayers() {
+      return this.soldierPlayers.slice(0, 3);
+    },
+    topDemomanPlayers() {
+      return this.demomanPlayers.slice(0, 3);
+    },
+    topOverallPlayers() {
+      return this.overallPlayers.slice(0, 3);
+    },
     displayedSoldierPlayers() {
-      return this.soldierPlayers.slice(0, this.currentSoldierIndex);
+      return this.soldierPlayers.slice(3, this.currentSoldierIndex);
     },
     displayedDemomanPlayers() {
-      return this.demomanPlayers.slice(0, this.currentDemomanIndex);
+      return this.demomanPlayers.slice(3, this.currentDemomanIndex);
     },
     displayedOverallPlayers() {
-      return this.overallPlayers.slice(0, this.currentOverallIndex);
+      return this.overallPlayers.slice(3, this.currentOverallIndex);
+    },
+
+    tableConfigs() {
+      return [
+        {
+          key: "soldier",
+          label: "Soldier",
+          icon: "/icons/soldier.png",
+          userRank: this.userRankSoldier,
+          topPlayers: this.topSoldierPlayers,
+          displayedPlayers: this.displayedSoldierPlayers,
+          loading: this.loadingSoldiers,
+          loadMore: () => this.loadMoreSoldiers(),
+        },
+        {
+          key: "demoman",
+          label: "Demoman",
+          icon: "/icons/demoman.png",
+          userRank: this.userRankDemoman,
+          topPlayers: this.topDemomanPlayers,
+          displayedPlayers: this.displayedDemomanPlayers,
+          loading: this.loadingDemomen,
+          loadMore: () => this.loadMoreDemomen(),
+        },
+        {
+          key: "overall",
+          label: "Overall",
+          icon: "/icons/overall.png",
+          userRank: this.userRankOverall,
+          topPlayers: this.topOverallPlayers,
+          displayedPlayers: this.displayedOverallPlayers,
+          loading: this.loadingOverall,
+          loadMore: () => this.loadMoreOverall(),
+        },
+      ];
     },
   },
 
   methods: {
+    formatAmount(userRank) {
+      if (!userRank) return 0;
+      if (this.selectedCategory === "completion") return userRank.amount + "%";
+      return (userRank.amount ?? 0)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
+    formatPlayerAmount(player) {
+      if (this.selectedCategory === "completion")
+        return player.percentage + "%";
+      return (player.amount ?? 0)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
+    formatPodiumSubstat(player) {
+      if (this.selectedCategory === "completion") {
+        return player.podiumPoints != null
+          ? player.podiumPoints.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : "—";
+      }
+      return player.podiumCompletion != null
+        ? player.podiumCompletion + "%"
+        : "—";
+    },
+    getTableHeader() {
+      if (this.points) {
+        if (this.selectedCategory === "countries")
+          return this.selectedItem === "Player Count" ? "Players" : "Points";
+        return "Points";
+      }
+      if (this.selectedCategory === "completion") return "Percentage";
+      return "Count";
+    },
+
+    // --- Existing Logic ---
+    async fetchPodiumStats(lists) {
+      const soldierList = lists ? lists.soldierData : this.soldierPlayers;
+      const demomanList = lists ? lists.demomanData : this.demomanPlayers;
+      const overallList = lists ? lists.overallData : this.overallPlayers;
+
+      const isCountryTotals =
+        this.selectedCategory === "countries" && this.selectedItem === "Total";
+      if (isCountryTotals) {
+        await this.fetchCountryPodiumPlayers({
+          soldierList,
+          demomanList,
+          overallList,
+        });
+        return;
+      }
+
+      const targets = [
+        { list: soldierList, statKey: "soldier" },
+        { list: demomanList, statKey: "demoman" },
+        { list: overallList, statKey: "overall" },
+      ];
+
+      await Promise.all(
+        targets.flatMap(({ list, statKey }) =>
+          (list || [])
+            .slice(0, 3)
+            .map((player) => this.applyPodiumStats(player, statKey)),
+        ),
+      );
+    },
+    async applyPodiumStats(player, statKey) {
+      if (!player || !player.player_id) return;
+      try {
+        const { data } = await axios.get(
+          `${API_BASE_URL}/players/${player.player_id}/full`,
+        );
+        const info = data["0"] || {};
+        // stats.overall doesn't exist — the combined bucket is called "combined"
+        const statsKey = statKey === "overall" ? "combined" : statKey;
+        const stats = data.stats ? data.stats[statsKey] : null;
+        // points live in the ranks array, not in stats at all
+        const rank = data.ranks && data.ranks[0] ? data.ranks[0] : null;
+
+        player.podiumFlag = info.country_code
+          ? `https://flagcdn.com/32x24/${info.country_code.toLowerCase()}.png`
+          : null;
+        player.podiumCompletion =
+          stats && stats.completion && stats.completion.total != null
+            ? Math.round(stats.completion.total * 100) / 100
+            : null;
+        player.podiumPoints = rank ? (rank[`${statKey}_points`] ?? null) : null;
+        player.podiumWr =
+          stats && stats.worldRecords
+            ? (stats.worldRecords.total ?? null)
+            : null;
+        player.podiumTt =
+          stats && stats.top10Records
+            ? (stats.top10Records.total ?? null)
+            : null;
+      } catch (error) {
+        console.error(
+          `Error fetching podium stats for player ${player.player_id}:`,
+          error,
+        );
+        player.podiumFlag = null;
+        player.podiumCompletion = null;
+        player.podiumPoints = null;
+        player.podiumWr = null;
+        player.podiumTt = null;
+      }
+    },
+    async fetchCountryPodiumPlayers(lists) {
+      const soldierList = lists ? lists.soldierList : this.soldierPlayers;
+      const demomanList = lists ? lists.demomanList : this.demomanPlayers;
+      const overallList = lists ? lists.overallList : this.overallPlayers;
+
+      const targets = [
+        { list: soldierList, key: "topSoldiers" },
+        { list: demomanList, key: "topDemomen" },
+        { list: overallList, key: "topOverall" },
+      ];
+
+      await Promise.all(
+        targets.flatMap(({ list, key }) =>
+          (list || [])
+            .slice(0, 3)
+            .map((countryEntry) =>
+              this.applyCountryPodiumPlayers(countryEntry, key),
+            ),
+        ),
+      );
+    },
+    async applyCountryPodiumPlayers(countryEntry, key) {
+      if (!countryEntry || !countryEntry.player_id) return;
+      try {
+        const { data } = await axios.get(
+          `${API_BASE_URL}/players/country-top-players/${countryEntry.player_id}/0/3`,
+        );
+        const list = data[key] || [];
+        const pointsKey =
+          key === "topSoldiers"
+            ? "soldier_total_points"
+            : key === "topDemomen"
+              ? "demoman_total_points"
+              : "overall_total_points";
+        countryEntry.podiumTopPlayers = list.slice(0, 3).map((p) => ({
+          name: p.name,
+          steam_avatar: p.steam_avatar || this.defaultAvatarPath,
+          player_id: p.id,
+          points: p[pointsKey] ?? 0,
+        }));
+      } catch (error) {
+        console.error(
+          `Error fetching top players for country ${countryEntry.player_id}:`,
+          error,
+        );
+        countryEntry.podiumTopPlayers = [];
+      }
+    },
     async fetchUser() {
       try {
         const res = await fetch(`${API_BASE_URL}/api/get-user`, {
@@ -935,9 +833,31 @@ export default {
         });
         const data = await res.json();
         this.currentUserId = data.data?.playerid || null;
+        await this.fetchCurrentUserAvatar();
       } catch (err) {
         console.error("Error fetching user:", err);
         this.currentUserId = null;
+      }
+    },
+    async fetchCurrentUserAvatar() {
+      if (!this.currentUserId) {
+        this.currentUserAvatar = null;
+        return;
+      }
+      try {
+        const { data } = await axios.get(
+          `${API_BASE_URL}/players/${this.currentUserId}`,
+        );
+        this.currentUserAvatar =
+          data?.steam_avatar ||
+          data?.["0"]?.steam_avatar ||
+          this.defaultAvatarPath;
+      } catch (error) {
+        console.error(
+          `Error fetching avatar for player ${this.currentUserId}:`,
+          error,
+        );
+        this.currentUserAvatar = this.defaultAvatarPath;
       }
     },
     async fetchUserRank() {
@@ -947,7 +867,6 @@ export default {
         this.userRankOverall = null;
         return;
       }
-
       this.loadingUserRank = true;
       try {
         const category = this.selectedCategory;
@@ -961,7 +880,6 @@ export default {
           await this.fetchUserCompletionRank(type);
           return;
         }
-
         if (category === "countries") {
           await this.fetchUserCountryRank();
           return;
@@ -978,7 +896,6 @@ export default {
           type = type.replace("(count)", "");
           cat = "count";
         }
-
         if (tableName === "ratings") {
           tableName = type.replace(/rating(\d+)/g, (_, n) => `r${n}s`);
           type = "maps";
@@ -990,7 +907,6 @@ export default {
           tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
           type = "total";
         }
-
         if (tableName === "tiers") cat = "total";
 
         await this.fetchUserPlayerRank(tableName, type, cat);
@@ -1033,7 +949,6 @@ export default {
         this.userRankOverall = null;
       }
     },
-
     async fetchUserCompletionRank(type) {
       try {
         const { data } = await axios.get(
@@ -1064,7 +979,6 @@ export default {
         this.userRankOverall = null;
       }
     },
-
     async fetchUserCountryRank() {
       if (this.selectedItem === "Total") {
         try {
@@ -1085,14 +999,11 @@ export default {
           const { data } = await axios.get(
             `${API_BASE_URL}/players/user-rank-country/${this.selectedCountry.code}/${this.currentUserId}`,
           );
-          const defaultAvatar = `${
-            import.meta.env.BASE_URL
-          }avatars/default-avatar.jpg`;
           this.userRankSoldier = data.soldierRank
             ? {
                 ...data.soldierRank,
                 amount: data.soldierRank.soldier_total_points || 0,
-                steam_avatar: data.soldierRank.steam_avatar || defaultAvatar,
+                steam_avatar: data.soldierRank.steam_avatar || null,
                 player_id: data.soldierRank.id,
               }
             : null;
@@ -1100,7 +1011,7 @@ export default {
             ? {
                 ...data.demomanRank,
                 amount: data.demomanRank.demoman_total_points || 0,
-                steam_avatar: data.demomanRank.steam_avatar || defaultAvatar,
+                steam_avatar: data.demomanRank.steam_avatar || null,
                 player_id: data.demomanRank.id,
               }
             : null;
@@ -1108,7 +1019,7 @@ export default {
             ? {
                 ...data.overallRank,
                 amount: data.overallRank.overall_total_points || 0,
-                steam_avatar: data.overallRank.steam_avatar || defaultAvatar,
+                steam_avatar: data.overallRank.steam_avatar || null,
                 player_id: data.overallRank.id,
               }
             : null;
@@ -1133,11 +1044,22 @@ export default {
       const fallback = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
       if (e.target.src !== fallback) e.target.src = fallback;
     },
+    async commitFetchResult(result, offset) {
+      if (offset !== 0 || !result) return;
+      await this.fetchPodiumStats(result);
+      this.soldierPlayers = result.soldierData || [];
+      this.demomanPlayers = result.demomanData || [];
+      this.overallPlayers = result.overallData || [];
+      await this.fetchUserRank();
+    },
     async fetchDataForCurrentSelection(
       offset,
       classType = "both",
       limit = this.loadSize,
     ) {
+      const isCountriesSwitch =
+        offset === 0 && this.selectedCategory === "countries";
+      if (isCountriesSwitch) this.isSwitching = true;
       try {
         const category = this.selectedCategory;
         const item = this.selectedItem;
@@ -1150,14 +1072,19 @@ export default {
 
         if (category === "completion") {
           this.points = false;
-          await this.fetchCompletions(type, offset, classType, limit);
-          if (offset === 0) await this.fetchUserRank();
+          const result = await this.fetchCompletions(
+            type,
+            offset,
+            classType,
+            limit,
+          );
+          await this.commitFetchResult(result, offset);
           return;
         }
         if (category === "countries") {
           this.points = true;
-          await this.fetchCountries(offset, classType, limit);
-          if (offset === 0) await this.fetchUserRank();
+          const result = await this.fetchCountries(offset, classType, limit);
+          await this.commitFetchResult(result, offset);
           return;
         }
         if (type.includes("(count)")) {
@@ -1170,7 +1097,7 @@ export default {
           type = "maps";
         } else if (tableName === "groups") {
           if (type === "groups") {
-            await this.fetchPlayers(
+            const result = await this.fetchPlayers(
               tableName,
               "total",
               cat,
@@ -1178,7 +1105,7 @@ export default {
               classType,
               limit,
             );
-            if (offset === 0) await this.fetchUserRank();
+            await this.commitFetchResult(result, offset);
             return;
           }
           tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
@@ -1186,13 +1113,21 @@ export default {
         }
         if (tableName === "tiers") cat = "total";
 
-        await this.fetchPlayers(tableName, type, cat, offset, classType, limit);
-        if (offset === 0) await this.fetchUserRank();
+        const result = await this.fetchPlayers(
+          tableName,
+          type,
+          cat,
+          offset,
+          classType,
+          limit,
+        );
+        await this.commitFetchResult(result, offset);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         this.loading = false;
         this.firstLoad = false;
+        this.isSwitching = false;
         this.loadingSoldiers = false;
         this.loadingDemomen = false;
         this.loadingOverall = false;
@@ -1339,82 +1274,75 @@ export default {
           `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${offset}/${limit}`,
         );
         const [soldierData, demomanData, overallData] = data;
-        if (offset === 0) {
-          this.soldierPlayers = soldierData;
-          this.demomanPlayers = demomanData;
-          this.overallPlayers = overallData;
-        } else {
-          if (classType === "both" || classType === "soldier")
-            this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
-          if (classType === "both" || classType === "demoman")
-            this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
-          if (classType === "both" || classType === "overall")
-            this.overallPlayers = [...this.overallPlayers, ...overallData];
-        }
-      } catch (error) {
-        console.error("Error fetching players");
-      }
-    },
-
-    async fetchCompletions(
-      type,
-      offset,
-      classType = "both",
-      limit = this.loadSize,
-    ) {
-      const { data } = await axios.get(
-        `${API_BASE_URL}/players/players-completion-stats/${type}/${offset}/${limit}`,
-      );
-      const [soldierData, demomanData, overallData] = data;
-      if (offset === 0) {
-        this.soldierPlayers = soldierData;
-        this.demomanPlayers = demomanData;
-        this.overallPlayers = overallData;
-      } else {
+        if (offset === 0) return { soldierData, demomanData, overallData };
         if (classType === "both" || classType === "soldier")
           this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
         if (classType === "both" || classType === "demoman")
           this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
         if (classType === "both" || classType === "overall")
           this.overallPlayers = [...this.overallPlayers, ...overallData];
+        return null;
+      } catch (error) {
+        console.error("Error fetching players");
+        return null;
+      }
+    },
+    async fetchCompletions(
+      type,
+      offset,
+      classType = "both",
+      limit = this.loadSize,
+    ) {
+      try {
+        const { data } = await axios.get(
+          `${API_BASE_URL}/players/players-completion-stats/${type}/${offset}/${limit}`,
+        );
+        const [soldierData, demomanData, overallData] = data;
+        if (offset === 0) return { soldierData, demomanData, overallData };
+        if (classType === "both" || classType === "soldier")
+          this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
+        if (classType === "both" || classType === "demoman")
+          this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
+        if (classType === "both" || classType === "overall")
+          this.overallPlayers = [...this.overallPlayers, ...overallData];
+        return null;
+      } catch (error) {
+        console.error("Error fetching completions:", error);
+        return null;
       }
     },
     async fetchCountries(offset, classType = "both", limit = this.loadSize) {
       try {
         if (this.selectedItem === "Total") {
-          if (offset === 0) {
-            const { data: countriesData } = await axios.get(
-              `${API_BASE_URL}/players/get-countries-data`,
-            );
-
-            const toEntry = (country, amountKey) => ({
-              id: country.country_code,
-              player_id: country.country_code,
-              name: country.country,
-              flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
-              amount:
-                amountKey === "overall"
-                  ? country.soldier_total_points + country.demoman_total_points
-                  : country[amountKey] || 0,
-            });
-
-            this.soldierPlayers = [...countriesData]
-              .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
-              .map((c) => toEntry(c, "soldier_total_points"));
-
-            this.demomanPlayers = [...countriesData]
-              .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
-              .map((c) => toEntry(c, "demoman_total_points"));
-
-            this.overallPlayers = [...countriesData]
-              .sort(
-                (a, b) =>
-                  b.soldier_total_points +
-                  b.demoman_total_points -
-                  (a.soldier_total_points + a.demoman_total_points),
-              )
-              .map((c) => toEntry(c, "overall"));
-          }
+          if (offset !== 0) return null;
+          const { data: countriesData } = await axios.get(
+            `${API_BASE_URL}/players/get-countries-data`,
+          );
+          const toEntry = (country, amountKey) => ({
+            id: country.country_code,
+            player_id: country.country_code,
+            name: country.country,
+            flag: `https://flagcdn.com/32x24/${country.country_code.toLowerCase()}.png`,
+            amount:
+              amountKey === "overall"
+                ? country.soldier_total_points + country.demoman_total_points
+                : country[amountKey] || 0,
+          });
+          const soldierData = [...countriesData]
+            .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
+            .map((c) => toEntry(c, "soldier_total_points"));
+          const demomanData = [...countriesData]
+            .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
+            .map((c) => toEntry(c, "demoman_total_points"));
+          const overallData = [...countriesData]
+            .sort(
+              (a, b) =>
+                b.soldier_total_points +
+                b.demoman_total_points -
+                (a.soldier_total_points + a.demoman_total_points),
+            )
+            .map((c) => toEntry(c, "overall"));
+          return { soldierData, demomanData, overallData };
         } else if (this.selectedCountry) {
           const { data: players } = await axios.get(
             `${API_BASE_URL}/players/country-top-players/${this.selectedCountry.code}/${offset}/${limit}`,
@@ -1429,38 +1357,42 @@ export default {
             }));
 
           if (offset === 0) {
-            this.soldierPlayers = normalize(
-              players.topSoldiers,
-              "soldier_total_points",
-            );
-            this.demomanPlayers = normalize(
-              players.topDemomen,
-              "demoman_total_points",
-            );
-            this.overallPlayers = normalize(
-              players.topOverall || [],
-              "overall_total_points",
-            );
-          } else {
-            if (classType === "both" || classType === "soldier")
-              this.soldierPlayers = [
-                ...this.soldierPlayers,
-                ...normalize(players.topSoldiers, "soldier_total_points"),
-              ];
-            if (classType === "both" || classType === "demoman")
-              this.demomanPlayers = [
-                ...this.demomanPlayers,
-                ...normalize(players.topDemomen, "demoman_total_points"),
-              ];
-            if (classType === "both" || classType === "overall")
-              this.overallPlayers = [
-                ...this.overallPlayers,
-                ...normalize(players.topOverall || [], "overall_total_points"),
-              ];
+            return {
+              soldierData: normalize(
+                players.topSoldiers,
+                "soldier_total_points",
+              ),
+              demomanData: normalize(
+                players.topDemomen,
+                "demoman_total_points",
+              ),
+              overallData: normalize(
+                players.topOverall || [],
+                "overall_total_points",
+              ),
+            };
           }
+          if (classType === "both" || classType === "soldier")
+            this.soldierPlayers = [
+              ...this.soldierPlayers,
+              ...normalize(players.topSoldiers, "soldier_total_points"),
+            ];
+          if (classType === "both" || classType === "demoman")
+            this.demomanPlayers = [
+              ...this.demomanPlayers,
+              ...normalize(players.topDemomen, "demoman_total_points"),
+            ];
+          if (classType === "both" || classType === "overall")
+            this.overallPlayers = [
+              ...this.overallPlayers,
+              ...normalize(players.topOverall || [], "overall_total_points"),
+            ];
+          return null;
         }
+        return null;
       } catch (error) {
         console.error("Error fetching countries data:", error);
+        return null;
       }
     },
     async loadMoreSoldiers() {
@@ -1546,6 +1478,303 @@ export default {
   color: var(--color-text);
 }
 
+.podium-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+}
+
+.podium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 10px;
+  border-radius: 12px;
+  background: linear-gradient(
+    160deg,
+    rgba(74, 111, 165, 0.18),
+    rgba(37, 55, 82, 0.18)
+  );
+  border: 1px solid var(--color-border-soft);
+}
+
+.podium-rank-1 {
+  border-color: #f4c430;
+  box-shadow: 0 0 16px rgba(244, 196, 48, 0.3);
+}
+.podium-rank-2 {
+  border-color: #c0c0c0;
+  box-shadow: 0 0 16px rgba(192, 192, 192, 0.22);
+}
+.podium-rank-3 {
+  border-color: #cd7f32;
+  box-shadow: 0 0 16px rgba(205, 127, 50, 0.22);
+}
+
+.podium-rank-number {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text-soft);
+}
+.podium-rank-1 .podium-rank-number {
+  color: #f4c430;
+}
+.podium-rank-2 .podium-rank-number {
+  color: #c0c0c0;
+}
+.podium-rank-3 .podium-rank-number {
+  color: #cd7f32;
+}
+
+.podium-flag {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 20px;
+  border-radius: 2px;
+}
+
+.podium-player-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+  max-width: 100%;
+  text-decoration: none;
+  color: var(--color-text-clickable) !important;
+}
+
+.podium-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid var(--color-primary);
+}
+
+.flag-avatar {
+  width: 38px;
+  height: 30px;
+  border-radius: 10px;
+  border: 2px solid var(--color-primary);
+}
+
+.podium-name {
+  font-weight: 700;
+  font-size: 17px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.podium-main-stat {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.podium-substats {
+  display: flex;
+  gap: 22px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  justify-content: center;
+}
+
+.podium-substat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 58px;
+}
+
+.podium-substat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+.podium-substat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
+.podium-country-players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.podium-country-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-text-clickable) !important;
+  transition: background 0.18s ease;
+}
+
+.podium-country-player:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.podium-country-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid var(--color-primary);
+  flex-shrink: 0;
+}
+
+.podium-country-player-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.podium-country-player-points {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.podium-country-player-empty {
+  font-size: 12px;
+  color: var(--color-text-soft);
+  text-align: center;
+  padding: 6px 0;
+}
+
+@media (max-width: 767.98px) {
+  .podium-card {
+    padding: 16px 12px 12px;
+  }
+  .podium-rank-number {
+    font-size: 24px;
+  }
+  .podium-avatar {
+    width: 52px;
+    height: 52px;
+  }
+  .podium-name {
+    font-size: 14px;
+  }
+  .podium-main-stat {
+    font-size: 20px;
+  }
+  .podium-substats {
+    gap: 14px;
+  }
+  .podium-substat-label {
+    font-size: 9px;
+  }
+  .podium-substat-value {
+    font-size: 14px;
+  }
+}
+
+.your-rank-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 5px 12px 0px 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(74, 111, 165, 0.18);
+  border: 1px solid var(--color-primary);
+}
+
+.your-rank-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.your-rank-position {
+  font-weight: 800;
+  color: var(--color-text);
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.your-rank-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: var(--color-text-clickable) !important;
+}
+
+.your-rank-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 3px;
+  border: 1px solid var(--color-primary);
+  flex-shrink: 0;
+}
+
+.your-rank-name {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.your-rank-amount {
+  font-weight: 800;
+  color: var(--color-text);
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+@media (max-width: 767.98px) {
+  .your-rank-label {
+    display: none;
+  }
+}
+/* -------------------------------------------------------------------- */
+
 .tables-wrapper {
   display: flex;
   gap: 50px;
@@ -1570,12 +1799,13 @@ export default {
 }
 
 .table-dark th {
-  background: var(--color-primary-dark);
   color: var(--color-text);
   text-align: left;
+  font-size: 14px;
   font-weight: 600;
   padding-bottom: 4px;
   border-top: 1px solid var(--color-border-soft);
+  font-size: 14px;
 }
 
 .table-dark td {
@@ -1587,9 +1817,6 @@ export default {
 
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
-}
-
-.user-rank-row td {
 }
 
 .current-user-row td {
@@ -1608,9 +1835,6 @@ export default {
   vertical-align: middle;
   letter-spacing: 0.5px;
   white-space: nowrap;
-}
-
-.name-cell:has(.inactive-badge) {
 }
 
 .name-cell,

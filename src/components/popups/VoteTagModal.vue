@@ -206,7 +206,7 @@
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
-  name: "TagModal",
+  name: "VoteTagModal",
   props: {
     showTagModal: { type: Boolean, default: false },
     availableTags: { type: Array, default: () => [] },

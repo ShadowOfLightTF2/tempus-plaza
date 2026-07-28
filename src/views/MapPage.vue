@@ -224,7 +224,7 @@
       </div>
     </div>
   </div>
-  <TagModal
+  <VoteTagModal
     v-model:showTagModal="showTagModal"
     :available-tags="availableTags"
     :selected-map-tags="selectedMapTags"
@@ -240,7 +240,7 @@ import axios from "axios";
 import Leaderboard from "@/components/Leaderboard.vue";
 import MapInformation from "@/components/MapInformation.vue";
 import WRVideos from "@/components/WRVideos.vue";
-import TagModal from "@/components/TagModal.vue";
+import VoteTagModal from "@/components/popups/VoteTagModal.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -250,7 +250,7 @@ export default {
     Leaderboard,
     MapInformation,
     WRVideos,
-    TagModal,
+    VoteTagModal,
   },
   props: {
     mapId: {

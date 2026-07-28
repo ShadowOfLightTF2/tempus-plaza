@@ -4,6 +4,14 @@
   >
     <div class="w-95 mx-auto py-4 d-flex flex-column align-items-center">
       <div class="content-container">
+        <TagFilterModal
+          :show="showTagFilterModal"
+          :available-tags="availableTags"
+          :selected-tags="selectedTags"
+          @close="closeTagFilterModal"
+          @toggle-tag="toggleTag"
+          @clear-tags="clearTagFilters"
+        />
         <div class="page-header">
           <h1 class="page-title">
             <span class="title-icon">🔍</span>
@@ -728,10 +736,35 @@
                     v-for="statusOption in ['completed', 'incomplete']"
                     :key="statusOption"
                     class="status-checkbox"
-                    :class="{ selected: statusState[statusOption] === 'include' }"
+                    :class="{
+                      selected: statusState[statusOption] === 'include',
+                    }"
                     @click="toggleStatus(statusOption)"
                   >
                     <span>{{ statusOption }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-group" v-if="!mapId">
+                <h6 class="filter-title mb-2">Tags</h6>
+                <div class="tags-filter-row">
+                  <div
+                    class="type-checkbox tags-filter-btn"
+                    :class="{ selected: selectedTags.length > 0 }"
+                    @click="openTagFilterModal"
+                  >
+                    <i class="bi bi-tags me-1"></i>Tags
+                    <span v-if="selectedTags.length" class="tag-count-badge">{{
+                      selectedTags.length
+                    }}</span>
+                  </div>
+                  <div
+                    class="type-checkbox"
+                    :class="{ selected: showMapTags }"
+                    @click="toggleShowMapTags"
+                    title="Show tags column in table"
+                  >
+                    <span>Show tags</span>
                   </div>
                 </div>
               </div>
@@ -764,6 +797,12 @@
             <table class="table table-dark">
               <thead>
                 <tr>
+                  <th
+                    v-if="showMapTags || selectedTags.length > 0"
+                    class="tags-column-header"
+                  >
+                    Tags
+                  </th>
                   <th>{{ playerId ? "Map" : "Player" }}</th>
                   <th>Type</th>
                   <th>Class</th>
@@ -785,6 +824,9 @@
                       class="table-skeleton"
                       :style="{ width: getSkeletonWidth(col) }"
                     ></span>
+                  </td>
+                  <td v-if="showMapTags || selectedTags.length > 0">
+                    <span class="table-skeleton" style="width: 90px"></span>
                   </td>
                 </tr>
               </tbody>
@@ -823,6 +865,12 @@
               <table class="table table-dark">
                 <thead>
                   <tr>
+                    <th
+                      v-if="showMapTags || selectedTags.length > 0"
+                      class="tags-column-header"
+                    >
+                      Tags
+                    </th>
                     <th @click="setSortColumn('map')" class="sortable-header">
                       {{ playerId ? "Map" : "Player" }}
                       <span
@@ -921,6 +969,35 @@
                     :key="record.id"
                     class="fade-in"
                   >
+                    <td
+                      v-if="showMapTags || selectedTags.length > 0"
+                      class="tags-cell"
+                    >
+                      <div
+                        v-if="getRecordTags(record).length"
+                        class="tags-cell-content"
+                      >
+                        <span
+                          v-for="tag in getRecordTags(record)"
+                          :key="'rt-' + record.id + '-' + tag.id"
+                          class="tag-chip-mini"
+                          :class="{
+                            'tag-chip-mini-selected': isTagSelected(tag.id),
+                          }"
+                          :style="{
+                            backgroundColor: tag.color + '30',
+                            borderColor: tag.color + '50',
+                            color: '#ddd',
+                            boxShadow: isTagSelected(tag.id)
+                              ? `0 0 0 1px ${tag.color} inset`
+                              : 'none',
+                          }"
+                          :title="tag.name"
+                          >{{ tag.name }}</span
+                        >
+                      </div>
+                      <span v-else class="tags-cell-empty">—</span>
+                    </td>
                     <SmartLink
                       v-if="playerId"
                       tag="td"
@@ -1018,11 +1095,13 @@
 import DOMPurify from "dompurify";
 import { formatDuration } from "@/utils/calculations.js";
 import { useHead } from "@vueuse/head";
+import TagFilterModal from "@/components/popups/TagFilterModal.vue";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
   name: "PlayerRecords",
+  components: { TagFilterModal },
   props: {
     playerId: { type: Number, default: null },
     mapId: { type: Number, default: null },
@@ -1031,6 +1110,7 @@ export default {
     useHead({ title: "Lookup | Tempus Plaza" });
   },
   data: () => ({
+    showMapTags: false,
     playerRankInfo: null,
     loadingRankInfo: false,
     playerAvatar: null,
@@ -1086,6 +1166,11 @@ export default {
     displayCount: 300,
     lookupSearchFocused: false,
     lookupHighlightedIndex: -1,
+    // Tag filtering
+    availableTags: [],
+    selectedTags: [],
+    showTagFilterModal: false,
+    mapTagsById: {},
   }),
   computed: {
     lookupMapCount() {
@@ -1201,9 +1286,7 @@ export default {
         ) {
           const recordClasses =
             record.intended_class === 5 ? [3, 4] : [record.intended_class];
-          if (
-            excludedIntendedClasses.some((k) => recordClasses.includes(k))
-          )
+          if (excludedIntendedClasses.some((k) => recordClasses.includes(k)))
             return false;
           if (includedIntendedClasses.length > 0) {
             if (includedIntendedClasses.length === 2) {
@@ -1214,6 +1297,15 @@ export default {
               return false;
             }
           }
+        }
+
+        // Map tags
+        if (this.selectedTags.length > 0) {
+          const tags = this.getRecordTags(record);
+          if (!tags || tags.length === 0) return false;
+          const tagIds = tags.map((t) => t.id);
+          if (!this.selectedTags.some((tagId) => tagIds.includes(tagId)))
+            return false;
         }
 
         if (this.recordSearchQuery) {
@@ -1317,6 +1409,8 @@ export default {
       this.playerName = null;
     }
     this.parseUrlFilters();
+    this.fetchAvailableTags();
+    this.fetchMapTagsLookup();
 
     if (this.$route.params.playerId) {
       this.playerId = this.$route.params.playerId;
@@ -1340,6 +1434,14 @@ export default {
     }
   },
   methods: {
+    toggleShowMapTags() {
+      this.showMapTags = !this.showMapTags;
+      this.onFilterChange();
+    },
+    clearTagFilters() {
+      this.selectedTags = [];
+      this.onFilterChange();
+    },
     cycleFilterState(stateObj, key) {
       const current = stateObj[key];
       if (current === "include") {
@@ -1363,8 +1465,7 @@ export default {
     },
     matchesGroup(key, record) {
       if (key === "WR") return record.placement === 1;
-      if (key === "TT")
-        return record.placement >= 2 && record.placement <= 10;
+      if (key === "TT") return record.placement >= 2 && record.placement <= 10;
       if (key === "BT") return record.rank === record.completion_count;
       return record.placement === 10 + Number(key);
     },
@@ -1424,6 +1525,53 @@ export default {
     toggleStatus(statusOption) {
       this.toggleSimpleState(this.statusState, statusOption);
     },
+    // --- Tag filtering ---
+    async fetchAvailableTags() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/maps/tags`);
+        if (response.ok) {
+          this.availableTags = await response.json();
+        }
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    },
+    async fetchMapTagsLookup() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/maps`);
+        if (response.ok) {
+          const maps = await response.json();
+          const lookup = {};
+          maps.forEach((m) => {
+            lookup[m.id] = m.tags || [];
+          });
+          this.mapTagsById = lookup;
+        }
+      } catch (error) {
+        console.error("Error fetching map tags lookup:", error);
+      }
+    },
+    getRecordTags(record) {
+      return this.mapTagsById[record.map_id] || [];
+    },
+    openTagFilterModal() {
+      this.showTagFilterModal = true;
+    },
+    closeTagFilterModal() {
+      this.showTagFilterModal = false;
+    },
+    toggleTag(tagId) {
+      if (this.selectedTags.includes(tagId)) {
+        this.selectedTags = this.selectedTags.filter((id) => id !== tagId);
+      } else {
+        this.selectedTags.push(tagId);
+      }
+      this.onFilterChange();
+    },
+    isTagSelected(tagId) {
+      return this.selectedTags.includes(tagId);
+    },
+    // --- End tag filtering ---
     onLookupKeydown(e) {
       if (!this.searchResults || this.lookupTotalResults === 0) return;
       if (e.key === "ArrowDown") {
@@ -1502,6 +1650,12 @@ export default {
           ["completed", "incomplete"],
           false,
         );
+      if (q.tags) {
+        this.selectedTags = String(q.tags)
+          .split(",")
+          .map((v) => parseInt(v))
+          .filter((v) => !isNaN(v));
+      }
       if (
         q.srt &&
         [
@@ -1519,6 +1673,7 @@ export default {
         this.sortByCategory = q.srt;
       }
       if (q.dir && ["asc", "desc"].includes(q.dir)) this.sortDirection = q.dir;
+      if (q.tgc === "1") this.showMapTags = true;
     },
     updateUrl() {
       const q = {};
@@ -1538,6 +1693,8 @@ export default {
       if (typ) q.typ = typ;
       const grp = this.serializeState(this.groupState);
       if (grp) q.grp = grp;
+      if (this.showMapTags) q.tgc = "1";
+      if (this.selectedTags.length > 0) q.tags = this.selectedTags.join(",");
 
       const defaultStatus = { completed: "include" };
       const statusChanged =
@@ -1954,6 +2111,8 @@ export default {
       this.searchQuery = "";
       this.searchResults = null;
       this.lookupHighlightedIndex = -1;
+      this.selectedTags = [];
+      this.showMapTags = false;
       this.$router.push({ name: "LookupMap", params: { mapId } });
     },
     async fetchRecords() {
@@ -2026,9 +2185,11 @@ export default {
       this.demomanRatingState = {};
       this.intendedClassState = {};
       this.groupState = {};
+      this.selectedTags = [];
       this.sortByCategory = "time";
       this.sortDirection = "desc";
       this.recordSearchQuery = "";
+      this.showMapTags = false;
       this.$router
         .replace({
           name: this.$route.name,
@@ -2049,7 +2210,7 @@ export default {
 
 <style scoped>
 .content-container {
-  max-width: 1320px;
+  max-width: 1500px;
   width: 100%;
 }
 .search-section {
@@ -2373,7 +2534,7 @@ export default {
   align-items: center;
 }
 .clear-filter {
-  padding-left: 50px;
+  padding-left: 30px;
 }
 .filter-count {
   color: white;
@@ -3156,6 +3317,71 @@ export default {
 }
 .skeleton-row:nth-child(even) td {
   background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.tags-filter-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tags-column-header {
+  min-width: 150px;
+}
+
+.tags-cell {
+  min-width: 150px;
+  max-width: 240px;
+  white-space: normal !important;
+  padding: 6px 8px !important;
+}
+
+.tags-cell-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.tag-chip-mini {
+  display: inline-block;
+  max-width: 90px;
+  padding: 2px 7px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.tag-chip-mini-selected {
+  font-weight: 800;
+}
+
+.tags-cell-empty {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+}
+
+.tags-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.tag-count-badge {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  line-height: 1.4;
 }
 
 @media (max-width: 767.98px) {

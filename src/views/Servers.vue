@@ -102,21 +102,27 @@
                         <div
                           class="rank-badge"
                           :class="
-                            player.highest_rank === player.soldier_rank
-                              ? 'soldier'
-                              : 'demoman'
+                            player.highest_rank === player.overall_rank
+                              ? 'overall'
+                              : player.highest_rank === player.soldier_rank
+                                ? 'soldier'
+                                : 'demoman'
                           "
                         >
                           <img
                             :src="`/icons/${
-                              player.highest_rank === player.soldier_rank
-                                ? 'soldier'
-                                : 'demoman'
+                              player.highest_rank === player.overall_rank
+                                ? 'overall'
+                                : player.highest_rank === player.soldier_rank
+                                  ? 'soldier'
+                                  : 'demoman'
                             }.png`"
                             :alt="
-                              player.highest_rank === player.soldier_rank
-                                ? 'Soldier'
-                                : 'Demoman'
+                              player.highest_rank === player.overall_rank
+                                ? 'Overall'
+                                : player.highest_rank === player.soldier_rank
+                                  ? 'Soldier'
+                                  : 'Demoman'
                             "
                             class="class-icon-small"
                           />
