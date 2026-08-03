@@ -142,9 +142,9 @@
           <button
             class="toggle-overall-btn"
             :class="{ active: minMode }"
-            @click="minMode = !minMode"
+            @click="toggleMinMode"
           >
-            <span v-if="minMode">Full Mode</span>
+            <span v-if="minMode">Podium Mode</span>
             <span v-else>Min Mode</span>
           </button>
         </div>
@@ -405,7 +405,9 @@
                             currentUserId && player.player_id === currentUserId,
                         }"
                       >
-                        <td class="rank-column">#{{ index + 4 }}</td>
+                        <td class="rank-column">
+                          #{{ index + table.rankOffset }}
+                        </td>
                         <td
                           v-if="
                             selectedCategory === 'countries' &&
@@ -583,6 +585,9 @@ export default {
   }),
 
   async mounted() {
+    this.minMode = localStorage.getItem("playersMinMode") === "true";
+    window.addEventListener("storage", this.handleStorageChange);
+
     this.fillDropdowns();
     await this.fetchUser();
     await this.loadCountriesList();
@@ -612,6 +617,9 @@ export default {
     }
     this.fetchDataForCurrentSelection(0, "both");
   },
+  beforeUnmount() {
+    window.removeEventListener("storage", this.handleStorageChange);
+  },
 
   computed: {
     defaultAvatarPath() {
@@ -636,14 +644,18 @@ export default {
       return this.overallPlayers.slice(3, this.currentOverallIndex);
     },
     tableConfigs() {
+      const rankOffset = this.minMode ? 1 : 4;
       return [
         {
           key: "soldier",
           label: "Soldier",
           icon: "/icons/soldier.png",
           userRank: this.userRankSoldier,
-          topPlayers: this.topSoldierPlayers,
-          displayedPlayers: this.displayedSoldierPlayers,
+          topPlayers: this.minMode ? [] : this.topSoldierPlayers,
+          displayedPlayers: this.minMode
+            ? this.soldierPlayers.slice(0, this.currentSoldierIndex)
+            : this.displayedSoldierPlayers,
+          rankOffset,
           loading: this.loadingSoldiers,
           loadMore: () => this.loadMoreSoldiers(),
         },
@@ -652,8 +664,11 @@ export default {
           label: "Demoman",
           icon: "/icons/demoman.png",
           userRank: this.userRankDemoman,
-          topPlayers: this.topDemomanPlayers,
-          displayedPlayers: this.displayedDemomanPlayers,
+          topPlayers: this.minMode ? [] : this.topDemomanPlayers,
+          displayedPlayers: this.minMode
+            ? this.demomanPlayers.slice(0, this.currentDemomanIndex)
+            : this.displayedDemomanPlayers,
+          rankOffset,
           loading: this.loadingDemomen,
           loadMore: () => this.loadMoreDemomen(),
         },
@@ -662,8 +677,11 @@ export default {
           label: "Overall",
           icon: "/icons/overall.png",
           userRank: this.userRankOverall,
-          topPlayers: this.topOverallPlayers,
-          displayedPlayers: this.displayedOverallPlayers,
+          topPlayers: this.minMode ? [] : this.topOverallPlayers,
+          displayedPlayers: this.minMode
+            ? this.overallPlayers.slice(0, this.currentOverallIndex)
+            : this.displayedOverallPlayers,
+          rankOffset,
           loading: this.loadingOverall,
           loadMore: () => this.loadMoreOverall(),
         },
@@ -672,6 +690,15 @@ export default {
   },
 
   methods: {
+    toggleMinMode() {
+      this.minMode = !this.minMode;
+      localStorage.setItem("playersMinMode", this.minMode);
+    },
+    handleStorageChange(event) {
+      if (event.key === "playersMinMode") {
+        this.minMode = event.newValue === "true";
+      }
+    },
     formatAmount(userRank) {
       if (!userRank) return 0;
       if (this.selectedCategory === "completion") return userRank.amount + "%";
@@ -1439,7 +1466,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px;
+  padding: 14px 14px 9px 14px;
   background: rgba(255, 255, 255, 0.02);
   border-left: 1px solid var(--color-border-soft);
   border-right: 1px solid var(--color-border-soft);
@@ -1713,6 +1740,9 @@ export default {
   box-shadow: 0 0px 20px rgb(0, 0, 0);
   background: transparent;
   z-index: 1;
+}
+.table-responsive {
+  margin-top: 5px;
 }
 .table-dark {
   margin: 0px;
