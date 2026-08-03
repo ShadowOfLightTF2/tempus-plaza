@@ -11,6 +11,7 @@
           :show="showTagFilterModal"
           :available-tags="availableTags"
           :selected-tags="selectedTags"
+          :excluded-tags="excludedTags"
           @close="closeTagFilterModal"
           @toggle-tag="toggleTag"
           @clear-tags="clearTagFilters"
@@ -40,46 +41,47 @@
                     <h6 class="filter-title mb-2">Soldier tiers</h6>
                     <div class="tier-filter-container">
                       <div class="tier-filters">
-                        <label
+                        <span
                           v-for="tier in availableTiers"
                           :key="'soldier-tier-' + tier"
-                          class="tier-checkbox"
+                          :class="[
+                            'tier-badge',
+                            `tier-${tier}`,
+                            {
+                              'filter-included':
+                                soldierTierState[tier] === 'include',
+                              'filter-excluded':
+                                soldierTierState[tier] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleSoldierTier(tier)"
+                          >{{ tier }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="tier"
-                            v-model="selectedSoldierTiers"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`tier-badge tier-${tier}`">{{
-                            tier
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
                 </div>
-
                 <div class="filter-column">
                   <div class="filter-group">
                     <h6 class="filter-title mb-2">Demoman tiers</h6>
                     <div class="tier-filter-container">
                       <div class="tier-filters">
-                        <label
+                        <span
                           v-for="tier in availableTiers"
                           :key="'demo-tier-' + tier"
-                          class="tier-checkbox"
+                          :class="[
+                            'tier-badge',
+                            `tier-${tier}`,
+                            {
+                              'filter-included':
+                                demomanTierState[tier] === 'include',
+                              'filter-excluded':
+                                demomanTierState[tier] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleDemomanTier(tier)"
+                          >{{ tier }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="tier"
-                            v-model="selectedDemomanTiers"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`tier-badge tier-${tier}`">{{
-                            tier
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -100,21 +102,22 @@
                     <h6 class="filter-title mb-2">Soldier ratings</h6>
                     <div class="rating-filter-container">
                       <div class="rating-filters">
-                        <label
+                        <span
                           v-for="rating in availableRatings"
                           :key="'soldier-rating-' + rating"
-                          class="rating-checkbox"
+                          :class="[
+                            'rating-badge',
+                            `rating-${rating}`,
+                            {
+                              'filter-included':
+                                soldierRatingState[rating] === 'include',
+                              'filter-excluded':
+                                soldierRatingState[rating] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleSoldierRating(rating)"
+                          >{{ rating }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="rating"
-                            v-model="selectedSoldierRatings"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`rating-badge rating-${rating}`">{{
-                            rating
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -128,7 +131,10 @@
                         :key="cls.id"
                         @click="toggleIntendedClass(cls.id)"
                         :class="{
-                          active: selectedIntendedClasses.includes(cls.id),
+                          'filter-included':
+                            intendedClassState[cls.id] === 'include',
+                          'filter-excluded':
+                            intendedClassState[cls.id] === 'exclude',
                         }"
                         class="intended-class-btn"
                       >
@@ -142,21 +148,22 @@
                     <h6 class="filter-title mb-2">Demoman ratings</h6>
                     <div class="rating-filter-container">
                       <div class="rating-filters">
-                        <label
+                        <span
                           v-for="rating in availableRatings"
                           :key="'demo-rating-' + rating"
-                          class="rating-checkbox"
+                          :class="[
+                            'rating-badge',
+                            `rating-${rating}`,
+                            {
+                              'filter-included':
+                                demomanRatingState[rating] === 'include',
+                              'filter-excluded':
+                                demomanRatingState[rating] === 'exclude',
+                            },
+                          ]"
+                          @click="toggleDemomanRating(rating)"
+                          >{{ rating }}</span
                         >
-                          <input
-                            type="checkbox"
-                            :value="rating"
-                            v-model="selectedDemomanRatings"
-                            @change="onFilterChange"
-                          />
-                          <span :class="`rating-badge rating-${rating}`">{{
-                            rating
-                          }}</span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -198,10 +205,24 @@
               </div>
             </div>
             <div class="compact-controls">
+              <button
+                v-if="isLoggedIn"
+                @click="toggleVoteFilter"
+                class="filter-btn"
+                :class="{ active: voteFilter !== 'all' }"
+                :title="
+                  voteFilter === 'all'
+                    ? 'Show all maps'
+                    : 'Showing unvoted maps'
+                "
+              >
+                <i class="bi bi-check2-circle me-1"></i>
+                <span v-if="voteFilter === 'all'">Votes</span>
+                <span v-else>Unvoted</span>
+              </button>
               <button @click="openTagFilterModal" class="filter-btn">
                 <i class="bi bi-tags me-1"></i>Tags
               </button>
-
               <button
                 @click="
                   clearAllFilters();
@@ -522,6 +543,13 @@
                   :key="'skel-' + i"
                   class="map-card skeleton-card"
                 >
+                  <div
+                    v-if="skeletonPlaceholders[i - 1]"
+                    class="skeleton-placeholder-bg"
+                    :style="{
+                      backgroundImage: `url('${skeletonPlaceholders[i - 1]}')`,
+                    }"
+                  ></div>
                   <div class="shimmer"></div>
                 </div>
               </template>
@@ -543,7 +571,12 @@
                   class="map-card fade-in"
                 >
                   <SmartLink :to="getMapRoute(item)" class="card-link">
-                    <MapCard :item="item" :current-view="currentView" />
+                    <MapCard
+                      :item="item"
+                      :current-view="currentView"
+                      :voted-map-ids="votedMapIds"
+                      :is-logged-in="isLoggedIn"
+                    />
                   </SmartLink>
                 </div>
               </template>
@@ -561,6 +594,10 @@ import { useHead } from "@vueuse/head";
 import { useRoute, useRouter } from "vue-router";
 import MapCard from "@/components/MapCard.vue";
 import TagFilterModal from "@/components/popups/TagFilterModal.vue";
+import {
+  getPlaceholderCache,
+  setPlaceholderCache,
+} from "@/utils/placeholderCache";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const TIER_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
@@ -581,6 +618,9 @@ export default {
   },
   data() {
     return {
+      isLoggedIn: false,
+      placeholderCache: getPlaceholderCache().data,
+      placeholderOrder: getPlaceholderCache().order,
       maps: [],
       courses: [],
       bonuses: [],
@@ -592,14 +632,15 @@ export default {
       sortDirection: 1,
       availableTags: [],
       selectedTags: [],
+      excludedTags: [],
       showTagFilterModal: false,
-      selectedSoldierTiers: [],
-      selectedSoldierRatings: [],
-      selectedDemomanTiers: [],
-      selectedDemomanRatings: [],
+      soldierTierState: {},
+      soldierRatingState: {},
+      demomanTierState: {},
+      demomanRatingState: {},
       availableTiers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
       availableRatings: [1, 2, 3, 4],
-      selectedIntendedClasses: [],
+      intendedClassState: {},
       availableIntendedClasses: [
         { id: 3, label: "Soldier", icon: "/icons/soldier.png" },
         { id: 4, label: "Demoman", icon: "/icons/demoman.png" },
@@ -614,7 +655,16 @@ export default {
       showSoldierColumns: true,
       showDemomanColumns: true,
       showCompletionColumns: false,
+      votedMapIds: new Set(),
+      voteFilter: "all", // 'all' | 'unvoted'
     };
+  },
+  async created() {
+    const user = await this.fetchUser();
+    if (user?.playerid) {
+      this.isLoggedIn = true;
+      await this.fetchVotedTags(user.playerid);
+    }
   },
   async mounted() {
     await this.fetchAvailableTags();
@@ -622,13 +672,32 @@ export default {
     await this.fetchData();
   },
   computed: {
+    skeletonPlaceholders() {
+      return this.placeholderOrder.map((id) => this.placeholderCache[id]);
+    },
     effectiveSortField() {
+      const includedDemomanTiers = this.getIncluded(
+        this.demomanTierState,
+        true,
+      );
+      const includedDemomanRatings = this.getIncluded(
+        this.demomanRatingState,
+        true,
+      );
+      const includedSoldierTiers = this.getIncluded(
+        this.soldierTierState,
+        true,
+      );
+      const includedSoldierRatings = this.getIncluded(
+        this.soldierRatingState,
+        true,
+      );
       if (
-        (this.selectedDemomanTiers.length > 0 ||
-          this.selectedDemomanRatings.length > 0) &&
+        (includedDemomanTiers.length > 0 ||
+          includedDemomanRatings.length > 0) &&
         this.sortField === "soldier_tier" &&
-        this.selectedSoldierTiers.length === 0 &&
-        this.selectedSoldierRatings.length === 0
+        includedSoldierTiers.length === 0 &&
+        includedSoldierRatings.length === 0
       ) {
         return "demoman_tier";
       }
@@ -655,41 +724,94 @@ export default {
       }
     },
     filteredItems() {
+      const includedSoldierTiers = this.getIncluded(
+        this.soldierTierState,
+        true,
+      );
+      const excludedSoldierTiers = this.getExcluded(
+        this.soldierTierState,
+        true,
+      );
+      const includedSoldierRatings = this.getIncluded(
+        this.soldierRatingState,
+        true,
+      );
+      const excludedSoldierRatings = this.getExcluded(
+        this.soldierRatingState,
+        true,
+      );
+      const includedDemomanTiers = this.getIncluded(
+        this.demomanTierState,
+        true,
+      );
+      const excludedDemomanTiers = this.getExcluded(
+        this.demomanTierState,
+        true,
+      );
+      const includedDemomanRatings = this.getIncluded(
+        this.demomanRatingState,
+        true,
+      );
+      const excludedDemomanRatings = this.getExcluded(
+        this.demomanRatingState,
+        true,
+      );
+      const includedIntendedClasses = this.getIncluded(
+        this.intendedClassState,
+        true,
+      );
+      const excludedIntendedClasses = this.getExcluded(
+        this.intendedClassState,
+        true,
+      );
+
       let filtered = this.currentItems.filter((item) => {
+        if (excludedSoldierTiers.includes(item.soldier_tier)) return false;
         if (
-          this.selectedSoldierTiers.length > 0 &&
-          !this.selectedSoldierTiers.includes(item.soldier_tier)
+          includedSoldierTiers.length > 0 &&
+          !includedSoldierTiers.includes(item.soldier_tier)
         )
           return false;
+        if (excludedSoldierRatings.includes(item.soldier_rating)) return false;
         if (
-          this.selectedSoldierRatings.length > 0 &&
-          !this.selectedSoldierRatings.includes(item.soldier_rating)
+          includedSoldierRatings.length > 0 &&
+          !includedSoldierRatings.includes(item.soldier_rating)
         )
           return false;
+        if (excludedDemomanTiers.includes(item.demoman_tier)) return false;
         if (
-          this.selectedDemomanTiers.length > 0 &&
-          !this.selectedDemomanTiers.includes(item.demoman_tier)
+          includedDemomanTiers.length > 0 &&
+          !includedDemomanTiers.includes(item.demoman_tier)
         )
           return false;
+        if (excludedDemomanRatings.includes(item.demoman_rating)) return false;
         if (
-          this.selectedDemomanRatings.length > 0 &&
-          !this.selectedDemomanRatings.includes(item.demoman_rating)
+          includedDemomanRatings.length > 0 &&
+          !includedDemomanRatings.includes(item.demoman_rating)
         )
           return false;
         return true;
       });
-      if (this.selectedIntendedClasses.length > 0) {
+
+      if (
+        includedIntendedClasses.length > 0 ||
+        excludedIntendedClasses.length > 0
+      ) {
         filtered = filtered.filter((item) => {
-          if (
-            this.selectedIntendedClasses.includes(3) &&
-            this.selectedIntendedClasses.includes(4)
-          ) {
-            return item.intended_class === 5;
+          const itemClasses =
+            item.intended_class === 5 ? [3, 4] : [item.intended_class];
+          if (excludedIntendedClasses.some((k) => itemClasses.includes(k)))
+            return false;
+          if (includedIntendedClasses.length > 0) {
+            if (includedIntendedClasses.length === 2) {
+              if (item.intended_class !== 5) return false;
+            } else if (
+              !includedIntendedClasses.some((k) => itemClasses.includes(k))
+            ) {
+              return false;
+            }
           }
-          return (
-            this.selectedIntendedClasses.includes(item.intended_class) ||
-            item.intended_class === 5
-          );
+          return true;
         });
       }
 
@@ -698,6 +820,22 @@ export default {
           if (!item.tags || item.tags.length === 0) return false;
           const itemTagIds = item.tags.map((tag) => tag.id);
           return this.selectedTags.some((tagId) => itemTagIds.includes(tagId));
+        });
+      }
+
+      if (this.excludedTags.length > 0) {
+        filtered = filtered.filter((item) => {
+          if (!item.tags || item.tags.length === 0) return true;
+          const itemTagIds = item.tags.map((tag) => tag.id);
+          return !this.excludedTags.some((tagId) => itemTagIds.includes(tagId));
+        });
+      }
+
+      if (this.voteFilter !== "all") {
+        filtered = filtered.filter((item) => {
+          const mapId = this.currentView === "maps" ? item.id : item.map_id;
+          const hasVoted = this.votedMapIds.has(mapId);
+          return this.voteFilter === "voted" ? hasVoted : !hasVoted;
         });
       }
 
@@ -768,12 +906,29 @@ export default {
         let effectiveSortField = this.sortField;
         let effectiveSortDirection = this.sortDirection;
 
+        const includedDemomanTiers = this.getIncluded(
+          this.demomanTierState,
+          true,
+        );
+        const includedDemomanRatings = this.getIncluded(
+          this.demomanRatingState,
+          true,
+        );
+        const includedSoldierTiers = this.getIncluded(
+          this.soldierTierState,
+          true,
+        );
+        const includedSoldierRatings = this.getIncluded(
+          this.soldierRatingState,
+          true,
+        );
+
         if (
-          (this.selectedDemomanTiers.length > 0 ||
-            this.selectedDemomanRatings.length > 0) &&
+          (includedDemomanTiers.length > 0 ||
+            includedDemomanRatings.length > 0) &&
           this.sortField === "soldier_tier" &&
-          this.selectedSoldierTiers.length === 0 &&
-          this.selectedSoldierRatings.length === 0
+          includedSoldierTiers.length === 0 &&
+          includedSoldierRatings.length === 0
         ) {
           effectiveSortField = "demoman_tier";
         }
@@ -865,8 +1020,43 @@ export default {
       return this.filteredAndSortedItems.length - this.eliminatedRows.size;
     },
   },
-
   methods: {
+    async fetchUser() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-user`, {
+          credentials: "include",
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          console.log("Response not ok:", response.status, response.statusText);
+          return null;
+        }
+        const result = await response.json();
+        return result.data;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    },
+    async fetchVotedTags(playerId) {
+      try {
+        const url = `${API_BASE_URL}/players/${playerId}/tags`;
+        const response = await fetch(url, {
+          credentials: "include",
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) return;
+        const result = await response.json();
+        const votes = Array.isArray(result) ? result : result.data || [];
+        this.votedMapIds = new Set(votes.map((v) => v.map_id));
+      } catch (error) {
+        console.error("Error fetching voted tags:", error);
+      }
+    },
     switchLayout(layout) {
       if (this.currentLayout === layout) return;
 
@@ -887,17 +1077,87 @@ export default {
     closeTagFilterModal() {
       this.showTagFilterModal = false;
     },
+    toggleVoteFilter() {
+      this.voteFilter = this.voteFilter === "all" ? "unvoted" : "all";
+      const idx = order.indexOf(this.voteFilter);
+      this.voteFilter = order[(idx + 1) % order.length];
+      this.onFilterChange();
+    },
     toggleTag(tagId) {
       if (this.selectedTags.includes(tagId)) {
+        // included -> excluded
         this.selectedTags = this.selectedTags.filter((id) => id !== tagId);
+        this.excludedTags.push(tagId);
+      } else if (this.excludedTags.includes(tagId)) {
+        // excluded -> none
+        this.excludedTags = this.excludedTags.filter((id) => id !== tagId);
       } else {
+        // none -> included
         this.selectedTags.push(tagId);
       }
       this.onFilterChange();
     },
     clearTagFilters() {
       this.selectedTags = [];
+      this.excludedTags = [];
       this.onFilterChange();
+    },
+    cycleFilterState(stateObj, key) {
+      const current = stateObj[key];
+      if (current === "include") {
+        stateObj[key] = "exclude";
+      } else if (current === "exclude") {
+        delete stateObj[key];
+      } else {
+        stateObj[key] = "include";
+      }
+      this.onFilterChange();
+    },
+    getIncluded(stateObj, numeric = false) {
+      return Object.keys(stateObj)
+        .filter((k) => stateObj[k] === "include")
+        .map((k) => (numeric ? Number(k) : k));
+    },
+    getExcluded(stateObj, numeric = false) {
+      return Object.keys(stateObj)
+        .filter((k) => stateObj[k] === "exclude")
+        .map((k) => (numeric ? Number(k) : k));
+    },
+    serializeState(stateObj) {
+      return Object.keys(stateObj)
+        .map((k) => (stateObj[k] === "exclude" ? "-" + k : k))
+        .join(",");
+    },
+    parseState(str, allowedKeys, numeric = false) {
+      const result = {};
+      if (!str) return result;
+      String(str)
+        .split(",")
+        .forEach((token) => {
+          if (!token) return;
+          const exclude = token.startsWith("-");
+          const rawKey = exclude ? token.slice(1) : token;
+          const key = numeric ? parseInt(rawKey) : rawKey;
+          if (numeric && isNaN(key)) return;
+          if (allowedKeys && !allowedKeys.includes(key)) return;
+          result[key] = exclude ? "exclude" : "include";
+        });
+      return result;
+    },
+    toggleSoldierTier(tier) {
+      this.cycleFilterState(this.soldierTierState, tier);
+    },
+    toggleSoldierRating(rating) {
+      this.cycleFilterState(this.soldierRatingState, rating);
+    },
+    toggleDemomanTier(tier) {
+      this.cycleFilterState(this.demomanTierState, tier);
+    },
+    toggleDemomanRating(rating) {
+      this.cycleFilterState(this.demomanRatingState, rating);
+    },
+    toggleIntendedClass(clsId) {
+      this.cycleFilterState(this.intendedClassState, clsId);
     },
     parseUrlFilters() {
       const query = this.$route.query;
@@ -907,30 +1167,38 @@ export default {
         this.currentView = query.view;
       }
 
-      // Parse tiers and ratings
-      this.selectedSoldierTiers = this.parseArrayParam(
+      // Parse tiers and ratings (include/exclude state)
+      this.soldierTierState = this.parseState(
         query.st,
         this.availableTiers,
+        true,
       );
-      this.selectedSoldierRatings = this.parseArrayParam(
+      this.soldierRatingState = this.parseState(
         query.sr,
         this.availableRatings,
+        true,
       );
-      this.selectedDemomanTiers = this.parseArrayParam(
+      this.demomanTierState = this.parseState(
         query.dt,
         this.availableTiers,
+        true,
       );
-      this.selectedDemomanRatings = this.parseArrayParam(
+      this.demomanRatingState = this.parseState(
         query.dr,
         this.availableRatings,
+        true,
       );
 
       // Parse intended classes
-      this.selectedIntendedClasses = this.parseArrayParam(query.ic, [3, 4]);
+      this.intendedClassState = this.parseState(query.ic, [3, 4], true);
 
       // Parse selected tags
       const availableTagIds = this.availableTags.map((tag) => tag.id);
       this.selectedTags = this.parseArrayParam(query.tags, availableTagIds);
+      this.excludedTags = this.parseArrayParam(query.extags, availableTagIds);
+
+      this.voteFilter =
+        this.isLoggedIn && query.vf === "unvoted" ? "unvoted" : "all";
 
       // Parse layout
       if (query.layout && ["table", "grid"].includes(query.layout)) {
@@ -956,21 +1224,16 @@ export default {
       }
 
       // Add filters only if they have values
-      if (this.selectedSoldierTiers.length > 0) {
-        query.st = this.selectedSoldierTiers.join(",");
-      }
-      if (this.selectedSoldierRatings.length > 0) {
-        query.sr = this.selectedSoldierRatings.join(",");
-      }
-      if (this.selectedDemomanTiers.length > 0) {
-        query.dt = this.selectedDemomanTiers.join(",");
-      }
-      if (this.selectedDemomanRatings.length > 0) {
-        query.dr = this.selectedDemomanRatings.join(",");
-      }
-      if (this.selectedIntendedClasses.length > 0) {
-        query.ic = this.selectedIntendedClasses.join(",");
-      }
+      const st = this.serializeState(this.soldierTierState);
+      if (st) query.st = st;
+      const sr = this.serializeState(this.soldierRatingState);
+      if (sr) query.sr = sr;
+      const dt = this.serializeState(this.demomanTierState);
+      if (dt) query.dt = dt;
+      const dr = this.serializeState(this.demomanRatingState);
+      if (dr) query.dr = dr;
+      const ic = this.serializeState(this.intendedClassState);
+      if (ic) query.ic = ic;
 
       // Add column visibility if not default
       if (!this.showSoldierColumns) {
@@ -986,6 +1249,13 @@ export default {
       // Add selected tags to URL
       if (this.selectedTags.length > 0) {
         query.tags = this.selectedTags.join(",");
+      }
+      if (this.excludedTags.length > 0) {
+        query.extags = this.excludedTags.join(",");
+      }
+
+      if (this.voteFilter !== "all") {
+        query.vf = this.voteFilter;
       }
 
       // Add layout if not default
@@ -1013,16 +1283,6 @@ export default {
         this.showCompletionColumns = !this.showCompletionColumns;
       }
       this.updateUrl();
-    },
-    toggleIntendedClass(clsId) {
-      if (this.selectedIntendedClasses.includes(clsId)) {
-        this.selectedIntendedClasses = this.selectedIntendedClasses.filter(
-          (id) => id !== clsId,
-        );
-      } else {
-        this.selectedIntendedClasses.push(clsId);
-      }
-      this.onFilterChange();
     },
     getMapRoute(item) {
       const itemId = this.currentView === "maps" ? item.id : item.map_id;
@@ -1084,6 +1344,18 @@ export default {
         );
 
         this.maps = mapsWithTags;
+
+        // update the placeholder cache
+        const updatedData = { ...this.placeholderCache };
+        for (const map of mapsWithTags) {
+          if (map.placeholder) updatedData[map.id] = map.placeholder;
+        }
+        this.placeholderCache = updatedData;
+
+        const updatedOrder = mapsWithTags.map((map) => map.id).reverse();
+        this.placeholderOrder = updatedOrder;
+
+        setPlaceholderCache(updatedData, updatedOrder);
       } catch (error) {
         this.error = "Error fetching maps data.";
         console.error("Error fetching maps data:", error);
@@ -1146,12 +1418,14 @@ export default {
       return this.sortDirection === 1 ? "↑" : "↓";
     },
     clearAllFilters() {
-      this.selectedSoldierTiers = [];
-      this.selectedSoldierRatings = [];
-      this.selectedDemomanTiers = [];
-      this.selectedDemomanRatings = [];
-      this.selectedIntendedClasses = [];
+      this.soldierTierState = {};
+      this.soldierRatingState = {};
+      this.demomanTierState = {};
+      this.demomanRatingState = {};
+      this.intendedClassState = {};
       this.selectedTags = [];
+      this.excludedTags = [];
+      this.voteFilter = "all";
       this.showSoldierColumns = true;
       this.showDemomanColumns = true;
       this.showCompletionColumns = false;
@@ -1497,28 +1771,10 @@ export default {
   justify-content: center;
 }
 
-.tier-checkbox,
-.rating-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  margin: 0;
-}
-
-.tier-checkbox:hover,
-.rating-checkbox:hover {
-  border-radius: 4px;
-  border-color: var(--color-border, #444);
-  box-shadow: 0 0 0 1px var(--color-border, #444);
-}
-
-.tier-checkbox input,
-.rating-checkbox input {
-  display: none;
-}
-
 .tier-badge,
 .rating-badge {
+  cursor: pointer;
+  display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
   font-weight: bold;
@@ -1529,10 +1785,21 @@ export default {
   text-align: center;
 }
 
-.tier-checkbox input:checked + .tier-badge,
-.rating-checkbox input:checked + .rating-badge {
+.tier-badge:hover,
+.rating-badge:hover {
+  border-radius: 4px;
   border-color: var(--color-border, #444);
   box-shadow: 0 0 0 1px var(--color-border, #444);
+}
+
+.filter-included {
+  border-color: var(--color-border, #444) !important;
+  box-shadow: 0 0 0 0.5px var(--color-border, #444) !important;
+}
+
+.filter-excluded {
+  border-color: #ff3b3b !important;
+  box-shadow: 0 0 0 1px #ff3b3b !important;
 }
 
 .column-toggles-section {
@@ -1722,9 +1989,15 @@ export default {
   display: block;
 }
 
-.intended-class-btn.active {
+.intended-class-btn.filter-included {
   background: rgba(165, 165, 165, 0.5);
   border-color: var(--color-border);
+  color: white;
+}
+
+.intended-class-btn.filter-excluded {
+  background: rgba(220, 53, 69, 0.25);
+  border-color: #ff3b3b;
   color: white;
 }
 
@@ -1861,6 +2134,23 @@ export default {
   border: 1px solid var(--color-border-soft);
   overflow: hidden;
   pointer-events: none;
+}
+
+.skeleton-placeholder-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px);
+  transform: scale(1.1);
+  z-index: 0;
+}
+
+.skeleton-placeholder-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .shimmer {

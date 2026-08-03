@@ -38,28 +38,17 @@
             :loading="loading.ranks"
             :online-status="onlineStatus"
             :banner-pattern="bannerPattern"
+            :points-order="pointsOrder"
           />
           <div class="row g-2 mt-3">
-            <div class="col-12 col-md-4 chart-col">
+            <div
+              class="col-12 col-md-4 chart-col"
+              v-for="chartItem in pointsOrder"
+              :key="chartItem.type"
+            >
               <PointsChart
-                title="Soldier Points History"
-                chart-type="soldier"
-                :points-data="pointsHistory"
-                :loading="loading.points"
-              />
-            </div>
-            <div class="col-12 col-md-4 chart-col">
-              <PointsChart
-                title="Overall Points History"
-                chart-type="overall"
-                :points-data="pointsHistory"
-                :loading="loading.points"
-              />
-            </div>
-            <div class="col-12 col-md-4 chart-col">
-              <PointsChart
-                title="Demoman Points History"
-                chart-type="demoman"
+                :title="chartItem.title"
+                :chart-type="chartItem.type"
                 :points-data="pointsHistory"
                 :loading="loading.points"
               />
@@ -376,6 +365,25 @@ export default {
     pointsHistory: [],
   }),
   computed: {
+    pointsOrder() {
+      return [
+        {
+          type: "soldier",
+          title: "Soldier Points History",
+          value: this.player.soldier_points || 0,
+        },
+        {
+          type: "overall",
+          title: "Overall Points History",
+          value: this.player.overall_points || 0,
+        },
+        {
+          type: "demoman",
+          title: "Demoman Points History",
+          value: this.player.demoman_points || 0,
+        },
+      ];
+    },
     hasMapAtCurrentIndex() {
       const currentMap = this.favoriteMaps.find(
         (map) => map.index === this.currentMapIndex,

@@ -130,7 +130,7 @@
           </div>
         </div>
         <hr class="row-divider" style="width: 100%" />
-        <div class="d-flex justify-content-center mb-3">
+        <div class="d-flex justify-content-center mb-3" style="gap: 10px">
           <button
             class="toggle-overall-btn"
             :class="{ active: showOverallTable }"
@@ -138,6 +138,14 @@
           >
             <span v-if="showOverallTable">Hide Overall</span>
             <span v-else>Show Overall</span>
+          </button>
+          <button
+            class="toggle-overall-btn"
+            :class="{ active: minMode }"
+            @click="minMode = !minMode"
+          >
+            <span v-if="minMode">Full Mode</span>
+            <span v-else>Min Mode</span>
           </button>
         </div>
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
@@ -178,7 +186,6 @@
                 </div>
               </div>
               <div class="your-rank-banner">
-                <span class="your-rank-label">Your Rank</span>
                 <span class="your-rank-position">{{
                   table.userRank ? "#" + table.userRank.rank : "-"
                 }}</span>
@@ -198,8 +205,7 @@
                         ? table.userRank.flag
                         : '/icons/default-flag.jpg'
                     "
-                    class="your-rank-avatar"
-                    alt="Country Flag"
+                    class="your-rank-flag"
                     @error="handleError"
                   />
                   <span class="your-rank-name">{{
@@ -239,9 +245,12 @@
                 }}</span>
               </div>
               <div
-                v-if="!firstLoad && !isSwitching && table.topPlayers.length"
+                v-if="!minMode && (firstLoad || isSwitching)"
                 class="podium-container"
               >
+                <PlayersSkeleton type="podium" />
+              </div>
+              <div v-else-if="table.topPlayers.length" class="podium-container">
                 <div
                   v-for="(player, index) in table.topPlayers"
                   :key="`top-${table.key}-${index}`"
@@ -258,7 +267,6 @@
                     "
                     :src="player.podiumFlag"
                     class="podium-flag"
-                    alt="Country Flag"
                     @error="handleError"
                   />
                   <div
@@ -385,7 +393,7 @@
                   </thead>
                   <tbody>
                     <template v-if="firstLoad || isSwitching">
-                      <PlayersSkeleton />
+                      <PlayersSkeleton type="rows" />
                     </template>
                     <template v-else>
                       <tr
@@ -408,7 +416,6 @@
                         >
                           <img
                             :src="player.flag || '/icons/default-flag.jpg'"
-                            alt="Country Flag"
                             class="flag"
                             @error="handleError"
                           />
@@ -505,6 +512,7 @@
 import axios from "axios";
 import { useHead } from "@vueuse/head";
 import PlayersSkeleton from "@/components/skeletons/PlayersSkeleton.vue";
+
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
@@ -517,6 +525,7 @@ export default {
     loadSize: 50,
     loadSizeOptions: [50, 100, 200],
     showOverallTable: true,
+    minMode: false,
     soldierPlayers: [],
     demomanPlayers: [],
     overallPlayers: [],
@@ -525,8 +534,6 @@ export default {
     userRankOverall: null,
     currentUserId: null,
     currentUserAvatar: null,
-    loadingUserRank: false,
-    loading: false,
     firstLoad: true,
     isSwitching: false,
     loadingSoldiers: false,
@@ -576,10 +583,10 @@ export default {
   }),
 
   async mounted() {
-    this.loading = true;
     this.fillDropdowns();
     await this.fetchUser();
     await this.loadCountriesList();
+
     const { category, item } = this.$route.params;
     if (!category || !item) {
       this.selectedCategory = "points";
@@ -607,12 +614,6 @@ export default {
   },
 
   computed: {
-    formattedHeaderTitle() {
-      return (
-        this.selectedCategory.charAt(0).toUpperCase() +
-        this.selectedCategory.slice(1)
-      );
-    },
     defaultAvatarPath() {
       return `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
     },
@@ -634,7 +635,6 @@ export default {
     displayedOverallPlayers() {
       return this.overallPlayers.slice(3, this.currentOverallIndex);
     },
-
     tableConfigs() {
       return [
         {
@@ -705,16 +705,15 @@ export default {
       if (this.selectedCategory === "completion") return "Percentage";
       return "Count";
     },
-
-    // --- Existing Logic ---
     async fetchPodiumStats(lists) {
       const soldierList = lists ? lists.soldierData : this.soldierPlayers;
       const demomanList = lists ? lists.demomanData : this.demomanPlayers;
       const overallList = lists ? lists.overallData : this.overallPlayers;
 
-      const isCountryTotals =
-        this.selectedCategory === "countries" && this.selectedItem === "Total";
-      if (isCountryTotals) {
+      if (
+        this.selectedCategory === "countries" &&
+        this.selectedItem === "Total"
+      ) {
         await this.fetchCountryPodiumPlayers({
           soldierList,
           demomanList,
@@ -744,28 +743,24 @@ export default {
           `${API_BASE_URL}/players/${player.player_id}/full`,
         );
         const info = data["0"] || {};
-        // stats.overall doesn't exist — the combined bucket is called "combined"
         const statsKey = statKey === "overall" ? "combined" : statKey;
         const stats = data.stats ? data.stats[statsKey] : null;
-        // points live in the ranks array, not in stats at all
         const rank = data.ranks && data.ranks[0] ? data.ranks[0] : null;
 
         player.podiumFlag = info.country_code
           ? `https://flagcdn.com/32x24/${info.country_code.toLowerCase()}.png`
           : null;
         player.podiumCompletion =
-          stats && stats.completion && stats.completion.total != null
+          stats?.completion?.total != null
             ? Math.round(stats.completion.total * 100) / 100
             : null;
         player.podiumPoints = rank ? (rank[`${statKey}_points`] ?? null) : null;
-        player.podiumWr =
-          stats && stats.worldRecords
-            ? (stats.worldRecords.total ?? null)
-            : null;
-        player.podiumTt =
-          stats && stats.top10Records
-            ? (stats.top10Records.total ?? null)
-            : null;
+        player.podiumWr = stats?.worldRecords
+          ? (stats.worldRecords.total ?? null)
+          : null;
+        player.podiumTt = stats?.top10Records
+          ? (stats.top10Records.total ?? null)
+          : null;
       } catch (error) {
         console.error(
           `Error fetching podium stats for player ${player.player_id}:`,
@@ -779,14 +774,10 @@ export default {
       }
     },
     async fetchCountryPodiumPlayers(lists) {
-      const soldierList = lists ? lists.soldierList : this.soldierPlayers;
-      const demomanList = lists ? lists.demomanList : this.demomanPlayers;
-      const overallList = lists ? lists.overallList : this.overallPlayers;
-
       const targets = [
-        { list: soldierList, key: "topSoldiers" },
-        { list: demomanList, key: "topDemomen" },
-        { list: overallList, key: "topOverall" },
+        { list: lists.soldierList || this.soldierPlayers, key: "topSoldiers" },
+        { list: lists.demomanList || this.demomanPlayers, key: "topDemomen" },
+        { list: lists.overallList || this.overallPlayers, key: "topOverall" },
       ];
 
       await Promise.all(
@@ -812,6 +803,7 @@ export default {
             : key === "topDemomen"
               ? "demoman_total_points"
               : "overall_total_points";
+
         countryEntry.podiumTopPlayers = list.slice(0, 3).map((p) => ({
           name: p.name,
           steam_avatar: p.steam_avatar || this.defaultAvatarPath,
@@ -862,15 +854,15 @@ export default {
     },
     async fetchUserRank() {
       if (!this.currentUserId) {
-        this.userRankSoldier = null;
-        this.userRankDemoman = null;
-        this.userRankOverall = null;
+        this.userRankSoldier =
+          this.userRankDemoman =
+          this.userRankOverall =
+            null;
         return;
       }
-      this.loadingUserRank = true;
+
       try {
-        const category = this.selectedCategory;
-        const item = this.selectedItem;
+        const { selectedCategory: category, selectedItem: item } = this;
 
         if (category === "completion") {
           const type = item
@@ -885,38 +877,14 @@ export default {
           return;
         }
 
-        let tableName = category;
-        let type = item
-          .replace(/\s+/g, "")
-          .toLowerCase()
-          .replace(/combined/gi, "total");
-        let cat = "points";
-
-        if (type.includes("(count)")) {
-          type = type.replace("(count)", "");
-          cat = "count";
-        }
-        if (tableName === "ratings") {
-          tableName = type.replace(/rating(\d+)/g, (_, n) => `r${n}s`);
-          type = "maps";
-        } else if (tableName === "groups") {
-          if (type === "groups") {
-            await this.fetchUserPlayerRank("groups", "total", cat);
-            return;
-          }
-          tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
-          type = "total";
-        }
-        if (tableName === "tiers") cat = "total";
-
+        const { tableName, type, cat } = this.getFetchParams(category, item);
         await this.fetchUserPlayerRank(tableName, type, cat);
       } catch (error) {
         console.error("Error fetching user rank:", error);
-        this.userRankSoldier = null;
-        this.userRankDemoman = null;
-        this.userRankOverall = null;
-      } finally {
-        this.loadingUserRank = false;
+        this.userRankSoldier =
+          this.userRankDemoman =
+          this.userRankOverall =
+            null;
       }
     },
     async fetchUserPlayerRank(tableName, type, category) {
@@ -924,29 +892,20 @@ export default {
         const { data } = await axios.get(
           `${API_BASE_URL}/players/user-rank/${tableName}/${type}/${category}/${this.currentUserId}`,
         );
-        this.userRankSoldier = data.soldierRank
-          ? {
-              ...data.soldierRank,
-              player_id: data.soldierRank.player_id ?? this.currentUserId,
-            }
-          : null;
-        this.userRankDemoman = data.demomanRank
-          ? {
-              ...data.demomanRank,
-              player_id: data.demomanRank.player_id ?? this.currentUserId,
-            }
-          : null;
-        this.userRankOverall = data.overallRank
-          ? {
-              ...data.overallRank,
-              player_id: data.overallRank.player_id ?? this.currentUserId,
-            }
-          : null;
+        const mapRank = (rank) =>
+          rank
+            ? { ...rank, player_id: rank.player_id ?? this.currentUserId }
+            : null;
+
+        this.userRankSoldier = mapRank(data.soldierRank);
+        this.userRankDemoman = mapRank(data.demomanRank);
+        this.userRankOverall = mapRank(data.overallRank);
       } catch (error) {
         console.error("Error fetching user player rank:", error);
-        this.userRankSoldier = null;
-        this.userRankDemoman = null;
-        this.userRankOverall = null;
+        this.userRankSoldier =
+          this.userRankDemoman =
+          this.userRankOverall =
+            null;
       }
     },
     async fetchUserCompletionRank(type) {
@@ -954,81 +913,61 @@ export default {
         const { data } = await axios.get(
           `${API_BASE_URL}/players/user-rank-completion/${type}/${this.currentUserId}`,
         );
-        this.userRankSoldier = data.soldierRank
-          ? {
-              ...data.soldierRank,
-              player_id: data.soldierRank.player_id ?? this.currentUserId,
-            }
-          : null;
-        this.userRankDemoman = data.demomanRank
-          ? {
-              ...data.demomanRank,
-              player_id: data.demomanRank.player_id ?? this.currentUserId,
-            }
-          : null;
-        this.userRankOverall = data.overallRank
-          ? {
-              ...data.overallRank,
-              player_id: data.overallRank.player_id ?? this.currentUserId,
-            }
-          : null;
+        const mapRank = (rank) =>
+          rank
+            ? { ...rank, player_id: rank.player_id ?? this.currentUserId }
+            : null;
+
+        this.userRankSoldier = mapRank(data.soldierRank);
+        this.userRankDemoman = mapRank(data.demomanRank);
+        this.userRankOverall = mapRank(data.overallRank);
       } catch (error) {
         console.error("Error fetching user completion rank:", error);
-        this.userRankSoldier = null;
-        this.userRankDemoman = null;
-        this.userRankOverall = null;
+        this.userRankSoldier =
+          this.userRankDemoman =
+          this.userRankOverall =
+            null;
       }
     },
     async fetchUserCountryRank() {
-      if (this.selectedItem === "Total") {
-        try {
+      if (!this.currentUserId) return;
+
+      const resetRanks = () => {
+        this.userRankSoldier =
+          this.userRankDemoman =
+          this.userRankOverall =
+            null;
+      };
+
+      try {
+        if (this.selectedItem === "Total") {
           const { data } = await axios.get(
             `${API_BASE_URL}/players/user-country-rank/${this.currentUserId}`,
           );
           this.userRankSoldier = data.soldierRank || null;
           this.userRankDemoman = data.demomanRank || null;
           this.userRankOverall = data.overallRank || null;
-        } catch (error) {
-          console.error("Error fetching user country rank:", error);
-          this.userRankSoldier = null;
-          this.userRankDemoman = null;
-          this.userRankOverall = null;
-        }
-      } else if (this.selectedCountry) {
-        try {
+        } else if (this.selectedCountry) {
           const { data } = await axios.get(
             `${API_BASE_URL}/players/user-rank-country/${this.selectedCountry.code}/${this.currentUserId}`,
           );
-          this.userRankSoldier = data.soldierRank
-            ? {
-                ...data.soldierRank,
-                amount: data.soldierRank.soldier_total_points || 0,
-                steam_avatar: data.soldierRank.steam_avatar || null,
-                player_id: data.soldierRank.id,
-              }
-            : null;
-          this.userRankDemoman = data.demomanRank
-            ? {
-                ...data.demomanRank,
-                amount: data.demomanRank.demoman_total_points || 0,
-                steam_avatar: data.demomanRank.steam_avatar || null,
-                player_id: data.demomanRank.id,
-              }
-            : null;
-          this.userRankOverall = data.overallRank
-            ? {
-                ...data.overallRank,
-                amount: data.overallRank.overall_total_points || 0,
-                steam_avatar: data.overallRank.steam_avatar || null,
-                player_id: data.overallRank.id,
-              }
-            : null;
-        } catch (error) {
-          console.error("Error fetching user rank in country:", error);
-          this.userRankSoldier = null;
-          this.userRankDemoman = null;
-          this.userRankOverall = null;
+          const mapRank = (rank, type) =>
+            rank
+              ? {
+                  ...rank,
+                  amount: rank[`${type}_total_points`] || 0,
+                  steam_avatar: rank.steam_avatar || null,
+                  player_id: rank.id,
+                }
+              : null;
+
+          this.userRankSoldier = mapRank(data.soldierRank, "soldier");
+          this.userRankDemoman = mapRank(data.demomanRank, "demoman");
+          this.userRankOverall = mapRank(data.overallRank, "overall");
         }
+      } catch (error) {
+        console.error("Error fetching user country rank:", error);
+        resetRanks();
       }
     },
     normalizeItemFromRoute(item) {
@@ -1036,9 +975,6 @@ export default {
     },
     closeDropdown() {
       this.showCountryDropdown = false;
-    },
-    goToPlayer(playerId) {
-      this.$router.push({ name: "PlayerPage", params: { playerId } });
     },
     handleError(e) {
       const fallback = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
@@ -1052,26 +988,51 @@ export default {
       this.overallPlayers = result.overallData || [];
       await this.fetchUserRank();
     },
+    getFetchParams(category, item) {
+      let tableName = category;
+      let type = item
+        .replace(/\s+/g, "")
+        .toLowerCase()
+        .replace(/combined/gi, "total");
+      let cat = "points";
+
+      if (type.includes("(count)")) {
+        type = type.replace("(count)", "");
+        cat = "count";
+      }
+
+      if (tableName === "ratings") {
+        tableName = type.replace(/rating(\d+)/g, (_, n) => `r${n}s`);
+        type = "maps";
+      } else if (tableName === "groups") {
+        if (type !== "groups") {
+          tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
+        }
+        type = "total";
+      } else if (tableName === "tiers") {
+        cat = "total";
+      }
+
+      return { tableName, type, cat };
+    },
     async fetchDataForCurrentSelection(
       offset,
       classType = "both",
       limit = this.loadSize,
     ) {
-      const isCountriesSwitch =
-        offset === 0 && this.selectedCategory === "countries";
-      if (isCountriesSwitch) this.isSwitching = true;
+      if (offset === 0 && this.selectedCategory === "countries") {
+        this.isSwitching = true;
+      }
+
       try {
-        const category = this.selectedCategory;
-        const item = this.selectedItem;
-        let tableName = category;
-        let type = item
-          .replace(/\s+/g, "")
-          .toLowerCase()
-          .replace(/combined/gi, "total");
-        let cat = "points";
+        const { selectedCategory: category, selectedItem: item } = this;
 
         if (category === "completion") {
           this.points = false;
+          const type = item
+            .replace(/\s+/g, "")
+            .toLowerCase()
+            .replace(/combined/gi, "total");
           const result = await this.fetchCompletions(
             type,
             offset,
@@ -1081,38 +1042,16 @@ export default {
           await this.commitFetchResult(result, offset);
           return;
         }
+
         if (category === "countries") {
           this.points = true;
           const result = await this.fetchCountries(offset, classType, limit);
           await this.commitFetchResult(result, offset);
           return;
         }
-        if (type.includes("(count)")) {
-          type = type.replace("(count)", "");
-          cat = "count";
-          this.points = false;
-        }
-        if (tableName === "ratings") {
-          tableName = type.replace(/rating(\d+)/g, (_, n) => `r${n}s`);
-          type = "maps";
-        } else if (tableName === "groups") {
-          if (type === "groups") {
-            const result = await this.fetchPlayers(
-              tableName,
-              "total",
-              cat,
-              offset,
-              classType,
-              limit,
-            );
-            await this.commitFetchResult(result, offset);
-            return;
-          }
-          tableName = type.replace(/group(\d+)/g, (_, n) => `g${n}s`);
-          type = "total";
-        }
-        if (tableName === "tiers") cat = "total";
 
+        this.points = !item.includes("(count)");
+        const { tableName, type, cat } = this.getFetchParams(category, item);
         const result = await this.fetchPlayers(
           tableName,
           type,
@@ -1125,7 +1064,6 @@ export default {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        this.loading = false;
         this.firstLoad = false;
         this.isSwitching = false;
         this.loadingSoldiers = false;
@@ -1240,9 +1178,10 @@ export default {
       }
 
       this.loadSize = 50;
-      this.currentSoldierIndex = this.loadSize;
-      this.currentDemomanIndex = this.loadSize;
-      this.currentOverallIndex = this.loadSize;
+      this.currentSoldierIndex =
+        this.currentDemomanIndex =
+        this.currentOverallIndex =
+          this.loadSize;
 
       this._internalNavigation = true;
       this.$router.push({
@@ -1261,55 +1200,57 @@ export default {
     hasCountSubmenu(cat) {
       return ["wrs", "tts", "groups"].includes(cat);
     },
-    async fetchPlayers(
-      tableName,
-      type,
-      category,
+    async fetchListData(
+      endpoint,
       offset,
       classType = "both",
       limit = this.loadSize,
     ) {
       try {
         const { data } = await axios.get(
-          `${API_BASE_URL}/players/data/${tableName}/${type}/${category}/${offset}/${limit}`,
+          `${API_BASE_URL}${endpoint}/${offset}/${limit}`,
         );
-        const [soldierData, demomanData, overallData] = data;
+        const [soldierData, demomanData, overallData] = data || [];
+
         if (offset === 0) return { soldierData, demomanData, overallData };
+
         if (classType === "both" || classType === "soldier")
-          this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
+          this.soldierPlayers = [
+            ...this.soldierPlayers,
+            ...(soldierData || []),
+          ];
         if (classType === "both" || classType === "demoman")
-          this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
+          this.demomanPlayers = [
+            ...this.demomanPlayers,
+            ...(demomanData || []),
+          ];
         if (classType === "both" || classType === "overall")
-          this.overallPlayers = [...this.overallPlayers, ...overallData];
+          this.overallPlayers = [
+            ...this.overallPlayers,
+            ...(overallData || []),
+          ];
+
         return null;
       } catch (error) {
-        console.error("Error fetching players");
+        console.error(`Error fetching data from ${endpoint}:`, error);
         return null;
       }
     },
-    async fetchCompletions(
-      type,
-      offset,
-      classType = "both",
-      limit = this.loadSize,
-    ) {
-      try {
-        const { data } = await axios.get(
-          `${API_BASE_URL}/players/players-completion-stats/${type}/${offset}/${limit}`,
-        );
-        const [soldierData, demomanData, overallData] = data;
-        if (offset === 0) return { soldierData, demomanData, overallData };
-        if (classType === "both" || classType === "soldier")
-          this.soldierPlayers = [...this.soldierPlayers, ...soldierData];
-        if (classType === "both" || classType === "demoman")
-          this.demomanPlayers = [...this.demomanPlayers, ...demomanData];
-        if (classType === "both" || classType === "overall")
-          this.overallPlayers = [...this.overallPlayers, ...overallData];
-        return null;
-      } catch (error) {
-        console.error("Error fetching completions:", error);
-        return null;
-      }
+    async fetchPlayers(tableName, type, category, offset, classType, limit) {
+      return this.fetchListData(
+        `/players/data/${tableName}/${type}/${category}`,
+        offset,
+        classType,
+        limit,
+      );
+    },
+    async fetchCompletions(type, offset, classType, limit) {
+      return this.fetchListData(
+        `/players/players-completion-stats/${type}`,
+        offset,
+        classType,
+        limit,
+      );
     },
     async fetchCountries(offset, classType = "both", limit = this.loadSize) {
       try {
@@ -1318,6 +1259,7 @@ export default {
           const { data: countriesData } = await axios.get(
             `${API_BASE_URL}/players/get-countries-data`,
           );
+
           const toEntry = (country, amountKey) => ({
             id: country.country_code,
             player_id: country.country_code,
@@ -1328,31 +1270,34 @@ export default {
                 ? country.soldier_total_points + country.demoman_total_points
                 : country[amountKey] || 0,
           });
-          const soldierData = [...countriesData]
-            .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
-            .map((c) => toEntry(c, "soldier_total_points"));
-          const demomanData = [...countriesData]
-            .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
-            .map((c) => toEntry(c, "demoman_total_points"));
-          const overallData = [...countriesData]
-            .sort(
-              (a, b) =>
-                b.soldier_total_points +
-                b.demoman_total_points -
-                (a.soldier_total_points + a.demoman_total_points),
-            )
-            .map((c) => toEntry(c, "overall"));
-          return { soldierData, demomanData, overallData };
-        } else if (this.selectedCountry) {
+
+          return {
+            soldierData: [...countriesData]
+              .sort((a, b) => b.soldier_total_points - a.soldier_total_points)
+              .map((c) => toEntry(c, "soldier_total_points")),
+            demomanData: [...countriesData]
+              .sort((a, b) => b.demoman_total_points - a.demoman_total_points)
+              .map((c) => toEntry(c, "demoman_total_points")),
+            overallData: [...countriesData]
+              .sort(
+                (a, b) =>
+                  b.soldier_total_points +
+                  b.demoman_total_points -
+                  (a.soldier_total_points + a.demoman_total_points),
+              )
+              .map((c) => toEntry(c, "overall")),
+          };
+        }
+
+        if (this.selectedCountry) {
           const { data: players } = await axios.get(
             `${API_BASE_URL}/players/country-top-players/${this.selectedCountry.code}/${offset}/${limit}`,
           );
-          const defaultAvatar = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
           const normalize = (list, pointsKey) =>
             (list || []).map((p) => ({
               ...p,
               amount: p[pointsKey] ?? 0,
-              steam_avatar: p.steam_avatar || defaultAvatar,
+              steam_avatar: p.steam_avatar || this.defaultAvatarPath,
               player_id: p.id,
             }));
 
@@ -1372,21 +1317,24 @@ export default {
               ),
             };
           }
+
+          const append = (current, newData) => [...current, ...newData];
           if (classType === "both" || classType === "soldier")
-            this.soldierPlayers = [
-              ...this.soldierPlayers,
-              ...normalize(players.topSoldiers, "soldier_total_points"),
-            ];
+            this.soldierPlayers = append(
+              this.soldierPlayers,
+              normalize(players.topSoldiers, "soldier_total_points"),
+            );
           if (classType === "both" || classType === "demoman")
-            this.demomanPlayers = [
-              ...this.demomanPlayers,
-              ...normalize(players.topDemomen, "demoman_total_points"),
-            ];
+            this.demomanPlayers = append(
+              this.demomanPlayers,
+              normalize(players.topDemomen, "demoman_total_points"),
+            );
           if (classType === "both" || classType === "overall")
-            this.overallPlayers = [
-              ...this.overallPlayers,
-              ...normalize(players.topOverall || [], "overall_total_points"),
-            ];
+            this.overallPlayers = append(
+              this.overallPlayers,
+              normalize(players.topOverall || [], "overall_total_points"),
+            );
+
           return null;
         }
         return null;
@@ -1397,23 +1345,33 @@ export default {
     },
     async loadMoreSoldiers() {
       this.loadingSoldiers = true;
-      const offset = this.currentSoldierIndex;
-      await this.fetchDataForCurrentSelection(offset, "soldier", this.loadSize);
+      await this.fetchDataForCurrentSelection(
+        this.currentSoldierIndex,
+        "soldier",
+        this.loadSize,
+      );
       this.currentSoldierIndex = this.soldierPlayers.length;
     },
     async loadMoreDemomen() {
       this.loadingDemomen = true;
-      const offset = this.currentDemomanIndex;
-      await this.fetchDataForCurrentSelection(offset, "demoman", this.loadSize);
+      await this.fetchDataForCurrentSelection(
+        this.currentDemomanIndex,
+        "demoman",
+        this.loadSize,
+      );
       this.currentDemomanIndex = this.demomanPlayers.length;
     },
     async loadMoreOverall() {
       this.loadingOverall = true;
-      const offset = this.currentOverallIndex;
-      await this.fetchDataForCurrentSelection(offset, "overall", this.loadSize);
+      await this.fetchDataForCurrentSelection(
+        this.currentOverallIndex,
+        "overall",
+        this.loadSize,
+      );
       this.currentOverallIndex = this.overallPlayers.length;
     },
   },
+
   watch: {
     "$route.params": {
       handler(params) {
@@ -1423,10 +1381,12 @@ export default {
         }
         if (params.category && params.item) {
           this.loadSize = 50;
-          this.currentSoldierIndex = 50;
-          this.currentDemomanIndex = 50;
-          this.currentOverallIndex = 50;
+          this.currentSoldierIndex =
+            this.currentDemomanIndex =
+            this.currentOverallIndex =
+              50;
           this.selectedCategory = params.category;
+
           if (params.category === "countries" && params.item !== "Total") {
             const found = this.allCountries.find(
               (c) =>
@@ -1465,19 +1425,16 @@ export default {
     rgba(37, 55, 82, 0.3)
   );
 }
-
 .header-text {
   margin-left: 10px;
   text-align: left;
   font-weight: bold;
 }
-
 .header-title {
   margin: 5px 0 0 0px;
   font-size: 20px;
   color: var(--color-text);
 }
-
 .podium-container {
   display: flex;
   flex-direction: column;
@@ -1487,7 +1444,6 @@ export default {
   border-left: 1px solid var(--color-border-soft);
   border-right: 1px solid var(--color-border-soft);
 }
-
 .podium-card {
   position: relative;
   display: flex;
@@ -1502,7 +1458,6 @@ export default {
   );
   border: 1px solid var(--color-border-soft);
 }
-
 .podium-rank-1 {
   border-color: #f4c430;
   box-shadow: 0 0 16px rgba(244, 196, 48, 0.3);
@@ -1515,7 +1470,6 @@ export default {
   border-color: #cd7f32;
   box-shadow: 0 0 16px rgba(205, 127, 50, 0.22);
 }
-
 .podium-rank-number {
   position: absolute;
   top: 12px;
@@ -1534,7 +1488,6 @@ export default {
 .podium-rank-3 .podium-rank-number {
   color: #cd7f32;
 }
-
 .podium-flag {
   position: absolute;
   top: 16px;
@@ -1543,7 +1496,6 @@ export default {
   height: 20px;
   border-radius: 2px;
 }
-
 .podium-player-link {
   display: flex;
   flex-direction: row;
@@ -1554,21 +1506,16 @@ export default {
   text-decoration: none;
   color: var(--color-text-clickable) !important;
 }
-
 .podium-avatar {
   width: 38px;
   height: 38px;
   border-radius: 10px;
   border: 2px solid var(--color-primary);
 }
-
 .flag-avatar {
   width: 38px;
   height: 30px;
-  border-radius: 10px;
-  border: 2px solid var(--color-primary);
 }
-
 .podium-name {
   font-weight: 700;
   font-size: 17px;
@@ -1578,7 +1525,6 @@ export default {
   text-overflow: ellipsis;
   max-width: 220px;
 }
-
 .podium-main-stat {
   margin-top: 5px;
   display: flex;
@@ -1589,7 +1535,6 @@ export default {
   font-size: 18px;
   color: var(--color-text);
 }
-
 .podium-substats {
   display: flex;
   gap: 22px;
@@ -1599,14 +1544,12 @@ export default {
   width: 100%;
   justify-content: center;
 }
-
 .podium-substat {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 58px;
 }
-
 .podium-substat-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -1614,14 +1557,12 @@ export default {
   color: var(--color-text-soft);
   white-space: nowrap;
 }
-
 .podium-substat-value {
   font-size: 16px;
   font-weight: 700;
   color: var(--color-text);
   margin-top: 2px;
 }
-
 .podium-country-players {
   display: flex;
   flex-direction: column;
@@ -1631,7 +1572,6 @@ export default {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   width: 100%;
 }
-
 .podium-country-player {
   display: flex;
   align-items: center;
@@ -1642,11 +1582,9 @@ export default {
   color: var(--color-text-clickable) !important;
   transition: background 0.18s ease;
 }
-
 .podium-country-player:hover {
   background: rgba(255, 255, 255, 0.06);
 }
-
 .podium-country-avatar {
   width: 22px;
   height: 22px;
@@ -1654,7 +1592,6 @@ export default {
   border: 1px solid var(--color-primary);
   flex-shrink: 0;
 }
-
 .podium-country-player-name {
   font-size: 13px;
   font-weight: 600;
@@ -1664,7 +1601,6 @@ export default {
   flex: 1;
   min-width: 0;
 }
-
 .podium-country-player-points {
   font-size: 12px;
   font-weight: 700;
@@ -1672,14 +1608,12 @@ export default {
   flex-shrink: 0;
   white-space: nowrap;
 }
-
 .podium-country-player-empty {
   font-size: 12px;
   color: var(--color-text-soft);
   text-align: center;
   padding: 6px 0;
 }
-
 @media (max-width: 767.98px) {
   .podium-card {
     padding: 16px 12px 12px;
@@ -1707,7 +1641,6 @@ export default {
     font-size: 14px;
   }
 }
-
 .your-rank-banner {
   display: flex;
   align-items: center;
@@ -1718,23 +1651,12 @@ export default {
   background: rgba(74, 111, 165, 0.18);
   border: 1px solid var(--color-primary);
 }
-
-.your-rank-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-soft);
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
 .your-rank-position {
   font-weight: 800;
   color: var(--color-text);
   flex-shrink: 0;
   font-size: 14px;
 }
-
 .your-rank-player {
   display: flex;
   align-items: center;
@@ -1744,7 +1666,13 @@ export default {
   text-decoration: none;
   color: var(--color-text-clickable) !important;
 }
-
+.your-rank-flag {
+  width: 28px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
 .your-rank-avatar {
   width: 26px;
   height: 26px;
@@ -1752,36 +1680,30 @@ export default {
   border: 1px solid var(--color-primary);
   flex-shrink: 0;
 }
-
 .your-rank-name {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .your-rank-amount {
   font-weight: 800;
   color: var(--color-text);
   flex-shrink: 0;
   font-size: 14px;
 }
-
 @media (max-width: 767.98px) {
   .your-rank-label {
     display: none;
   }
 }
-/* -------------------------------------------------------------------- */
-
 .tables-wrapper {
   display: flex;
   gap: 50px;
   width: 100%;
   align-items: flex-start;
 }
-
 .table-wrapper {
   position: relative;
   width: 100%;
@@ -1792,12 +1714,10 @@ export default {
   background: transparent;
   z-index: 1;
 }
-
 .table-dark {
   margin: 0px;
   background: transparent;
 }
-
 .table-dark th {
   color: var(--color-text);
   text-align: left;
@@ -1805,24 +1725,19 @@ export default {
   font-weight: 600;
   padding-bottom: 4px;
   border-top: 1px solid var(--color-border-soft);
-  font-size: 14px;
 }
-
 .table-dark td {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
   font-weight: bold;
   padding: 4px 6px;
 }
-
 .table-dark tr:nth-child(odd) td {
   background: rgba(119, 119, 119, 0.05);
 }
-
 .current-user-row td {
   background: var(--color-primary-dark) !important;
 }
-
 .inactive-badge {
   background: rgba(255, 80, 80, 0.15);
   color: #ff7b7b;
@@ -1836,7 +1751,6 @@ export default {
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
-
 .name-cell,
 .country-cell {
   max-width: 250px;
@@ -1845,23 +1759,19 @@ export default {
   text-overflow: ellipsis;
   color: var(--color-text-clickable) !important;
 }
-
 .rank-column {
   width: auto;
   white-space: nowrap;
   text-align: right;
 }
-
 .points-column {
   width: auto;
   white-space: nowrap;
 }
-
 .name-column {
   width: 100%;
   white-space: nowrap;
 }
-
 .players-footer {
   display: flex;
   align-items: stretch;
@@ -1922,21 +1832,17 @@ export default {
     display: none;
   }
 }
-
 .clickable:hover {
   cursor: pointer;
 }
-
 .update-button:hover {
   background: var(--color-row) !important;
 }
-
 .class-icon {
   width: 40px;
   height: 40px;
   margin: 8px;
 }
-
 .avatar {
   width: 25px;
   height: 25px;
@@ -1944,24 +1850,15 @@ export default {
   border: 1px solid var(--color-primary);
   border-radius: 2px;
 }
-
 .flag {
   width: 28px;
   height: 20px;
   margin-right: 1px;
 }
-
-.arrow {
-  float: right;
-  margin-left: 10px;
-  font-size: 0.9em;
-}
-
 .category-tabs-container {
   display: flex;
   justify-content: center;
 }
-
 .category-tabs {
   display: flex;
   gap: 10px;
@@ -1970,7 +1867,6 @@ export default {
   border-radius: 30px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .category-tab {
   background: transparent;
   border: none;
@@ -1984,27 +1880,23 @@ export default {
   font-size: 16px;
   border: 2px solid transparent;
 }
-
 .category-tab.active {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
-
 .category-tab:hover:not(.active) {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
-
 .subcategory-container {
   width: 100%;
   display: flex;
   justify-content: center;
   margin-top: 1.5rem;
 }
-
 .subcategory-pills {
   display: flex;
   flex-direction: column;
@@ -2016,7 +1908,6 @@ export default {
   border-radius: 25px;
   background: transparent;
 }
-
 .subcategory-pill {
   color: var(--color-text-soft);
   padding: 10px 20px;
@@ -2029,20 +1920,17 @@ export default {
   border: 2px solid transparent;
   background: rgba(255, 255, 255, 0.05);
 }
-
 .subcategory-pill.active {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
-
 .subcategory-pill:hover:not(.active) {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
 }
-
 .pill-row {
   display: flex;
   flex-wrap: wrap;
@@ -2050,7 +1938,6 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 .count-badge {
   background: rgba(255, 255, 255, 0.2);
   padding: 2px 6px;
@@ -2059,7 +1946,6 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
 }
-
 .row-divider {
   border: none;
   height: 2px;
@@ -2072,12 +1958,10 @@ export default {
   margin: 30px 0;
   opacity: 0.6;
 }
-
 .percentage-column {
   text-align: left;
   padding-left: 3% !important;
 }
-
 .search-container {
   margin: 20px 0;
   position: relative;
@@ -2085,7 +1969,6 @@ export default {
   margin-left: auto;
   margin-right: auto;
 }
-
 .search-box {
   display: flex;
   background: rgba(255, 255, 255, 0.1);
@@ -2096,27 +1979,23 @@ export default {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 300px;
 }
-
 .search-box:hover,
 .search-box:focus-within {
   border-color: var(--color-primary);
   box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
   transform: translateY(-2px);
 }
-
 .search-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-left: 15px;
 }
-
 .search-icon {
   width: 20px;
   height: 20px;
   color: rgba(255, 255, 255, 0.5);
 }
-
 .search-input {
   flex: 1;
   padding: 18px 10px;
@@ -2126,11 +2005,9 @@ export default {
   font-size: 16px;
   outline: none;
 }
-
 .search-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
-
 .search-results-dropdown {
   position: absolute;
   background: var(--color-box);
@@ -2143,13 +2020,11 @@ export default {
   z-index: 1000;
   margin-top: 8px;
 }
-
 .search-results-dropdown ul {
   list-style: none;
   padding: 8px;
   margin: 0;
 }
-
 .search-result-item {
   padding: 12px 16px;
   border-radius: 8px;
@@ -2163,7 +2038,6 @@ export default {
   display: flex;
   align-items: center;
 }
-
 .search-result-item:hover {
   background: linear-gradient(
     to bottom,
@@ -2172,13 +2046,11 @@ export default {
   );
   transform: translateX(4px);
 }
-
 .flag-icon {
   margin-right: 10px;
   width: 24px;
   height: 18px;
 }
-
 @media (min-width: 1400px) {
   .tables-wrapper {
     flex-wrap: nowrap;
@@ -2192,7 +2064,6 @@ export default {
     max-width: 33%;
   }
 }
-
 @media (min-width: 992px) and (max-width: 1399px) {
   .tables-wrapper {
     flex-wrap: nowrap;
@@ -2211,7 +2082,6 @@ export default {
     margin-left: 4px;
   }
 }
-
 @media (max-width: 1400px) {
   .category-tabs {
     flex-wrap: wrap;
@@ -2239,7 +2109,6 @@ export default {
     height: 20px;
   }
 }
-
 @media (max-width: 992px) {
   .tables-wrapper {
     flex-direction: row;
@@ -2259,7 +2128,6 @@ export default {
     border: 1px solid var(--color-border-soft);
   }
 }
-
 @media (min-width: 768px) and (max-width: 991.98px) {
   .table-responsive {
     overflow-x: hidden;
@@ -2289,7 +2157,6 @@ export default {
     height: 32px;
   }
 }
-
 @media (max-width: 767.98px) {
   .subcategory-pill {
     padding: 10px 12px;
@@ -2318,7 +2185,6 @@ export default {
     letter-spacing: 0;
   }
 }
-
 @media (min-width: 1400px) {
   .tables-wrapper.two-tables {
     gap: 50px;
@@ -2328,7 +2194,6 @@ export default {
     max-width: 50%;
   }
 }
-
 @media (min-width: 992px) and (max-width: 1399px) {
   .tables-wrapper.two-tables {
     gap: 30px;
@@ -2338,7 +2203,6 @@ export default {
     max-width: 50%;
   }
 }
-
 @media (max-width: 1200px) {
   .tables-wrapper.two-tables .category-tabs {
     flex-wrap: wrap;
@@ -2354,7 +2218,6 @@ export default {
     margin: 6px;
   }
 }
-
 @media (max-width: 991px) and (min-width: 768px) {
   .tables-wrapper.two-tables .soldier-table-container,
   .tables-wrapper.two-tables .demoman-table-container {
@@ -2363,7 +2226,6 @@ export default {
     overflow: hidden;
   }
 }
-
 @media (max-width: 767.98px) {
   .soldier-table-container,
   .demoman-table-container,
@@ -2373,7 +2235,6 @@ export default {
     min-width: 0;
   }
 }
-
 .toggle-overall-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(255, 255, 255, 0.15);
@@ -2385,14 +2246,12 @@ export default {
   font-weight: 500;
   transition: all 0.3s ease;
 }
-
 .toggle-overall-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
-
 .toggle-overall-btn.active {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);

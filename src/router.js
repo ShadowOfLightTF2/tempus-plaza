@@ -1,114 +1,135 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import Home from './views/Home.vue';
-import Servers from './views/Servers.vue';
-import Activity from './views/Activity.vue';
-import Maps from './views/Maps.vue';
-import Players from './views/Players.vue';
-import PlayerPage from './views/PlayerPage.vue';
-import MapPage from './views/MapPage.vue';
-import Compare from './views/Compare.vue';
-import Lookup from './views/Lookup.vue';
-import Donate from './views/Donate.vue';
-import History from './views/History.vue';
-import NotFound from './components/NotFound.vue';
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "./views/Home.vue";
+import Servers from "./views/Servers.vue";
+import Activity from "./views/Activity.vue";
+import Maps from "./views/Maps.vue";
+import Players from "./views/Players.vue";
+import PlayerPage from "./views/PlayerPage.vue";
+import MapPage from "./views/MapPage.vue";
+import Compare from "./views/Compare.vue";
+import Lookup from "./views/Lookup.vue";
+import Donate from "./views/Donate.vue";
+import History from "./views/History.vue";
+import NotFound from "./components/NotFound.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
+    path: "/",
+    name: "Home",
     component: Home,
-    meta: { title: 'Tempus Plaza | TF2 Jump Stats & Leaderboards' },
+    meta: { title: "Tempus Plaza | TF2 Jump Stats & Leaderboards" },
   },
   {
-    path: '/servers/:view?',
-    name: 'Servers',
+    path: "/servers/:view?",
+    name: "Servers",
     component: Servers,
-    meta: { title: 'Tempus Servers | Tempus Plaza' },
+    meta: { title: "Tempus Servers | Tempus Plaza" },
   },
   {
-    path: '/activity/:view?',
-    name: 'Activity',
+    path: "/activity/:view?",
+    name: "Activity",
     component: Activity,
-    meta: { title: 'Tempus Activity Dashboard | Tempus Plaza' },
+    meta: { title: "Tempus Activity Dashboard | Tempus Plaza" },
   },
   {
-    path: '/maps/',
-    name: 'Maps',
+    path: "/maps/",
+    name: "Maps",
     component: Maps,
-    meta: { title: 'Tempus Maps | Tempus Plaza' },
+    meta: { title: "Tempus Maps | Tempus Plaza" },
   },
   {
-    path: "/maps/:mapId/:type?/:index?",
+    path: "/maps/:mapId(\\d+)/:type(map|course|bonus)?/:index(\\d+)?",
     name: "MapPage",
     component: MapPage,
-    meta: { title: 'Tempus Plaza' },
-    props: route => ({
+    meta: { title: "Tempus Plaza" },
+    props: (route) => ({
       mapId: Number(route.params.mapId),
       type: route.params.type || "map",
       index: route.params.index ? Number(route.params.index) : null,
     }),
+    beforeEnter: (to, from, next) => {
+      const { type, index } = to.params;
+
+      // /maps/:mapId or /maps/:mapId/map (no index allowed)
+      const isValidMap = (!type || type === "map") && !index;
+
+      // /maps/:mapId/course/:index or /maps/:mapId/bonus/:index (index required)
+      const isValidCourseOrBonus =
+        (type === "course" || type === "bonus") && !!index;
+
+      if (isValidMap || isValidCourseOrBonus) {
+        next();
+      } else {
+        next({ name: "MapPage", params: { mapId: to.params.mapId } });
+      }
+    },
+  },
+  // catch anything else under /maps/:mapId/ and send it back to the map root
+  {
+    path: "/maps/:mapId(\\d+)/:pathMatch(.*)*",
+    redirect: (to) => ({ name: "MapPage", params: { mapId: to.params.mapId } }),
   },
   {
-    path: '/players/:category?/:item?',
-    name: 'Players',
+    path: "/players/:category?/:item?",
+    name: "Players",
     component: Players,
-    meta: { title: 'Top Tempus Players | Tempus Plaza' },
+    meta: { title: "Top Tempus Players | Tempus Plaza" },
   },
   {
-    path: '/lookup/player/:playerId',
-    name: 'LookupPlayer',
+    path: "/lookup/player/:playerId",
+    name: "LookupPlayer",
     component: Lookup,
-    meta: { title: 'Tempus Player Records | Tempus Plaza' },
-    props: route => ({ playerId: Number(route.params.playerId) })
+    meta: { title: "Tempus Player Records | Tempus Plaza" },
+    props: (route) => ({ playerId: Number(route.params.playerId) }),
   },
   {
-    path: '/lookup/map/:mapId',
-    name: 'LookupMap',
+    path: "/lookup/map/:mapId",
+    name: "LookupMap",
     component: Lookup,
-    meta: { title: 'Tempus Map Records | Tempus Plaza' },
-    props: route => ({ mapId: Number(route.params.mapId) })
+    meta: { title: "Tempus Map Records | Tempus Plaza" },
+    props: (route) => ({ mapId: Number(route.params.mapId) }),
   },
   {
-    path: '/lookup',
-    name: 'Lookup',
+    path: "/lookup",
+    name: "Lookup",
     component: Lookup,
-    meta: { title: 'Tempus Lookup | Search Players and Maps' },
+    meta: { title: "Tempus Lookup | Search Players and Maps" },
   },
   {
-    path: '/history',
-    name: 'History',
+    path: "/history",
+    name: "History",
     component: History,
-    meta: { title: 'Tempus Record History | Tempus Plaza' },
+    meta: { title: "Tempus Record History | Tempus Plaza" },
   },
   {
-    path: '/compare/:playerId1?/:playerId2?/:mapId?',
-    name: 'Compare',
+    path: "/compare/:playerId1?/:playerId2?/:mapId?",
+    name: "Compare",
     component: Compare,
-    meta: { title: 'Compare Tempus Players | Tempus Plaza' },
-    props: route => ({
+    meta: { title: "Compare Tempus Players | Tempus Plaza" },
+    props: (route) => ({
       playerId1: route.params.playerId1 ? Number(route.params.playerId1) : null,
       playerId2: route.params.playerId2 ? Number(route.params.playerId2) : null,
-      mapId: route.params.mapId ? Number(route.params.mapId) : null
-    })
+      mapId: route.params.mapId ? Number(route.params.mapId) : null,
+    }),
   },
   {
-    path: '/donate',
-    name: 'Donate',
+    path: "/donate",
+    name: "Donate",
     component: Donate,
-    meta: { title: 'Support Tempus Plaza' },
+    meta: { title: "Support Tempus Plaza" },
   },
   {
-    path: '/players/:playerId',
-    name: 'PlayerPage',
+    path: "/players/:playerId",
+    name: "PlayerPage",
     component: PlayerPage,
-    meta: { title: 'Tempus Plaza' },
-    props: route => ({ playerId: Number(route.params.playerId) }),
+    meta: { title: "Tempus Plaza" },
+    props: (route) => ({ playerId: Number(route.params.playerId) }),
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
     component: NotFound,
-    meta: { title: '404 Not Found | Tempus Plaza' },
+    meta: { title: "404 Not Found | Tempus Plaza" },
   },
 ];
 
@@ -118,18 +139,18 @@ const router = createRouter({
   strict: false,
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
-      return { el: to.hash, behavior: 'smooth', block: 'start' }
+      return { el: to.hash, behavior: "smooth", block: "start" };
     }
     if (savedPosition) return savedPosition;
     if (to.name === from.name) return false;
-    return { left: 0, top: 0, behavior: 'auto' };
+    return { left: 0, top: 0, behavior: "auto" };
   },
-  linkActiveClass: 'active',
-  linkExactActiveClass: 'exact-active'
+  linkActiveClass: "active",
+  linkExactActiveClass: "exact-active",
 });
 
 router.afterEach((to) => {
-  document.title = to.meta?.title ?? 'Tempus Plaza'
+  document.title = to.meta?.title ?? "Tempus Plaza";
 });
 
 export default router;

@@ -150,8 +150,8 @@
                 <button
                   class="banner-tag-btn"
                   :class="{
-                    'has-voted': hasVotedMapTags,
-                    'not-voted': !hasVotedMapTags,
+                    'has-voted': isLoggedIn && hasVotedMapTags,
+                    'not-voted': isLoggedIn && !hasVotedMapTags,
                   }"
                   :title="
                     hasVotedMapTags ? 'You voted for tag(s)' : 'Vote for tag(s)'
@@ -160,11 +160,11 @@
                 >
                   <i class="bi bi-tag-fill"></i>
                   <i
-                    v-if="hasVotedMapTags"
+                    v-if="isLoggedIn && hasVotedMapTags"
                     class="bi bi-check-circle-fill vote-check-badge voted"
                   ></i>
                   <i
-                    v-else
+                    v-else-if="isLoggedIn && !hasVotedMapTags"
                     class="bi bi-exclamation-circle-fill vote-check-badge unvoted"
                   ></i>
                 </button>
@@ -304,6 +304,9 @@ export default {
     },
   },
   computed: {
+    isLoggedIn() {
+      return this.playerId !== null;
+    },
     hasVotedMapTags() {
       if (this.selectedMapTags === null) return null;
       return this.selectedMapTags.length > 0;

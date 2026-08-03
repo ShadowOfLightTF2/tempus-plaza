@@ -30,10 +30,8 @@
             >
           </div>
         </div>
-
         <div class="tag-section">
           <h4><i class="bi bi-map me-2"></i>Map Tags</h4>
-
           <div class="tag-class-group" v-if="tagsByClass('soldier').length > 0">
             <h5>
               <img
@@ -69,7 +67,6 @@
               </div>
             </div>
           </div>
-
           <div class="tag-class-group" v-if="tagsByClass('demoman').length > 0">
             <h5>
               <img
@@ -105,7 +102,6 @@
               </div>
             </div>
           </div>
-
           <div class="tag-class-group" v-if="tagsByClass('both').length > 0">
             <h5><i class="bi bi-people me-1"></i>Both Classes</h5>
             <div class="tag-selector">
@@ -135,7 +131,6 @@
               </div>
             </div>
           </div>
-
           <div class="tag-class-group" v-if="tagsByClass('extra').length > 0">
             <h5><i class="bi bi-gear me-1"></i>Extra</h5>
             <div class="tag-selector">
@@ -167,7 +162,6 @@
           </div>
         </div>
       </div>
-
       <div class="tag-modal-footer">
         <button @click="saveTags" class="save-tags-btn">
           <i class="bi bi-check-lg me-2"></i>Save Changes
@@ -176,7 +170,6 @@
       </div>
     </div>
   </div>
-
   <div
     v-if="showLoginRequired"
     class="login-popup-backdrop"

@@ -952,6 +952,9 @@ export default {
     rgba(17, 20, 24, 0.95) 100%
   ) !important;
 }
+.navbar-collapse {
+  margin-top: 3px;
+}
 .navbar-nav {
   display: flex;
   align-items: center;

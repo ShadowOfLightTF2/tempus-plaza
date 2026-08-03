@@ -14,6 +14,11 @@
       :style="{ top: tooltipY + 'px', left: tooltipX + 'px' }"
     >
       <div class="preview-image-container" :style="imageContainerStyle">
+        <div
+          v-if="metadata?.placeholder"
+          class="preview-placeholder-bg"
+          :style="{ backgroundImage: `url('${metadata.placeholder}')` }"
+        ></div>
         <div v-if="imageLoading" class="image-loading-overlay">
           <div class="loading-spinner-medium"></div>
         </div>
@@ -230,6 +235,15 @@ export default {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.preview-placeholder-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(15px);
+  transform: scale(1.1);
 }
 .image-loading-overlay {
   position: absolute;

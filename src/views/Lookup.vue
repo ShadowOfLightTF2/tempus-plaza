@@ -8,6 +8,7 @@
           :show="showTagFilterModal"
           :available-tags="availableTags"
           :selected-tags="selectedTags"
+          :excluded-tags="excludedTags"
           @close="closeTagFilterModal"
           @toggle-tag="toggleTag"
           @clear-tags="clearTagFilters"
@@ -983,6 +984,7 @@
                           class="tag-chip-mini"
                           :class="{
                             'tag-chip-mini-selected': isTagSelected(tag.id),
+                            'tag-chip-mini-excluded': isTagExcluded(tag.id),
                           }"
                           :style="{
                             backgroundColor: tag.color + '30',
@@ -1169,6 +1171,7 @@ export default {
     // Tag filtering
     availableTags: [],
     selectedTags: [],
+    excludedTags: [],
     showTagFilterModal: false,
     mapTagsById: {},
   }),
@@ -1308,6 +1311,14 @@ export default {
             return false;
         }
 
+        // Excluded map tags
+        if (this.excludedTags.length > 0) {
+          const tags = this.getRecordTags(record);
+          const tagIds = tags ? tags.map((t) => t.id) : [];
+          if (this.excludedTags.some((tagId) => tagIds.includes(tagId)))
+            return false;
+        }
+
         if (this.recordSearchQuery) {
           const query = this.recordSearchQuery.toLowerCase();
           if (this.playerId && !record.map_name.toLowerCase().includes(query))
@@ -1440,6 +1451,7 @@ export default {
     },
     clearTagFilters() {
       this.selectedTags = [];
+      this.excludedTags = [];
       this.onFilterChange();
     },
     cycleFilterState(stateObj, key) {
@@ -1525,7 +1537,6 @@ export default {
     toggleStatus(statusOption) {
       this.toggleSimpleState(this.statusState, statusOption);
     },
-    // --- Tag filtering ---
     async fetchAvailableTags() {
       try {
         const response = await fetch(`${API_BASE_URL}/maps/tags`);
@@ -1562,8 +1573,14 @@ export default {
     },
     toggleTag(tagId) {
       if (this.selectedTags.includes(tagId)) {
+        // included -> excluded
         this.selectedTags = this.selectedTags.filter((id) => id !== tagId);
+        this.excludedTags.push(tagId);
+      } else if (this.excludedTags.includes(tagId)) {
+        // excluded -> none
+        this.excludedTags = this.excludedTags.filter((id) => id !== tagId);
       } else {
+        // none -> included
         this.selectedTags.push(tagId);
       }
       this.onFilterChange();
@@ -1571,7 +1588,9 @@ export default {
     isTagSelected(tagId) {
       return this.selectedTags.includes(tagId);
     },
-    // --- End tag filtering ---
+    isTagExcluded(tagId) {
+      return this.excludedTags.includes(tagId);
+    },
     onLookupKeydown(e) {
       if (!this.searchResults || this.lookupTotalResults === 0) return;
       if (e.key === "ArrowDown") {
@@ -1656,6 +1675,12 @@ export default {
           .map((v) => parseInt(v))
           .filter((v) => !isNaN(v));
       }
+      if (q.extags) {
+        this.excludedTags = String(q.extags)
+          .split(",")
+          .map((v) => parseInt(v))
+          .filter((v) => !isNaN(v));
+      }
       if (
         q.srt &&
         [
@@ -1695,6 +1720,7 @@ export default {
       if (grp) q.grp = grp;
       if (this.showMapTags) q.tgc = "1";
       if (this.selectedTags.length > 0) q.tags = this.selectedTags.join(",");
+      if (this.excludedTags.length > 0) q.extags = this.excludedTags.join(",");
 
       const defaultStatus = { completed: "include" };
       const statusChanged =
@@ -2112,6 +2138,7 @@ export default {
       this.searchResults = null;
       this.lookupHighlightedIndex = -1;
       this.selectedTags = [];
+      this.excludedTags = [];
       this.showMapTags = false;
       this.$router.push({ name: "LookupMap", params: { mapId } });
     },
@@ -2186,6 +2213,7 @@ export default {
       this.intendedClassState = {};
       this.groupState = {};
       this.selectedTags = [];
+      this.excludedTags = [];
       this.sortByCategory = "time";
       this.sortDirection = "desc";
       this.recordSearchQuery = "";
@@ -3360,6 +3388,11 @@ export default {
 
 .tag-chip-mini-selected {
   font-weight: 800;
+}
+
+.tag-chip-mini-excluded {
+  opacity: 0.5;
+  text-decoration: line-through;
 }
 
 .tags-cell-empty {

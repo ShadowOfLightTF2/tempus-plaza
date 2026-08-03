@@ -119,7 +119,6 @@
               onerror="this.src = '/avatars/golly.jpg'"
             />
           </a>
-
           <div class="profile-info">
             <h1 v-if="player.name" class="player-name" :title="player.name">
               {{ player.name }}
@@ -175,11 +174,15 @@ export default {
     },
     onlineStatus: {
       type: Object,
-      default: null, // null = offline, { server_name, shortname, currentMap } = online
+      default: null,
     },
     bannerPattern: {
       type: String,
       default: "null",
+    },
+    pointsOrder: {
+      type: Array,
+      default: () => [],
     },
   },
   data() {
@@ -187,7 +190,7 @@ export default {
       overlayOptions: [
         {
           key: "jf",
-          label: "JF Logo",
+          label: "JF Logo Pattern",
           src: "/images/jf-logo.png",
           logoSize: 60,
           gap: 75,
@@ -197,15 +200,26 @@ export default {
           circular: false,
         },
         {
-          key: "coolcat",
-          label: "Cool cat Pattern",
-          src: "/images/coolcat.png",
+          key: "goldentags",
+          label: "Golden Tags Pattern",
+          src: "/icons/tagsgold.png",
           logoSize: 60,
           gap: 100,
           angle: 30,
-          imageRotate: 0,
-          opacity: 0.06,
-          circular: true,
+          imageRotate: -30,
+          opacity: 0.04,
+          circular: false,
+        },
+        {
+          key: "tags",
+          label: "Tags Pattern",
+          src: "/icons/tags.png",
+          logoSize: 60,
+          gap: 100,
+          angle: 30,
+          imageRotate: -30,
+          opacity: 0.03,
+          circular: false,
         },
         {
           key: "golly",
@@ -279,14 +293,38 @@ export default {
     stats() {
       const fmt = (val) => (val != null ? `#${val}` : "—");
       const fmtPts = (val) => (val != null ? val : "—");
-      return [
-        { label: "Overall Rank", value: fmt(this.player.overall_rank) },
-        { label: "Soldier Rank", value: fmt(this.player.soldier_rank) },
-        { label: "Demoman Rank", value: fmt(this.player.demoman_rank) },
-        { label: "Overall Points", value: fmtPts(this.player.overall_points) },
-        { label: "Soldier Points", value: fmtPts(this.player.soldier_points) },
-        { label: "Demoman Points", value: fmtPts(this.player.demoman_points) },
-      ];
+
+      const typeLabels = {
+        overall: "Overall",
+        soldier: "Soldier",
+        demoman: "Demoman",
+      };
+      const rankMap = {
+        overall: this.player.overall_rank,
+        soldier: this.player.soldier_rank,
+        demoman: this.player.demoman_rank,
+      };
+      const pointsMap = {
+        overall: this.player.overall_points,
+        soldier: this.player.soldier_points,
+        demoman: this.player.demoman_points,
+      };
+
+      const order =
+        this.pointsOrder && this.pointsOrder.length
+          ? this.pointsOrder.map((p) => p.type)
+          : ["overall", "soldier", "demoman"];
+
+      const rankStats = order.map((type) => ({
+        label: `${typeLabels[type]} Rank`,
+        value: fmt(rankMap[type]),
+      }));
+      const pointsStats = order.map((type) => ({
+        label: `${typeLabels[type]} Points`,
+        value: fmtPts(pointsMap[type]),
+      }));
+
+      return [...rankStats, ...pointsStats];
     },
   },
   methods: {

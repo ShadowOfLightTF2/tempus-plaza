@@ -16,130 +16,52 @@
           everyone!
         </p>
       </div>
-
       <div class="tag-modal-body">
         <div class="tag-section">
           <div
+            v-for="group in tagGroups"
+            :key="group.class"
             class="tag-class-group"
-            v-if="getTagsByClass('soldier').length > 0"
+            v-show="getTagsByClass(group.class).length > 0"
           >
             <h5>
               <img
-                src="/icons/soldier.png"
-                alt="Soldier"
+                v-if="group.icon"
+                :src="group.icon"
+                :alt="group.label"
                 class="class-icon me-1"
               />
-              Soldier
+              <i v-else :class="['bi', group.iconClass, 'me-1']"></i>
+              {{ group.label }}
             </h5>
             <div class="tag-selector">
               <div class="available-tags">
                 <div
-                  v-for="tag in getTagsByClass('soldier')"
-                  :key="'filter-soldier-' + tag.id"
+                  v-for="tag in getTagsByClass(group.class)"
+                  :key="'filter-' + group.class + '-' + tag.id"
                   class="tag-option"
-                  :class="{ active: isTagSelected(tag.id) }"
+                  :class="{
+                    active: isTagSelected(tag.id),
+                    excluded: isTagExcluded(tag.id),
+                  }"
                   @click="toggleTag(tag.id)"
                   :style="{
-                    backgroundColor: isTagSelected(tag.id)
-                      ? tag.color + '40'
-                      : 'transparent',
-                    borderColor: tag.color,
+                    backgroundColor: isTagExcluded(tag.id)
+                      ? '#dc354533'
+                      : isTagSelected(tag.id)
+                        ? tag.color + '40'
+                        : 'transparent',
+                    borderColor: isTagExcluded(tag.id) ? '#dc3545' : tag.color,
                   }"
                 >
                   <i
-                    class="bi bi-tag-fill me-1"
-                    :style="{ color: tag.color }"
-                  ></i>
-                  {{ tag.name }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="tag-class-group"
-            v-if="getTagsByClass('demoman').length > 0"
-          >
-            <h5>
-              <img
-                src="/icons/demoman.png"
-                alt="Demoman"
-                class="class-icon me-1"
-              />
-              Demoman
-            </h5>
-            <div class="tag-selector">
-              <div class="available-tags">
-                <div
-                  v-for="tag in getTagsByClass('demoman')"
-                  :key="'filter-demoman-' + tag.id"
-                  class="tag-option"
-                  :class="{ active: isTagSelected(tag.id) }"
-                  @click="toggleTag(tag.id)"
-                  :style="{
-                    backgroundColor: isTagSelected(tag.id)
-                      ? tag.color + '40'
-                      : 'transparent',
-                    borderColor: tag.color,
-                  }"
-                >
-                  <i
-                    class="bi bi-tag-fill me-1"
-                    :style="{ color: tag.color }"
-                  ></i>
-                  {{ tag.name }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tag-class-group" v-if="getTagsByClass('both').length > 0">
-            <h5><i class="bi bi-people me-1"></i>Both Classes</h5>
-            <div class="tag-selector">
-              <div class="available-tags">
-                <div
-                  v-for="tag in getTagsByClass('both')"
-                  :key="'filter-both-' + tag.id"
-                  class="tag-option"
-                  :class="{ active: isTagSelected(tag.id) }"
-                  @click="toggleTag(tag.id)"
-                  :style="{
-                    backgroundColor: isTagSelected(tag.id)
-                      ? tag.color + '40'
-                      : 'transparent',
-                    borderColor: tag.color,
-                  }"
-                >
-                  <i
-                    class="bi bi-tag-fill me-1"
-                    :style="{ color: tag.color }"
-                  ></i>
-                  {{ tag.name }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="tag-class-group"
-            v-if="getTagsByClass('extra').length > 0"
-          >
-            <h5><i class="bi bi-gear me-1"></i>Extra</h5>
-            <div class="tag-selector">
-              <div class="available-tags">
-                <div
-                  v-for="tag in getTagsByClass('extra')"
-                  :key="'filter-extra-' + tag.id"
-                  class="tag-option"
-                  :class="{ active: isTagSelected(tag.id) }"
-                  @click="toggleTag(tag.id)"
-                  :style="{
-                    backgroundColor: isTagSelected(tag.id)
-                      ? tag.color + '40'
-                      : 'transparent',
-                    borderColor: tag.color,
-                  }"
-                >
-                  <i
-                    class="bi bi-tag-fill me-1"
-                    :style="{ color: tag.color }"
+                    class="bi me-1"
+                    :class="
+                      isTagExcluded(tag.id) ? 'bi-x-circle-fill' : 'bi-tag-fill'
+                    "
+                    :style="{
+                      color: isTagExcluded(tag.id) ? '#dc3545' : tag.color,
+                    }"
                   ></i>
                   {{ tag.name }}
                 </div>
@@ -153,7 +75,7 @@
           type="button"
           @click="clearTags"
           class="btn btn-secondary clear-tags-btn"
-          :disabled="selectedTags.length === 0"
+          :disabled="selectedTags.length === 0 && excludedTags.length === 0"
         >
           <i class="bi bi-x-circle me-1"></i>Clear tags
         </button>
@@ -169,8 +91,19 @@ export default {
     show: { type: Boolean, default: false },
     availableTags: { type: Array, default: () => [] },
     selectedTags: { type: Array, default: () => [] },
+    excludedTags: { type: Array, default: () => [] },
   },
   emits: ["close", "toggle-tag", "clear-tags"],
+  data() {
+    return {
+      tagGroups: [
+        { class: "soldier", label: "Soldier", icon: "/icons/soldier.png" },
+        { class: "demoman", label: "Demoman", icon: "/icons/demoman.png" },
+        { class: "both", label: "Both Classes", iconClass: "bi-people" },
+        { class: "extra", label: "Extra", iconClass: "bi-gear" },
+      ],
+    };
+  },
   methods: {
     close() {
       this.$emit("close");
@@ -186,6 +119,9 @@ export default {
     },
     getTagsByClass(className) {
       return this.availableTags.filter((tag) => tag.class === className);
+    },
+    isTagExcluded(tagId) {
+      return this.excludedTags.includes(tagId);
     },
   },
 };
@@ -313,6 +249,13 @@ export default {
 .tag-option.active {
   font-weight: 600;
   transform: scale(1.05);
+}
+
+.tag-option.excluded {
+  font-weight: 600;
+  transform: scale(1.05);
+  text-decoration: line-through;
+  text-decoration-color: #dc3545;
 }
 
 .tag-modal-footer {

@@ -8,9 +8,11 @@
       'image-failed': imageFailed,
     }"
   >
-    <div v-if="!imageLoaded && !imageFailed" class="loading-placeholder">
-      <div class="spinner"></div>
-    </div>
+    <div
+      v-if="!imageLoaded && !imageFailed && item.placeholder"
+      class="card-placeholder-bg"
+      :style="{ backgroundImage: `url('${item.placeholder}')` }"
+    ></div>
     <div class="card-bg" :style="backgroundImageStyle"></div>
     <div class="card-inner">
       <div class="card-overlay">
@@ -69,7 +71,6 @@
                 {{ item.soldier_completion_count?.toLocaleString() || 0 }}
               </div>
             </div>
-
             <div class="tier-section">
               <span class="class-label">Demoman</span>
               <div class="tier-group">
@@ -90,7 +91,6 @@
               </div>
             </div>
           </div>
-
           <div class="card-stats">
             <div v-if="currentView === 'maps'" class="stat-row">
               <div class="stat-item">
@@ -102,26 +102,42 @@
                 <span class="stat-value">{{ item.bonus_count || 0 }}</span>
               </div>
             </div>
-
-            <div class="map-tags" v-if="item.tags && item.tags.length > 0">
-              <div
-                v-for="tag in item.tags"
-                :key="tag.id"
-                class="map-tag"
-                :style="{
-                  backgroundColor: tag.color + '20',
-                  borderColor: tag.color,
-                }"
-              >
-                <i
-                  class="bi bi-tag-fill me-1"
-                  :style="{ color: tag.color }"
-                ></i>
-                {{ tag.name }}
+            <div class="tags-row">
+              <div class="map-tags">
+                <div
+                  v-for="tag in item.tags || []"
+                  :key="tag.id"
+                  class="map-tag"
+                  :style="{
+                    backgroundColor: tag.color + '20',
+                    borderColor: tag.color,
+                  }"
+                >
+                  <i
+                    class="bi bi-tag-fill me-1"
+                    :style="{ color: tag.color }"
+                  ></i>
+                  {{ tag.name }}
+                </div>
+                <div
+                  v-if="isLoggedIn"
+                  class="badge-tag"
+                  :class="{
+                    voted: hasVotedTags,
+                    unvoted: !hasVotedTags,
+                  }"
+                  :title="
+                    hasVotedTags
+                      ? 'You voted for tag(s)'
+                      : 'Not voted for tag(s)'
+                  "
+                >
+                  <i v-if="hasVotedTags" class="bi bi-check-circle-fill"></i>
+                  <i v-else class="bi bi-exclamation-circle-fill"></i>
+                </div>
               </div>
             </div>
           </div>
-
           <div v-if="currentView === 'maps'" class="map-date-added">
             Date Added:
             {{ formatDate(item.date_added * 1000) }}
@@ -143,6 +159,14 @@ export default {
     currentView: {
       type: String,
       required: true,
+    },
+    votedMapIds: {
+      type: Set,
+      default: () => new Set(),
+    },
+    isLoggedIn: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -172,6 +196,12 @@ export default {
       return `/map-backgrounds/medium/${
         this.currentView === "maps" ? this.item.name : this.item.map_name
       }.webp`;
+    },
+    cardMapId() {
+      return this.currentView === "maps" ? this.item.id : this.item.map_id;
+    },
+    hasVotedTags() {
+      return this.votedMapIds.has(this.cardMapId);
     },
   },
   mounted() {
@@ -242,6 +272,24 @@ export default {
   opacity: 1;
 }
 
+.card-placeholder-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(15px);
+  transform: scale(1.1);
+  z-index: 0;
+}
+
+.card-placeholder-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .card-bg {
   position: absolute;
   inset: 0;
@@ -255,7 +303,9 @@ export default {
     rgba(0, 0, 0, 0.8) 100%
   );
   opacity: 0;
-  transition: transform 0.4s ease, opacity 0.3s ease;
+  transition:
+    transform 0.4s ease,
+    opacity 0.3s ease;
   z-index: 0;
 }
 
@@ -275,36 +325,6 @@ export default {
   z-index: 1;
   width: 100%;
   height: 100%;
-}
-
-.loading-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e3e3e3;
-  border-top: 3px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .card-overlay {
@@ -388,11 +408,18 @@ export default {
   margin-top: 10px;
 }
 
+.tags-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
 .map-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-bottom: 0.5rem;
   justify-content: center;
 }
 
@@ -405,6 +432,23 @@ export default {
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--color-text) !important;
+}
+
+.badge-tag {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-tag.voted {
+  color: #4ade80;
+}
+
+.badge-tag.unvoted {
+  color: #fbbf24;
 }
 
 .stat-row {

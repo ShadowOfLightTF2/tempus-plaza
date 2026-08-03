@@ -108,6 +108,20 @@ export default {
               "Unlocked by playing in special Jump Fortress events",
             donatable: false,
           },
+          {
+            value: "tags",
+            label: "Tags",
+            thumb: "/icons/tags.png",
+            unlockMessage: "Unlocked by voting a tag on a map",
+            donatable: false,
+          },
+          {
+            value: "goldentags",
+            label: "Golden Tags",
+            thumb: "/icons/tagsgold.png",
+            unlockMessage: "Unlocked by voting tags on every map",
+            donatable: false,
+          },
         ],
 
         // ui state
