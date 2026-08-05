@@ -1,5 +1,6 @@
 <template>
   <div id="app" @click="closeDropdown">
+    <UnlockPopup v-model="showUnlockPopup" />
     <LoginPopup v-model="showLoginPopup" @login-with-steam="loginWithSteam" />
     <AccountNotFoundPopup v-model="showErrorPopup" />
     <PointsCalculator v-model="showCalculator" />
@@ -14,6 +15,7 @@
 </template>
 
 <script>
+import UnlockPopup from "@/components/popups/UnlockPopup.vue";
 import PointsCalculator from "@/components/utils/PointsCalculator.vue";
 import LoginPopup from "@/components/popups/LoginPopup.vue";
 import AccountNotFoundPopup from "@/components/popups/AccountNotFoundPopup.vue";
@@ -29,6 +31,7 @@ const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 export default {
   name: "App",
   components: {
+    UnlockPopup,
     PointsCalculator,
     LoginPopup,
     AccountNotFoundPopup,
@@ -39,6 +42,7 @@ export default {
   },
   data() {
     return {
+      showUnlockPopup: false,
       showErrorPopup: false,
       showLoginPopup: false,
       showCalculator: false,
@@ -69,6 +73,10 @@ export default {
         bannerPattern: null,
         unlockedColors: [],
         unlockedPatterns: [],
+        newColors: [],
+        newPatterns: [],
+        newlyUnlockedColors: [],
+        newlyUnlockedPatterns: [],
         donator: 0,
         colorOptions: [
           { value: "blue", color: "var(--color-banner-blue-1)" },
@@ -159,6 +167,58 @@ export default {
     },
   },
   methods: {
+    async acknowledgeUnlocks() {
+      const colors = [...this.navShared.newlyUnlockedColors];
+      const patterns = [...this.navShared.newlyUnlockedPatterns];
+      if (!colors.length && !patterns.length) return;
+
+      // Clear immediately so the popup doesn't reappear on re-render
+      this.navShared.newlyUnlockedColors = [];
+      this.navShared.newlyUnlockedPatterns = [];
+
+      try {
+        await fetch(`${API_BASE_URL}/users/mark-unlock-seen-popup`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ colors, patterns }),
+        });
+      } catch (error) {
+        console.error("Failed to acknowledge unlocks:", error);
+      }
+    },
+    async markColorSeen(value) {
+      if (!this.navShared.newColors.includes(value)) return;
+      this.navShared.newColors = this.navShared.newColors.filter(
+        (v) => v !== value,
+      );
+      try {
+        await fetch(`${API_BASE_URL}/users/mark-unlock-seen`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "color", value }),
+        });
+      } catch (error) {
+        console.error("Failed to mark color seen:", error);
+      }
+    },
+    async markPatternSeen(value) {
+      if (!this.navShared.newPatterns.includes(value)) return;
+      this.navShared.newPatterns = this.navShared.newPatterns.filter(
+        (v) => v !== value,
+      );
+      try {
+        await fetch(`${API_BASE_URL}/users/mark-unlock-seen`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "pattern", value }),
+        });
+      } catch (error) {
+        console.error("Failed to mark pattern seen:", error);
+      }
+    },
     checkFirstVisit() {
       const hasSeenPopup = localStorage.getItem("tempus_popup_shown");
       return !hasSeenPopup;
@@ -410,6 +470,9 @@ export default {
       clearSearch: this.clearSearch,
       sanitize: this.sanitize,
       handleAvatarError: this.handleAvatarError,
+      markColorSeen: this.markColorSeen,
+      markPatternSeen: this.markPatternSeen,
+      acknowledgeUnlocks: this.acknowledgeUnlocks,
     });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -431,10 +494,22 @@ export default {
           this.navShared.bannerPattern = userData.pattern ?? null;
           this.navShared.unlockedColors = userData.unlockedColors || [];
           this.navShared.unlockedPatterns = userData.unlockedPatterns || [];
+          this.navShared.newColors = userData.newColors || [];
+          this.navShared.newPatterns = userData.newPatterns || [];
+          this.navShared.newlyUnlockedColors =
+            userData.newlyUnlockedColors || [];
+          this.navShared.newlyUnlockedPatterns =
+            userData.newlyUnlockedPatterns || [];
           this.profileUpdateTracker.rank = this.navShared.rankPreference;
           this.profileUpdateTracker.color = this.navShared.colorPreference;
           this.profileUpdateTracker.gender = this.navShared.gender;
           this.profileUpdateTracker.pattern = this.navShared.bannerPattern;
+          if (
+            this.navShared.newlyUnlockedColors.length ||
+            this.navShared.newlyUnlockedPatterns.length
+          ) {
+            this.showUnlockPopup = true;
+          }
         }
       }
     } catch (error) {
@@ -730,12 +805,11 @@ body {
   opacity: 0;
   transform: translateY(-6px);
 }
-
 .pattern-picker-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-content: center;
   gap: 5px;
-  max-width: 180px;
   margin-top: 4px;
 }
 .pattern-option-wrapper {
@@ -743,8 +817,12 @@ body {
   position: relative;
 }
 .pattern-block {
+  box-sizing: border-box;
   width: 42px;
   height: 42px;
+  border: 2px solid transparent;
+  background-origin: border-box;
+  background-clip: border-box;
   border-radius: 8px;
   position: relative;
   display: flex;
@@ -772,7 +850,7 @@ body {
   border-color: var(--color-border);
 }
 .pattern-block.selected {
-  border: 2px solid var(--color-text);
+  border-color: var(--color-text);
 }
 .pattern-block.locked {
   opacity: 0.45;
@@ -806,6 +884,17 @@ body {
 .color-swatch.locked {
   opacity: 0.45;
   cursor: pointer;
+}
+.new-marker {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary-red-light);
+  box-shadow: 0 0 0 2px var(--color-dark);
+  pointer-events: none;
 }
 .lock-icon {
   color: rgba(255, 255, 255, 0.9);

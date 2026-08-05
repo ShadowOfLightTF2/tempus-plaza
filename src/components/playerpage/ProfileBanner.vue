@@ -332,10 +332,10 @@ export default {
       window.location.href = `steam://run/440//+connect ${ip}:${port}/`;
     },
     getFlagImageUrl(countryCode) {
-      const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
-        ? countryCode.toLowerCase()
-        : "unknown";
-      return `https://flagcdn.com/24x18/${validCode}.png`;
+      if (countryCode && /^[a-zA-Z]{2}$/.test(countryCode)) {
+        return `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`;
+      }
+      return "/icons/default-flag.jpg";
     },
     handleImageError(event) {
       event.target.src = "/icons/default-flag.jpg";

@@ -29,7 +29,6 @@
             </button>
           </div>
         </div>
-
         <div class="filter-group">
           <h6 class="filter-title text-light mb-2">Type</h6>
           <div class="type-filter-container">
@@ -59,7 +58,6 @@
           </div>
         </div>
       </div>
-
       <div class="filter-group" style="margin-bottom: 20px; margin-top: 10px">
         <h6 class="filter-title text-light mb-2">Placement</h6>
         <div class="group-filter-container">
@@ -97,7 +95,6 @@
           </div>
         </div>
       </div>
-
       <div
         class="filter-columns"
         :class="{ 'no-padding-bottom': !showChangeFilters }"

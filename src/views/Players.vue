@@ -140,12 +140,11 @@
             <span v-else>Show Overall</span>
           </button>
           <button
-            class="toggle-overall-btn"
-            :class="{ active: minMode }"
+            class="toggle-overall-btn mode-toggle-btn"
             @click="toggleMinMode"
           >
-            <span v-if="minMode">Podium Mode</span>
-            <span v-else>Min Mode</span>
+            <span v-if="minMode">Min Mode</span>
+            <span v-else>Podium Mode</span>
           </button>
         </div>
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
@@ -2285,6 +2284,16 @@ export default {
 .toggle-overall-btn.active {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+.mode-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+.mode-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }

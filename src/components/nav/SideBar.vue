@@ -30,8 +30,7 @@
           </svg>
         </button>
       </div>
-
-      <div class="sidebar-search-wrap" v-if="!isHomePage" @click.stop>
+      <div class="sidebar-search-wrap" @click.stop>
         <div
           class="sidebar-search-box"
           :class="{ 'is-focused': searchFocused }"
@@ -309,6 +308,11 @@
               v-if="navShared.user.avatar"
             />
             <span class="sidebar-username">{{ navShared.user.name }}</span>
+            <span
+              v-if="hasUnseenCustomizations"
+              class="username-new-marker"
+              title="New customization options available"
+            ></span>
             <svg
               class="sidebar-chevron"
               :class="{ rotated: sidebarSettingsOpen }"
@@ -420,6 +424,8 @@
                   :key="index"
                   class="color-option-wrapper"
                   @click="navShared.selectColor(color.value)"
+                  @mouseenter="navShared.markColorSeen(color.value)"
+                  @touchstart="navShared.markColorSeen(color.value)"
                 >
                   <input
                     class="d-none"
@@ -456,8 +462,11 @@
                       <path
                         d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
                       />
-                    </svg>
-                  </label>
+                    </svg> </label
+                  ><span
+                    v-if="navShared.newColors.includes(color.value)"
+                    class="new-marker"
+                  ></span>
                 </div>
                 <div
                   v-if="navShared.showTooltip"
@@ -479,7 +488,7 @@
             </div>
             <div class="sidebar-settings-divider"></div>
             <div class="sidebar-settings-item" @click.stop>
-              <h6>Banner background</h6>
+              <h6>Banner pattern</h6>
               <div
                 class="pattern-picker-container position-relative"
                 @click.stop
@@ -493,6 +502,8 @@
                       ? navShared.selectPattern(pattern)
                       : null
                   "
+                  @mouseenter="navShared.markPatternSeen(pattern.value)"
+                  @touchstart="navShared.markPatternSeen(pattern.value)"
                 >
                   <input
                     class="d-none"
@@ -538,8 +549,11 @@
                       <path
                         d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3z"
                       />
-                    </svg>
-                  </label>
+                    </svg> </label
+                  ><span
+                    v-if="navShared.newPatterns.includes(pattern.value)"
+                    class="new-marker"
+                  ></span>
                 </div>
               </div>
             </div>
@@ -586,9 +600,6 @@ export default {
     };
   },
   computed: {
-    isHomePage() {
-      return this.$route.name === "Home";
-    },
     navMapCount() {
       return this.navShared.searchResults?.maps?.length ?? 0;
     },
@@ -597,6 +608,12 @@ export default {
     },
     navTotalResults() {
       return this.navMapCount + this.navPlayerCount;
+    },
+    hasUnseenCustomizations() {
+      return (
+        (this.navShared.newColors?.length ?? 0) > 0 ||
+        (this.navShared.newPatterns?.length ?? 0) > 0
+      );
     },
   },
   watch: {
@@ -938,6 +955,16 @@ export default {
 .sidebar-user-toggle:hover {
   background: rgba(74, 111, 165, 0.15);
   border-color: rgba(74, 111, 165, 0.5);
+}
+.username-new-marker {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  box-shadow: 0 0 4px rgba(255, 77, 77, 0.7);
+  margin-left: -4px;
+  flex-shrink: 0;
 }
 .sidebar-chevron {
   color: rgba(255, 255, 255, 0.5);

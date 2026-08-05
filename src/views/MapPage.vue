@@ -27,13 +27,7 @@
               tag="div"
               :to="{ name: 'LookupMap', params: { mapId: mapId } }"
               class="lookup-map-banner fancy-hover"
-              :style="{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/map-backgrounds/${
-                  map?.name || mapName
-                }.webp')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }"
+              :style="bannerStyle"
             >
               <div class="lookup-banner-content">
                 <div class="lookup-map-main">
@@ -145,7 +139,6 @@
                 </div>
                 <div v-else class="loading-ranks">
                   <div class="loading-spinner"></div>
-                  <span>Loading...</span>
                 </div>
                 <button
                   class="banner-tag-btn"
@@ -304,6 +297,19 @@ export default {
     },
   },
   computed: {
+    bannerStyle() {
+      const name = this.mapName;
+      const gradient =
+        "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6))";
+
+      return {
+        backgroundImage: name
+          ? `${gradient}, url('/map-backgrounds/${encodeURIComponent(name)}.webp')`
+          : gradient,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    },
     isLoggedIn() {
       return this.playerId !== null;
     },
