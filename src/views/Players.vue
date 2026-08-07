@@ -338,11 +338,7 @@
                         topPlayer.name
                       }}</span>
                       <span class="podium-country-player-points">
-                        {{
-                          (topPlayer.points ?? 0)
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
+                        {{ formatCount(topPlayer.points) }}
                       </span>
                     </SmartLink>
                     <div
@@ -701,26 +697,33 @@ export default {
     formatAmount(userRank) {
       if (!userRank) return 0;
       if (this.selectedCategory === "completion") return userRank.amount + "%";
-      return (userRank.amount ?? 0)
+      return Math.round(userRank.amount ?? 0)
         .toString()
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     formatPlayerAmount(player) {
       if (this.selectedCategory === "completion")
         return player.percentage + "%";
-      return (player.amount ?? 0)
+      return Math.round(player.amount ?? 0)
         .toString()
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     formatPodiumSubstat(player) {
       if (this.selectedCategory === "completion") {
         return player.podiumPoints != null
-          ? player.podiumPoints.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          ? Math.round(player.podiumPoints)
+              .toString()
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
           : "—";
       }
       return player.podiumCompletion != null
         ? player.podiumCompletion + "%"
         : "—";
+    },
+    formatCount(value) {
+      return Math.round(value ?? 0)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     getTableHeader() {
       if (this.points) {

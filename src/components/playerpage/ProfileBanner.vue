@@ -292,7 +292,11 @@ export default {
     },
     stats() {
       const fmt = (val) => (val != null ? `#${val}` : "—");
-      const fmtPts = (val) => (val != null ? val : "—");
+      const fmtPts = (val) => {
+        if (val == null) return "—";
+        const num = Number(String(val).replace(/,/g, ""));
+        return Number.isNaN(num) ? "—" : String(Math.round(num));
+      };
 
       const typeLabels = {
         overall: "Overall",

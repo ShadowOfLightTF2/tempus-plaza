@@ -1123,7 +1123,8 @@ export default {
         this.player.soldier_rank = playerRanks.soldier_rank;
         this.player.demoman_rank = playerRanks.demoman_rank;
         this.player.overall_points =
-          playerRanks.soldier_points + playerRanks.demoman_points;
+          Number(playerRanks.soldier_points) +
+          Number(playerRanks.demoman_points);
         this.player.soldier_points = playerRanks.soldier_points;
         this.player.demoman_points = playerRanks.demoman_points;
       } catch (error) {

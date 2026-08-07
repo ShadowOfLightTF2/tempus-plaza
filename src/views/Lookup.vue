@@ -85,7 +85,6 @@
                 </a>
               </div>
             </div>
-
             <div v-if="playerRankInfo" class="lookup-banner-stats">
               <div class="lookup-stat-card">
                 <span class="lookup-stat-label">Overall</span>
@@ -93,7 +92,7 @@
                   >#{{ playerRankInfo.overall_rank }}</span
                 >
                 <span class="lookup-stat-points">{{
-                  playerRankInfo.overall_points.toLocaleString()
+                  Math.round(playerRankInfo.overall_points).toLocaleString()
                 }}</span>
               </div>
               <div class="lookup-stat-card">
@@ -102,7 +101,7 @@
                   >#{{ playerRankInfo.soldier_rank }}</span
                 >
                 <span class="lookup-stat-points">{{
-                  playerRankInfo.soldier_points.toLocaleString()
+                  Math.round(playerRankInfo.soldier_points).toLocaleString()
                 }}</span>
               </div>
               <div class="lookup-stat-card">
@@ -111,7 +110,7 @@
                   >#{{ playerRankInfo.demoman_rank }}</span
                 >
                 <span class="lookup-stat-points">{{
-                  playerRankInfo.demoman_points.toLocaleString()
+                  Math.round(playerRankInfo.demoman_points).toLocaleString()
                 }}</span>
               </div>
             </div>
