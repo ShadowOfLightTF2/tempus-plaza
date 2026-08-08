@@ -697,23 +697,17 @@ export default {
     formatAmount(userRank) {
       if (!userRank) return 0;
       if (this.selectedCategory === "completion") return userRank.amount + "%";
-      return Math.round(userRank.amount ?? 0)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return Math.round(userRank.amount ?? 0).toString();
     },
     formatPlayerAmount(player) {
       if (this.selectedCategory === "completion")
         return player.percentage + "%";
-      return Math.round(player.amount ?? 0)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return Math.round(player.amount ?? 0).toString();
     },
     formatPodiumSubstat(player) {
       if (this.selectedCategory === "completion") {
         return player.podiumPoints != null
-          ? Math.round(player.podiumPoints)
-              .toString()
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          ? Math.round(player.podiumPoints).toString()
           : "—";
       }
       return player.podiumCompletion != null
@@ -721,9 +715,7 @@ export default {
         : "—";
     },
     formatCount(value) {
-      return Math.round(value ?? 0)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return Math.round(value ?? 0).toString();
     },
     getTableHeader() {
       if (this.points) {

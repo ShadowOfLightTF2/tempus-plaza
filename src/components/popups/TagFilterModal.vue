@@ -85,6 +85,8 @@
 </template>
 
 <script>
+import { sortTagsByOrder } from "@/utils/tagOrder";
+
 export default {
   name: "TagFilterModal",
   props: {
@@ -118,7 +120,10 @@ export default {
       return this.selectedTags.includes(tagId);
     },
     getTagsByClass(className) {
-      return this.availableTags.filter((tag) => tag.class === className);
+      const filtered = this.availableTags.filter(
+        (tag) => tag.class === className,
+      );
+      return sortTagsByOrder(filtered);
     },
     isTagExcluded(tagId) {
       return this.excludedTags.includes(tagId);

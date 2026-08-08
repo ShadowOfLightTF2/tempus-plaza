@@ -196,6 +196,8 @@
 </template>
 
 <script>
+import { sortTagsByOrder } from "@/utils/tagOrder";
+
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export default {
@@ -206,6 +208,7 @@ export default {
     selectedMapTags: { type: Array, default: () => [] },
     mapId: { type: Number, required: true },
     playerId: { type: [String, Number], default: null },
+    intendedClass: { type: Number, default: null },
   },
   emits: ["update:showTagModal", "save-tags", "close"],
   data() {
@@ -224,6 +227,24 @@ export default {
       }
     },
   },
+  computed: {
+    allowedTagClasses() {
+      // 3 = soldier only, 4 = demoman only, 5 = both classes.
+      // "both" and "extra" tags are always allowed regardless of intended class.
+      switch (this.intendedClass) {
+        case 3:
+          return ["soldier", "both", "extra"];
+        case 4:
+          return ["demoman", "both", "extra"];
+        case 5:
+          return ["soldier", "demoman", "both", "extra"];
+        default:
+          // Unknown/missing intended class - fall back to showing everything
+          // rather than hiding all class-specific tags.
+          return ["soldier", "demoman", "both", "extra"];
+      }
+    },
+  },
   methods: {
     closeModal() {
       this.$emit("update:showTagModal", false);
@@ -238,6 +259,11 @@ export default {
         return;
       }
 
+      const sanitizedSelected = this.localSelected.filter((tagId) => {
+        const tag = this.availableTags.find((t) => t.id === tagId);
+        return tag && this.allowedTagClasses.includes(tag.class);
+      });
+
       try {
         const response = await fetch(
           `${API_BASE_URL}/maps/${this.mapId}/${this.playerId}/vote-tags`,
@@ -246,12 +272,12 @@ export default {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ mapTags: this.localSelected }),
+            body: JSON.stringify({ mapTags: sanitizedSelected }),
           },
         );
 
         if (response.ok) {
-          this.$emit("save-tags", this.localSelected);
+          this.$emit("save-tags", sanitizedSelected);
           this.closeModal();
         } else {
           const errorText = await response.text();
@@ -262,12 +288,19 @@ export default {
       }
     },
     tagsByClass(className) {
-      return this.availableTags.filter((tag) => tag.class === className);
+      if (!this.allowedTagClasses.includes(className)) return [];
+      const filtered = this.availableTags.filter(
+        (tag) => tag.class === className,
+      );
+      return sortTagsByOrder(filtered);
     },
     isSelected(tagId) {
       return this.localSelected.includes(tagId);
     },
     toggleTag(tagId) {
+      const tag = this.availableTags.find((t) => t.id === tagId);
+      if (!tag || !this.allowedTagClasses.includes(tag.class)) return;
+
       const index = this.localSelected.indexOf(tagId);
       if (index > -1) {
         this.localSelected.splice(index, 1);

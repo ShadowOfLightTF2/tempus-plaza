@@ -182,7 +182,7 @@ const points = computed(() => {
     placement.value,
     includeCompletion.value,
   );
-  return Math.round(value * 100) / 100;
+  return value;
 });
 
 function capitalize(s) {

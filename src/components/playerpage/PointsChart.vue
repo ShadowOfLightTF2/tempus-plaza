@@ -333,7 +333,7 @@ export default {
           name: `${label} Points`,
           data: filteredData.map((point) => ({
             x: point.date * 1000,
-            y: point[pointsKey],
+            y: Math.round(point[pointsKey]),
             [`${this.chartType}_rank`]: point[rankKey],
           })),
         },

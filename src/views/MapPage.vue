@@ -223,6 +223,7 @@
     :selected-map-tags="selectedMapTags"
     :map-id="mapId"
     :player-id="playerId"
+    :intended-class="map ? map.intended_class : null"
     @save-tags="handleSaveTags"
     @close="handleTagModalClose"
   />
@@ -234,6 +235,7 @@ import Leaderboard from "@/components/Leaderboard.vue";
 import MapInformation from "@/components/MapInformation.vue";
 import WRVideos from "@/components/WRVideos.vue";
 import VoteTagModal from "@/components/popups/VoteTagModal.vue";
+import { sortTagsByOrder } from "@/utils/tagOrder";
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -398,7 +400,7 @@ export default {
         const response = await fetch(`${API_BASE_URL}/maps/${mapId}/tags`);
         const data = await response.json();
 
-        this.mapTags = [...data.tags].sort((a, b) => a.id - b.id);
+        this.mapTags = sortTagsByOrder(data.tags);
       } catch (error) {
         console.error("Error loading map tags:", error);
       }
