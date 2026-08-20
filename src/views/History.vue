@@ -763,7 +763,7 @@
                 v-if="!loadingMore && !hasMore && filteredHistory.length > 0"
                 class="end-of-feed"
               >
-                — End of history —
+                — End of recorded history —
               </div>
             </div>
           </div>

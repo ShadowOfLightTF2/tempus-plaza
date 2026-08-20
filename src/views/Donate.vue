@@ -20,9 +20,9 @@
               <h2 class="donation-title">Make a Donation</h2>
               <p class="donation-description">
                 Donations are not necessary or needed in order to keep plaza
-                running. If you still would like to support me that is very much
-                appreciated! Tempus Plaza is not associated or affiliated with
-                Tempus and donations will not go towards Tempus itself.
+                running. Tempus Plaza is not associated or affiliated with
+                Tempus and donations will not go towards Tempus itself. If you
+                still would like to support me that is very much appreciated!
               </p>
             </div>
             <div class="donation-options">
@@ -61,10 +61,12 @@
         </div>
         <div class="preview-section">
           <h2 class="preview-title">
-            Donating unlocks different profile banner colours
+            Donating unlocks profile banner cusomization
           </h2>
           <p class="preview-subtitle">
-            This is what your profile could look like with supporter perks!
+            You will also get the donator role in the Tempus Plaza discord.
+            <br />This is what your profile could look like with supporter
+            perks:
           </p>
           <div v-if="loading" class="loading-message">
             Loading your profile data...
@@ -279,16 +281,16 @@ export default {
     bannerColorPairs() {
       return [
         {
-          color1: "var(--color-banner-sky-1)",
-          color2: "var(--color-banner-sky-2)",
+          color1: "var(--color-banner-indigo-1)",
+          color2: "var(--color-banner-indigo-2)",
         },
         {
           color1: "var(--color-banner-forest-1)",
           color2: "var(--color-banner-forest-2)",
         },
         {
-          color1: "var(--color-banner-indigo-1)",
-          color2: "var(--color-banner-indigo-2)",
+          color1: "var(--color-banner-rust-1)",
+          color2: "var(--color-banner-rust-2)",
         },
       ];
     },

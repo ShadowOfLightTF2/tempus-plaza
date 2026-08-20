@@ -212,8 +212,8 @@
                 :class="{ active: voteFilter !== 'all' }"
                 :title="
                   voteFilter === 'all'
-                    ? 'Show all maps'
-                    : 'Showing unvoted maps'
+                    ? 'Show your unvoted maps'
+                    : 'Show all maps'
                 "
               >
                 <i class="bi bi-check2-circle me-1"></i>
@@ -1443,6 +1443,9 @@ export default {
       if (this.isPickerActive || this.filteredAndSortedItems.length <= 1)
         return;
 
+      // Clear any leftover state from a previous run before starting a new one
+      this.resetPicker();
+
       this.isPickerActive = true;
       this.pickerComplete = false;
       this.shouldContinuePicker = true;
@@ -1464,7 +1467,6 @@ export default {
 
       await this.runPickerStep(0, interval);
     },
-
     async runPickerStep(index, interval) {
       if (!this.shouldContinuePicker) return;
 

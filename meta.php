@@ -149,8 +149,8 @@ function getHomeMeta(): array {
 
     return [
         'tags' => generateMetaTags([
-            'title'        => 'Tempus Plaza | TF2 Jump Stats & Leaderboards',
-            'description'  => 'Tempus records, player rankings, map information and everything to do with the TF2 jump Tempus network.',
+            'title' => 'Tempus Plaza | Tempus TF2 Jump Stats, Records & Leaderboards',
+            'description'  => 'Tempus Plaza tracks Tempus TF2 jump records, player rankings, and map stats. Showcasing map information, activity, servers, history and more of the TF2 Tempus jump network.',
             'image'        => DEFAULT_IMAGE,
             'image_width'  => 512,
             'image_height' => 512,

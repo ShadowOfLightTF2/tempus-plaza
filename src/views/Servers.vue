@@ -1062,7 +1062,19 @@ export default {
           .filter((server) => server.hidden !== 1)
           .map((server) => ({
             ...server,
-            players: server.players ? JSON.parse(server.players) : [],
+            players: (() => {
+              if (!server.players) return [];
+              if (Array.isArray(server.players)) return server.players;
+              try {
+                return JSON.parse(server.players);
+              } catch (e) {
+                console.warn(
+                  `Failed to parse players for server ${server.id}:`,
+                  e,
+                );
+                return [];
+              }
+            })(),
           }));
         this.applyCurrentSort();
       } catch (error) {
