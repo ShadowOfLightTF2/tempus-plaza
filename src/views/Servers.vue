@@ -235,6 +235,15 @@
                     <h3 class="table-header-title">Server Status</h3>
                     <p class="table-header-subtitle">Updates every minute</p>
                   </div>
+                  <label v-if="!isMobile" class="min-mode-checkbox">
+                    <input
+                      type="checkbox"
+                      :checked="minMode"
+                      @change="toggleMinMode"
+                    />
+                    <span class="checkmark"></span>
+                    <span class="checkbox-label">Min Mode</span>
+                  </label>
                 </div>
                 <div class="table-header-filters">
                   <div class="region-buttons">
@@ -266,9 +275,54 @@
                       {{ serverType.name }}
                     </button>
                   </div>
+                  <div class="sort-buttons">
+                    <span class="sort-buttons-label">Sort by:</span>
+                    <button
+                      :class="{ active: sortBy === 'region' }"
+                      @click="sortServersByRegion"
+                      class="sort-btn"
+                    >
+                      Location
+                      <span v-if="sortBy === 'region'">{{
+                        sortDirection === 1 ? "↑" : "↓"
+                      }}</span>
+                    </button>
+                    <button
+                      :class="{ active: sortBy === 'name' }"
+                      @click="sortServersByName"
+                      class="sort-btn"
+                    >
+                      Name
+                      <span v-if="sortBy === 'name'">{{
+                        sortDirection === 1 ? "↑" : "↓"
+                      }}</span>
+                    </button>
+                    <button
+                      :class="{ active: sortBy === 'map' }"
+                      @click="sortServersByMap"
+                      class="sort-btn"
+                    >
+                      Map
+                      <span v-if="sortBy === 'map'">{{
+                        sortDirection === 1 ? "↑" : "↓"
+                      }}</span>
+                    </button>
+                    <button
+                      :class="{ active: sortBy === 'players' }"
+                      @click="sortServersByPlayers"
+                      class="sort-btn"
+                    >
+                      Players
+                      <span v-if="sortBy === 'players'">{{
+                        sortDirection === 1 ? "↓" : "↑"
+                      }}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="table-responsive">
+
+              <!-- MIN MODE: compact table (unchanged behavior) -->
+              <div v-if="minMode" class="table-responsive">
                 <table class="table table-dark">
                   <thead>
                     <tr>
@@ -316,7 +370,7 @@
                           >↑</span
                         >
                       </th>
-                      <th>Connect</th>
+                      <th class="connect-column">Connect</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -449,6 +503,195 @@
                   </tbody>
                 </table>
               </div>
+
+              <!-- NORMAL MODE: card layout, mirrors Top Players Online normal mode -->
+              <div v-else class="server-cards-container">
+                <div
+                  v-for="server in filteredServersData"
+                  :key="server.id"
+                  class="server-card"
+                >
+                  <div
+                    class="server-card-main"
+                    @click="toggleServerExpansion(server.id)"
+                  >
+                    <div class="server-card-location">
+                      <img
+                        :src="getFlagImageUrl(server.country_code)"
+                        alt="Flag"
+                        class="flag-icon-large"
+                      />
+                      <div class="server-card-location-text">
+                        <div class="server-card-country">
+                          {{ server.country }}
+                        </div>
+                        <div class="server-card-region">
+                          {{ getRegionName(server.region) }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="server-card-info-section">
+                      <div class="server-card-name">
+                        <span v-if="expandedServerId === server.id">▼</span>
+                        <span v-else>▶</span>
+                        {{ server.name }}
+                      </div>
+                      <div class="server-card-players">
+                        <template v-if="server.hostname !== null">
+                          <div
+                            class="server-status"
+                            :class="
+                              getServerStatusClass(
+                                server.playerCount,
+                                server.maxPlayers,
+                              )
+                            "
+                          ></div>
+                          <span
+                            >{{ server.playerCount }}/{{
+                              server.maxPlayers
+                            }}
+                            players</span
+                          >
+                        </template>
+                        <span v-else class="server-offline">Offline</span>
+                      </div>
+                    </div>
+                    <SmartLink
+                      :to="
+                        server.hostname !== null
+                          ? {
+                              name: 'MapPage',
+                              params: { mapId: server.map_id },
+                            }
+                          : null
+                      "
+                      class="server-card-map"
+                      :class="server.hostname !== null ? 'clickable' : ''"
+                      :style="
+                        server.hostname !== null
+                          ? `background-image: url('/map-backgrounds/medium/${server.currentMap}.webp')`
+                          : ''
+                      "
+                      @click.stop
+                    >
+                      <div class="server-card-map-content">
+                        <div class="server-card-map-name">
+                          <template v-if="server.hostname !== null">
+                            <HoverPreview :map-name="server.currentMap">
+                              {{ server.currentMap }}
+                            </HoverPreview>
+                          </template>
+                          <span v-else class="server-offline">—</span>
+                        </div>
+                        <div
+                          v-if="server.hostname !== null"
+                          class="map-class-badges"
+                        >
+                          <div
+                            v-if="hasClassData(server, 'soldier')"
+                            class="map-class-badge"
+                          >
+                            <img
+                              src="/icons/soldier.png"
+                              alt="Soldier"
+                              class="class-icon-medium"
+                              :class="{
+                                'intended-icon': isIntendedClass(
+                                  'soldier',
+                                  server.intended_class,
+                                ),
+                              }"
+                            />
+                            <span
+                              class="tier-badge"
+                              :class="`tier-${server.soldier_tier}`"
+                              >T{{ server.soldier_tier }}</span
+                            >
+                            <span
+                              class="rating-badge"
+                              :class="`rating-${server.soldier_rating}`"
+                              >R{{ server.soldier_rating }}</span
+                            >
+                          </div>
+                          <div
+                            v-if="hasClassData(server, 'demoman')"
+                            class="map-class-badge"
+                          >
+                            <img
+                              src="/icons/demoman.png"
+                              alt="Demoman"
+                              class="class-icon-medium"
+                              :class="{
+                                'intended-icon': isIntendedClass(
+                                  'demoman',
+                                  server.intended_class,
+                                ),
+                              }"
+                            />
+                            <span
+                              class="tier-badge"
+                              :class="`tier-${server.demoman_tier}`"
+                              >T{{ server.demoman_tier }}</span
+                            >
+                            <span
+                              class="rating-badge"
+                              :class="`rating-${server.demoman_rating}`"
+                              >R{{ server.demoman_rating }}</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </SmartLink>
+                    <div class="server-card-actions">
+                      <button
+                        @click.stop="
+                          connectToServer(server.ipAddr, server.port)
+                        "
+                        class="global-btn"
+                      >
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    v-if="expandedServerId === server.id"
+                    class="server-card-players-panel"
+                  >
+                    <div class="players-list">
+                      <h5>Players in {{ server.name }}:</h5>
+                      <div
+                        v-if="!server.players || server.players.length === 0"
+                        class="no-players"
+                      >
+                        No players currently online
+                      </div>
+                      <div v-else class="players-grid">
+                        <SmartLink
+                          v-for="player in server.players"
+                          :key="player.player_id"
+                          :to="{
+                            name: 'PlayerPage',
+                            params: { playerId: player.player_id },
+                          }"
+                          class="player-item"
+                          style="text-decoration: none; color: inherit"
+                        >
+                          <img
+                            :src="player.steam_avatar"
+                            alt="Avatar"
+                            class="avatar"
+                          />
+                          <span class="player-name-server">{{
+                            player.name
+                          }}</span>
+                        </SmartLink>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div
                 v-if="filteredServersData.length === 0 && !loading"
                 class="no-servers-message"
@@ -1087,6 +1330,16 @@ export default {
         : "unknown";
       return `https://flagcdn.com/24x18/${validCode}.png`;
     },
+    isIntendedClass(cls, intendedClass) {
+      const val = String(intendedClass);
+      if (cls === "soldier") return val === "3" || val === "5";
+      if (cls === "demoman") return val === "4" || val === "5";
+      return false;
+    },
+    hasClassData(server, cls) {
+      const tier = server[`${cls}_tier`];
+      return tier !== undefined && tier !== null;
+    },
     getServerStatusClass(players, maxPlayers) {
       const ratio = players / maxPlayers;
       if (ratio > 0.8) return "status-high";
@@ -1096,11 +1349,6 @@ export default {
     connectToServer(ip, port) {
       const address = `${ip}:${port}`;
       window.location.href = `steam://run/440//+connect ${address}/`;
-    },
-    switchView(view) {
-      if (this.currentView === view) return;
-      this.currentView = view;
-      this.$router.push({ name: "Servers", params: { view } });
     },
     switchView(view) {
       if (this.currentView === view) return;
@@ -1238,6 +1486,48 @@ export default {
 
 .server-type-btn.excluded:hover {
   background: rgba(239, 68, 68, 0.8);
+}
+
+.sort-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.sort-buttons-label {
+  color: var(--color-text);
+  opacity: 0.8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.sort-btn {
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--color-border-soft);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.sort-btn:hover {
+  background: rgba(74, 111, 165, 0.25);
+  border-color: var(--color-primary);
+}
+
+.sort-btn.active {
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.5),
+    rgba(74, 111, 165, 0.3)
+  );
+  border-color: var(--color-primary);
+  color: white;
 }
 
 .no-servers-message {
@@ -1513,6 +1803,12 @@ export default {
 
 .connect-btn {
   padding: 0.25rem 0.75rem;
+}
+
+.table-dark th:nth-child(5),
+.table-dark td:nth-child(5) {
+  width: 90px;
+  text-align: center;
 }
 
 .server-row:hover {
@@ -1864,6 +2160,365 @@ export default {
 .player-card.min-mode .class-icon-small {
   width: 16px;
   height: 16px;
+}
+
+.server-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.server-card {
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.server-card:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.05);
+}
+.server-card:nth-child(even) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.server-card-main {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2.4fr minmax(100px, 0.6fr);
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  min-height: 75px;
+  cursor: pointer;
+}
+
+.server-card:hover {
+  border-color: var(--color-border-semi-soft);
+  background: rgba(74, 111, 165, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.server-card-location {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.server-card-location .flag-icon-large {
+  width: 24px;
+}
+
+.server-card-location-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.server-card-country {
+  font-weight: bold;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.server-card-region {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  opacity: 0.75;
+}
+
+.server-card-info-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  padding-left: 1.5rem;
+  min-width: 0;
+}
+
+.server-card-name {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-text-clickable);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.server-card-players {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.server-card-players .server-status {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+.server-card-map {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  padding-left: 1.5rem;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  min-width: 0;
+}
+
+.server-card-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: inherit;
+}
+
+.server-card-map-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.server-card-map-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--color-text-clickable);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.map-class-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.map-class-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.map-class-badge .class-icon-medium {
+  width: 28px;
+  height: 28px;
+  padding: 3px;
+}
+
+.map-class-badge .class-icon-medium.intended-icon {
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 0 6px rgba(74, 111, 165, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.tier-badge,
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.server-card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-left: 1px solid var(--color-border-soft);
+}
+
+.server-card-actions .global-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.server-card-players-panel {
+  padding: 1rem;
+  border-top: 1px solid var(--color-border-soft);
+  background: rgba(37, 55, 82, 0.3);
+}
+
+@media (max-width: 1400px) {
+  .server-card-main {
+    grid-template-columns: 0.7fr 1.4fr 1.6fr minmax(100px, 0.6fr);
+  }
+
+  .server-card-name {
+    font-size: 0.9rem;
+  }
+
+  .server-card-map-name {
+    font-size: 1rem;
+  }
+
+  .server-card-players {
+    font-size: 0.95rem;
+  }
+
+  .server-card-info-section,
+  .server-card-map {
+    padding-left: 1rem;
+  }
+
+  .server-card-location .flag-icon-large {
+    width: 20px;
+  }
+
+  .server-card-location {
+    gap: 0.5rem;
+  }
+
+  .map-class-badges {
+    gap: 0.4rem;
+    margin-right: 0.3rem;
+  }
+
+  .map-class-badge {
+    gap: 0.2rem;
+  }
+
+  .map-class-badge .class-icon-medium {
+    width: 22px;
+    height: 22px;
+    padding: 2px;
+  }
+
+  .tier-badge,
+  .rating-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+  }
+}
+
+@media (max-width: 1199px) {
+  .server-card-main {
+    grid-template-columns: 0.6fr 1.2fr 1.4fr minmax(100px, 0.6fr);
+  }
+
+  .server-card-country {
+    font-size: 0.9rem;
+  }
+
+  .server-card-region {
+    font-size: 0.72rem;
+  }
+
+  .server-card-name {
+    font-size: 0.8rem;
+  }
+
+  .server-card-map-name {
+    font-size: 0.9rem;
+  }
+
+  .server-card-players {
+    font-size: 0.85rem;
+  }
+
+  .server-card-location .flag-icon-large {
+    width: 17px;
+  }
+
+  .server-card-location {
+    gap: 0.4rem;
+  }
+
+  .map-class-badges {
+    gap: 0.3rem;
+    margin-right: 0.2rem;
+  }
+
+  .map-class-badge {
+    gap: 0.15rem;
+  }
+
+  .map-class-badge .class-icon-medium {
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+  }
+
+  .tier-badge,
+  .rating-badge {
+    font-size: 0.62rem;
+    padding: 0.08rem 0.3rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .server-card-main {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .server-card-location {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.6rem;
+  }
+
+  .server-card-info-section,
+  .server-card-map,
+  .server-card-actions {
+    border-left: none;
+    border-right: none;
+    padding-left: 0;
+  }
+
+  .server-card-info-section {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.6rem;
+  }
+
+  .server-card-map {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.6rem;
+  }
+
+  .server-card-location .flag-icon-large {
+    width: 20px;
+  }
+
+  .map-class-badges {
+    gap: 0.35rem;
+    margin-right: 0;
+  }
+
+  .map-class-badge .class-icon-medium {
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+  }
+
+  .tier-badge,
+  .rating-badge {
+    font-size: 0.65rem;
+    padding: 0.08rem 0.3rem;
+  }
 }
 
 .playercount-graph-wrapper {
