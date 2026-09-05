@@ -585,6 +585,16 @@
         </div>
       </div>
     </div>
+    <transition name="fade">
+      <button
+        v-if="showScrollTopButton"
+        @click="scrollToTop"
+        class="scroll-top-btn"
+        title="Scroll back to top"
+      >
+        ↑ Top
+      </button>
+    </transition>
   </div>
 </template>
 
@@ -657,6 +667,7 @@ export default {
       showCompletionColumns: false,
       votedMapIds: new Set(),
       voteFilter: "all", // 'all' | 'unvoted'
+      showScrollTopButton: false,
     };
   },
   async created() {
@@ -1443,7 +1454,6 @@ export default {
       if (this.isPickerActive || this.filteredAndSortedItems.length <= 1)
         return;
 
-      // Clear any leftover state from a previous run before starting a new one
       this.resetPicker();
 
       this.isPickerActive = true;
@@ -1458,20 +1468,24 @@ export default {
         const j = Math.floor(Math.random() * (i + 1));
         [ids[i], ids[j]] = [ids[j], ids[i]];
       }
-      // All but the last ID will be eliminated; last ID is the winner
       this.shuffledPickerOrder = ids.slice(0, ids.length - 1);
 
       const total = this.shuffledPickerOrder.length;
-      const totalMs = Math.min(5000, total * 200);
-      const interval = totalMs / total;
 
-      await this.runPickerStep(0, interval);
+      const TOTAL_MS = 2000;
+      const MIN_INTERVAL = 10;
+
+      const maxSteps = Math.max(1, Math.floor(TOTAL_MS / MIN_INTERVAL));
+      const steps = Math.min(total, maxSteps);
+      const batchSize = Math.ceil(total / steps);
+      const interval = TOTAL_MS / steps;
+
+      await this.runPickerStep(0, interval, batchSize);
     },
-    async runPickerStep(index, interval) {
+    async runPickerStep(index, interval, batchSize) {
       if (!this.shouldContinuePicker) return;
 
       if (index >= this.shuffledPickerOrder.length) {
-        // All eliminations done, declare winner
         this.isPickerActive = false;
         this.pickerComplete = true;
         await this.$nextTick();
@@ -1493,15 +1507,22 @@ export default {
               block: "center",
             });
           }
+          this.showScrollTopButton = true;
         }
         return;
       }
 
-      // Eliminate the next item in the pre-shuffled order
-      this.eliminatedRows.add(this.shuffledPickerOrder[index]);
+      const end = Math.min(index + batchSize, this.shuffledPickerOrder.length);
+      for (let i = index; i < end; i++) {
+        this.eliminatedRows.add(this.shuffledPickerOrder[i]);
+      }
 
       await new Promise((resolve) => setTimeout(resolve, interval));
-      await this.runPickerStep(index + 1, interval);
+      await this.runPickerStep(end, interval, batchSize);
+    },
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      this.showScrollTopButton = false;
     },
     resetPicker() {
       this.eliminatedRows.clear();
@@ -1510,6 +1531,7 @@ export default {
       this.isPickerActive = false;
       this.pickerComplete = false;
       this.eliminatingRowId = null;
+      this.showScrollTopButton = false;
     },
   },
 };
@@ -1638,6 +1660,41 @@ export default {
   font-weight: bold;
 }
 
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--color-primary);
+  color: white;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.scroll-top-btn:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.9),
+    rgba(74, 111, 165, 0.7)
+  );
+  transform: translateY(-2px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 .table tbody tr {
   transition: all 0.5s ease;
   position: relative;
@@ -1658,12 +1715,11 @@ export default {
 
 .row-eliminating,
 .map-card.card-eliminating {
-  animation: eliminate 0.8s ease-in-out;
   background: linear-gradient(90deg, #ff4757, #ff6b6b, #ff4757);
   background-size: 200% 100%;
   animation:
-    eliminate 0.8s ease-in-out,
-    shimmer 0.8s ease-in-out;
+    eliminate 0.25s ease-in-out,
+    shimmer 0.25s ease-in-out;
 }
 
 @keyframes eliminate {
