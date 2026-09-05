@@ -795,8 +795,10 @@ export default {
       loading: false,
       failedMapImages: new Set(),
       isMobile: false,
-      manualMinMode: false,
-      minMode: false,
+      manualMinModeByView: {
+        topplayers: false,
+        servers: false,
+      },
       topPlayersData: [],
       serversData: [],
       expandedServerId: null,
@@ -833,6 +835,11 @@ export default {
     };
   },
   computed: {
+    minMode() {
+      return this.isMobile
+        ? true
+        : (this.manualMinModeByView || {})[this.currentView];
+    },
     totalPlayerCount() {
       return this.serversData.reduce((sum, s) => sum + (s.playerCount || 0), 0);
     },
@@ -1018,8 +1025,10 @@ export default {
   },
   mounted() {
     this.isMobile = window.innerWidth <= 992;
-    this.manualMinMode = localStorage.getItem("minMode") === "true";
-    this.minMode = this.isMobile ? true : this.manualMinMode;
+    this.manualMinModeByView.topplayers =
+      localStorage.getItem("minMode_topplayers") === "true";
+    this.manualMinModeByView.servers =
+      localStorage.getItem("minMode_servers") === "true";
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("storage", this.handleStorageChange);
     this.refreshInterval = setInterval(this.silentRefresh, 60000);
@@ -1078,18 +1087,21 @@ export default {
         .catch(() => {});
     },
     toggleMinMode() {
-      this.manualMinMode = !this.manualMinMode;
-      this.minMode = this.manualMinMode;
-      localStorage.setItem("minMode", this.manualMinMode);
+      const view = this.currentView;
+      const newValue = !this.manualMinModeByView[view];
+      this.manualMinModeByView[view] = newValue;
+      localStorage.setItem(`minMode_${view}`, newValue);
     },
     handleResize() {
       this.isMobile = window.innerWidth <= 992;
-      this.minMode = this.isMobile ? true : this.manualMinMode;
     },
     handleStorageChange(event) {
-      if (event.key === "minMode") {
-        this.manualMinMode = event.newValue === "true";
-        if (!this.isMobile) this.minMode = this.manualMinMode;
+      if (
+        event.key === "minMode_topplayers" ||
+        event.key === "minMode_servers"
+      ) {
+        const view = event.key.replace("minMode_", "");
+        this.manualMinModeByView[view] = event.newValue === "true";
       }
     },
     handleMapImageError(mapName) {
@@ -1355,11 +1367,9 @@ export default {
       this.currentView = view;
       this.$router.push({ name: "Servers", params: { view } });
     },
-
     setGraphRange(range) {
       this.graphRange = range;
     },
-
     formatPeakDate(dateStr) {
       const date = new Date(dateStr);
       return date.toLocaleString([], {
@@ -1370,7 +1380,6 @@ export default {
         hour12: false,
       });
     },
-
     normalizeUtcString(dateStr) {
       if (typeof dateStr !== "string") return dateStr;
       const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(dateStr);

@@ -184,7 +184,7 @@
                   </p>
                 </div>
               </div>
-              <div class="your-rank-banner">
+              <div v-if="isLoggedIn" class="your-rank-banner">
                 <span class="your-rank-position">{{
                   table.userRank ? "#" + table.userRank.rank : "-"
                 }}</span>
@@ -615,8 +615,10 @@ export default {
   beforeUnmount() {
     window.removeEventListener("storage", this.handleStorageChange);
   },
-
   computed: {
+    isLoggedIn() {
+      return !!this.currentUserId;
+    },
     defaultAvatarPath() {
       return `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
     },

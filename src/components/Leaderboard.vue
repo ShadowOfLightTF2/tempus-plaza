@@ -32,7 +32,10 @@
             :key="type"
             class="category-tab"
             :class="{ active: selectedTypePill === type }"
-            @click="selectType(type)"
+            @click="
+              selectType(type);
+              goTo('course', 1);
+            "
           >
             {{ type }}
           </button>
@@ -42,7 +45,10 @@
             :key="type"
             class="category-tab"
             :class="{ active: selectedTypePill === type }"
-            @click="selectType(type)"
+            @click="
+              selectType(type);
+              goTo('bonus', 1);
+            "
           >
             {{ type }}
           </button>
