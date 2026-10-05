@@ -809,6 +809,8 @@
                   <th>T</th>
                   <th>R</th>
                   <th>Time</th>
+                  <th v-if="wrDurations">Soldier WR</th>
+                  <th v-if="wrDurations">Demoman WR</th>
                   <th>Rank</th>
                   <th>Completion</th>
                   <th>Percentile</th>
@@ -827,6 +829,12 @@
                   </td>
                   <td v-if="showMapTags || selectedTags.length > 0">
                     <span class="table-skeleton" style="width: 90px"></span>
+                  </td>
+                  <td v-if="wrDurations">
+                    <span class="table-skeleton" style="width: 70px"></span>
+                  </td>
+                  <td v-if="wrDurations">
+                    <span class="table-skeleton" style="width: 70px"></span>
                   </td>
                 </tr>
               </tbody>
@@ -859,6 +867,20 @@
                 class="search-records-input"
               />
             </div>
+            <button
+              v-if="playerId"
+              @click="toggleWrColumns"
+              class="btn btn-wr-fetch"
+              :disabled="loadingWrDurations"
+            >
+              <span class="download-button">{{
+                loadingWrDurations
+                  ? "Loading WR Times..."
+                  : wrDurations
+                    ? "Disable WR Columns"
+                    : "Fetch (map) WR Times"
+              }}</span>
+            </button>
           </div>
           <div v-if="playerId != null || mapId != null" class="table-container">
             <div class="table-responsive">
@@ -908,6 +930,30 @@
                       <span
                         class="sort-indicator"
                         v-if="sortByCategory === 'duration'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      v-if="wrDurations"
+                      @click="setSortColumn('wr_soldier')"
+                      class="sortable-header"
+                    >
+                      Soldier WR
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'wr_soldier'"
+                        >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
+                      >
+                    </th>
+                    <th
+                      v-if="wrDurations"
+                      @click="setSortColumn('wr_demoman')"
+                      class="sortable-header"
+                    >
+                      Demoman WR
+                      <span
+                        class="sort-indicator"
+                        v-if="sortByCategory === 'wr_demoman'"
                         >{{ sortDirection === "desc" ? "↓" : "↑" }}</span
                       >
                     </th>
@@ -1042,6 +1088,20 @@
                           : ""
                       }}
                     </td>
+                    <td v-if="wrDurations">
+                      {{
+                        getWrDuration(record, "soldier") !== null
+                          ? formatDuration(getWrDuration(record, "soldier"))
+                          : ""
+                      }}
+                    </td>
+                    <td v-if="wrDurations">
+                      {{
+                        getWrDuration(record, "demoman") !== null
+                          ? formatDuration(getWrDuration(record, "demoman"))
+                          : ""
+                      }}
+                    </td>
                     <td :class="getRankColorClass(record.placement)">
                       {{ record.rank !== null ? record.rank : "" }}
                       {{
@@ -1173,6 +1233,10 @@ export default {
     excludedTags: [],
     showTagFilterModal: false,
     mapTagsById: {},
+    // WR durations
+    wrDurations: null,
+    wrDurationsCache: null,
+    loadingWrDurations: false,
   }),
   computed: {
     lookupMapCount() {
@@ -1362,6 +1426,18 @@ export default {
           case "map":
             comparison = a.map_name.localeCompare(b.map_name);
             break;
+          case "wr_soldier": {
+            const av = this.getWrDuration(a, "soldier");
+            const bv = this.getWrDuration(b, "soldier");
+            comparison = (av ?? Infinity) - (bv ?? Infinity);
+            break;
+          }
+          case "wr_demoman": {
+            const av = this.getWrDuration(a, "demoman");
+            const bv = this.getWrDuration(b, "demoman");
+            comparison = (av ?? Infinity) - (bv ?? Infinity);
+            break;
+          }
           default:
             comparison = b.date - a.date;
         }
@@ -1394,6 +1470,8 @@ export default {
         this.playerCountry = null;
         this.playerCountryCode = null;
         this.playerRankInfo = null;
+        this.wrDurations = null;
+        this.wrDurationsCache = null;
         this.fetchMapRecords();
       }
     },
@@ -1444,6 +1522,49 @@ export default {
     }
   },
   methods: {
+    async toggleWrColumns() {
+      if (this.wrDurations) {
+        this.wrDurations = null;
+        return;
+      }
+      if (this.wrDurationsCache) {
+        this.wrDurations = this.wrDurationsCache;
+        return;
+      }
+      await this.fetchWrDurations();
+    },
+    async fetchWrDurations() {
+      this.loadingWrDurations = true;
+      try {
+        const response = await fetch(
+          `https://api.tempusplaza.com/maps/get-all-wr-durations`,
+        );
+        if (!response.ok)
+          throw new Error(`Failed to fetch WR durations (${response.status})`);
+        const data = await response.json();
+        const map = new Map();
+        (Array.isArray(data) ? data : []).forEach((row) => {
+          if (row && row.map_id !== undefined && row.class) {
+            if (!map.has(row.map_id))
+              map.set(row.map_id, { soldier: null, demoman: null });
+            map.get(row.map_id)[row.class] = row.duration;
+          }
+        });
+        this.wrDurationsCache = map;
+        this.wrDurations = map;
+      } catch (error) {
+        console.error("Error fetching WR durations:", error);
+      } finally {
+        this.loadingWrDurations = false;
+      }
+    },
+    getWrDuration(record, cls) {
+      if (!this.wrDurations || record.type !== "map") return null;
+      const entry = this.wrDurations.get(record.map_id);
+      if (!entry) return null;
+      const duration = entry[cls];
+      return duration !== undefined ? duration : null;
+    },
     toggleShowMapTags() {
       this.showMapTags = !this.showMapTags;
       this.onFilterChange();
@@ -1692,6 +1813,8 @@ export default {
           "rating",
           "completion",
           "map",
+          "wr_soldier",
+          "wr_demoman",
         ].includes(q.srt)
       ) {
         this.sortByCategory = q.srt;
@@ -2140,6 +2263,8 @@ export default {
       this.excludedTags = [];
       this.showMapTags = false;
       this.$router.push({ name: "LookupMap", params: { mapId } });
+      this.wrDurations = null;
+      this.wrDurationsCache = null;
     },
     async fetchRecords() {
       this.loading = true;
@@ -2859,16 +2984,18 @@ export default {
 }
 .search-records-container {
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 0 auto 25px auto;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 12px;
 }
 .search-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  flex: 1;
 }
 .search-icon {
   position: absolute;
@@ -2897,6 +3024,28 @@ export default {
 }
 .search-records-input::placeholder {
   color: #888;
+}
+
+.btn-wr-fetch {
+  background: rgba(74, 111, 165, 0.35);
+  border: 1px solid rgba(74, 111, 165, 0.5);
+  color: #fff;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.btn-wr-fetch:hover:not(:disabled) {
+  background: rgba(74, 111, 165, 0.55);
+  border-color: rgba(74, 111, 165, 0.8);
+}
+.btn-wr-fetch:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .table-responsive {
@@ -3462,10 +3611,12 @@ export default {
     max-width: 100%;
   }
   .search-records-container {
+    flex-direction: column;
     width: 100%;
     max-width: 100%;
     margin: 10px 0;
     padding: 0;
+    gap: 10px;
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
@@ -3478,6 +3629,10 @@ export default {
     width: 100%;
     padding: 12px 12px 12px 50px;
     box-sizing: border-box;
+  }
+  .btn-wr-fetch {
+    width: 100%;
+    max-width: 500px;
   }
   .table-responsive {
     width: 100%;

@@ -275,17 +275,19 @@
                             author.player &&
                             author.player.steam_avatar
                               ? `${author.player.steam_avatar}`
-                              : '/avatars/default-avatar.jpg'
+                              : DEFAULT_AVATAR
                           "
                           alt="Author Avatar"
                           class="author-avatar"
+                          @error="onAvatarError"
                         />
                       </SmartLink>
                       <img
                         v-else
-                        src="/avatars/default-avatar.jpg"
+                        :src="DEFAULT_AVATAR"
                         alt="Default Author Avatar"
                         class="author-avatar"
+                        @error="onAvatarError"
                       />
                     </div>
                     <h6 class="author-name mt-2">
@@ -369,6 +371,7 @@
 
 <script>
 import SmartLink from "@/components/utils/SmartLink.vue";
+const DEFAULT_AVATAR = "/avatars/default-avatar.jpg";
 
 export default {
   name: "MapInformation",
@@ -397,8 +400,17 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      DEFAULT_AVATAR,
+    };
+  },
   emits: ["show-tag-modal"],
   methods: {
+    onAvatarError(event) {
+      if (event.target.src.endsWith(DEFAULT_AVATAR)) return;
+      event.target.src = DEFAULT_AVATAR;
+    },
     emitShowTagModal() {
       this.$emit("show-tag-modal");
     },

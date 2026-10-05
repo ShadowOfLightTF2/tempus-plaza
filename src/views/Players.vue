@@ -552,6 +552,7 @@ export default {
       groups: [],
       ratings: [],
       tiers: [],
+      oldpoints: [],
     },
     categoryNames: [
       "points",
@@ -562,6 +563,7 @@ export default {
       "tiers",
       "completion",
       "countries",
+      "oldpoints",
     ],
     categoryDisplayNames: {
       wrs: "World records",
@@ -572,6 +574,7 @@ export default {
       tiers: "Tiers",
       completion: "Completion",
       countries: "Countries",
+      oldpoints: "Old System",
     },
     currentSoldierIndex: 50,
     currentDemomanIndex: 50,
@@ -1034,6 +1037,8 @@ export default {
         type = "total";
       } else if (tableName === "tiers") {
         cat = "total";
+      } else if (tableName === "oldpoints") {
+        tableName = "old_system_points";
       }
 
       return { tableName, type, cat };
@@ -1166,6 +1171,7 @@ export default {
       ];
       this.dropdowns.completion = ["Total", "Maps", "Courses", "Bonuses"];
       this.dropdowns.countries = ["Total"];
+      this.dropdowns.oldpoints = ["Total", "Maps", "Courses", "Bonuses"];
     },
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
