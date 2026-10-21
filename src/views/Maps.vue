@@ -1325,34 +1325,14 @@ export default {
       try {
         const response = await axios.get(`${API_BASE_URL}/maps`);
 
-        const mapsWithTags = await Promise.all(
-          response.data.map(async (map) => {
-            try {
-              return {
-                ...map,
-                class:
-                  map.intended_class === 3
-                    ? "soldier"
-                    : map.intended_class === 4
-                      ? "demoman"
-                      : "soldier",
-                tags: map.tags || [],
-              };
-            } catch (error) {
-              console.error(`Error loading map info for ${map.id}:`, error);
-              return {
-                ...map,
-                class:
-                  map.intended_class === 3
-                    ? "soldier"
-                    : map.intended_class === 4
-                      ? "demoman"
-                      : "soldier",
-                tags: [],
-              };
-            }
-          }),
-        );
+        const mapsWithTags = response.data
+          // drop maps without a name or zone_id
+          .filter((map) => map.name && map.zone_id)
+          .map((map) => ({
+            ...map,
+            class: map.intended_class === 4 ? "demoman" : "soldier",
+            tags: map.tags || [],
+          }));
 
         this.maps = mapsWithTags;
 
