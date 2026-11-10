@@ -6,7 +6,6 @@
       <div class="container hero">
         <h1>Tempus Plaza</h1>
         <div class="search-container" @click.stop>
-          ...
           <div class="search-box" :class="{ 'is-focused': isInputFocused }">
             <div class="search-icon-container">
               <svg
@@ -23,6 +22,7 @@
               </svg>
             </div>
             <input
+              ref="searchInput"
               type="text"
               v-model="searchQuery"
               @input="onSearch"
@@ -257,6 +257,14 @@ export default {
       return null;
     },
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.$refs.searchInput?.focus();
+    });
+  },
+  beforeUnmount() {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+  },
   methods: {
     onTierDataLoaded(latestChange) {
       this.latestTierChange = latestChange;
@@ -388,9 +396,6 @@ export default {
         this.fetchSearchResults();
       }, 400);
     },
-  },
-  beforeUnmount() {
-    if (this.debounceTimer) clearTimeout(this.debounceTimer);
   },
   watch: {
     searchQuery() {

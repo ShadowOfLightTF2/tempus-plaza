@@ -149,7 +149,7 @@
         </div>
         <div v-if="error" class="alert alert-danger">{{ error }}</div>
         <div
-          class="tables-wrapper d-flex flex-column flex-md-row justify-content-center"
+          class="tables-wrapper d-flex flex-column flex-lg-row justify-content-center"
           :class="{ 'two-tables': !showOverallTable }"
         >
           <div
@@ -242,6 +242,50 @@
                 <span class="your-rank-amount">{{
                   formatAmount(table.userRank)
                 }}</span>
+                <button
+                  v-if="
+                    table.userRank &&
+                    !(
+                      selectedCategory === 'countries' &&
+                      selectedItem === 'Total'
+                    )
+                  "
+                  class="jump-rank-btn"
+                  :disabled="jumpingKey !== null"
+                  @click.stop="jumpToMyRank(table)"
+                >
+                  <span
+                    v-if="jumpingKey === table.key"
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  <span v-else>↓</span>
+                </button>
+              </div>
+              <div class="jump-to-rank-row" @click.stop>
+                <input
+                  v-model.number="jumpInputs[table.key]"
+                  type="number"
+                  min="1"
+                  class="jump-rank-input"
+                  placeholder="Jump to rank # (max 5000)"
+                  :disabled="jumpingKey !== null"
+                  @keyup.enter="jumpToRank(table, jumpInputs[table.key])"
+                />
+                <button
+                  class="jump-rank-btn"
+                  :disabled="jumpingKey !== null || !jumpInputs[table.key]"
+                  @click="jumpToRank(table, jumpInputs[table.key])"
+                >
+                  <span
+                    v-if="jumpingKey === table.key"
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  <span v-else>Go</span>
+                </button>
               </div>
               <div
                 v-if="!minMode && (firstLoad || isSwitching)"
@@ -254,7 +298,12 @@
                   v-for="(player, index) in table.topPlayers"
                   :key="`top-${table.key}-${index}`"
                   class="podium-card"
-                  :class="`podium-rank-${index + 1}`"
+                  :class="[
+                    `podium-rank-${index + 1}`,
+                    {
+                      'jump-highlight': isJumpHighlighted(table.key, index + 1),
+                    },
+                  ]"
                 >
                   <span class="podium-rank-number">{{ index + 1 }}</span>
                   <img
@@ -395,9 +444,14 @@
                         v-for="(player, index) in table.displayedPlayers"
                         :key="`${table.key}-${index}`"
                         class="fade-in"
+                        :data-rank="index + table.rankOffset"
                         :class="{
                           'current-user-row':
                             currentUserId && player.player_id === currentUserId,
+                          'jump-highlight': isJumpHighlighted(
+                            table.key,
+                            index + table.rankOffset,
+                          ),
                         }"
                       >
                         <td class="rank-column">
@@ -502,6 +556,16 @@
         </div>
       </div>
     </div>
+    <transition name="fade">
+      <button
+        v-if="showScrollTopButton"
+        @click="scrollToTop"
+        class="scroll-top-btn"
+        title="Scroll back to top"
+      >
+        ↑ Top
+      </button>
+    </transition>
   </div>
 </template>
 
@@ -521,6 +585,11 @@ export default {
   data: () => ({
     loadSize: 50,
     loadSizeOptions: [50, 100, 200],
+    jumpingKey: null,
+    jumpInputs: { soldier: null, demoman: null, overall: null },
+    jumpHighlight: null,
+    _jumpHighlightTimer: null,
+    showScrollTopButton: false,
     showOverallTable: true,
     minMode: false,
     soldierPlayers: [],
@@ -586,6 +655,9 @@ export default {
     this.minMode = localStorage.getItem("playersMinMode") === "true";
     window.addEventListener("storage", this.handleStorageChange);
 
+    window.addEventListener("scroll", this.handleScroll, { passive: true });
+    this.handleScroll();
+
     this.fillDropdowns();
     await this.fetchUser();
     await this.loadCountriesList();
@@ -616,6 +688,8 @@ export default {
     this.fetchDataForCurrentSelection(0, "both");
   },
   beforeUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
+    clearTimeout(this._jumpHighlightTimer);
     window.removeEventListener("storage", this.handleStorageChange);
   },
   computed: {
@@ -657,6 +731,8 @@ export default {
             : this.displayedSoldierPlayers,
           rankOffset,
           loading: this.loadingSoldiers,
+          loaded: this.soldierPlayers.length,
+          loadStep: (limit) => this.loadMoreSoldiers(limit),
           loadMore: () => this.loadMoreSoldiers(),
         },
         {
@@ -670,6 +746,8 @@ export default {
             : this.displayedDemomanPlayers,
           rankOffset,
           loading: this.loadingDemomen,
+          loaded: this.demomanPlayers.length,
+          loadStep: (limit) => this.loadMoreDemomen(limit),
           loadMore: () => this.loadMoreDemomen(),
         },
         {
@@ -683,13 +761,20 @@ export default {
             : this.displayedOverallPlayers,
           rankOffset,
           loading: this.loadingOverall,
+          loaded: this.overallPlayers.length,
+          loadStep: (limit) => this.loadMoreOverall(limit),
           loadMore: () => this.loadMoreOverall(),
         },
       ];
     },
   },
-
   methods: {
+    handleScroll() {
+      this.showScrollTopButton = window.scrollY > 300;
+    },
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
     toggleMinMode() {
       this.minMode = !this.minMode;
       localStorage.setItem("playersMinMode", this.minMode);
@@ -1372,32 +1457,97 @@ export default {
         return null;
       }
     },
-    async loadMoreSoldiers() {
+    async loadMoreSoldiers(limit = this.loadSize) {
       this.loadingSoldiers = true;
       await this.fetchDataForCurrentSelection(
         this.currentSoldierIndex,
         "soldier",
-        this.loadSize,
+        limit,
       );
       this.currentSoldierIndex = this.soldierPlayers.length;
     },
-    async loadMoreDemomen() {
+    async loadMoreDemomen(limit = this.loadSize) {
       this.loadingDemomen = true;
       await this.fetchDataForCurrentSelection(
         this.currentDemomanIndex,
         "demoman",
-        this.loadSize,
+        limit,
       );
       this.currentDemomanIndex = this.demomanPlayers.length;
     },
-    async loadMoreOverall() {
+    async loadMoreOverall(limit = this.loadSize) {
       this.loadingOverall = true;
       await this.fetchDataForCurrentSelection(
         this.currentOverallIndex,
         "overall",
-        this.loadSize,
+        limit,
       );
       this.currentOverallIndex = this.overallPlayers.length;
+    },
+    jumpToMyRank(table) {
+      return this.jumpToRank(table, table.userRank?.rank);
+    },
+    isJumpHighlighted(key, rank) {
+      return (
+        !!this.jumpHighlight &&
+        this.jumpHighlight.key === key &&
+        this.jumpHighlight.rank === rank
+      );
+    },
+    async jumpToRank(table, targetRank) {
+      const rank = Math.floor(Number(targetRank));
+      if (!rank || rank < 1 || this.jumpingKey) return;
+
+      const listKey = `${table.key}Players`;
+      const idxKey = {
+        soldier: "currentSoldierIndex",
+        demoman: "currentDemomanIndex",
+        overall: "currentOverallIndex",
+      }[table.key];
+      const snapshot = `${this.selectedCategory}|${this.selectedItem}`;
+      const isCountryTotal =
+        this.selectedCategory === "countries" && this.selectedItem === "Total";
+      const step = 50;
+      const maxLimit = 5000;
+      this.jumpingKey = table.key;
+
+      try {
+        const loaded = this[listKey].length;
+        const roundedTarget = Math.ceil(rank / step) * step;
+        const missing = Math.min(roundedTarget - loaded, maxLimit);
+
+        if (missing > 0 && !isCountryTotal) {
+          this[idxKey] = loaded;
+          await table.loadStep(missing);
+
+          if (`${this.selectedCategory}|${this.selectedItem}` !== snapshot)
+            return;
+        }
+
+        const target = Math.min(rank, this[listKey].length);
+        if (this[idxKey] < target) this[idxKey] = target;
+      } finally {
+        this.jumpingKey = null;
+      }
+
+      const finalRank = Math.min(rank, this[listKey].length);
+      if (!finalRank) return;
+
+      await this.$nextTick();
+      const container = `.${table.key}-table-container`;
+      const el =
+        (!this.minMode && finalRank <= 3
+          ? document.querySelector(`${container} .podium-rank-${finalRank}`)
+          : null) ||
+        document.querySelector(`${container} [data-rank="${finalRank}"]`);
+
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      this.jumpHighlight = { key: table.key, rank: finalRank };
+      clearTimeout(this._jumpHighlightTimer);
+      this._jumpHighlightTimer = setTimeout(() => {
+        this.jumpHighlight = null;
+      }, 2500);
     },
   },
 
@@ -1643,7 +1793,7 @@ export default {
   text-align: center;
   padding: 6px 0;
 }
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .podium-card {
     padding: 16px 12px 12px;
   }
@@ -1722,7 +1872,69 @@ export default {
   flex-shrink: 0;
   font-size: 14px;
 }
-@media (max-width: 767.98px) {
+.jump-rank-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-primary);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+.jump-rank-btn:hover:not(:disabled) {
+  background: rgba(74, 111, 165, 0.45);
+}
+.jump-rank-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.jump-to-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 12px 0 12px;
+}
+.jump-rank-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 14px;
+  outline: none;
+  transition: all 0.18s ease;
+}
+.jump-rank-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 1px 6px rgba(74, 111, 165, 0.45);
+}
+.jump-rank-input::placeholder {
+  color: var(--color-text-soft);
+  font-weight: 500;
+}
+.jump-rank-input::-webkit-outer-spin-button,
+.jump-rank-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.jump-rank-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.table-dark tr.jump-highlight td {
+  background: rgba(244, 196, 48, 0.25) !important;
+}
+.podium-card.jump-highlight {
+  box-shadow: 0 0 22px rgba(244, 196, 48, 0.55);
+}
+@media (max-width: 991.98px) {
   .your-rank-label {
     display: none;
   }
@@ -1859,7 +2071,7 @@ export default {
   flex: 1;
   border-radius: 0 !important;
 }
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .load-size-label {
     display: none;
   }
@@ -2083,6 +2295,38 @@ export default {
   width: 24px;
   height: 18px;
 }
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--color-primary);
+  color: white;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+.scroll-top-btn:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(74, 111, 165, 0.9),
+    rgba(74, 111, 165, 0.7)
+  );
+  transform: translateY(-2px);
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 @media (min-width: 1400px) {
   .tables-wrapper {
     flex-wrap: nowrap;
@@ -2141,55 +2385,7 @@ export default {
     height: 20px;
   }
 }
-@media (max-width: 992px) {
-  .tables-wrapper {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .soldier-table-container,
-  .demoman-table-container,
-  .overall-table-container {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-  }
-  .category-tab {
-    padding: 12px 16px;
-    font-size: 13px;
-    border: 1px solid var(--color-border-soft);
-  }
-}
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .table-responsive {
-    overflow-x: hidden;
-  }
-  .table-dark td,
-  .table-dark th {
-    font-size: 11px;
-    padding: 3px 4px;
-  }
-  .name-cell,
-  .country-cell {
-    max-width: 120px;
-  }
-  .avatar {
-    width: 18px;
-    height: 18px;
-  }
-  .flag {
-    width: 20px;
-    height: 14px;
-  }
-  .header-title {
-    font-size: 14px;
-  }
-  .class-icon {
-    width: 32px;
-    height: 32px;
-  }
-}
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .subcategory-pill {
     padding: 10px 12px;
     font-size: 12px;
@@ -2250,15 +2446,7 @@ export default {
     margin: 6px;
   }
 }
-@media (max-width: 991px) and (min-width: 768px) {
-  .tables-wrapper.two-tables .soldier-table-container,
-  .tables-wrapper.two-tables .demoman-table-container {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-  }
-}
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .soldier-table-container,
   .demoman-table-container,
   .overall-table-container {

@@ -1229,7 +1229,11 @@ export default {
             const diff =
               regionOrder.indexOf(a.region) - regionOrder.indexOf(b.region);
             if (diff !== 0) return diff * this.sortDirection;
-            return a.country.localeCompare(b.country) * this.sortDirection;
+
+            const countryDiff = a.country.localeCompare(b.country);
+            if (countryDiff !== 0) return countryDiff * this.sortDirection;
+
+            return a.name.localeCompare(b.name);
           });
           break;
         case "name":

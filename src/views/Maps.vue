@@ -678,9 +678,14 @@ export default {
     }
   },
   async mounted() {
+    window.addEventListener("scroll", this.handleScroll, { passive: true });
+    this.handleScroll();
     await this.fetchAvailableTags();
     this.parseUrlFilters();
     await this.fetchData();
+  },
+  beforeUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
   },
   computed: {
     skeletonPlaceholders() {
@@ -906,9 +911,8 @@ export default {
             const dateB = b.date_added * 1000;
             return dateB - dateA;
           } else {
-            const nameComparison = a.map_name.localeCompare(b.map_name);
-            if (nameComparison !== 0) return nameComparison;
-            return a.index - b.index;
+            if (a.map_id !== b.map_id) return b.map_id - a.map_id;
+            return b.id - a.id;
           }
         });
       }
@@ -1032,6 +1036,9 @@ export default {
     },
   },
   methods: {
+    handleScroll() {
+      this.showScrollTopButton = window.scrollY > 300;
+    },
     async fetchUser() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/get-user`, {
@@ -1090,8 +1097,6 @@ export default {
     },
     toggleVoteFilter() {
       this.voteFilter = this.voteFilter === "all" ? "unvoted" : "all";
-      const idx = order.indexOf(this.voteFilter);
-      this.voteFilter = order[(idx + 1) % order.length];
       this.onFilterChange();
     },
     toggleTag(tagId) {

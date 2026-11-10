@@ -164,6 +164,7 @@ import FavoriteMapCard from "@/components/playerpage/FavoriteMapCard.vue";
 import MapSearchModal from "@/components/MapSearchModal.vue";
 import RotwVideos from "@/components/playerpage/RotwVideos.vue";
 import AuthoredMaps from "@/components/playerpage/AuthoredMaps.vue";
+import { getRankTitle } from "@/utils/rankThemes.js";
 import axios from "axios";
 import { ref, defineAsyncComponent } from "vue";
 const PointsChart = defineAsyncComponent(
@@ -900,84 +901,7 @@ export default {
       return "0.00pts";
     },
     getRankName(rank, gender) {
-      const titles = [
-        { range: [1, 1], male: "Emperor", female: "Empress" },
-        { range: [2, 2], male: "King", female: "Queen" },
-        { range: [3, 3], male: "Archduke", female: "Archduchess" },
-        { range: [4, 4], male: "Lord", female: "Lady" },
-        { range: [5, 5], male: "Duke", female: "Duchess" },
-        { range: [6, 6], male: "Prince V", female: "Princess V" },
-        { range: [7, 7], male: "Prince IV", female: "Princess IV" },
-        { range: [8, 8], male: "Prince III", female: "Princess III" },
-        { range: [9, 9], male: "Prince II", female: "Princess II" },
-        { range: [10, 10], male: "Prince I", female: "Princess I" },
-        { range: [11, 11], male: "Earl V", female: "Gearl V" },
-        { range: [12, 12], male: "Earl IV", female: "Gearl IV" },
-        { range: [13, 13], male: "Earl III", female: "Gearl III" },
-        { range: [14, 14], male: "Earl II", female: "Gearl II" },
-        { range: [15, 15], male: "Earl I", female: "Gearl I" },
-        { range: [16, 16], male: "Sir V", female: "Madam V" },
-        { range: [17, 17], male: "Sir IV", female: "Madam IV" },
-        { range: [18, 18], male: "Sir III", female: "Madam III" },
-        { range: [19, 19], male: "Sir II", female: "Madam II" },
-        { range: [20, 20], male: "Sir I", female: "Madam I" },
-        { range: [21, 21], male: "Count V", female: "Countess" },
-        { range: [22, 22], male: "Count IV", female: "Countess" },
-        { range: [23, 23], male: "Count III", female: "Countess" },
-        { range: [24, 24], male: "Count II", female: "Countess" },
-        { range: [25, 25], male: "Count I", female: "Countess" },
-        { range: [26, 30], male: "Baron V", female: "Baroness V" },
-        { range: [31, 35], male: "Baron IV", female: "Baroness IV" },
-        { range: [36, 40], male: "Baron III", female: "Baroness III" },
-        { range: [41, 45], male: "Baron II", female: "Baroness II" },
-        { range: [46, 50], male: "Baron I", female: "Baroness I" },
-        { range: [51, 60], male: "Knight V", female: "Dame V" },
-        { range: [61, 70], male: "Knight IV", female: "Dame IV" },
-        { range: [71, 80], male: "Knight III", female: "Dame III" },
-        { range: [81, 90], male: "Knight II", female: "Dame II" },
-        { range: [91, 100], male: "Knight I", female: "Dame I" },
-        { range: [101, 120], male: "Noble V", female: "Noblewoman V" },
-        { range: [121, 140], male: "Noble IV", female: "Noblewoman IV" },
-        { range: [141, 160], male: "Noble III", female: "Noblewoman III" },
-        { range: [161, 180], male: "Noble II", female: "Noblewoman II" },
-        { range: [181, 200], male: "Noble I", female: "Noblewoman I" },
-        { range: [201, 260], male: "Esquire V", female: "Esquire V" },
-        { range: [261, 320], male: "Esquire IV", female: "Esquire IV" },
-        { range: [321, 380], male: "Esquire III", female: "Esquire III" },
-        { range: [381, 440], male: "Esquire II", female: "Esquire II" },
-        { range: [441, 500], male: "Esquire I", female: "Esquire I" },
-        { range: [501, 600], male: "Jester V", female: "Jester V" },
-        { range: [601, 700], male: "Jester IV", female: "Jester IV" },
-        { range: [701, 800], male: "Jester III", female: "Jester III" },
-        { range: [801, 900], male: "Jester II", female: "Jester II" },
-        { range: [901, 1000], male: "Jester I", female: "Jester I" },
-        { range: [1001, 1300], male: "Plebeian V", female: "Plebeian V" },
-        { range: [1301, 1600], male: "Plebeian IV", female: "Plebeian IV" },
-        { range: [1601, 1900], male: "Plebeian III", female: "Plebeian III" },
-        { range: [1901, 2200], male: "Plebeian II", female: "Plebeian II" },
-        { range: [2201, 2500], male: "Plebeian I", female: "Plebeian I" },
-        { range: [2501, 2700], male: "Peasant V", female: "Peasant V" },
-        { range: [2701, 2900], male: "Peasant IV", female: "Peasant IV" },
-        { range: [2901, 3100], male: "Peasant III", female: "Peasant III" },
-        { range: [3101, 3300], male: "Peasant II", female: "Peasant II" },
-        { range: [3301, 3500], male: "Peasant I", female: "Peasant I" },
-        { range: [3501, 4000], male: "Peasant I", female: "Peasant I" },
-        { range: [4001, 5000], male: "Peasant I", female: "Peasant I" },
-        { range: [5001, 999999], male: "Peon", female: "Peon" },
-      ];
-      for (const title of titles) {
-        if (rank >= title.range[0] && rank <= title.range[1]) {
-          const selectedTitle = gender === "male" ? title.male : title.female;
-          let cleanedTitle = title.male.replace(/\s[IVX]+$/, "").toLowerCase();
-          if (selectedTitle === "Queen" || selectedTitle === "Empress")
-            cleanedTitle = title.female.replace(/\s[IVX]+$/, "").toLowerCase();
-          return {
-            title: selectedTitle,
-            color: `rank-color-${cleanedTitle}`,
-          };
-        }
-      }
-      return { title: "Unranked", color: "--color-peon" };
+      return getRankTitle(rank, gender);
     },
     getFlagImageUrl(countryCode) {
       const validCode = /^[a-zA-Z]{2}$/.test(countryCode)
